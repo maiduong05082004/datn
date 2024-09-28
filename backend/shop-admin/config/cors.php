@@ -22,7 +22,7 @@ return [
     'allowed_methods' => ['*'],
 
     // Chỉ cho phép từ nguồn localhost:3000 (ứng dụng React)
-    'allowed_origins' => ['http://localhost:3000'],
+    'allowed_origins' => ['http://localhost:3000','http://127.0.0.1:3000'],
 
     // Không sử dụng các mẫu regex cho domain
     'allowed_origins_patterns' => [],
@@ -38,6 +38,6 @@ return [
 
     // Nếu bạn không cần gửi cookie hoặc xác thực, để false
     // Nếu sử dụng Laravel Sanctum với SPA thì đặt thành true
-    'supports_credentials' => true,
+    'supports_credentials' => false,
 
 ];
