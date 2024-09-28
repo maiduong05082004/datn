@@ -10,6 +10,18 @@ import { Route, Routes } from "react-router-dom";
 import Sanphambt from "@/pages/(website)/home/_components/sanphambt";
 import PayPage from "@/pages/(website)/home/_components/PayPage";
 import CartPage from "@/pages/(website)/home/_components/CartPage";
+import AddCategories from "@/pages/(dashboard)/dashboard/categories/add";
+import UpdateCategories from "@/pages/(dashboard)/dashboard/categories/update";
+import AddBanners from "@/pages/(dashboard)/dashboard/banners/add";
+import UpdateBanners from "@/pages/(dashboard)/dashboard/banners/update";
+import ListUser from "@/pages/(dashboard)/dashboard/user/list";
+import ListProducts from "@/pages/(dashboard)/dashboard/products/list";
+import Addproduct from "@/pages/(dashboard)/dashboard/products/add";
+import UpdateProduct from "@/pages/(dashboard)/dashboard/products/update";
+import ListComments from "@/pages/(dashboard)/dashboard/comments/list";
+import ListCategories from "@/pages/(dashboard)/dashboard/categories/list";
+import ListBills from "@/pages/(dashboard)/dashboard/bills/list";
+import ListBanners from "@/pages/(dashboard)/dashboard/banners/list";
 
 const Router = () => {
     return (
@@ -25,6 +37,18 @@ const Router = () => {
                     <Route index element={<DashboardPage />} />
                     <Route path="addUser" element={<AddUser />} />
                     <Route path="updateUser" element={<UpdateUser />} />
+                    <Route path="listUser" element={<ListUser />} />
+                    <Route path="listProducts" element={<ListProducts />} />
+                    <Route path="addProducts" element={<Addproduct />} />
+                    <Route path="updateProducts" element={<UpdateProduct />} />
+                    <Route path="listComments" element={<ListComments />} />
+                    <Route path="listCategories" element={<ListCategories />} />
+                    <Route path="addCategories" element={<AddCategories />} />
+                    <Route path="updateCategories" element={<UpdateCategories />} />
+                    <Route path="listBills" element={<ListBills />} />
+                    <Route path="listBanners" element={<ListBanners />} />
+                    <Route path="addBanners" element={<AddBanners />} />
+                    <Route path="updateBanners" element={<UpdateBanners />} />
 
                 </Route>
                 <Route path="**" element={<ErrorPage />} />

@@ -29,9 +29,10 @@ const items1: MenuProps['items'] = [
     icon: <UserOutlined />,
     label: "Quản Lý Tài Khoản",
     children: [
-      { key: 'sub1-1', label: <NavLink to="/admin/addUser">Thêm Tài Khoản</NavLink> },
-      { key: 'sub1-2', label: <NavLink to="/admin/updateUser">Sửa Tài Khoản</NavLink> },
-      { key: 'sub1-3', label: <NavLink to="/admin/delete-account">Xóa Tài Khoản</NavLink> },
+      { key: 'sub1-1', label: <NavLink to="/admin/listUser">Danh sách</NavLink> },
+      { key: 'sub1-2', label: <NavLink to="/admin/addUser">Thêm Tài Khoản</NavLink> },
+      { key: 'sub1-3', label: <NavLink to="/admin/updateUser">Sửa Tài Khoản</NavLink> },
+      { key: 'sub1-4', label: <NavLink to="/admin/delete-account">Xóa Tài Khoản</NavLink> },
     ],
   },
   {
@@ -39,9 +40,10 @@ const items1: MenuProps['items'] = [
     icon: React.createElement(ShoppingCartOutlined),
     label: 'Quản Lý Sản Phẩm',
     children: [
-      { key: 'sub3-1', label: 'Thêm Sản Phẩm' },
-      { key: 'sub3-2', label: 'Sửa Sản Phẩm' },
-      { key: 'sub3-3', label: 'Xóa Sản Phẩm' },
+      { key: 'sub3-1', label: <NavLink to="/admin/listProducts">Danh sách sản phẩm</NavLink> },
+      { key: 'sub3-2', label: <NavLink to="/admin/addProducts">Thêm Sản phẩm</NavLink> },
+      { key: 'sub3-3', label: <NavLink to="/admin/updateProducts">Cập nhật sản phẩm</NavLink> },
+
     ],
   },
   {
@@ -49,9 +51,9 @@ const items1: MenuProps['items'] = [
     icon: React.createElement(LaptopOutlined),
     label: 'Quản Lý Danh Mục',
     children: [
-      { key: 'sub4-1', label: 'Thêm Danh Mục' },
-      { key: 'sub4-2', label: 'Sửa Danh Mục' },
-      { key: 'sub4-3', label: 'Xóa Danh Mục' },
+      { key: 'sub4-1', label: <NavLink to="/admin/listCategories">Danh sách</NavLink> },
+      { key: 'sub4-2', label: <NavLink to="/admin/addCategories">Thêm mới danh mục</NavLink> },
+      { key: 'sub4-3', label: <NavLink to="/admin/updateCategories">Cập nhật danh mục</NavLink> },
     ],
   },
   {
@@ -59,8 +61,8 @@ const items1: MenuProps['items'] = [
     icon: React.createElement(ProductOutlined),
     label: 'Quản Lý Đơn Hàng',
     children: [
-      { key: 'sub5-1', label: 'Xem Đơn Hàng' },
-      { key: 'sub5-2', label: 'Sửa Đơn Hàng' },
+      { key: 'sub5-1', label: <NavLink to="/admin/listBills">Danh sách</NavLink> },
+      { key: 'sub5-2', label: <NavLink to="/admin">Danh sách</NavLink> },
       { key: 'sub5-3', label: 'Xóa Đơn Hàng' },
     ],
   },
@@ -69,7 +71,7 @@ const items1: MenuProps['items'] = [
     icon: React.createElement(MessageOutlined),
     label: 'Quản Lý Bình Luận',
     children: [
-      { key: 'sub6-1', label: 'Xem Bình Luận' },
+      { key: 'sub6-1', label: <NavLink to="/admin/listComments">Danh sách bình luận</NavLink> },
       { key: 'sub6-2', label: 'Phê Duyệt Bình Luận' },
       { key: 'sub6-3', label: 'Xóa Bình Luận' },
     ],
@@ -79,9 +81,9 @@ const items1: MenuProps['items'] = [
     icon: React.createElement(GiftOutlined),
     label: 'Quản Lý Khuyến Mại',
     children: [
-      { key: 'sub7-1', label: 'Xem Khuyến Mại' },
-      { key: 'sub7-2', label: 'Thêm Khuyến Mại' },
-      { key: 'sub7-3', label: 'Sửa Khuyến Mại' },
+      { key: 'sub7-1', label: <NavLink to="/admin/listBanners">Danh sách</NavLink> },
+      { key: 'sub7-2', label: <NavLink to="/admin/addBanners">Thêm mới</NavLink> },
+      { key: 'sub7-3', label: <NavLink to="/admin/updateBanners">Cập nhật</NavLink> },
       { key: 'sub7-4', label: 'Xóa Khuyến Mại' },
     ],
   },
