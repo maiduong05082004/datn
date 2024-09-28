@@ -12,6 +12,7 @@ class Category extends Model
     // Các cột có thể điền vào được (fillable)
     protected $fillable = [
         'name',
+        'image',
         'parent_id',
         'status',
     ];
@@ -37,5 +38,9 @@ class Category extends Model
     public function parent()
     {
         return $this->belongsTo(Category::class, 'parent_id');
+    }
+    public function childrenRecursive()
+    {
+        return $this->children()->with('childrenRecursive');
     }
 }
