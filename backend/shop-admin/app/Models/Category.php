@@ -13,6 +13,7 @@ class Category extends Model
     protected $fillable = [
         'name',
         'parent_id',
+        'image',
         'status',
     ];
 
@@ -37,5 +38,9 @@ class Category extends Model
     public function parent()
     {
         return $this->belongsTo(Category::class, 'parent_id');
+    }
+    public function childrenRecursive()
+    {
+        return $this->children()->with('childrenRecursive');
     }
 }
