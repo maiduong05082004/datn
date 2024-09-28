@@ -25,4 +25,5 @@ Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth:sanc
 Route::get('/user', [AuthController::class, 'user'])->middleware('auth:sanctum');
 Route::get('/auth/google', [AuthController::class, 'redirectToGoogle']);
 Route::get('/auth/callback/google', [AuthController::class, 'handleGoogleCallback']);
-
+Route::get('/categories', [CategoryController::class, 'index']);
+Route::get('/category/{id}/products', [CategoryController::class, 'showCategoryProducts']);
