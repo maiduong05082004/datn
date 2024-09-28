@@ -4,6 +4,7 @@ use App\Http\Controllers\Api\Admin\Product\ProductController;
 use App\Http\Controllers\Api\Client\AuthController;
 use App\Http\Controllers\Api\Admin\AuthController as AdminAuthController;
 use App\Http\Controllers\Api\Client\CategoryController;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\Admin\CategoryController as AdminCategoryController;
 use App\Http\Controllers\Api\Admin\Product\AttributeController;
