@@ -3,7 +3,7 @@ import React from 'react'
 const UpdateProduct = () => {
   return (
     <form action="/submit" method="PUT" className="max-w-lg mx-auto p-6 bg-gray-100 rounded-lg shadow-lg mt-6">
-    <h2 className="text-2xl font-bold mb-6 text-center">Update Sản Phẩm</h2>
+    <h2 className="text-2xl font-bold mb-6 text-center">Cập nhật Sản Phẩm</h2>
     
     <div className="mb-4">
         <label htmlFor="slug" className="block text-gray-700 font-bold mb-2">Slug:</label>
