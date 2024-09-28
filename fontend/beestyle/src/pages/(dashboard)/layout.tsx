@@ -36,6 +36,17 @@ const items1: MenuProps['items'] = [
     ],
   },
   {
+    key: '2',
+    icon: <UserOutlined />,
+    label: "Quản Lý Banners",
+    children: [
+      { key: 'sub1-1', label: <NavLink to="/admin/listBanners">Danh sách</NavLink> },
+      { key: 'sub1-2', label: <NavLink to="/admin/addBanners">Thêm mới banners</NavLink> },
+      { key: 'sub1-3', label: <NavLink to="/admin/updateBanners">Sửa banners</NavLink> },
+      { key: 'sub1-4', label: <NavLink to="/admin/delete-account">Xóa banner</NavLink> },
+    ],
+  },
+  {
     key: 'sub3',
     icon: React.createElement(ShoppingCartOutlined),
     label: 'Quản Lý Sản Phẩm',
@@ -81,9 +92,9 @@ const items1: MenuProps['items'] = [
     icon: React.createElement(GiftOutlined),
     label: 'Quản Lý Khuyến Mại',
     children: [
-      { key: 'sub7-1', label: <NavLink to="/admin/listBanners">Danh sách</NavLink> },
-      { key: 'sub7-2', label: <NavLink to="/admin/addBanners">Thêm mới</NavLink> },
-      { key: 'sub7-3', label: <NavLink to="/admin/updateBanners">Cập nhật</NavLink> },
+      { key: 'sub7-1', label: 'Xem khuyến mại' },
+      { key: 'sub7-2', label: 'Thêm khuyến mại' },
+      { key: 'sub7-3', label:  'Sửa khuyến mại'},
       { key: 'sub7-4', label: 'Xóa Khuyến Mại' },
     ],
   },
