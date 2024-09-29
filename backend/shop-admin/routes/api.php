@@ -1,8 +1,9 @@
 <?php
 
 use App\Http\Controllers\Api\Client\AuthController;
-use Illuminate\Http\Request;
+use App\Http\Controllers\Api\Client\CategoryController;
 use Illuminate\Support\Facades\Route;
+
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -23,3 +24,10 @@ Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth:sanc
 Route::get('/user', [AuthController::class, 'user'])->middleware('auth:sanctum');
 Route::get('/auth/google', [AuthController::class, 'redirectToGoogle']);
 Route::get('/auth/callback/google', [AuthController::class, 'handleGoogleCallback']);
+Route::get('/categories', [CategoryController::class, 'index']);
+Route::get('/category/{id}/products', [CategoryController::class, 'showCategoryProducts']);
+Route::post('/forgot-password', [AuthController::class, 'forgotPassword'])->middleware('guest')->name('password.email');
+Route::post('/reset-password', [AuthController::class, 'resetPassword'])->middleware('guest')->name('password.update');
+Route::get('/reset-password/{token}', function ($token) {
+    return response()->json(['token' => $token]);
+})->middleware('guest')->name('password.reset');

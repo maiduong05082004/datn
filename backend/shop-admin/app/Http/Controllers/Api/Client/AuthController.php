@@ -9,7 +9,9 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Facades\Auth;
 use Laravel\Socialite\Facades\Socialite;
+use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Str;
+use Illuminate\Auth\Events\PasswordReset;
 
 class AuthController extends Controller
 {
@@ -22,7 +24,6 @@ class AuthController extends Controller
             'sex' => 'required|string|in:male,female,other',
             'date_of_birth' => 'required|date',
         ]);
-
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
@@ -42,30 +43,23 @@ class AuthController extends Controller
             'email' => 'required|string|email',
             'password' => 'required|string',
         ]);
-
         $user = User::where('email', $request->email)->first();
-
         if (! $user || ! Hash::check($request->password, $user->password)) {
             throw ValidationException::withMessages([
                 'email' => ['The provided credentials are incorrect.'],
             ]);
         }
-
         $token = $user->createToken('token-name')->plainTextToken;
-
         return response()->json([
             'token' => $token,
             'role' => $user->role,
         ]);
     }
-
     public function logout(Request $request)
     {
         $request->user()->tokens()->delete();
-
         return response()->json(['message' => 'Logged out successfully']);
     }
-
     public function user(Request $request)
     {
         return response()->json([
@@ -73,7 +67,6 @@ class AuthController extends Controller
             'role' => $request->user()->role,
         ]);
     }
-    
 
     public function redirectToGoogle()
     {
@@ -81,14 +74,11 @@ class AuthController extends Controller
         $url = Socialite::driver('google')->stateless()->scopes($scopes)->redirect()->getTargetUrl();
         return response()->json(['url' => $url]);
     }
-
     public function handleGoogleCallback()
     {
         try {
             $googleUser = Socialite::driver('google')->stateless()->user();
-
             $existingUser = User::where('email', $googleUser->getEmail())->first();
-
             if ($existingUser) {
                 $user = $existingUser;
             } else {
@@ -104,12 +94,48 @@ class AuthController extends Controller
                     'date_of_birth' => $googleUser->user['birthday'] ?? null,
                 ]);
             }
-
             $token = $user->createToken('authToken')->plainTextToken;
-
             return redirect("http://localhost:3000/auth/google/callback?token=$token");
         } catch (\Exception $e) {
             return response()->json(['error' => 'Google login failed'], 500);
         }
+    }
+    public function forgotPassword(Request $request)
+    {
+        $request->validate(['email' => 'required|email']);
+
+        $status = Password::sendResetLink(
+            $request->only('email')
+        );
+
+        return $status === Password::RESET_LINK_SENT
+            ? response()->json(['status' => __($status)], 200)
+            : response()->json(['email' => __($status)], 400);
+    }
+
+    public function resetPassword(Request $request)
+    {
+        $request->validate([
+            'token' => 'required',
+            'email' => 'required|email',
+            'password' => 'required|min:8|confirmed',
+        ]);
+
+        $status = Password::reset(
+            $request->only('email', 'password', 'password_confirmation', 'token'),
+            function (User $user, string $password) {
+                $user->forceFill([
+                    'password' => Hash::make($password)
+                ])->setRememberToken(Str::random(60));
+
+                $user->save();
+
+                event(new PasswordReset($user));
+            }
+        );
+
+        return $status === Password::PASSWORD_RESET
+            ? response()->json(['message' => 'Password reset successfully'], 200)
+            : response()->json(['email' => [__($status)]], 400);
     }
 }
