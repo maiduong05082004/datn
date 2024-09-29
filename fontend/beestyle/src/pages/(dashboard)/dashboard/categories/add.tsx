@@ -3,24 +3,63 @@ import React from 'react'
 type Props = {}
 const AddCategories = (props: Props) => {
     return (
-        <form action="/submit" method="POST" className="max-w-lg mx-auto p-6 bg-gray-100 rounded-lg shadow-lg">
-            <h2 className="text-2xl font-bold mb-6 text-center">Thêm mới danh mục</h2>
-            <div className="mb-4">
-                <label htmlFor="name" className="block text-gray-700 font-bold mb-2">Tên danh mục</label>
-                <input type="text" name="name" id="name" className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" maxLength={255} required />
+        <div className="w-full mx-auto p-6 bg-white rounded-lg shadow-lg mt-10">
+        <h3 className="text-2xl font-bold mb-6 text-center">Thêm mới danh mục</h3>
+        {/* Thông tin danh mục */}
+        <div className="bg-gray-100 p-6 rounded-md mb-6">
+          <h4 className="text-lg font-medium mb-4">Thông tin danh mục</h4>
+          <form className="space-y-6">
+            {/* Name */}
+            <div className="mb-4 w-full">
+              <label htmlFor="name" className="block text-gray-700 font-medium mb-2">Tên danh mục</label>
+              <input
+                type="text"
+                id="name"
+                name="name"
+                maxLength={255}
+                required
+                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              />
             </div>
-            <div className="mb-4">
-                <label htmlFor="parent_id" className="block text-gray-700 font-bold mb-2">Parent ID:</label>
-                <input type="number" name="parent_id" id="parent_id" className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
+            
+            {/* Parent ID */}
+            <div className="mb-4 w-full">
+              <label htmlFor="parent_id" className="block text-gray-700 font-medium mb-2">Parent ID</label>
+              <input
+                type="number"
+                id="parent_id"
+                name="parent_id"
+                required
+                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              />
             </div>
-            <div className="mb-4">
-                <label htmlFor="status" className="block text-gray-700 font-bold mb-2">Trạng thái</label>
-                <input type="number" name="status" id="status" className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required />
+            
+            {/* Status */}
+            <div className="mb-4 w-full">
+              <label htmlFor="status" className="block text-gray-700 font-medium mb-2">Trạng thái</label>
+              <input
+                type="number"
+                id="status"
+                name="status"
+                required
+                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              />
             </div>
-            <button type="submit" className="w-full bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600 transition duration-300">
-                Submit
-            </button>
-        </form>
+            
+            {/* Nút Lưu */}
+            <div className="w-full">
+              <button
+                type="submit"
+                className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 transition duration-200"
+              >
+                Lưu thông tin
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+      
+      
 
 
     )

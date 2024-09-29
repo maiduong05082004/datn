@@ -4,24 +4,64 @@ type Props = {}
 
 const UpdateBanners = (props: Props) => {
   return (
-    <form action="/submit" method="PUT" className="max-w-lg mx-auto p-6 bg-gray-100 rounded-lg shadow-lg mt-6">
-      <h2 className="text-2xl font-bold mb-6 text-center">Cập nhật Banners</h2>
-      <div className="mb-4">
-        <label htmlFor="title" className="block text-gray-700 font-bold mb-2">Title:</label>
-        <input type="text" name="title" id="title" className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" maxLength={255} required />
-      </div>
-      <div className="mb-4">
-        <label htmlFor="image_path" className="block text-gray-700 font-bold mb-2">Image Path:</label>
-        <input type="text" name="image_path" id="image_path" className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" maxLength={255} required />
-      </div>
-      <div className="mb-4">
-        <label htmlFor="link" className="block text-gray-700 font-bold mb-2">Link:</label>
-        <input type="url" name="link" id="link" className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" maxLength={255} required />
-      </div>
-      <button type="submit" className="w-full bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600 transition duration-300">
-        Submit
-      </button>
-    </form>
+    <div className="w-full mx-auto p-6 bg-white rounded-lg shadow-lg mt-10">
+    <h3 className="text-2xl font-bold mb-6 text-center">Cập nhật Banner</h3>
+    {/* Thông tin Banner */}
+    <div className="bg-gray-100 p-6 rounded-md mb-6">
+      <h4 className="text-lg font-medium mb-4">Thông tin Banner</h4>
+      <form className="space-y-6">
+        {/* Title */}
+        <div className="mb-4 w-full">
+          <label htmlFor="title" className="block text-gray-700 font-medium mb-2">Tiêu đề</label>
+          <input
+            type="text"
+            id="title"
+            name="title"
+            maxLength={255}
+            required
+            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          />
+        </div>
+  
+        {/* Image Path */}
+        <div className="mb-4 w-full">
+          <label htmlFor="image_path" className="block text-gray-700 font-medium mb-2">Đường dẫn hình ảnh</label>
+          <input
+            type="text"
+            id="image_path"
+            name="image_path"
+            maxLength={255}
+            required
+            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          />
+        </div>
+  
+        {/* Link */}
+        <div className="mb-4 w-full">
+          <label htmlFor="link" className="block text-gray-700 font-medium mb-2">Liên kết</label>
+          <input
+            type="text"
+            id="link"
+            name="link"
+            maxLength={255}
+            required
+            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          />
+        </div>
+  
+        {/* Nút Lưu */}
+        <div className="w-full">
+          <button
+            type="submit"
+            className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 transition duration-200"
+          >
+            Lưu thông tin
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+  
   )
 }
 

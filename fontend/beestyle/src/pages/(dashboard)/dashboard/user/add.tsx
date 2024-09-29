@@ -4,47 +4,97 @@ type Props = {}
 
 const addUser = (props: Props) => {
     return (
-        <form action="/submit" method="POST" className="max-w-lg mx-auto p-6 bg-gray-100 rounded-lg shadow-lg mt-6">
-  <h2 className="text-2xl font-bold mb-6 text-center">Thêm mới Người Dùng</h2>
-
-  <div className="mb-4">
-    <label htmlFor="name" className="block text-gray-700 font-bold mb-2">Name:</label>
-    <input type="text" name="name" id="name" className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" maxLength={255} required />
-  </div>
-
-  <div className="mb-4">
-    <label htmlFor="date_of_birth" className="block text-gray-700 font-bold mb-2">Date of Birth:</label>
-    <input type="date" name="date_of_birth" id="date_of_birth" className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required />
-  </div>
-
-  <div className="mb-4">
-    <label htmlFor="sex" className="block text-gray-700 font-bold mb-2">Sex:</label>
-    <select name="sex" id="sex" className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required>
-      <option value="male">Male</option>
-      <option value="female">Female</option>
-      <option value="other">Other</option>
-    </select>
-  </div>
-
-  <div className="mb-4">
-    <label htmlFor="email" className="block text-gray-700 font-bold mb-2">Email:</label>
-    <input type="email" name="email" id="email" className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" maxLength={255} required />
-  </div>
-
-  <div className="mb-4">
-    <label htmlFor="password" className="block text-gray-700 font-bold mb-2">Password:</label>
-    <input type="password" name="password" id="password" className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" maxLength={255} required />
-  </div>
-
-  <div className="mb-4">
-    <label htmlFor="provider_name" className="block text-gray-700 font-bold mb-2">Provider Name:</label>
-    <input type="text" name="provider_name" id="provider_name" className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" maxLength={255} required />
-  </div>
-
-  <button type="submit" className="w-full bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600 transition duration-300">
-    Submit
-  </button>
-</form>
+        <div className="w-full mx-auto p-6 bg-white rounded-lg shadow-lg mt-10">
+        <h3 className="text-2xl font-bold mb-6 text-center">Thêm mới người dùng</h3>
+        {/* Thông tin người dùng */}
+        <div className="bg-gray-100 p-6 rounded-md mb-6">
+          <h4 className="text-lg font-medium mb-4">Thông tin người dùng</h4>
+          <form className="space-y-6">
+            {/* Tên */}
+            <div className="mb-4 w-full">
+              <label htmlFor="name" className="block text-gray-700 font-medium mb-2">Tên</label>
+              <input
+                type="text"
+                id="name"
+                name="name"
+                maxLength={255}
+                required
+                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              />
+            </div>
+            {/* Ngày sinh */}
+            <div className="mb-4 w-full">
+              <label htmlFor="date_of_birth" className="block text-gray-700 font-medium mb-2">Ngày sinh</label>
+              <input
+                type="date"
+                id="date_of_birth"
+                name="date_of_birth"
+                required
+                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              />
+            </div>
+            {/* Giới tính */}
+            <div className="mb-4 w-full">
+              <label htmlFor="sex" className="block text-gray-700 font-medium mb-2">Giới tính</label>
+              <select
+                id="sex"
+                name="sex"
+                required
+                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              >
+                <option value="male">Nam</option>
+                <option value="female">Nữ</option>
+                <option value="other">Khác</option>
+              </select>
+            </div>
+            {/* Email */}
+            <div className="mb-4 w-full">
+              <label htmlFor="email" className="block text-gray-700 font-medium mb-2">Email</label>
+              <input
+                type="email"
+                id="email"
+                name="email"
+                maxLength={255}
+                required
+                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              />
+            </div>
+            {/* Mật khẩu */}
+            <div className="mb-4 w-full">
+              <label htmlFor="password" className="block text-gray-700 font-medium mb-2">Mật khẩu</label>
+              <input
+                type="password"
+                id="password"
+                name="password"
+                maxLength={255}
+                required
+                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              />
+            </div>
+            {/* Nhà cung cấp */}
+            <div className="mb-4 w-full">
+              <label htmlFor="provider_name" className="block text-gray-700 font-medium mb-2">Nhà cung cấp</label>
+              <input
+                type="text"
+                id="provider_name"
+                name="provider_name"
+                maxLength={255}
+                required
+                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              />
+            </div>
+            {/* Nút Lưu */}
+            <div className="w-full">
+            <button
+          type="submit"
+          className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 transition duration-200"
+        >
+          Lưu thông tin
+        </button>
+            </div>
+          </form>
+        </div>
+      </div>
 
     )
 }
