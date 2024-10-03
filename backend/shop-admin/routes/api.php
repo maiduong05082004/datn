@@ -3,7 +3,7 @@
 use App\Http\Controllers\Api\Client\AuthController;
 use App\Http\Controllers\Api\Client\CategoryController;
 use Illuminate\Support\Facades\Route;
-
+use App\Http\Controllers\Api\Admin\CategoryController as AdminCategoryController; 
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -33,4 +33,12 @@ Route::get('/auth/callback/google', [AuthController::class, 'handleGoogleCallbac
 Route::prefix('categories')->group(function () {
     Route::get('/', [CategoryController::class, 'index']);
     Route::get('/{id}/products', [CategoryController::class, 'showCategoryProducts']);
+});
+
+Route::prefix('admin/categories')->group(function () {
+    Route::get('/', [AdminCategoryController::class, 'index']);
+    Route::post('/', [AdminCategoryController::class, 'store']);
+    Route::get('/{id}', [AdminCategoryController::class, 'show']);
+    Route::put('/{id}', [AdminCategoryController::class, 'update']);
+    Route::delete('/{id}', [AdminCategoryController::class, 'destroy']);
 });
