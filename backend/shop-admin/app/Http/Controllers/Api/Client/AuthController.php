@@ -12,6 +12,7 @@ use Laravel\Socialite\Facades\Socialite;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Str;
 use Illuminate\Auth\Events\PasswordReset;
+use Illuminate\Support\Facades\Log;
 
 class AuthController extends Controller
 {
@@ -71,13 +72,29 @@ class AuthController extends Controller
     public function redirectToGoogle()
     {
         $scopes = ['openid', 'profile', 'email', 'https://www.googleapis.com/auth/user.birthday.read'];
-        $url = Socialite::driver('google')->stateless()->scopes($scopes)->redirect()->getTargetUrl();
+        $redirectUrl = env('GOOGLE_REDIRECT_URI', 'http://localhost:8000/api/auth/callback/google');
+        $url = Socialite::driver('google')
+            ->stateless()
+            ->redirectUrl($redirectUrl)
+            ->scopes($scopes)
+            ->redirect()
+            ->getTargetUrl();
         return response()->json(['url' => $url]);
     }
-    public function handleGoogleCallback()
+
+    public function handleGoogleCallback(Request $request)
     {
         try {
-            $googleUser = Socialite::driver('google')->stateless()->user();
+            $code = $request->input('code');
+            if (!$code) {
+                throw new \Exception('Missing code parameter');
+            }
+            $tokenResponse = Socialite::driver('google')->stateless()->getAccessTokenResponse($code);
+            if (!isset($tokenResponse['access_token'])) {
+                throw new \Exception('Failed to retrieve access token');
+            }
+            $accessToken = $tokenResponse['access_token'];
+            $googleUser = Socialite::driver('google')->stateless()->userFromToken($accessToken);
             $existingUser = User::where('email', $googleUser->getEmail())->first();
             if ($existingUser) {
                 $user = $existingUser;
@@ -95,11 +112,13 @@ class AuthController extends Controller
                 ]);
             }
             $token = $user->createToken('authToken')->plainTextToken;
-            return redirect("http://localhost:3000/auth/google/callback?token=$token");
+            return redirect("http://localhost:5173/auth/google/callback?token=$token");
         } catch (\Exception $e) {
+            Log::error('Google login failed: ' . $e->getMessage());
             return response()->json(['error' => 'Google login failed'], 500);
         }
     }
+
     public function forgotPassword(Request $request)
     {
         $request->validate(['email' => 'required|email']);
