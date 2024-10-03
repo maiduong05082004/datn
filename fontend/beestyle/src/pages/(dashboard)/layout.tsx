@@ -29,9 +29,20 @@ const items1: MenuProps['items'] = [
     icon: <UserOutlined />,
     label: "Quản Lý Tài Khoản",
     children: [
-      { key: 'sub1-1', label: <NavLink to="/admin/listUser">Danh sách</NavLink> },
+      { key: 'sub1-1', label: <NavLink to="/admin/listUser">Danh sách tài Khoản</NavLink> },
       { key: 'sub1-2', label: <NavLink to="/admin/addUser">Thêm Tài Khoản</NavLink> },
-      { key: 'sub1-3', label: <NavLink to="/admin/updateUser">Sửa Tài Khoản</NavLink> },
+      { key: 'sub1-3', label: <NavLink to="/admin/updateUser">Cập nhật Tài Khoản</NavLink> },
+      { key: 'sub1-4', label: <NavLink to="/admin/delete-account">Xóa Tài Khoản</NavLink> },
+    ],
+  },
+  {
+    key: '2',
+    icon: <UserOutlined />,
+    label: "Quản Lý Banners",
+    children: [
+      { key: 'sub1-1', label: <NavLink to="/admin/listBanners">Danh sách Banners</NavLink> },
+      { key: 'sub1-2', label: <NavLink to="/admin/addBanners">Thêm Banners</NavLink> },
+      { key: 'sub1-3', label: <NavLink to="/admin/updateBanners">Cập nhật Banners</NavLink> },
       { key: 'sub1-4', label: <NavLink to="/admin/delete-account">Xóa Tài Khoản</NavLink> },
     ],
   },
@@ -51,7 +62,7 @@ const items1: MenuProps['items'] = [
     icon: React.createElement(LaptopOutlined),
     label: 'Quản Lý Danh Mục',
     children: [
-      { key: 'sub4-1', label: <NavLink to="/admin/listCategories">Danh sách</NavLink> },
+      { key: 'sub4-1', label: <NavLink to="/admin/listCategories">Danh sách danh mục</NavLink> },
       { key: 'sub4-2', label: <NavLink to="/admin/addCategories">Thêm mới danh mục</NavLink> },
       { key: 'sub4-3', label: <NavLink to="/admin/updateCategories">Cập nhật danh mục</NavLink> },
     ],
@@ -61,7 +72,7 @@ const items1: MenuProps['items'] = [
     icon: React.createElement(ProductOutlined),
     label: 'Quản Lý Đơn Hàng',
     children: [
-      { key: 'sub5-1', label: <NavLink to="/admin/listBills">Danh sách</NavLink> },
+      { key: 'sub5-1', label: <NavLink to="/admin/listBills">Danh sách đơn hàng</NavLink> },
       { key: 'sub5-2', label: <NavLink to="/admin">Danh sách</NavLink> },
       { key: 'sub5-3', label: 'Xóa Đơn Hàng' },
     ],

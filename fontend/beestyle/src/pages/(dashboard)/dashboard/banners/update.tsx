@@ -4,24 +4,41 @@ type Props = {}
 
 const UpdateBanners = (props: Props) => {
   return (
-    <form action="/submit" method="PUT" className="max-w-lg mx-auto p-6 bg-gray-100 rounded-lg shadow-lg mt-6">
-      <h2 className="text-2xl font-bold mb-6 text-center">Cập nhật Banners</h2>
-      <div className="mb-4">
-        <label htmlFor="title" className="block text-gray-700 font-bold mb-2">Title:</label>
-        <input type="text" name="title" id="title" className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" maxLength={255} required />
+    <div className="container mx-auto px-4 py-8">
+    <h1 className="text-3xl font-bold mb-6 text-center text-white-800">Cập nhật banners</h1>
+    <form>
+      <div className="bg-white shadow-lg rounded-lg mb-6 overflow-hidden">
+        <div className="bg-blue-100 p-4 rounded-t-lg">
+          <h4 className="text-lg font-semibold text-blue-800">Thông tin banner</h4>
+        </div>
+        <div className="p-6 bg-gray-50">
+          {/* Title */}
+          <div className="mb-4">
+            <label htmlFor="title" className="block font-medium text-gray-700">Tiêu đề</label>
+            <input type="text" name="title" id="title" className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500" required />
+          </div>
+  
+          {/* Image Path */}
+          <div className="mb-4">
+            <label htmlFor="image_path" className="block font-medium text-gray-700">Đường dẫn hình ảnh</label>
+            <input type="text" name="image_path" id="image_path" className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500" required />
+          </div>
+  
+          {/* Link */}
+          <div className="mb-4">
+            <label htmlFor="link" className="block font-medium text-gray-700">Liên kết</label>
+            <input type="text" name="link" id="link" className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500" required />
+          </div>
+        </div>
       </div>
-      <div className="mb-4">
-        <label htmlFor="image_path" className="block text-gray-700 font-bold mb-2">Image Path:</label>
-        <input type="text" name="image_path" id="image_path" className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" maxLength={255} required />
-      </div>
-      <div className="mb-4">
-        <label htmlFor="link" className="block text-gray-700 font-bold mb-2">Link:</label>
-        <input type="url" name="link" id="link" className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" maxLength={255} required />
-      </div>
-      <button type="submit" className="w-full bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600 transition duration-300">
-        Submit
+  
+      <button type="submit" className="mt-4 px-4 py-2 bg-green-500 text-white rounded-md shadow-lg hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500">
+        Cập nhật
       </button>
     </form>
+  </div>
+  
+  
   )
 }
 

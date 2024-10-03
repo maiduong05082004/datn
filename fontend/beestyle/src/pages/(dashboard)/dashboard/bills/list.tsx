@@ -1,46 +1,45 @@
 import React from 'react'
+
 type Props = {}
-const ListBills = (props: Props) => {
+
+const AddBanners = (props: Props) => {
     return (
-        <div className="container mx-auto mt-10">
-            <h2 className="text-2xl font-bold mb-6 text-center">Hóa đơn</h2>
-            <table className="min-w-full bg-white shadow-md rounded-lg overflow-hidden">
-                <thead className="bg-gray-800 text-white">
-                    <tr>
-                        <th className="py-3 px-4 text-left">ID</th>
-                        <th className="py-3 px-4 text-left">Mã đơn hàng</th>
-                        <th className="py-3 px-4 text-left">User ID</th>
-                        <th className="py-3 px-4 text-left">Email người nhận</th>
-                        <th className="py-3 px-4 text-left">Ghi chú</th>
-                        <th className="py-3 px-4 text-left">Trạng thái đơn hàng</th>
-                        <th className="py-3 px-4 text-left">Hình thức thanh toán</th>
-                        <th className="py-3 px-4 text-left">Ngày hủy</th>
-                        <th className="py-3 px-4 text-left">Tạm tính (VNĐ)</th>
-                        <th className="py-3 px-4 text-left">Tổng cộng (VNĐ)</th>
-                        <th className="py-3 px-4 text-left">ID khuyến mãi</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    
-                    <tr className="border-b border-gray-200">
-                        <td className="py-3 px-4">1</td>
-                        <td className="py-3 px-4">PH1</td>
-                        <td className="py-3 px-4">1</td>
-                        <td className="py-3 px-4">abc@gmail.com</td>
-                        <td className="py-3 px-4">sjh</td>
-                        <td className="py-3 px-4">ĐTT</td>
-                        <td className="py-3 px-4">CK</td>
-                        <td className="py-3 px-4">KHONG</td>
-                        <td className="py-3 px-4">100.000</td>
-                        <td className="py-3 px-4">100.000</td>
-                        <td className="py-3 px-4">1</td>
-                    </tr>
-                  
-                </tbody>
-            </table>
+      <div className="container mx-auto px-4 py-8">
+  <h1 className="text-3xl font-bold mb-6 text-center text-white-800">Thêm mới banners</h1>
+  <form>
+    <div className="bg-white shadow-lg rounded-lg mb-6 overflow-hidden">
+      <div className="bg-blue-100 p-4 rounded-t-lg">
+        <h4 className="text-lg font-semibold text-blue-800">Thông tin banner</h4>
+      </div>
+      <div className="p-6 bg-gray-50">
+        {/* Title */}
+        <div className="mb-4">
+          <label htmlFor="title" className="block font-medium text-gray-700">Tiêu đề</label>
+          <input type="text" name="title" id="title" className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500" required />
         </div>
 
+        {/* Image Path */}
+        <div className="mb-4">
+          <label htmlFor="image_path" className="block font-medium text-gray-700">Đường dẫn hình ảnh</label>
+          <input type="text" name="image_path" id="image_path" className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500" required />
+        </div>
+
+        {/* Link */}
+        <div className="mb-4">
+          <label htmlFor="link" className="block font-medium text-gray-700">Liên kết</label>
+          <input type="text" name="link" id="link" className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500" required />
+        </div>
+      </div>
+    </div>
+
+    <button type="submit" className="mt-4 px-4 py-2 bg-green-500 text-white rounded-md shadow-lg hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500">
+      Thêm mới
+    </button>
+  </form>
+</div>
+
+      
     )
 }
 
-export default ListBills
+export default AddBanners
