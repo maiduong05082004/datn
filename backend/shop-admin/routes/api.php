@@ -2,9 +2,8 @@
 
 use App\Http\Controllers\Api\Client\AuthController;
 use App\Http\Controllers\Api\Client\CategoryController;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-use Laravel\Socialite\Facades\Socialite;
+
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -16,14 +15,22 @@ use Laravel\Socialite\Facades\Socialite;
 |
 */
 
-// Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-//     return $request->user();
-// });
-Route::post('/signup', [AuthController::class, 'register']);
-Route::post('/signin', [AuthController::class, 'login']);
-Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth:sanctum');
-Route::get('/user', [AuthController::class, 'user'])->middleware('auth:sanctum');
+Route::prefix('user')->group(function () {
+    Route::post('/signup', [AuthController::class, 'register']);
+    Route::post('/signin', [AuthController::class, 'login']);
+    Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth:sanctum');
+    Route::get('/user', [AuthController::class, 'user'])->middleware('auth:sanctum');
+    Route::post('/forgot-password', [AuthController::class, 'forgotPassword'])->middleware('guest')->name('password.email');
+    Route::post('/reset-password', [AuthController::class, 'resetPassword'])->middleware('guest')->name('password.update');
+    Route::get('/reset-password/{token}', function ($token) {
+        return response()->json(['token' => $token]);
+    })->middleware('guest')->name('password.reset');
+});
+
 Route::get('/auth/google', [AuthController::class, 'redirectToGoogle']);
 Route::get('/auth/callback/google', [AuthController::class, 'handleGoogleCallback']);
-Route::get('/categories', [CategoryController::class, 'index']);
-Route::get('/category/{id}/products', [CategoryController::class, 'showCategoryProducts']);
+
+Route::prefix('categories')->group(function () {
+    Route::get('/', [CategoryController::class, 'index']);
+    Route::get('/{id}/products', [CategoryController::class, 'showCategoryProducts']);
+});
