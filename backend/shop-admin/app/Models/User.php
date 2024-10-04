@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
+use App\Notifications\ResetPasswordNotification;
 
 class User extends Authenticatable
 {
@@ -63,7 +64,6 @@ class User extends Authenticatable
         return $this->hasMany(Bill::class);
     }
 
-
     public function promotions()
     {
         return $this->belongsToMany(Promotion::class, 'user_promotions');
@@ -74,16 +74,19 @@ class User extends Authenticatable
         return $this->hasMany(Comment::class);
     }
 
-
     // Mối quan hệ với bảng ShippingAddress
     public function shippingAddresses()
     {
         return $this->hasMany(ShippingAddress::class);
     }
 
-
     public function defaultShippingAddress()
     {
         return $this->hasOne(ShippingAddress::class)->where('is_default', true);
+    }
+    
+    public function sendPasswordResetNotification($token)
+    {
+        $this->notify(new ResetPasswordNotification($token));
     }
 }

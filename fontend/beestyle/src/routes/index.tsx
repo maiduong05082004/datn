@@ -1,12 +1,14 @@
+import { Route, Routes } from "react-router-dom";
 import DashboardPage from "@/pages/(dashboard)/dashboard/page";
 import LayoutAdmin from "@/pages/(dashboard)/layout";
 import ErrorPage from "@/pages/(website)/404/page";
 import HomePage from "@/pages/(website)/home/page";
 import LayoutWebsite from "@/pages/(website)/layout";
+import Signin from "@/pages/signin/signin";
+import Signup from "@/pages/signup/signup";
+import GoogleCallback from "@/pages/GoogleCallback/GoogleCallback";
 import AddUser from "@/pages/(dashboard)/dashboard/user/add";
 import UpdateUser from "@/pages/(dashboard)/dashboard/user/update";
-
-import { Route, Routes } from "react-router-dom";
 import PayPage from "@/pages/(website)/home/_components/PayPage";
 import CartPage from "@/pages/(website)/home/_components/CartPage";
 import AddCategories from "@/pages/(dashboard)/dashboard/categories/add";
@@ -27,8 +29,15 @@ const Router = () => {
     return (
         <>
             <Routes>
+
+
+                    
+
                 <Route path="/" element={<LayoutWebsite />}>
                     <Route index element={<HomePage />} />
+                    <Route path="signin" element={<Signin />} />
+                    <Route path="signup" element={<Signup />} />
+                    <Route path="auth/google/callback" element={<GoogleCallback />} />
                     {/* <Route path="spbt" element={<Sanphambt />} /> */}
                     <Route path="pay" element={<PayPage />} />
                     <Route path="cart" element={<CartPage />} />
