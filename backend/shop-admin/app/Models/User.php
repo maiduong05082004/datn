@@ -21,20 +21,19 @@ class User extends Authenticatable
      * @var array<int, string>
      */
     protected $fillable = [
-        'first_name',       // Tên đầu của người dùng (Ví dụ: John)
-        'last_name',        // Họ của người dùng (Ví dụ: Doe)
+        'name',              // tên của người dùng (Ví dụ: Doe)
         'date_of_birth',    // Ngày tháng năm sinh của người dùng
         'sex',              // Giới tính của người dùng (male, female, other)
         'email',            // Địa chỉ email của người dùng
         'password',         // Mật khẩu (sẽ được mã hóa khi lưu vào cơ sở dữ liệu)
-        'provider_name',         // Mật khẩu (sẽ được mã hóa khi lưu vào cơ sở dữ liệu)
-        'provider_id',         // Mật khẩu (sẽ được mã hóa khi lưu vào cơ sở dữ liệu)
+        'provider_name',    // Tên nhà cung cấp phương thức đăng nhập)
+        'provider_id',      // id của nhà cung cấp (sẽ được mã hóa khi lưu vào cơ sở dữ liệu)
         'role',             // Vai trò của người dùng (ví dụ: admin, user)
         'last_login_at',    // Thời gian người dùng đăng nhập lần cuối
         'is_active',        // Trạng thái kích hoạt tài khoản (true/false)
-            
+
     ];
-    
+
 
     /**
      * The attributes that should be hidden for serialization.
@@ -59,7 +58,8 @@ class User extends Authenticatable
     ];
 
 
-    public function bill(){
+    public function bill()
+    {
         return $this->hasMany(Bill::class);
     }
 
@@ -70,22 +70,20 @@ class User extends Authenticatable
     }
 
     public function comments()
-{
-    return $this->hasMany(Comment::class);
-}
+    {
+        return $this->hasMany(Comment::class);
+    }
 
 
-   // Mối quan hệ với bảng ShippingAddress
-   public function shippingAddresses()
-   {
-       return $this->hasMany(ShippingAddress::class);
-   }
+    // Mối quan hệ với bảng ShippingAddress
+    public function shippingAddresses()
+    {
+        return $this->hasMany(ShippingAddress::class);
+    }
 
 
-   public function defaultShippingAddress()
-{
-    return $this->hasOne(ShippingAddress::class)->where('is_default', true);
-}
-
-   
+    public function defaultShippingAddress()
+    {
+        return $this->hasOne(ShippingAddress::class)->where('is_default', true);
+    }
 }
