@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\Admin\Product\ProductController;
 use App\Http\Controllers\Api\Client\AuthController;
 use App\Http\Controllers\Api\Client\CategoryController;
 use Illuminate\Http\Request;
@@ -27,3 +28,24 @@ Route::get('/auth/google', [AuthController::class, 'redirectToGoogle']);
 Route::get('/auth/callback/google', [AuthController::class, 'handleGoogleCallback']);
 Route::get('/categories', [CategoryController::class, 'index']);
 Route::get('/category/{id}/products', [CategoryController::class, 'showCategoryProducts']);
+
+
+// Route::middleware(['auth']) // thêm check admin nhé
+//     ->prefix('admins')
+//     ->as('admins.')
+//     ->group(function () {
+   
+//         Route::resource('products', ProductController::class)
+//             ->names('products');
+
+//     });
+
+
+Route::prefix('admins')
+    ->as('admins.')
+    ->group(function () {
+   
+        Route::resource('products', ProductController::class)
+            ->names('products');
+
+    });
