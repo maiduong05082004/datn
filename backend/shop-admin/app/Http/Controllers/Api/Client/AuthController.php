@@ -18,6 +18,25 @@ class AuthController extends Controller
 {
     public function register(Request $request)
     {
+        Log::info('Request data:', $request->all());
+        $data = $request->all();
+        
+        $requiredFields = ['name', 'email', 'password', 'sex', 'date_of_birth'];
+        $missingFields = [];
+    
+        foreach ($requiredFields as $field) {
+            if (!isset($data[$field])) {
+                $missingFields[] = $field;
+            }
+        }
+    
+        if (!empty($missingFields)) {
+            return response()->json([
+                'error' => 'Missing required fields',
+                'missing_fields' => $missingFields
+            ], 400);
+        }
+    
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
@@ -25,6 +44,7 @@ class AuthController extends Controller
             'sex' => 'required|string|in:male,female,other',
             'date_of_birth' => 'required|date',
         ]);
+    
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
@@ -34,8 +54,10 @@ class AuthController extends Controller
             'role' => User::Role_User,
             'is_active' => true,
         ]);
-
-        return response()->json(['message' => 'User registered successfully'], 201);
+    
+        return response()->json([
+            'message' => 'User registered successfully',
+        ], 201);
     }
 
     public function login(Request $request)
