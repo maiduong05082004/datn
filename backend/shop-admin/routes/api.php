@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\Admin\Product\ProductController;
 use App\Http\Controllers\Api\Client\AuthController;
+use App\Http\Controllers\Api\Admin\AuthController as AdminAuthController;
 use App\Http\Controllers\Api\Client\CategoryController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\Admin\CategoryController as AdminCategoryController;
@@ -39,10 +40,11 @@ Route::prefix('client')->as('client.')->group(function () {
 
 Route::prefix('admins')
     ->as('admins.')
-    ->middleware('admin')
     ->group(function () {
-        Route::apiResource('products', ProductController::class)
-            ->names('products');
-        Route::apiResource('categories', AdminCategoryController::class);
+        Route::post('/signin', [AdminAuthController::class, 'login'])->name('signin');
+        Route::middleware(['auth:admin', 'admin'])->group(function () {
+            Route::apiResource('products', ProductController::class)
+                ->names('products');
+            Route::apiResource('categories', AdminCategoryController::class);
+        });
     });
-
