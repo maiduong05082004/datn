@@ -9,6 +9,7 @@ import {
   UserOutlined,
   BellOutlined,
   SearchOutlined,
+  FileImageOutlined,
 } from '@ant-design/icons';
 import {
   Badge,
@@ -32,18 +33,18 @@ const items1: MenuProps['items'] = [
       { key: 'sub1-1', label: <NavLink to="/admin/listUser">Danh sách tài Khoản</NavLink> },
       { key: 'sub1-2', label: <NavLink to="/admin/addUser">Thêm Tài Khoản</NavLink> },
       { key: 'sub1-3', label: <NavLink to="/admin/updateUser">Cập nhật Tài Khoản</NavLink> },
-      { key: 'sub1-4', label: <NavLink to="/admin/delete-account">Xóa Tài Khoản</NavLink> },
+      { key: 'sub1-4', label: <NavLink to="/admin/blockUser">Tài khoản chặn</NavLink> },
     ],
   },
   {
     key: '2',
-    icon: <UserOutlined />,
+    icon: <FileImageOutlined />,
     label: "Quản Lý Banners",
     children: [
-      { key: 'sub1-1', label: <NavLink to="/admin/listBanners">Danh sách Banners</NavLink> },
-      { key: 'sub1-2', label: <NavLink to="/admin/addBanners">Thêm Banners</NavLink> },
-      { key: 'sub1-3', label: <NavLink to="/admin/updateBanners">Cập nhật Banners</NavLink> },
-      { key: 'sub1-4', label: <NavLink to="/admin/delete-account">Xóa Tài Khoản</NavLink> },
+      { key: 'sub2-1', label: <NavLink to="/admin/listBanners">Danh sách Banners</NavLink> },
+      { key: 'sub2-2', label: <NavLink to="/admin/addBanners">Thêm Banners</NavLink> },
+      { key: 'sub2-3', label: <NavLink to="/admin/updateBanners">Cập nhật Banners</NavLink> },
+      // { key: 'sub1-4', label: <NavLink to="/admin/delete-account">Xóa Tài Khoản</NavLink> },
     ],
   },
   {
@@ -92,9 +93,9 @@ const items1: MenuProps['items'] = [
     icon: React.createElement(GiftOutlined),
     label: 'Quản Lý Khuyến Mại',
     children: [
-      { key: 'sub7-1', label: <NavLink to="/admin/listBanners">Danh sách</NavLink> },
-      { key: 'sub7-2', label: <NavLink to="/admin/addBanners">Thêm mới</NavLink> },
-      { key: 'sub7-3', label: <NavLink to="/admin/updateBanners">Cập nhật</NavLink> },
+      { key: 'sub7-1', label: <NavLink to="/admin">Danh sách</NavLink> },
+      { key: 'sub7-2', label: <NavLink to="/admin">Thêm mới</NavLink> },
+      { key: 'sub7-3', label: <NavLink to="/admin">Cập nhật</NavLink> },
       { key: 'sub7-4', label: 'Xóa Khuyến Mại' },
     ],
   },

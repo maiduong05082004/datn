@@ -8,7 +8,6 @@ const AddUser = (props: Props) => {
   const toggleDarkMode = () => {
     setDarkMode(!darkMode);
   };
-
   return (
     <div className={`container mx-auto px-4 py-8 ${darkMode ? 'bg-gray-900' : 'bg-white'} transition-colors duration-300`}>
       <h1 className={`text-3xl font-bold mb-6 text-center ${darkMode ? 'text-white' : 'text-gray-800'} transition-colors duration-300`}>
@@ -103,15 +102,15 @@ const AddUser = (props: Props) => {
               />
             </div>
 
-            {/* Tên nhà cung cấp */}
+            {/* Địa chỉ */}
             <div className="mb-4">
-              <label htmlFor="provider_name" className={`block font-medium ${darkMode ? 'text-white' : 'text-gray-700'} transition-colors duration-300`}>
-                Tên nhà cung cấp
+              <label htmlFor="address" className={`block font-medium ${darkMode ? 'text-white' : 'text-gray-700'} transition-colors duration-300`}>
+                Địa chỉ
               </label>
               <input
                 type="text"
-                name="provider_name"
-                id="provider_name"
+                name="address"
+                id="address"
                 className={`mt-1 block w-full border ${darkMode ? 'border-gray-600 bg-gray-700 text-white' : 'border-gray-300 bg-white text-gray-700'} rounded-md shadow-sm p-2 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors duration-300`}
               />
             </div>

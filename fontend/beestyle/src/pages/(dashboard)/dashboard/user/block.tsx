@@ -3,7 +3,7 @@ import { format } from 'date-fns'; // Import thư viện date-fns để định 
 
 type Props = {}
 
-const ListUser = (props: Props) => {
+const BlockUser = (props: Props) => {
 
     const [darkMode, setDarkMode] = useState(false); // Chế độ tối mặc định là false (chế độ sáng)
 
@@ -20,7 +20,7 @@ const ListUser = (props: Props) => {
     return (
         <div className={`w-full mx-auto p-6 rounded-lg shadow-lg mt-10 ${darkMode ? 'bg-gray-800' : 'bg-white'}`}>
             <h3 className={`text-2xl font-bold mb-6 text-center ${darkMode ? 'text-white' : 'text-black'}`}>
-                Danh sách tài khoản
+                Danh sách tài khoản bị chặn
             </h3>
             <div className={`bg-gray-100 ${darkMode ? 'dark:bg-gray-700' : 'bg-gray-100'} p-6 rounded-md mb-6`}>
                 <table className={`min-w-full rounded-lg shadow-md overflow-hidden ${darkMode ? 'bg-gray-800' : 'bg-white'}`}>
@@ -49,22 +49,7 @@ const ListUser = (props: Props) => {
                             <td className="py-3 px-4 text-center text-black dark:text-white">Google</td>
                             <td className="py-3 px-4 text-center text-black dark:text-white">
                                 <button className="bg-blue-500 text-white py-1 px-3 rounded-lg mr-2">Sửa</button>
-                                <button className="bg-red-500 text-white py-1 px-3 rounded-lg">Block</button>
-                            </td>
-                        </tr>
-                        <tr className="border-b border-gray-200 dark:border-gray-700">
-                            <td className="py-3 px-4 text-center text-black dark:text-white">2</td>
-                            <td className="py-3 px-4 text-center text-black dark:text-white">Người dùng 2</td>
-                            <td className="py-3 px-4 text-center text-black dark:text-white">
-                                {formatBirthDate('1992-02-02')}
-                            </td>
-                            <td className="py-3 px-4 text-center text-black dark:text-white">female</td>
-                            <td className="py-3 px-4 text-center text-black dark:text-white">user2@example.com</td>
-                            <td className="py-3 px-4 text-center text-black dark:text-white">Nam Định</td>
-                            <td className="py-3 px-4 text-center text-black dark:text-white">Facebook</td>
-                            <td className="py-3 px-4 text-center text-black dark:text-white">
-                                <button className="bg-blue-500 text-white py-1 px-3 rounded-lg mr-2">Sửa</button>
-                                <button className="bg-red-500 text-white py-1 px-3 rounded-lg">Block</button>
+                                <button className="bg-red-500 text-white py-1 px-3 rounded-lg">Bỏ chặn</button>
                             </td>
                         </tr>
                     </tbody>
@@ -73,4 +58,4 @@ const ListUser = (props: Props) => {
         </div>
     );
 }
-export default ListUser;
+export default BlockUser;

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 
 type Props = {}
 
-const AddUser = (props: Props) => {
+const UpdateUser = (props: Props) => {
   const [darkMode, setDarkMode] = useState(false);
 
   const toggleDarkMode = () => {
@@ -102,9 +102,20 @@ const AddUser = (props: Props) => {
                 required
               />
             </div>
+            <div className="mb-4">
+              <label htmlFor="address" className={`block font-medium ${darkMode ? 'text-white' : 'text-gray-700'} transition-colors duration-300`}>
+                Địa chỉ
+              </label>
+              <input
+                type="text"
+                name="address"
+                id="address"
+                className={`mt-1 block w-full border ${darkMode ? 'border-gray-600 bg-gray-700 text-white' : 'border-gray-300 bg-white text-gray-700'} rounded-md shadow-sm p-2 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors duration-300`}
+              />
+            </div>
 
             {/* Tên nhà cung cấp */}
-            <div className="mb-4">
+            {/* <div className="mb-4">
               <label htmlFor="provider_name" className={`block font-medium ${darkMode ? 'text-white' : 'text-gray-700'} transition-colors duration-300`}>
                 Tên nhà cung cấp
               </label>
@@ -114,7 +125,7 @@ const AddUser = (props: Props) => {
                 id="provider_name"
                 className={`mt-1 block w-full border ${darkMode ? 'border-gray-600 bg-gray-700 text-white' : 'border-gray-300 bg-white text-gray-700'} rounded-md shadow-sm p-2 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors duration-300`}
               />
-            </div>
+            </div> */}
           </div>
         </div>
 
@@ -129,4 +140,4 @@ const AddUser = (props: Props) => {
   );
 };
 
-export default AddUser;
+export default UpdateUser;

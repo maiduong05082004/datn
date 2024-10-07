@@ -10,33 +10,34 @@ const ListCategories = (props: Props) => {
         <table className="min-w-full bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden">
           <thead className="bg-gray-800 dark:bg-gray-900 text-white">
             <tr>
-              <th className="py-3 px-4 text-left">ID</th>
-              <th className="py-3 px-4 text-left">Tên danh mục</th>
-              <th className="py-3 px-4 text-left">Parent ID</th>
-              <th className="py-3 px-4 text-left">Trạng thái</th>
+              <th className="py-3 px-4 text-center">ID</th>
+              <th className="py-3 px-4 text-center">Tên danh mục</th>
+              <th className="py-3 px-4 text-center">Danh mục con</th>
             </tr>
           </thead>
           <tbody>
             <tr className="border-b border-gray-200 dark:border-gray-700">
-              <td className="py-3 px-4 text-black dark:text-white">1</td>
-              <td className="py-3 px-4 text-black dark:text-white">Danh mục 1</td>
-              <td className="py-3 px-4 text-black dark:text-white">123</td>
-              <td className="py-3 px-4 text-black dark:text-white">1</td> {/* 1 = Active, 0 = Inactive */}
+              <td className="py-3 px-4 text-center text-black dark:text-white">1</td>
+              <td className="py-3 px-4 text-center text-black dark:text-white">Danh mục 1</td>
+              <td className="py-3 px-4 text-center text-black dark:text-white">
+                <button className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg shadow-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                  Danh mục con
+                </button>
+              </td>
             </tr>
             <tr className="border-b border-gray-200 dark:border-gray-700">
-              <td className="py-3 px-4 text-black dark:text-white">2</td>
-              <td className="py-3 px-4 text-black dark:text-white">Danh mục 2</td>
-              <td className="py-3 px-4 text-black dark:text-white">124</td>
-              <td className="py-3 px-4 text-black dark:text-white">0</td>
+              <td className="py-3 px-4 text-center text-black dark:text-white">2</td>
+              <td className="py-3 px-4 text-center text-black dark:text-white">Danh mục 2</td>
+              <td className="py-3 px-4 text-center text-black dark:text-white">
+                <button className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg shadow-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                  Danh mục con
+                </button>
+              </td>
             </tr>
           </tbody>
         </table>
       </div>
     </div>
-
-
-
   )
 }
-
-export default ListCategories
+export default ListCategories;

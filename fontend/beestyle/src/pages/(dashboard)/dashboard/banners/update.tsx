@@ -20,7 +20,7 @@ const UpdateBanners = (props: Props) => {
   
           {/* Image Path */}
           <div className="mb-4">
-            <label htmlFor="image_path" className="block font-medium text-gray-700">Đường dẫn hình ảnh</label>
+            <label htmlFor="image_path" className="block font-medium text-gray-700">Image</label>
             <input type="text" name="image_path" id="image_path" className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500" required />
           </div>
   

@@ -1,10 +1,16 @@
 import React, { useState } from 'react';
 
 const UpdateCategories = () => {
+
   const [darkMode, setDarkMode] = useState(false); // false = Light Mode by default
+  const [isActive, setIsActive] = useState(false); // Trạng thái của checkbox
 
   const toggleDarkMode = () => {
     setDarkMode(!darkMode);
+  };
+
+  const handleStatusChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setIsActive(e.target.checked); // Cập nhật trạng thái của checkbox
   };
 
   return (
@@ -32,26 +38,39 @@ const UpdateCategories = () => {
 
             {/* Parent ID */}
             <div className="mb-4">
-              <label htmlFor="parent_id" className={`block font-medium ${darkMode ? 'text-white' : 'text-gray-700'}`}>Parent ID</label>
-              <input
+              <label htmlFor="parent_id" className={`block font-medium ${darkMode ? 'text-white' : 'text-gray-700'}`}>Danh mục cha</label>
+              {/* <input
                 type="number"
                 name="parent_id"
                 id="parent_id"
                 className={`mt-1 block w-full border ${darkMode ? 'border-gray-600 bg-gray-700 text-white' : 'border-gray-300 bg-white text-gray-700'} rounded-md shadow-sm p-2 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500`}
-              />
+              /> */}
+              <select
+                name="parent_id"
+                id="parent_id"
+                className={`mt-1 block w-full border ${darkMode ? 'border-gray-600 bg-gray-700 text-white' : 'border-gray-300 bg-white text-gray-700'} rounded-md shadow-sm p-2 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500`}
+              >
+                <option value="">Chọn danh mục cha</option> {/* Option mặc định */}
+                <option value="1">Danh mục cha 1</option>
+                <option value="2">Danh mục cha 2</option>
+                <option value="3">Danh mục cha 3</option>
+              </select>
             </div>
 
             {/* Status */}
-            <div className="mb-4">
+            <div className="mb-4 flex items-center">
               <label htmlFor="status" className={`block font-medium ${darkMode ? 'text-white' : 'text-gray-700'}`}>Trạng thái</label>
-              <select
+              <input
+                type="checkbox"
                 id="status"
                 name="status"
-                className={`mt-1 block w-full border ${darkMode ? 'border-gray-600 bg-gray-700 text-white' : 'border-gray-300 bg-white text-gray-700'} rounded-md shadow-sm p-2 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500`}
-              >
-                <option value="0">Không hoạt động</option>
-                <option value="1">Hoạt động</option>
-              </select>
+                checked={isActive}
+                onChange={handleStatusChange}
+                className={`ml-2 ${darkMode ? 'border-gray-600 bg-gray-700 text-white' : 'border-gray-300 bg-white text-gray-700'} rounded shadow-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500`}
+              />
+              <span className={`ml-2 ${darkMode ? 'text-white' : 'text-gray-700'}`}>
+                {isActive ? 'Hoạt động' : 'Không hoạt động'}
+              </span>
             </div>
           </div>
         </div>
@@ -66,5 +85,4 @@ const UpdateCategories = () => {
     </div>
   );
 };
-
 export default UpdateCategories;
