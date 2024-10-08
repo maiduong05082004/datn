@@ -29,10 +29,6 @@ const Router = () => {
     return (
         <>
             <Routes>
-
-
-                    
-
                 <Route path="/" element={<LayoutWebsite />}>
                     <Route index element={<HomePage />} />
                     <Route path="signin" element={<Signin />} />
