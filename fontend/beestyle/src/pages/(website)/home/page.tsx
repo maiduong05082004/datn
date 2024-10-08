@@ -10,11 +10,10 @@ type Props = {}
 const HomePage = (props: Props) => {
   return (
     <div>
-      {/* <HomePage/> */}
-      {/* <Header/> */}
+      <Header/>
       {/* <AboutPage /> */}
       {/* <Footer/> */}
-      <PayPage />
+      {/* <PayPage /> */}
       {/* <CartPage /> */}
     </div>
   )
