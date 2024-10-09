@@ -6,6 +6,10 @@ use App\Http\Controllers\Api\Admin\AuthController as AdminAuthController;
 use App\Http\Controllers\Api\Client\CategoryController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\Admin\CategoryController as AdminCategoryController;
+use App\Http\Controllers\Api\Admin\Product\AttributeController;
+use App\Http\Controllers\Api\Admin\Product\AttributeGroupController;
+use App\Http\Controllers\Api\Admin\Product\AttributeValueController;
+
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -47,4 +51,16 @@ Route::prefix('admins')
                 ->names('products');
             Route::apiResource('categories', AdminCategoryController::class);
         });
+        Route::apiResource('products', ProductController::class)
+            ->names('products');
+
+        Route::apiResource('attributes', AttributeController::class)
+            ->names('attributes');
+
+        Route::apiResource('attribute_groups', AttributeGroupController::class)
+            ->names('attribute_groups');
+
+
+        Route::apiResource('attribute_values', AttributeValueController::class)
+            ->names('attribute_values');
     });
