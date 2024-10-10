@@ -22,9 +22,7 @@ use App\Http\Controllers\Api\Admin\Product\AttributeValueController;
 */
 
 Route::prefix('client')->as('client.')->group(function () {
-    Route::prefix('auth')
-    ->as('auth.')
-    ->group(function () {
+    Route::prefix('auth')->as('auth.')->group(function () {
         Route::post('/signup', [AuthController::class, 'register'])->name('signup');
         Route::post('/signin', [AuthController::class, 'login'])->name('signin');
         Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth:sanctum')->name('logout');
@@ -44,7 +42,6 @@ Route::prefix('client')->as('client.')->group(function () {
 });
 
 
-<<<<<<< HEAD
 Route::prefix('admins')
     ->as('admins.')
     ->group(function () {
@@ -53,47 +50,14 @@ Route::prefix('admins')
             Route::apiResource('products', ProductController::class)
                 ->names('products');
             Route::apiResource('categories', AdminCategoryController::class);
-        });
-        Route::apiResource('products', ProductController::class)
+            Route::apiResource('products', ProductController::class)
             ->names('products');
-
-        Route::apiResource('attributes', AttributeController::class)
+            Route::apiResource('attributes', AttributeController::class)
             ->names('attributes');
-
-        Route::apiResource('attribute_groups', AttributeGroupController::class)
+            Route::apiResource('attribute_groups', AttributeGroupController::class)
             ->names('attribute_groups');
-
-
-        Route::apiResource('attribute_values', AttributeValueController::class)
+            Route::apiResource('attribute_values', AttributeValueController::class)
             ->names('attribute_values');
+        });
     });
-=======
 
-
-        
-
-     
-            Route::prefix('admins')
-            ->as('admins.')
-            ->group(function () {
-                Route::post('/signin', [AdminAuthController::class, 'login'])->name('signin');
-                Route::middleware('admin')->group(function () {
-                    Route::apiResource('products', ProductController::class)
-                    ->names('products');
-        
-                    Route::apiResource('attributes', AttributeController::class)
-                    ->names('attributes');
-        
-                    Route::apiResource('attribute_groups', AttributeGroupController::class)
-                    ->names('attribute_groups');
-        
-                    
-                    Route::apiResource('attribute_values', AttributeValueController::class)
-                    ->names('attribute_values');
-                    
-                    Route::apiResource('categories', AdminCategoryController::class);
-
-                });
-            });
-        
->>>>>>> 4725313 (update all product, attribute)
