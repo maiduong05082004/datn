@@ -5,6 +5,8 @@ import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
 import { toast, ToastContainer } from 'react-toastify';
 
 import 'react-toastify/dist/ReactToastify.css';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import axios from 'axios';
 
 type Variant = {
   size: string;
@@ -30,6 +32,29 @@ const AddProduct = () => {
   const [showVariants, setShowVariants] = useState<boolean>(true);
   const [variantImages, setVariantImages] = useState<{ [key: string]: string | null }>({});
   const [variantAlbums, setVariantAlbums] = useState<{ [key: string]: string[] }>({});
+  const queryCLient = useQueryClient();
+  const { data: categories } = useQuery({
+    queryKey: ['categories'],
+    queryFn: async () => await axios.get(`http://localhost:8000/api/admins/categories`)
+  });
+
+  const renderChildren = (children: any[]) => {
+    return children.map((child) => (
+      <option key={child.id} value={child.id} className="ml-4">
+        {child.name}
+      </option>
+    ));
+  };
+  
+  // Render danh mục chính và danh mục con (nếu có)
+  const renderCategories = (categories: any[]) => {
+    return categories.map((category) => (
+      <optgroup key={category.id} label={category.name} className="font-bold">
+        {category.children_recursive ? renderChildren(category.children_recursive) : null}
+      </optgroup>
+    ));
+  };
+
 
   const filteredColors = colors.filter(color =>
     color.toLowerCase().includes(searchTerm.toLowerCase())
@@ -119,7 +144,6 @@ const AddProduct = () => {
     };
     console.log('Product data:', formData);
   };
-
   return (
     <>
       <ToastContainer position="top-right" autoClose={5000} hideProgressBar={false} closeOnClick draggable pauseOnHover />
@@ -162,13 +186,15 @@ const AddProduct = () => {
 
                   <div className="flex flex-col">
                     <label htmlFor="category" className="font-medium text-gray-700">Danh mục</label>
-                    <select id="category" className="border rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                      <option>--Chọn danh mục--</option>
-                      <option value={1}>Áo</option>
-                      <option value={2}>Quần</option>
-                      <option value={3}>Giày</option>
+                    <select
+                      id="category"
+                      className="border rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition ease-in-out duration-200"
+                    >
+                      <option value="">--Chọn danh mục--</option>
+                      {categories?.data && renderCategories(categories.data)}
                     </select>
                   </div>
+
 
                   <div className="flex flex-col">
                     <label htmlFor="dateAdded" className="font-medium text-gray-700">Ngày nhập</label>
@@ -205,7 +231,7 @@ const AddProduct = () => {
                             className="mt-2 p-2 bg-red-500 text-white rounded-lg hover:bg-red-600"
                             onClick={() => setMainImage(null)}
                           >
-                            Xóa ảnh
+                            Xóa
                           </button>
                         </div>
                       )}
@@ -230,7 +256,7 @@ const AddProduct = () => {
                               return { ...prev, default: updatedAlbum };
                             })}
                           >
-                            Xóa ảnh album
+                            Xóa
                           </button>
                         </div>
                       ))}
@@ -280,14 +306,15 @@ const AddProduct = () => {
                             onChange={(e) => setSearchTerm(e.target.value)}
                             className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500"
                           />
-                          <div className="grid grid-cols-5 gap-2 mt-2 border-2 border-gray-300 p-5 rounded-md shadow-sm">
+                          <div className="grid grid-cols-6 mt-2 p-10 border-2 border-gray-300  rounded-md shadow-sm ">
                             {filteredColors.map((color, index) => (
-                              <div key={index} className="flex items-center cursor-pointer" onClick={() => handleColorChange(color)}>
-                                <div
-                                  className="w-3 h-3 rounded-full" 
-                                  style={{ backgroundColor: color.toLowerCase() }}
-                                />
-                                <span className="ml-2">{color}</span>
+                              <div key={index} className="flex items-center justify-center cursor-pointer" onClick={() => handleColorChange(color)}>
+                                <div className='w-10 h-10 rounded-full border border-[#e6e6e6] hover:border-black flex justify-center items-center'>
+                                  <div
+                                    className="w-8 h-8 rounded-full"
+                                    style={{ backgroundColor: color.toLowerCase() }}
+                                  />
+                                </div>
                               </div>
                             ))}
                           </div>
@@ -323,7 +350,7 @@ const AddProduct = () => {
                             ))}
 
                             <div className="mb-4">
-                              <div className="flex justify-between">
+                              <div className="flex justify-between gap-2">
                                 <div className="mb-4">
                                   <label className="block font-medium text-gray-700">Hình ảnh đại diện cho {selectedColor}</label>
                                   <input type="file"
@@ -338,7 +365,7 @@ const AddProduct = () => {
                                         className="mt-2 p-2 bg-red-500 text-white rounded-lg hover:bg-red-600"
                                         onClick={() => setVariantImages((prev) => ({ ...prev, [selectedColor]: null }))}
                                       >
-                                        Xóa ảnh đại diện
+                                        Xóa
                                       </button>
                                     </div>
                                   )}
@@ -363,7 +390,7 @@ const AddProduct = () => {
                                           return { ...prev, [selectedColor]: updatedAlbum };
                                         })}
                                       >
-                                        Xóa ảnh album
+                                        Xóa
                                       </button>
                                     </div>
                                   ))}
