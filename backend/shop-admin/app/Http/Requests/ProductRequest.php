@@ -19,8 +19,8 @@ class ProductRequest extends FormRequest
             'name' => 'required|string|max:255|unique:products,name',  // Tên sản phẩm là bắt buộc và phải duy nhất
             'price' => 'required|numeric|min:0',
             'stock' => 'nullable|integer|min:0',
-            'thumbnail_image' => 'nullable|image|max:2048',
-            'album_images.*' => 'nullable|image|max:2048',
+            'thumbnail_image' => 'nullable|max:2048',
+            'album_images.*' => 'nullable|max:2048',
             'variations' => 'nullable|json',
             'category_id' => 'required|integer|exists:categories,id',
             'description' => 'nullable|string|max:500',
@@ -49,8 +49,7 @@ class ProductRequest extends FormRequest
             'price.required' => 'Giá sản phẩm là bắt buộc.',
             'price.numeric' => 'Giá phải là số.',
             'stock.integer' => 'Số lượng phải là số nguyên.',
-            'thumbnail_image.image' => 'Ảnh đại diện phải là file hình ảnh hợp lệ.',
-            'album_images.*.image' => 'Ảnh trong album phải là file hình ảnh hợp lệ.',
+  
             'category_id.required' => 'Danh mục sản phẩm là bắt buộc.',
             'category_id.exists' => 'Danh mục sản phẩm không hợp lệ.',
             'description.string' => 'Mô tả sản phẩm phải là chuỗi ký tự.',

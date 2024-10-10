@@ -33,7 +33,7 @@ class ProductController extends Controller
             ]
         )->paginate(10);
 
-        return  ProductResource::collection($products);
+        return ProductResource::collection($products);
     }
 
 
@@ -56,18 +56,14 @@ class ProductController extends Controller
                 'content' => $request->content,
                 'input_day' => $request->input_day,
                 'category_id' => $request->category_id,
-                'is_collection' => $request->has('is_collection') ? 1 : 0, // Kiểm tra checkbox
-                'is_hot' => $request->has('is_hot') ? 1 : 0,               // Kiểm tra checkbox
-                'is_new' => $request->has('is_new') ? 1 : 0,               // Kiểm tra checkbox
+                'is_collection' => $request->has('is_collection') ? 1 : 0, 
+                'is_hot' => $request->has('is_hot') ? 1 : 0,               
+                'is_new' => $request->has('is_new') ? 1 : 0,              
             ]);
     
-            // Kiểm tra xem có biến thể không
+
             $hasVariations = $request->has('variations') && !empty($request->variations);
-    
-            // Giải mã JSON của biến thể thành mảng (nếu dữ liệu là JSON string)
             $variations = json_decode($request->input('variations'), true);
-    
-            // Nếu không có biến thể, lưu thông tin số lượng và ảnh cho sản phẩm
             if (!$hasVariations || !is_array($variations)) {
                 // Cập nhật tồn kho
                 $product->update(['stock' => $request->stock]);
@@ -76,27 +72,27 @@ class ProductController extends Controller
                 $this->saveImages($product, $request);
             }
     
-            // Nếu có biến thể, kiểm tra và lưu ảnh và thông tin biến thể
+
             if ($hasVariations && is_array($variations)) {
-                $totalProductStock = 0; // Tổng số lượng tồn kho cho sản phẩm
+                $totalProductStock = 0; 
     
                 foreach ($variations as $attributeValueId => $sizes) {
-                    // Kiểm tra tính hợp lệ của thuộc tính với nhóm trước khi tạo biến thể
+
                     if (!$this->isValidAttributeForGroup($request->group_id, $attributeValueId)) {
                         throw new \Exception("Thuộc tính không hợp lệ cho nhóm đã chọn.");
                     }
     
-                    // Tạo biến thể chính (ví dụ như màu sắc)
+
                     $productVariation = ProductVariation::create([
                         'product_id' => $product->id,
                         'group_id' => $request->group_id,
                         'attribute_value_id' => $attributeValueId,
                     ]);
     
-                    // Lưu ảnh cho biến thể
+
                     $this->saveImages($productVariation, $request, true, $attributeValueId);
     
-                    // Tính toán tổng tồn kho cho từng biến thể
+
                     $totalVariationStock = 0;
     
                     // Lưu các size (kích thước) của từng biến thể
@@ -113,20 +109,13 @@ class ProductController extends Controller
                                 'price' => $calculatedPrice,
                                 'discount' => $details['discount'] ?? null,
                             ]);
-    
-                            // Cộng dồn số lượng stock của các biến thể size
+
                             $totalVariationStock += $details['stock'];
                         }
                     }
-    
-                    // Cập nhật tổng số lượng stock của biến thể vào bảng product_variations
                     $productVariation->update(['stock' => $totalVariationStock]);
-    
-                    // Cộng dồn số lượng stock của biến thể vào tổng stock sản phẩm
                     $totalProductStock += $totalVariationStock;
                 }
-    
-                // Cập nhật tổng số lượng stock của sản phẩm vào bảng products
                 $product->update(['stock' => $totalProductStock]);
             }
     
@@ -135,7 +124,7 @@ class ProductController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => 'Product created successfully',
-                'data' => $product
+                'data' => new ProductResource($product),
             ], 201);
         } catch (\Exception $e) {
             DB::rollback();
@@ -344,8 +333,6 @@ public function update(UpdateProductRequest $request, $id)
 
         
         $hasVariations = $request->has('variations') && !empty($request->variations);
-
-        // Giải mã JSON của biến thể thành mảng
         $variations = json_decode($request->input('variations'), true);
 
         // Xử lý cập nhật sản phẩm nếu không có biến thể
@@ -412,7 +399,7 @@ public function update(UpdateProductRequest $request, $id)
         return response()->json([
             'success' => true,
             'message' => 'Product updated successfully',
-            'data' => $product
+            'data' => new ProductResource($product),
         ], 200);
     } catch (\Exception $e) {
         DB::rollback();
@@ -429,24 +416,22 @@ public function update(UpdateProductRequest $request, $id)
 
         $validAttributes = DB::table('attribute_groups')
             ->where('group_id', $groupId)
-            ->pluck('attribute_id')  // Lấy danh sách attribute_id thuộc group_id
-            ->toArray();  // Chuyển sang mảng để dễ kiểm tra
+            ->pluck('attribute_id')  
+            ->toArray();  
 
         if (empty($validAttributes)) {
-            // Nếu không có thuộc tính nào được tìm thấy cho group_id
             return false;
         }
 
-        // Lấy tất cả các giá trị thuộc tính hợp lệ từ bảng attribute_values dựa trên attribute_id đã lấy từ attribute_groups
+      
         $validAttributeValues = DB::table('attribute_values')
             ->whereIn('attribute_id', $validAttributes)
-            ->pluck('id')  // Lấy danh sách attribute_value_id hợp lệ
+            ->pluck('id')  
             ->toArray();
 
-        // Kiểm tra tất cả các attribute_value_id mà người dùng cung cấp xem có nằm trong danh sách hợp lệ không
+     
         foreach ($attributeValueIds as $attributeValueId) {
             if (!in_array($attributeValueId, $validAttributeValues)) {
-                // Nếu bất kỳ giá trị thuộc tính nào không hợp lệ
                 return false;
             }
         }
@@ -557,7 +542,6 @@ public function update(UpdateProductRequest $request, $id)
 
 
         foreach ($variations as $variation) {
-            // Lấy danh sách hình ảnh của biến thể
             $variationImages = ProductVariationImage::where('product_variation_id', $variation->id)->get();
 
    
@@ -571,12 +555,8 @@ public function update(UpdateProductRequest $request, $id)
 
                 $variationImage->delete();
             }
-
-            // Xóa tất cả các giá trị biến thể
             ProductVariationValue::where('product_variation_id', $variation->id)->delete();
-
-            // Xóa biến thể
-            $variation->forceDelete();  // Xóa vĩnh viễn biến thể
+            $variation->forceDelete();
         }
 
         $productImages = ProductImage::where('product_id', $product->id)->get();
