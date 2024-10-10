@@ -6,13 +6,11 @@ import App from './App.tsx'
 import './global.css'
 import './styles/style.scss'
 const queryClient = new QueryClient();
-
 ReactDOM.createRoot(document.getElementById('root')!).render(
     <React.StrictMode>
-        <QueryClientProvider client={queryClient}>
-            <BrowserRouter>
-                <App />
-            </BrowserRouter>
-        </QueryClientProvider>
-    </React.StrictMode >
+        <QueryClientProvider client={queryClient}/>
+        <BrowserRouter>
+            <App />
+        </BrowserRouter>
+    </React.StrictMode>
 )

@@ -1,11 +1,3 @@
-import DashboardPage from "@/pages/(dashboard)/dashboard/page";
-import AddUser from "@/pages/(dashboard)/dashboard/user/add";
-import UpdateUser from "@/pages/(dashboard)/dashboard/user/update";
-import LayoutAdmin from "@/pages/(dashboard)/layout";
-import ErrorPage from "@/pages/(website)/404/page";
-import HomePage from "@/pages/(website)/home/page";
-import LayoutWebsite from "@/pages/(website)/layout";
-
 import AddBanners from "@/pages/(dashboard)/dashboard/banners/add";
 import ListBanners from "@/pages/(dashboard)/dashboard/banners/list";
 import UpdateBanners from "@/pages/(dashboard)/dashboard/banners/update";
@@ -14,15 +6,22 @@ import AddCategories from "@/pages/(dashboard)/dashboard/categories/add";
 import ListCategories from "@/pages/(dashboard)/dashboard/categories/list";
 import UpdateCategories from "@/pages/(dashboard)/dashboard/categories/update";
 import ListComments from "@/pages/(dashboard)/dashboard/comments/list";
+import DashboardPage from "@/pages/(dashboard)/dashboard/page";
 import Addproduct from "@/pages/(dashboard)/dashboard/products/add";
 import ListProducts from "@/pages/(dashboard)/dashboard/products/list";
 import UpdateProduct from "@/pages/(dashboard)/dashboard/products/update";
 import VariantProduct from "@/pages/(dashboard)/dashboard/products/variant";
+import AddUser from "@/pages/(dashboard)/dashboard/user/add";
 import ListUser from "@/pages/(dashboard)/dashboard/user/list";
-import { Route, Routes } from "react-router-dom";
-import ListPage from "@/pages/(website)/list/page";
+import UpdateUser from "@/pages/(dashboard)/dashboard/user/update";
+import LayoutAdmin from "@/pages/(dashboard)/layout";
+import ErrorPage from "@/pages/(website)/404/page";
 import PageSignin from "@/pages/(website)/auth/signin/page";
 import PageSignup from "@/pages/(website)/auth/signup/page";
+import HomePage from "@/pages/(website)/home/page";
+import LayoutWebsite from "@/pages/(website)/layout";
+import ListPage from "@/pages/(website)/list/page";
+import { Route, Routes } from "react-router-dom";
 
 const Router = () => {
     return (

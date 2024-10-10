@@ -1,171 +1,187 @@
-import React from 'react'
+import React, { useState } from 'react';
 
-const UpdateProduct = () => {
+const UpdateProductForm = () => {
+  const [darkMode, setDarkMode] = useState(false);
+
+  const toggleDarkMode = () => {
+    setDarkMode(!darkMode);
+  };
+
   return (
-<div className="w-full mx-auto p-6 bg-white rounded-lg shadow-lg mt-10">
-  <h3 className="text-2xl font-bold mb-6 text-center">Cập nhật phẩm mới</h3>
-  {/* Thông tin sản phẩm */}
-  <div className="bg-gray-100 p-6 rounded-md mb-6">
-    <h4 className="text-lg font-medium mb-4">Thông tin sản phẩm</h4>
-    <form className="space-y-6">
-      {/* Slug */}
-      <div className="mb-4 w-full">
-        <label htmlFor="slug" className="block text-gray-700 font-medium mb-2">Slug</label>
-        <input
-          type="text"
-          id="slug"
-          name="slug"
-          maxLength={255}
-          required
-          className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-        />
-      </div>
-      {/* Tên sản phẩm */}
-      <div className="mb-4 w-full">
-        <label htmlFor="name_product" className="block text-gray-700 font-medium mb-2">Tên sản phẩm</label>
-        <input
-          type="text"
-          id="name_product"
-          name="name_product"
-          maxLength={255}
-          required
-          className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-        />
-      </div>
-      {/* Giá sản phẩm */}
-      <div className="mb-4 w-full">
-        <label htmlFor="price" className="block text-gray-700 font-medium mb-2">Giá sản phẩm</label>
-        <input
-          type="number"
-          id="price"
-          name="price"
-          step="0.01"
-          required
-          className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-        />
-      </div>
-      {/* Số lượng sản phẩm */}
-      <div className="mb-4 w-full">
-        <label htmlFor="stock" className="block text-gray-700 font-medium mb-2">Số lượng trong kho</label>
-        <input
-          type="number"
-          id="stock"
-          name="stock"
-          required
-          className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-        />
-      </div>
-      {/* Mô tả sản phẩm */}
-      <div className="mb-4 w-full">
-        <label htmlFor="description" className="block text-gray-700 font-medium mb-2">Mô tả</label>
-        <input
-          type="text"
-          id="description"
-          name="description"
-          maxLength={255}
-          required
-          className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-        />
-      </div>
-      {/* Nội dung chi tiết */}
-      <div className="mb-4 w-full">
-        <label htmlFor="content" className="block text-gray-700 font-medium mb-2">Nội dung chi tiết</label>
-        <textarea
-          id="content"
-          name="content"
-          required
-          className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-        ></textarea>
-      </div>
-      {/* Lượt xem */}
-      <div className="mb-4 w-full">
-        <label htmlFor="view" className="block text-gray-700 font-medium mb-2">Lượt xem</label>
-        <input
-          type="number"
-          id="view"
-          name="view"
-          required
-          className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-        />
-      </div>
-      {/* Danh mục sản phẩm */}
-      <div className="mb-4 w-full">
-        <label htmlFor="category_id" className="block text-gray-700 font-medium mb-2">ID danh mục</label>
-        <input
-          type="number"
-          id="category_id"
-          name="category_id"
-          required
-          className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-        />
-      </div>
-      {/* Các loại checkbox */}
-      <div className="grid grid-cols-2 gap-4">
-        {/* Loại sản phẩm */}
-        <div className="mb-4">
-          <label htmlFor="is_type" className="block text-gray-700 font-medium mb-2">Loại sản phẩm</label>
-          <input
-            type="checkbox"
-            id="is_type"
-            name="is_type"
-            className="h-5 w-5 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-          />
+    <div className={`container mx-auto px-4 py-8 ${darkMode ? 'bg-gray-900' : 'bg-white'}`}>
+      <h1 className={`text-3xl font-bold mb-6 text-center ${darkMode ? 'text-white' : 'text-gray-800'}`}>
+        Cập nhật sản phẩm mới
+      </h1>
+      <form>
+        <div className={`shadow-lg rounded-lg mb-6 overflow-hidden ${darkMode ? 'bg-gray-700' : 'bg-white'}`}>
+          <div className={`p-4 rounded-t-lg ${darkMode ? 'bg-gray-700' : 'bg-blue-100'}`}>
+            <h4 className={`text-lg font-semibold ${darkMode ? 'text-white' : 'text-blue-800'}`}>Thông tin sản phẩm</h4>
+          </div>
+          <div className={`p-6 ${darkMode ? 'bg-gray-800' : 'bg-gray-50'}`}>
+            {/* Slug */}
+            <div className="mb-4">
+              <label htmlFor="slug" className={`block font-medium ${darkMode ? 'text-white' : 'text-gray-700'}`}>Slug</label>
+              <input
+                type="text"
+                id="slug"
+                name="slug"
+                maxLength={255}
+                required
+                className={`mt-1 block w-full border ${darkMode ? 'border-gray-600 bg-gray-700 text-white' : 'border-gray-300 bg-white text-gray-700'} rounded-md shadow-sm p-2 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500`}
+              />
+            </div>
+
+            {/* Tên sản phẩm */}
+            <div className="mb-4">
+              <label htmlFor="name_product" className={`block font-medium ${darkMode ? 'text-white' : 'text-gray-700'}`}>Tên sản phẩm</label>
+              <input
+                type="text"
+                id="name_product"
+                name="name_product"
+                maxLength={255}
+                required
+                className={`mt-1 block w-full border ${darkMode ? 'border-gray-600 bg-gray-700 text-white' : 'border-gray-300 bg-white text-gray-700'} rounded-md shadow-sm p-2 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500`}
+              />
+            </div>
+
+            {/* Giá sản phẩm */}
+            <div className="mb-4">
+              <label htmlFor="price" className={`block font-medium ${darkMode ? 'text-white' : 'text-gray-700'}`}>Giá sản phẩm</label>
+              <input
+                type="number"
+                id="price"
+                name="price"
+                step="0.01"
+                required
+                className={`mt-1 block w-full border ${darkMode ? 'border-gray-600 bg-gray-700 text-white' : 'border-gray-300 bg-white text-gray-700'} rounded-md shadow-sm p-2 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500`}
+              />
+            </div>
+
+            {/* Số lượng trong kho */}
+            <div className="mb-4">
+              <label htmlFor="stock" className={`block font-medium ${darkMode ? 'text-white' : 'text-gray-700'}`}>Số lượng trong kho</label>
+              <input
+                type="number"
+                id="stock"
+                name="stock"
+                required
+                className={`mt-1 block w-full border ${darkMode ? 'border-gray-600 bg-gray-700 text-white' : 'border-gray-300 bg-white text-gray-700'} rounded-md shadow-sm p-2 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500`}
+              />
+            </div>
+
+            {/* Mô tả */}
+            <div className="mb-4">
+              <label htmlFor="description" className={`block font-medium ${darkMode ? 'text-white' : 'text-gray-700'}`}>Mô tả</label>
+              <input
+                type="text"
+                id="description"
+                name="description"
+                maxLength={255}
+                required
+                className={`mt-1 block w-full border ${darkMode ? 'border-gray-600 bg-gray-700 text-white' : 'border-gray-300 bg-white text-gray-700'} rounded-md shadow-sm p-2 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500`}
+              />
+            </div>
+
+            {/* Nội dung chi tiết */}
+            <div className="mb-4">
+              <label htmlFor="content" className={`block font-medium ${darkMode ? 'text-white' : 'text-gray-700'}`}>Nội dung chi tiết</label>
+              <textarea
+                id="content"
+                name="content"
+                required
+                className={`mt-1 block w-full border ${darkMode ? 'border-gray-600 bg-gray-700 text-white' : 'border-gray-300 bg-white text-gray-700'} rounded-md shadow-sm p-2 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500`}
+              ></textarea>
+            </div>
+
+            {/* Lượt xem */}
+            <div className="mb-4">
+              <label htmlFor="view" className={`block font-medium ${darkMode ? 'text-white' : 'text-gray-700'}`}>Lượt xem</label>
+              <input
+                type="number"
+                id="view"
+                name="view"
+                required
+                className={`mt-1 block w-full border ${darkMode ? 'border-gray-600 bg-gray-700 text-white' : 'border-gray-300 bg-white text-gray-700'} rounded-md shadow-sm p-2 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500`}
+              />
+            </div>
+
+            {/* ID danh mục */}
+            <div className="mb-4">
+              <label htmlFor="category_id" className={`block font-medium ${darkMode ? 'text-white' : 'text-gray-700'}`}>ID danh mục</label>
+              <input
+                type="number"
+                id="category_id"
+                name="category_id"
+                required
+                className={`mt-1 block w-full border ${darkMode ? 'border-gray-600 bg-gray-700 text-white' : 'border-gray-300 bg-white text-gray-700'} rounded-md shadow-sm p-2 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500`}
+              />
+            </div>
+
+            {/* Checkbox cho các loại sản phẩm */}
+            <div className="grid grid-cols-2 gap-4">
+              {/* Loại sản phẩm */}
+              <div className="mb-4">
+                <label htmlFor="is_type" className={`block font-medium ${darkMode ? 'text-white' : 'text-gray-700'}`}>Loại sản phẩm</label>
+                <input
+                  type="checkbox"
+                  id="is_type"
+                  name="is_type"
+                  className={`h-5 w-5 border ${darkMode ? 'border-gray-600 bg-gray-800' : 'border-gray-300 bg-white'} rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500`}
+                />
+              </div>
+              {/* Sản phẩm hot */}
+              <div className="mb-4">
+                <label htmlFor="is_hot" className={`block font-medium ${darkMode ? 'text-white' : 'text-gray-700'}`}>Sản phẩm hot</label>
+                <input
+                  type="checkbox"
+                  id="is_hot"
+                  name="is_hot"
+                  className={`h-5 w-5 border ${darkMode ? 'border-gray-600 bg-gray-800' : 'border-gray-300 bg-white'} rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500`}
+                />
+              </div>
+              {/* Hot deal */}
+              <div className="mb-4">
+                <label htmlFor="is_hot_deal" className={`block font-medium ${darkMode ? 'text-white' : 'text-gray-700'}`}>Hot deal</label>
+                <input
+                  type="checkbox"
+                  id="is_hot_deal"
+                  name="is_hot_deal"
+                  className={`h-5 w-5 border ${darkMode ? 'border-gray-600 bg-gray-800' : 'border-gray-300 bg-white'} rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500`}
+                />
+              </div>
+              {/* Sản phẩm mới */}
+              <div className="mb-4">
+                <label htmlFor="is_new" className={`block font-medium ${darkMode ? 'text-white' : 'text-gray-700'}`}>Sản phẩm mới</label>
+                <input
+                  type="checkbox"
+                  id="is_new"
+                  name="is_new"
+                  className={`h-5 w-5 border ${darkMode ? 'border-gray-600 bg-gray-800' : 'border-gray-300 bg-white'} rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500`}
+                />
+              </div>
+              {/* Hiển thị trên trang chủ */}
+              <div className="mb-4">
+                <label htmlFor="is_show_home" className={`block font-medium ${darkMode ? 'text-white' : 'text-gray-700'}`}>Hiển thị trên trang chủ</label>
+                <input
+                  type="checkbox"
+                  id="is_show_home"
+                  name="is_show_home"
+                  className={`h-5 w-5 border ${darkMode ? 'border-gray-600 bg-gray-800' : 'border-gray-300 bg-white'} rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500`}
+                />
+              </div>
+            </div>
+          </div>
         </div>
-        {/* Sản phẩm hot */}
-        <div className="mb-4">
-          <label htmlFor="is_hot" className="block text-gray-700 font-medium mb-2">Sản phẩm hot</label>
-          <input
-            type="checkbox"
-            id="is_hot"
-            name="is_hot"
-            className="h-5 w-5 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-          />
-        </div>
-        {/* Hot deal */}
-        <div className="mb-4">
-          <label htmlFor="is_hot_deal" className="block text-gray-700 font-medium mb-2">Hot deal</label>
-          <input
-            type="checkbox"
-            id="is_hot_deal"
-            name="is_hot_deal"
-            className="h-5 w-5 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-          />
-        </div>
-        {/* Sản phẩm mới */}
-        <div className="mb-4">
-          <label htmlFor="is_new" className="block text-gray-700 font-medium mb-2">Sản phẩm mới</label>
-          <input
-            type="checkbox"
-            id="is_new"
-            name="is_new"
-            className="h-5 w-5 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-          />
-        </div>
-        {/* Hiển thị ở trang chủ */}
-        <div className="mb-4">
-          <label htmlFor="is_show_home" className="block text-gray-700 font-medium mb-2">Hiển thị trên trang chủ</label>
-          <input
-            type="checkbox"
-            id="is_show_home"
-            name="is_show_home"
-            className="h-5 w-5 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-          />
-        </div>
-      </div>
-      {/* Nút Lưu */}
-      <div className="w-full">
+
         <button
           type="submit"
-          className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 transition duration-200"
+          className="mt-4 px-4 py-2 bg-green-500 text-white rounded-md shadow-lg hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500"
         >
-          Lưu thông tin
+          Cập nhật
         </button>
-      </div>
-    </form>
-  </div>
-</div>
+      </form>
+    </div>
+  );
+};
 
-  )
-}
-
-export default UpdateProduct
+export default UpdateProductForm;
