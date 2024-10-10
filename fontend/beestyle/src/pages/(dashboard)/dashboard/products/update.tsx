@@ -110,7 +110,6 @@ const AddProduct = (props: Props) => {
                 </select>
               </div>
 
-              {/* Hiển thị các select loại chất liệu khi chọn màu sắc */}
               {selectedColor && (
                 <div className="mb-4">
                   <label htmlFor="material" className="block font-medium text-gray-700">Chọn loại chất liệu</label>
@@ -122,7 +121,6 @@ const AddProduct = (props: Props) => {
                 </div>
               )}
 
-              {/* Biến thể kích thước */}
               {selectedColor && selectedMaterial && (
                 <>
                   {variants.map((variant, index) => (
