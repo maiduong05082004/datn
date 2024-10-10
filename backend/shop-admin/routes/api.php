@@ -49,15 +49,17 @@ Route::prefix('admins')
         Route::middleware(['auth:admin', 'admin'])->group(function () {
             Route::apiResource('products', ProductController::class)
                 ->names('products');
-            Route::apiResource('categories', AdminCategoryController::class);
-            Route::apiResource('products', ProductController::class)
-            ->names('products');
-            Route::apiResource('attributes', AttributeController::class)
-            ->names('attributes');
+                Route::apiResource('attributes', AttributeController::class)
+                ->names('attributes');
             Route::apiResource('attribute_groups', AttributeGroupController::class)
-            ->names('attribute_groups');
+                ->names('attribute_groups');
             Route::apiResource('attribute_values', AttributeValueController::class)
-            ->names('attribute_values');
+                ->names('attribute_values');
+            Route::prefix('categories')->group(function () {
+                Route::post('{id}/soft-delete', [AdminCategoryController::class, 'softDestroy'])->name('categories.soft-delete');
+                Route::post('{id}/restore', [AdminCategoryController::class, 'restore'])->name('categories.restore');
+                Route::get('trash', [AdminCategoryController::class, 'trash']);
+            });
+            Route::apiResource('categories', AdminCategoryController::class);
         });
     });
-
