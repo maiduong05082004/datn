@@ -16,9 +16,9 @@ class AttributeGroupController extends Controller
     public function index()
     {
         $attributeGroups = AttributeGroup::with('group', 'attribute')->get();
-
+    
         $groupedData = $attributeGroups->groupBy('group_id');
-
+    
         $result = $groupedData->map(function ($group) {
             return [
                 'group_id' => $group->first()->group->id,
@@ -28,14 +28,21 @@ class AttributeGroupController extends Controller
                         'id' => $item->attribute->id,
                         'name' => $item->attribute->name,
                         'attribute_type' => $item->attribute->attribute_type,
-
+                        'attribute_values' => $item->attribute->values->map(function ($value) { 
+                            return [
+                                'id' => $value->id,
+                                'value' => $value->value,
+                            ];
+                        })
+    
                     ];
                 })
             ];
         });
+    
         return response()->json(['data' => $result]);
     }
-
+    
 
 
     public function store(AttributeGroupRequest $request)
