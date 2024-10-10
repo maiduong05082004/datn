@@ -22,7 +22,9 @@ use App\Http\Controllers\Api\Admin\Product\AttributeValueController;
 */
 
 Route::prefix('client')->as('client.')->group(function () {
-    Route::prefix('auth')->as('auth.')->group(function () {
+    Route::prefix('auth')
+    ->as('auth.')
+    ->group(function () {
         Route::post('/signup', [AuthController::class, 'register'])->name('signup');
         Route::post('/signin', [AuthController::class, 'login'])->name('signin');
         Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth:sanctum')->name('logout');
