@@ -6,6 +6,10 @@ use App\Http\Controllers\Api\Admin\AuthController as AdminAuthController;
 use App\Http\Controllers\Api\Client\CategoryController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\Admin\CategoryController as AdminCategoryController;
+use App\Http\Controllers\Api\Admin\Product\AttributeController;
+use App\Http\Controllers\Api\Admin\Product\AttributeGroupController;
+use App\Http\Controllers\Api\Admin\Product\AttributeValueController;
+
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -18,7 +22,9 @@ use App\Http\Controllers\Api\Admin\CategoryController as AdminCategoryController
 */
 
 Route::prefix('client')->as('client.')->group(function () {
-    Route::prefix('auth')->as('auth.')->group(function () {
+    Route::prefix('auth')
+    ->as('auth.')
+    ->group(function () {
         Route::post('/signup', [AuthController::class, 'register'])->name('signup');
         Route::post('/signin', [AuthController::class, 'login'])->name('signin');
         Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth:sanctum')->name('logout');
@@ -36,15 +42,26 @@ Route::prefix('client')->as('client.')->group(function () {
         Route::get('/{id}/products', [CategoryController::class, 'showCategoryProducts'])->name('products.show');
     });
 });
-
-
 Route::prefix('admins')
-    ->as('admins.')
-    ->group(function () {
-        Route::post('/signin', [AdminAuthController::class, 'login'])->name('signin');
-        // Route::middleware(['auth:admin', 'admin'])->group(function () {
-            Route::apiResource('products', ProductController::class)
-                ->names('products');
-            Route::apiResource('categories', AdminCategoryController::class);
-        // });
+->as('admins.')
+->group(function () {
+    Route::post('/signin', [AdminAuthController::class, 'login'])->name('signin');
+    Route::middleware('admin')->group(function () {
+        Route::apiResource('products', ProductController::class)
+        ->names('products');
+
+        Route::apiResource('attributes', AttributeController::class)
+        ->names('attributes');
+
+        Route::apiResource('attribute_groups', AttributeGroupController::class)
+        ->names('attribute_groups');
+
+        
+        Route::apiResource('attribute_values', AttributeValueController::class)
+        ->names('attribute_values');
+        
+        Route::apiResource('categories', AdminCategoryController::class);
+
     });
+});
+
