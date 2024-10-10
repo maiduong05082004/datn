@@ -1,0 +1,87 @@
+import { getAllProducts } from '@/services/product'
+import { useQuery } from '@tanstack/react-query'
+import React, { useEffect, useState } from 'react'
+import { Link, useParams } from 'react-router-dom'
+import ErrorPage from '../../404/page'
+import axios from 'axios'
+
+type Props = {}
+
+const ProductsList = (props: Props) => {
+
+
+
+
+    const {id} = useParams()
+    console.log(id);
+    
+
+    const { data: products } = useQuery({
+        queryKey: ['products'],
+        queryFn: () => {
+            return axios.get(`http://127.0.0.1:8000/api/category/${id}/products`)
+        }
+    })
+
+    console.log(products);
+    
+    return (
+
+        <div className="grid grid-cols-4 lg:grid-cols-12 lg:px-[15px] lg:gap-2 pc:px-[48px]">
+       
+                    <div className="mb-[30px] col-span-2 relative lg:col-span-3 lg:mb-[40px]">
+                        <div className="absolute top-[16px] right-[16px]">
+                            <div className="bg-black flex justify-center w-[40px] h-[40px] rounded-[100%] items-center opacity-10">
+                                <div className="w-[24px] h-[24px]">
+                                    <img src="https:file.hstatic.net/200000642007/file/shopping-cart_3475f727ea204ccfa8fa7c70637d1d06.svg" alt="" />
+                                </div>
+                            </div>
+                        </div>
+                        <div className="absolute flex flex-col items-start m-[6px]">
+                            <div className="bg-[#FF0000] rounded-[3px] text-white text-[12px] font-[500] p-[3px_5px]">-10%</div>
+                            <div className="leading-5 bg-white text-black text-[12px] font-[500] p-[3px_10px] mt-[5px]">Hết hàng</div>
+                        </div>
+                        <Link to={`/products/`} className="">
+                            <picture>
+                                <div className="pt-[124%] bg-cover bg-center bg-no-repeat cursor-pointer" ></div>
+                            </picture>
+                        </Link>
+                        <div className="w-[100%] text-wrap px-[8px] pt-[10px]">
+                            <div className="">
+                                <Link to={`/products/`}>
+                                    <h4 className='description2 mb-[5px] text-[14px] font-[600] cursor-pointer hover:text-[#BB9244] lg:text-[16px]'></h4>
+                                </Link>
+                                
+                                    <div  className={` text-[14px] font-[700]`}>
+                                        
+                                            <span className={``}> VND</span>
+                                       
+                                    </div>
+
+                            </div>
+                            <div className="flex gap-1 justify-start mt-[18px]">
+                              
+                                    <React.Fragment >
+                                        <input
+                                            className='hidden'
+                                            type="radio"
+                                            id={``}
+                                            name={`options-`}
+                                            value="1"
+                                           
+                                        />
+                                        <label htmlFor={``} className="w-[12px] h-[12px] cursor-pointer">
+                                            <img className="w-[12px] h-[12px] rounded-[100%]" alt="" />
+                                        </label>
+                                    </React.Fragment>
+                               
+                            </div>
+                        </div>
+                    </div>
+                
+          
+        </div>
+    )
+}
+
+export default ProductsList
