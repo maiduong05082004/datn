@@ -39,7 +39,7 @@ Route::prefix('client')->as('client.')->group(function () {
     });
     Route::prefix('categories')->as('categories.')->group(function () {
         Route::get('/', [CategoryController::class, 'index'])->name('list');
-        Route::get('/{id}/products', [CategoryController::class, 'showCategoryProducts'])->name('products.show');
+        Route::get('/{id}', [CategoryController::class, 'showCategoryProducts'])->name('products.show');
     });
 });
 
