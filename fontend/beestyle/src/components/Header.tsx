@@ -11,10 +11,13 @@ const Header = () => {
     const { data: categorires } = useQuery({
         queryKey: ['categories'],
         queryFn: () => {
-            return axios.get(`http://127.0.0.1:8000/api/categories`)
+            return axios.get(`http://127.0.0.1:8000/api/client/categories`)
         }
     })
 
+
+    console.log(categorires);
+    
     return (
         <>
             <div className="bg-black h-[42px] text-center flex">

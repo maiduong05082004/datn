@@ -16,7 +16,7 @@ const PageSignin = (props: Props) => {
     const { mutate } = useMutation({
         mutationFn: async (auth: any) => {
             try {
-                const use = await axios.post(`http://127.0.0.1:8000/api/signin`, auth)
+                const use = await axios.post(`http://127.0.0.1:8000/api/client/auth/signin`, auth)
                 console.log(use);
 
             } catch (error) {
