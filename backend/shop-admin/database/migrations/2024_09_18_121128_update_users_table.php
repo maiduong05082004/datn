@@ -25,7 +25,6 @@ class UpdateUsersTable extends Migration
             $table->boolean('is_active')->default(true)->after('last_login_at')->comment('Trạng thái hoạt động của người dùng, true là hoạt động');
         });
     }
-
     /**
      * Reverse the migrations.
      *

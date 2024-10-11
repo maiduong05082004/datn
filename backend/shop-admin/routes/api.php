@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\Admin\UserController;
 use App\Http\Controllers\Api\Client\AuthController;
 use App\Http\Controllers\Api\Client\CategoryController;
 use Illuminate\Support\Facades\Route;
@@ -33,4 +34,17 @@ Route::get('/auth/callback/google', [AuthController::class, 'handleGoogleCallbac
 Route::prefix('categories')->group(function () {
     Route::get('/', [CategoryController::class, 'index']);
     Route::get('/{id}/products', [CategoryController::class, 'showCategoryProducts']);
+});
+
+Route::prefix('admin')->group(function () {
+    Route::get('users/', [UserController::class, 'index']);
+    Route::post('users/', [UserController::class, 'store']);
+    Route::get('users/{id}', [UserController::class, 'show']);
+    Route::put('users/{id}', [UserController::class, 'update']);
+
+    Route::apiResource('users', UserController::class);
+
+    Route::get('user/{id}/block', [UserController::class, 'blockUser']);
+
+    Route::put('user/{id}/unblock', [UserController::class, 'unblockUser']);
 });
