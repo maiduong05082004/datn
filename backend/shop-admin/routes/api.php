@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\Admin\Product\ProductController;
+use App\Http\Controllers\Api\Admin\UserController;
 use App\Http\Controllers\Api\Client\AuthController;
 use App\Http\Controllers\Api\Admin\AuthController as AdminAuthController;
 use App\Http\Controllers\Api\Client\CategoryController;
@@ -80,5 +81,18 @@ Route::prefix('admins')
                 Route::get('trash', [AdminCategoryController::class, 'trash']);
             });
             Route::apiResource('categories', AdminCategoryController::class);
+            Route::prefix('users')->group(function () {
+                Route::get('/', [UserController::class, 'index']);
+                Route::post('/', [UserController::class, 'store']);
+                Route::get('/{id}', [UserController::class, 'show']);
+                Route::put('/{id}', [UserController::class, 'update']);
+            
+                Route::apiResource('users', UserController::class);
+            
+                Route::get('/{id}/block', [UserController::class, 'blockUser']);
+            
+                Route::put('/{id}/unblock', [UserController::class, 'unblockUser']);
+            });
         });
     });
+
