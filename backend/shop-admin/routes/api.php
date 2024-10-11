@@ -9,6 +9,8 @@ use App\Http\Controllers\Api\Admin\CategoryController as AdminCategoryController
 use App\Http\Controllers\Api\Admin\Product\AttributeController;
 use App\Http\Controllers\Api\Admin\Product\AttributeGroupController;
 use App\Http\Controllers\Api\Admin\Product\AttributeValueController;
+use App\Http\Controllers\Api\Client\HomeController;
+
 
 /*
 |--------------------------------------------------------------------------
@@ -40,6 +42,13 @@ Route::prefix('client')->as('client.')->group(function () {
     Route::prefix('categories')->as('categories.')->group(function () {
         Route::get('/', [CategoryController::class, 'index'])->name('list');
         Route::get('/{id}', [CategoryController::class, 'showCategoryProducts'])->name('products.show');
+    });
+
+
+    Route::prefix('home')->as('home.')->group(function () {
+        Route::get('/',[HomeController::class, 'index'])->name('home.index');
+
+
     });
 });
 
