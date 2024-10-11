@@ -12,7 +12,7 @@ class Product extends Model
 
     protected $fillable = [
         'slug',
-        'name_product',
+        'name',
         'price',
         'stock',
         'description',
@@ -20,19 +20,15 @@ class Product extends Model
         'view',
         'input_day',
         'category_id',
-        'is_type',
+        'is_collection ',
         'is_hot',
-        'is_hot_deal',
         'is_new',
-        'is_show_home',
     ];
 
     protected $casts = [
-        'is_type' => 'boolean',
         'is_hot' => 'boolean',
-        'is_hot_deal' => 'boolean',
         'is_new' => 'boolean',
-        'is_show_home' => 'boolean',
+        'is_collection' => 'boolean',
     ];
 
     // Quan hệ với Category
@@ -49,12 +45,11 @@ class Product extends Model
     }
 
 
-    // Quan hệ với ProductImage
-      // Liên kết với model ProductImage
-      public function images()
-      {
-          return $this->hasMany(ProductImage::class);
-      }
+        // Liên kết với model ProductImage
+        public function images()
+        {
+            return $this->hasMany(ProductImage::class);
+        }
 
     // Quan hệ với Comment
     public function comments()

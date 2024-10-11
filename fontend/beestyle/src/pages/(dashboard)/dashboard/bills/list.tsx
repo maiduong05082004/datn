@@ -1,60 +1,45 @@
 import React from 'react'
+
 type Props = {}
-const ListBills = (props: Props) => {
+
+const AddBanners = (props: Props) => {
     return (
-        <div className="w-full mx-auto p-6 bg-white rounded-lg shadow-lg mt-10">
-  <h3 className="text-2xl font-bold mb-6 text-center">Danh sách Đơn hàng</h3>
-  <div className="bg-gray-100 p-6 rounded-md mb-6">
-    <table className="min-w-full bg-white rounded-lg shadow-md overflow-hidden">
-      <thead className="bg-gray-800 text-white">
-        <tr>
-          <th className="py-3 px-4 text-left">ID</th>
-          <th className="py-3 px-4 text-left">Mã đơn hàng</th>
-          <th className="py-3 px-4 text-left">User ID</th>
-          <th className="py-3 px-4 text-left">Email Người nhận</th>
-          <th className="py-3 px-4 text-left">Ghi chú</th>
-          <th className="py-3 px-4 text-left">Trạng thái</th>
-          <th className="py-3 px-4 text-left">Hình thức thanh toán</th>
-          <th className="py-3 px-4 text-left">Ngày hủy</th>
-          <th className="py-3 px-4 text-left">Tạm tính</th>
-          <th className="py-3 px-4 text-left">Tổng cộng</th>
-          <th className="py-3 px-4 text-left">Mã khuyến mãi</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr className="border-b border-gray-200">
-          <td className="py-3 px-4">1</td>
-          <td className="py-3 px-4">ORD123</td>
-          <td className="py-3 px-4">123</td>
-          <td className="py-3 px-4">example@example.com</td>
-          <td className="py-3 px-4">Note here</td>
-          <td className="py-3 px-4">Pending</td>
-          <td className="py-3 px-4">Credit Card</td>
-          <td className="py-3 px-4">2024-09-28 12:00:00</td>
-          <td className="py-3 px-4">1000.00</td>
-          <td className="py-3 px-4">1100.00</td>
-          <td className="py-3 px-4">PROMO123</td>
-        </tr>
-        <tr className="border-b border-gray-200">
-          <td className="py-3 px-4">2</td>
-          <td className="py-3 px-4">ORD124</td>
-          <td className="py-3 px-4">124</td>
-          <td className="py-3 px-4">receiver@example.com</td>
-          <td className="py-3 px-4">Another note</td>
-          <td className="py-3 px-4">Completed</td>
-          <td className="py-3 px-4">PayPal</td>
-          <td className="py-3 px-4">N/A</td>
-          <td className="py-3 px-4">500.00</td>
-          <td className="py-3 px-4">600.00</td>
-          <td className="py-3 px-4">PROMO124</td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
+      <div className="container mx-auto px-4 py-8">
+  <h1 className="text-3xl font-bold mb-6 text-center text-white-800">Thêm mới banners</h1>
+  <form>
+    <div className="bg-white shadow-lg rounded-lg mb-6 overflow-hidden">
+      <div className="bg-blue-100 p-4 rounded-t-lg">
+        <h4 className="text-lg font-semibold text-blue-800">Thông tin banner</h4>
+      </div>
+      <div className="p-6 bg-gray-50">
+        {/* Title */}
+        <div className="mb-4">
+          <label htmlFor="title" className="block font-medium text-gray-700">Tiêu đề</label>
+          <input type="text" name="title" id="title" className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500" required />
+        </div>
+
+        {/* Image Path */}
+        <div className="mb-4">
+          <label htmlFor="image_path" className="block font-medium text-gray-700">Đường dẫn hình ảnh</label>
+          <input type="text" name="image_path" id="image_path" className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500" required />
+        </div>
+
+        {/* Link */}
+        <div className="mb-4">
+          <label htmlFor="link" className="block font-medium text-gray-700">Liên kết</label>
+          <input type="text" name="link" id="link" className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500" required />
+        </div>
+      </div>
+    </div>
+
+    <button type="submit" className="mt-4 px-4 py-2 bg-green-500 text-white rounded-md shadow-lg hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500">
+      Thêm mới
+    </button>
+  </form>
 </div>
 
-
+      
     )
 }
 
-export default ListBills
+export default AddBanners

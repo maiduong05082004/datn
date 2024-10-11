@@ -1,103 +1,132 @@
-import React from 'react'
+import React, { useState } from 'react';
 
 type Props = {}
 
-const UpdateUser = (props: Props) => {
-    return (
-        <div className="w-full mx-auto p-6 bg-white rounded-lg shadow-lg mt-10">
-        <h3 className="text-2xl font-bold mb-6 text-center">Cập nhật người dùng</h3>
-        {/* Thông tin người dùng */}
-        <div className="bg-gray-100 p-6 rounded-md mb-6">
-          <h4 className="text-lg font-medium mb-4">Thông tin người dùng</h4>
-          <form className="space-y-6">
-            {/* Tên */}
-            <div className="mb-4 w-full">
-              <label htmlFor="name" className="block text-gray-700 font-medium mb-2">Tên</label>
+const AddUser = (props: Props) => {
+  const [darkMode, setDarkMode] = useState(false);
+
+  const toggleDarkMode = () => {
+    setDarkMode(!darkMode);
+  };
+
+  return (
+    <div className={`container mx-auto px-4 py-8 ${darkMode ? 'bg-gray-900' : 'bg-white'} transition-colors duration-300`}>
+      <h1 className={`text-3xl font-bold mb-6 text-center ${darkMode ? 'text-white' : 'text-gray-800'} transition-colors duration-300`}>
+        Cập nhật tài khoản mới
+      </h1>
+
+      <form>
+        <div className={`bg-white dark:bg-gray-800 shadow-lg rounded-lg mb-6 overflow-hidden transition-colors duration-300`}>
+          <div className={`p-4 rounded-t-lg ${darkMode ? 'bg-gray-700' : 'bg-blue-100'} transition-colors duration-300`}>
+            <h4 className={`text-lg font-semibold ${darkMode ? 'text-white' : 'text-blue-800'} transition-colors duration-300`}>
+              Thông tin người dùng
+            </h4>
+          </div>
+          <div className={`p-6 ${darkMode ? 'bg-gray-800' : 'bg-gray-50'} transition-colors duration-300`}>
+
+            {/* Tên người dùng */}
+            <div className="mb-4">
+              <label htmlFor="name" className={`block font-medium ${darkMode ? 'text-white' : 'text-gray-700'} transition-colors duration-300`}>
+                Tên người dùng
+              </label>
               <input
                 type="text"
-                id="name"
                 name="name"
-                maxLength={255}
+                id="name"
+                className={`mt-1 block w-full border ${darkMode ? 'border-gray-600 bg-gray-700 text-white' : 'border-gray-300 bg-white text-gray-700'} rounded-md shadow-sm p-2 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors duration-300`}
                 required
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
               />
             </div>
+
             {/* Ngày sinh */}
-            <div className="mb-4 w-full">
-              <label htmlFor="date_of_birth" className="block text-gray-700 font-medium mb-2">Ngày sinh</label>
+            <div className="mb-4">
+              <label htmlFor="date_of_birth" className={`block font-medium ${darkMode ? 'text-white' : 'text-gray-700'} transition-colors duration-300`}>
+                Ngày sinh
+              </label>
               <input
                 type="date"
-                id="date_of_birth"
                 name="date_of_birth"
+                id="date_of_birth"
+                className={`mt-1 block w-full border ${darkMode ? 'border-gray-600 bg-gray-700 text-white' : 'border-gray-300 bg-white text-gray-700'} rounded-md shadow-sm p-2 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors duration-300`}
                 required
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
               />
             </div>
+
             {/* Giới tính */}
-            <div className="mb-4 w-full">
-              <label htmlFor="sex" className="block text-gray-700 font-medium mb-2">Giới tính</label>
+            <div className="mb-4">
+              <label
+                htmlFor="sex"
+                className={`block font-medium ${darkMode ? "text-white" : "text-gray-700"
+                  } transition-colors duration-300`}
+              >
+                Giới tính
+              </label>
               <select
                 id="sex"
                 name="sex"
+                className={`mt-1 block w-full border ${darkMode ? "border-gray-600 bg-gray-700 text-white" : "border-gray-300 bg-white text-gray-700"
+                  } rounded-md shadow-sm p-2 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors duration-300`}
                 required
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
               >
+                <option value="">Chọn giới tính</option>
                 <option value="male">Nam</option>
                 <option value="female">Nữ</option>
                 <option value="other">Khác</option>
               </select>
             </div>
+
             {/* Email */}
-            <div className="mb-4 w-full">
-              <label htmlFor="email" className="block text-gray-700 font-medium mb-2">Email</label>
+            <div className="mb-4">
+              <label htmlFor="email" className={`block font-medium ${darkMode ? 'text-white' : 'text-gray-700'} transition-colors duration-300`}>
+                Email
+              </label>
               <input
                 type="email"
-                id="email"
                 name="email"
-                maxLength={255}
+                id="email"
+                className={`mt-1 block w-full border ${darkMode ? 'border-gray-600 bg-gray-700 text-white' : 'border-gray-300 bg-white text-gray-700'} rounded-md shadow-sm p-2 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors duration-300`}
                 required
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
               />
             </div>
+
             {/* Mật khẩu */}
-            <div className="mb-4 w-full">
-              <label htmlFor="password" className="block text-gray-700 font-medium mb-2">Mật khẩu</label>
+            <div className="mb-4">
+              <label htmlFor="password" className={`block font-medium ${darkMode ? 'text-white' : 'text-gray-700'} transition-colors duration-300`}>
+                Mật khẩu
+              </label>
               <input
                 type="password"
-                id="password"
                 name="password"
-                maxLength={255}
+                id="password"
+                className={`mt-1 block w-full border ${darkMode ? 'border-gray-600 bg-gray-700 text-white' : 'border-gray-300 bg-white text-gray-700'} rounded-md shadow-sm p-2 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors duration-300`}
                 required
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
               />
             </div>
-            {/* Nhà cung cấp */}
-            <div className="mb-4 w-full">
-              <label htmlFor="provider_name" className="block text-gray-700 font-medium mb-2">Nhà cung cấp</label>
+
+            {/* Tên nhà cung cấp */}
+            <div className="mb-4">
+              <label htmlFor="provider_name" className={`block font-medium ${darkMode ? 'text-white' : 'text-gray-700'} transition-colors duration-300`}>
+                Tên nhà cung cấp
+              </label>
               <input
                 type="text"
-                id="provider_name"
                 name="provider_name"
-                maxLength={255}
-                required
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                id="provider_name"
+                className={`mt-1 block w-full border ${darkMode ? 'border-gray-600 bg-gray-700 text-white' : 'border-gray-300 bg-white text-gray-700'} rounded-md shadow-sm p-2 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors duration-300`}
               />
             </div>
-            {/* Nút Lưu */}
-            <div className="w-full">
-            <button
-          type="submit"
-          className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 transition duration-200"
-        >
-          Lưu thông tin
-        </button>
-            </div>
-          </form>
+          </div>
         </div>
-      </div>
-      
-      
-    )
-}
 
-export default UpdateUser
+        <button
+          type="submit"
+          className="mt-4 px-4 py-2 bg-green-500 text-white rounded-md shadow-lg hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500"
+        >
+          Cập nhật
+        </button>
+      </form>
+    </div>
+  );
+};
+
+export default AddUser;
