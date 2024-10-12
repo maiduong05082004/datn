@@ -20,7 +20,7 @@ class Product extends Model
         'view',
         'input_day',
         'category_id',
-        'is_collection ',
+        'is_collection',
         'is_hot',
         'is_new',
     ];

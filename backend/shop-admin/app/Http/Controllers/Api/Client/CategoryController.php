@@ -1,6 +1,7 @@
 <?php
 namespace App\Http\Controllers\Api\Client;
 use App\Http\Controllers\Controller;
+use App\Http\Resources\ProductResource;
 use App\Models\Category;
 use App\Models\Product;
 use Illuminate\Http\Request;
@@ -23,7 +24,7 @@ class CategoryController extends Controller
         }
         $products = Product::whereIn('category_id', $categoryIds)
             ->paginate(6);
-        return response()->json(['products' => $products], 200);
+        return response()->json(['products' => ProductResource::collection($products)], 200);
     }
     private function getAllChildrenIds($category)
     {
