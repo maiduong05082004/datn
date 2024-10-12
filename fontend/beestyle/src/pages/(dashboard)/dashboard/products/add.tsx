@@ -1,11 +1,9 @@
-import React, { useState } from 'react';
-
+import React, { useEffect, useState } from 'react';
 import { CKEditor } from '@ckeditor/ckeditor5-react';
 import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
 import { toast, ToastContainer } from 'react-toastify';
-
 import 'react-toastify/dist/ReactToastify.css';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
 
 type Variant = {
@@ -21,7 +19,7 @@ const AddProduct = () => {
   const [variantGroup, setVariantGroup] = useState<string>('');
   const [selectedColor, setSelectedColor] = useState<string>('');
   const [searchTerm, setSearchTerm] = useState<string>('');
-  const [colors, setColors] = useState<string[]>(['Red', 'Green', 'Blue', 'Yellow', 'Purple', 'pink']);
+  const [colors, setColors] = useState<string[]>([]);
   const [variants, setVariants] = useState<Variant[]>([
     { size: 'S', stock: '', discount: '' },
     { size: 'M', stock: '', discount: '' },
@@ -32,34 +30,19 @@ const AddProduct = () => {
   const [showVariants, setShowVariants] = useState<boolean>(true);
   const [variantImages, setVariantImages] = useState<{ [key: string]: string | null }>({});
   const [variantAlbums, setVariantAlbums] = useState<{ [key: string]: string[] }>({});
-  const queryCLient = useQueryClient();
-  const { data: categories } = useQuery({
-    queryKey: ['categories'],
-    queryFn: async () => await axios.get(`http://localhost:8000/api/admins/categories`)
+  const [attributeGroups, setAttributeGroups] = useState<any[]>([]);
+  const [colorImages, setColorImages] = useState<{ [key: string]: string }>({});
+
+  const { data: variant_group, isLoading } = useQuery({
+    queryKey: ['variant_group'],
+    queryFn: async () => {
+      const response = await axios.get('http://localhost:8000/api/admins/attribute_groups');
+      return response?.data?.data; // Return the response
+    },
   });
+console.log(variant_group[0]);
 
-  const renderChildren = (children: any[]) => {
-    return children.map((child) => (
-      <option key={child.id} value={child.id} className="ml-4">
-        {child.name}
-      </option>
-    ));
-  };
-  
-  // Render danh mục chính và danh mục con (nếu có)
-  const renderCategories = (categories: any[]) => {
-    return categories.map((category) => (
-      <optgroup key={category.id} label={category.name} className="font-bold">
-        {category.children_recursive ? renderChildren(category.children_recursive) : null}
-      </optgroup>
-    ));
-  };
-
-
-  const filteredColors = colors.filter(color =>
-    color.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
+  // Handle image change for the main product image
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
@@ -73,25 +56,7 @@ const AddProduct = () => {
     }
   };
 
-  const handleAddImagesChange = () => {
-    setAddImages(!addImages);
-  };
-
-  const handleVariantGroupChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setVariantGroup(e.target.value);
-  };
-
-  const handleVariantChange = (index: number, field: keyof Variant, value: string) => {
-    const newVariants = [...variants];
-    newVariants[index] = { ...newVariants[index], [field]: value };
-    setVariants(newVariants);
-  };
-
-  const handleColorChange = (color: string) => {
-    setSelectedColor(color);
-    setVariants(variants.map(variant => ({ ...variant, stock: '', discount: '' })));
-  };
-
+  // Toggle showing or hiding the variant form
   const toggleVariantForm = () => {
     if (showVariants) {
       toast.info('Bạn đã chọn không thêm biến thể.');
@@ -99,6 +64,20 @@ const AddProduct = () => {
     setShowVariants(!showVariants);
   };
 
+  // Handle variant group change
+  const handleVariantGroupChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setVariantGroup(e.target.value);
+    setSelectedColor(''); // Reset selected color when variant group changes
+    setVariants(variants.map(variant => ({ ...variant, stock: '', discount: '' }))); // Reset variants
+  };
+
+  // Handle color change and reset variants
+  const handleColorChange = (color: string) => {
+    setSelectedColor(color);
+    setVariants(variants.map(variant => ({ ...variant, stock: '', discount: '' })));
+  };
+
+  // Handle variant image change for each color
   const handleVariantImageChange = (color: string, e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
@@ -112,6 +91,7 @@ const AddProduct = () => {
     }
   };
 
+  // Handle album image change for each color
   const handleVariantAlbumChange = (color: string, e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
       const files = Array.from(e.target.files);
@@ -129,6 +109,7 @@ const AddProduct = () => {
     }
   };
 
+  // Handle form submission
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const formData = {
@@ -144,6 +125,10 @@ const AddProduct = () => {
     };
     console.log('Product data:', formData);
   };
+
+  // Loading state while fetching data
+  if (isLoading) return <div>Loading....</div>;
+
   return (
     <>
       <ToastContainer position="top-right" autoClose={5000} hideProgressBar={false} closeOnClick draggable pauseOnHover />
@@ -153,6 +138,7 @@ const AddProduct = () => {
           <form onSubmit={handleSubmit}>
             <div className="container mx-auto p-6 min-w-full bg-white">
               <div className="grid grid-cols-2 gap-6">
+                {/* Left Column */}
                 <div className="space-y-4">
                   <div className="flex flex-col">
                     <label htmlFor="productName" className="font-medium text-gray-700">Tên Sản phẩm</label>
@@ -186,15 +172,13 @@ const AddProduct = () => {
 
                   <div className="flex flex-col">
                     <label htmlFor="category" className="font-medium text-gray-700">Danh mục</label>
-                    <select
-                      id="category"
-                      className="border rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition ease-in-out duration-200"
-                    >
-                      <option value="">--Chọn danh mục--</option>
-                      {categories?.data && renderCategories(categories.data)}
+                    <select id="category" className="border rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                      <option>--Chọn danh mục--</option>
+                      <option value={1}>Áo</option>
+                      <option value={2}>Quần</option>
+                      <option value={3}>Giày</option>
                     </select>
                   </div>
-
 
                   <div className="flex flex-col">
                     <label htmlFor="dateAdded" className="font-medium text-gray-700">Ngày nhập</label>
@@ -231,7 +215,7 @@ const AddProduct = () => {
                             className="mt-2 p-2 bg-red-500 text-white rounded-lg hover:bg-red-600"
                             onClick={() => setMainImage(null)}
                           >
-                            Xóa
+                            Xóa ảnh
                           </button>
                         </div>
                       )}
@@ -256,7 +240,7 @@ const AddProduct = () => {
                               return { ...prev, default: updatedAlbum };
                             })}
                           >
-                            Xóa
+                            Xóa ảnh album
                           </button>
                         </div>
                       ))}
@@ -265,6 +249,7 @@ const AddProduct = () => {
 
                 </div>
 
+                {/* Right Column */}
                 <div className="space-y-4">
                   <div className="flex flex-col">
                     <label className="font-medium mb-2 text-base text-gray-800">Mô tả chi tiết sản phẩm</label>
@@ -281,22 +266,52 @@ const AddProduct = () => {
                   <div className="bg-white shadow-lg rounded-lg overflow-hidden">
                     <div className="bg-green-100 p-4 rounded-t-lg flex justify-between items-center">
                       <h4 className="text-lg font-semibold text-green-800">Biến thể sản phẩm</h4>
-                      <button type="button" onClick={toggleVariantForm} className="text-blue-500 hover:underline">
+                      <button
+                        type="button"
+                        onClick={toggleVariantForm}
+                        className="text-blue-500 hover:underline"
+                      >
                         {showVariants ? 'Không thêm biến thể' : 'Thêm biến thể'}
                       </button>
                     </div>
                     {showVariants && (
                       <div className="p-6 bg-gray-50">
+                        {/* Nhóm biến thể */}
                         <div className="mb-4">
                           <label htmlFor="variant_group" className="block font-medium text-gray-700">Chọn nhóm biến thể</label>
-                          <select id="variant_group" className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500" value={variantGroup} onChange={handleVariantGroupChange}>
+                          <select
+                            id="variant_group"
+                            className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500"
+                            value={variantGroup}
+                            onChange={handleVariantGroupChange}
+                          >
                             <option value="">Chọn nhóm biến thể</option>
-                            <option value="Biến thể cho quần áo">Biến thể cho quần áo</option>
-                            <option value="Biến thể cho giày">Biến thể cho giày</option>
-                            <option value="Biến thể cho phụ kiện">Biến thể cho phụ kiện</option>
+                            {variant_group?.map((group: any) => (
+                              <option key={group.group_id} value={group.group_name}>
+                                {group.group_name}
+                              </option>
+                            ))}
                           </select>
                         </div>
 
+                        {/* Render các thuộc tính dựa trên nhóm biến thể đã chọn */}
+                        {variant_group && variant_group?.data?.data?.filter((group: any) => group.group_name === variant_group)
+                          .map((group: any) => (
+                            group.attributes.map((attribute: any) => (
+                              <div key={attribute.id} className="mb-4">
+                                <label className="block font-medium text-gray-700">{attribute.name}</label>
+                                <select className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
+                                  {attribute.attribute_values.map((value: any) => (
+                                    <option key={value.id} value={value.value}>
+                                      {value.value}
+                                    </option>
+                                  ))}
+                                </select>
+                              </div>
+                            ))
+                          ))}
+
+                        {/* Chọn màu sắc */}
                         <div className="mb-4">
                           <label htmlFor="color" className="block font-medium text-gray-700">Chọn màu sắc</label>
                           <input
@@ -306,102 +321,29 @@ const AddProduct = () => {
                             onChange={(e) => setSearchTerm(e.target.value)}
                             className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500"
                           />
-                          <div className="grid grid-cols-6 mt-2 p-10 border-2 border-gray-300  rounded-md shadow-sm ">
-                            {filteredColors.map((color, index) => (
-                              <div key={index} className="flex items-center justify-center cursor-pointer" onClick={() => handleColorChange(color)}>
-                                <div className='w-10 h-10 rounded-full border border-[#e6e6e6] hover:border-black flex justify-center items-center'>
-                                  <div
-                                    className="w-8 h-8 rounded-full"
-                                    style={{ backgroundColor: color.toLowerCase() }}
-                                  />
-                                </div>
+                          <div className="grid grid-cols-5 gap-2 mt-2 border-2 border-gray-300 p-5 rounded-md shadow-sm">
+                            {colors.filter(color => color.toLowerCase().includes(searchTerm.toLowerCase())).map((color, index) => (
+                              <div
+                                key={index}
+                                className="flex items-center cursor-pointer"
+                                onClick={() => handleColorChange(color)}
+                              >
+                                <div
+                                  className="w-3 h-3 rounded-full"
+                                  style={{ backgroundColor: color.toLowerCase() }}
+                                />
+                                <span className="ml-2">{color}</span>
+                                {selectedColor === color && colorImages[color] && (
+                                  <img src={colorImages[color]} alt={color} className="ml-2 w-10 h-10 object-cover" />
+                                )}
                               </div>
                             ))}
                           </div>
                         </div>
-
-                        {selectedColor && (
-                          <>
-                            {variants.map((variant, index) => (
-                              <div key={index} className="mb-4 grid grid-cols-4 gap-4 items-center">
-                                <div className="flex items-center space-x-2">
-                                  <input type="checkbox" id={`size-${variant.size}`} name="size" className="focus:ring-green-500 h-4 w-4 text-green-600 border-gray-300 rounded" />
-                                  <label htmlFor={`size-${variant.size}`} className="block text-gray-700">{variant.size}</label>
-                                </div>
-
-                                <input
-                                  type="number"
-                                  placeholder="Số lượng"
-                                  className="border border-gray-300 rounded-md shadow-sm p-2 focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500"
-                                  value={variant.stock}
-                                  onChange={(e) => handleVariantChange(index, 'stock', e.target.value)}
-                                />
-                                <input
-                                  type="number"
-                                  placeholder="Giảm giá (%)"
-                                  className="border border-gray-300 rounded-md shadow-sm p-2 focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500"
-                                  value={variant.discount}
-                                  onChange={(e) => handleVariantChange(index, 'discount', e.target.value)}
-                                />
-                                <button type="button" className="bg-red-500 text-white px-4 py-2 rounded-md shadow-sm hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500">
-                                  Xóa
-                                </button>
-                              </div>
-                            ))}
-
-                            <div className="mb-4">
-                              <div className="flex justify-between gap-2">
-                                <div className="mb-4">
-                                  <label className="block font-medium text-gray-700">Hình ảnh đại diện cho {selectedColor}</label>
-                                  <input type="file"
-                                    onChange={(e) => handleVariantImageChange(selectedColor, e)}
-                                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
-                                  />
-                                  {variantImages[selectedColor] && (
-                                    <div className="mt-4">
-                                      <img src={variantImages[selectedColor]} alt={`Hình ảnh đại diện cho ${selectedColor}`} className="w-[280px] h-48 object-cover rounded-lg shadow-md m-auto" />
-                                      <button
-                                        type="button"
-                                        className="mt-2 p-2 bg-red-500 text-white rounded-lg hover:bg-red-600"
-                                        onClick={() => setVariantImages((prev) => ({ ...prev, [selectedColor]: null }))}
-                                      >
-                                        Xóa
-                                      </button>
-                                    </div>
-                                  )}
-                                </div>
-
-                                <div className="mb-4">
-                                  <label className="block font-medium text-gray-700">Album hình ảnh cho {selectedColor}</label>
-                                  <input
-                                    type="file"
-                                    multiple
-                                    onChange={(e) => handleVariantAlbumChange(selectedColor, e)}
-                                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
-                                  />
-                                  {variantAlbums[selectedColor] && variantAlbums[selectedColor].map((image, idx) => (
-                                    <div key={idx} className="mt-4">
-                                      <img src={image} alt={`Hình ảnh album cho ${selectedColor}`} className="w-[280px] h-48 object-cover rounded-lg shadow-md" />
-                                      <button
-                                        type="button"
-                                        className="mt-2 p-2 bg-red-500 text-white rounded-lg hover:bg-red-600"
-                                        onClick={() => setVariantAlbums((prev) => {
-                                          const updatedAlbum = prev[selectedColor].filter((_, index) => index !== idx);
-                                          return { ...prev, [selectedColor]: updatedAlbum };
-                                        })}
-                                      >
-                                        Xóa
-                                      </button>
-                                    </div>
-                                  ))}
-                                </div>
-                              </div>
-                            </div>
-                          </>
-                        )}
                       </div>
                     )}
                   </div>
+
                 </div>
               </div>
 
@@ -416,7 +358,6 @@ const AddProduct = () => {
           </form>
         </div>
       </div>
-
     </>
   );
 };

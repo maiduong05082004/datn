@@ -24,6 +24,7 @@ import ListCategories from "@/pages/(dashboard)/dashboard/categories/list";
 import ListBills from "@/pages/(dashboard)/dashboard/bills/list";
 import ListBanners from "@/pages/(dashboard)/dashboard/banners/list";
 import VariantProduct from "@/pages/(dashboard)/dashboard/products/variant";
+import Products from "@/pages/(dashboard)/dashboard/products/chuacode";
 
 const Router = () => {
     return (
@@ -41,6 +42,7 @@ const Router = () => {
                 <Route path="admin" element={<LayoutAdmin />}>
                     <Route index element={<DashboardPage />} />
                     <Route path="addUser" element={<AddUser />} />
+                    <Route path="products" element={<Products />} />
                     <Route path="updateUser" element={<UpdateUser />} />
                     <Route path="listUser" element={<ListUser />} />
                     <Route path="listProducts" element={<ListProducts />} />
