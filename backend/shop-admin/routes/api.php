@@ -10,7 +10,7 @@ use App\Http\Controllers\Api\Admin\Product\AttributeController;
 use App\Http\Controllers\Api\Admin\Product\AttributeGroupController;
 use App\Http\Controllers\Api\Admin\Product\AttributeValueController;
 use App\Http\Controllers\Api\Client\HomeController;
-
+use App\Http\Controllers\Api\Client\Product\ProductController as ProductProductController;
 
 /*
 |--------------------------------------------------------------------------
@@ -46,7 +46,15 @@ Route::prefix('client')->as('client.')->group(function () {
 
 
     Route::prefix('home')->as('home.')->group(function () {
-        Route::get('/',[HomeController::class, 'index'])->name('home.index');
+        Route::get('/',[HomeController::class, 'index'])->name('index');
+        Route::get('/banner/{id}',[HomeController::class, 'showCategoryBanner'])->name('showCategoryBanner');
+        Route::get('search',[HomeController::class, 'search'])->name('search');
+
+    });
+
+
+    Route::prefix('products')->as('products.')->group(function () {
+        Route::get('/showDetail/{id}',[ProductProductController::class, 'showDetail'])->name('showDetail');
 
 
     });

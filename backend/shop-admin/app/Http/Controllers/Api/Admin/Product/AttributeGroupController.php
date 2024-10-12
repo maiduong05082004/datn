@@ -28,19 +28,15 @@ class AttributeGroupController extends Controller
                         'id' => $item->attribute->id,
                         'name' => $item->attribute->name,
                         'attribute_type' => $item->attribute->attribute_type,
-                        'attribute_values' => $item->attribute->values->map(function ($value) { 
-                            return [
-                                'id' => $value->id,
-                                'value' => $value->value,
-                            ];
+                        'attribute_values' => $item->attribute->values->mapWithKeys(function ($value) { 
+                            return ["value_{$value->id}" => $value->value];
                         })
-    
                     ];
                 })
             ];
         });
     
-        return response()->json(['data' => $result]);
+        return response()->json($result);
     }
     
 
@@ -96,15 +92,15 @@ class AttributeGroupController extends Controller
                     'id' => $item->attribute->id,
                     'name' => $item->attribute->name,
                     'attribute_type' => $item->attribute->attribute_type,
-
+                    'attribute_values' => $item->attribute->values->mapWithKeys(function ($value) { 
+                        return ["value_{$value->id}" => $value->value];
+                    })
                 ];
             })
         ];
+        
 
-        return response()->json([
-            'success' => true,
-            'data' => $result
-        ], 200);
+        return response()->json( $result, 201);
     }
 
     public function update(AttributeGroupRequest $request, $id)
