@@ -14,8 +14,14 @@ class Banner extends Model
 
     // Các trường có thể điền
     protected $fillable = [
+        'category_id',
         'title',
         'image_path',
         'link',
     ];
+
+    public function category()
+    {
+        return $this->belongsTo(Category::class);
+    }
 }
