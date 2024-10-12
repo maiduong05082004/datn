@@ -18,15 +18,16 @@ class CategoryController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'parent_id' => 'nullable|exists:categories,id',
+            'status' => 'required|boolean',
         ]);
 
-        $category = Category::create($request->only('name', 'parent_id'));
+        $category = Category::create($request->only('name', 'parent_id', 'status'));
         return response()->json($category, 201);
     }
 
     public function show($id)
     {
-        $category = Category::findOrFail($id);
+        $category = Category::findOrFail($id)->with('childrenRecursive')->get();
         return response()->json($category);
     }
 
@@ -35,10 +36,11 @@ class CategoryController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'parent_id' => 'nullable|exists:categories,id',
+            'status' => 'required|boolean',
         ]);
 
         $category = Category::findOrFail($id);
-        $category->update($request->only('name', 'parent_id'));
+        $category->update($request->only('name', 'parent_id', 'status'));
         return response()->json($category, 200);
     }
 
