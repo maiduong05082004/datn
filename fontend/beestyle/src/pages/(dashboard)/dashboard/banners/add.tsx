@@ -36,9 +36,7 @@ const AddBanners = (props: Props) => {
       Thêm mới
     </button>
   </form>
-</div>
-
-      
+</div> 
     )
 }
 

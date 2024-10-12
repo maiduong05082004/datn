@@ -22,8 +22,8 @@ import ListComments from "@/pages/(dashboard)/dashboard/comments/list";
 import ListCategories from "@/pages/(dashboard)/dashboard/categories/list";
 import ListBills from "@/pages/(dashboard)/dashboard/bills/list";
 import ListBanners from "@/pages/(dashboard)/dashboard/banners/list";
-import BlockCategories from "@/pages/(dashboard)/dashboard/categories/block";
 import BlockUser from "@/pages/(dashboard)/dashboard/user/block";
+import SubCategories from "@/pages/(dashboard)/dashboard/categories/subCategories";
 
 const Router = () => {
     return (
@@ -46,12 +46,13 @@ const Router = () => {
                     <Route path="updateProducts" element={<UpdateProduct />} />
                     <Route path="listComments" element={<ListComments />} />
                     <Route path="listCategories" element={<ListCategories />} />
+                    <Route path="subCategories" element={<SubCategories />} />
                     <Route path="addCategories" element={<AddCategories />} />
-                    <Route path="updateCategories" element={<UpdateCategories/>} />
-                    <Route path="listBills" element={<ListBills/>} />
-                    <Route path="listBanners" element={<ListBanners/>} />
-                    <Route path="addBanners" element={<AddBanners/>} />
-                    <Route path="updateBanners" element={<UpdateBanners/>} />
+                    <Route path="updateCategories" element={<UpdateCategories />} />
+                    <Route path="listBills" element={<ListBills />} />
+                    <Route path="listBanners" element={<ListBanners />} />
+                    <Route path="addBanners" element={<AddBanners />} />
+                    <Route path="updateBanners" element={<UpdateBanners />} />
 
                 </Route>
                 <Route path="**" element={<ErrorPage />} />

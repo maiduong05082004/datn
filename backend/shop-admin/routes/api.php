@@ -1,8 +1,11 @@
 <?php
 
-use Illuminate\Http\Request;
+use App\Http\Controllers\Api\Admin\Product\ProductController;
+use App\Http\Controllers\Api\Client\AuthController;
+use App\Http\Controllers\Api\Admin\AuthController as AdminAuthController;
+use App\Http\Controllers\Api\Client\CategoryController;
 use Illuminate\Support\Facades\Route;
-
+use App\Http\Controllers\Api\Admin\CategoryController as AdminCategoryController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -14,6 +17,34 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
+Route::prefix('client')->as('client.')->group(function () {
+    Route::prefix('auth')->as('auth.')->group(function () {
+        Route::post('/signup', [AuthController::class, 'register'])->name('signup');
+        Route::post('/signin', [AuthController::class, 'login'])->name('signin');
+        Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth:sanctum')->name('logout');
+        Route::get('/profile', [AuthController::class, 'user'])->middleware('auth:sanctum')->name('profile');
+        Route::post('/forgot-password', [AuthController::class, 'forgotPassword'])->middleware('guest')->name('password.email');
+        Route::post('/reset-password', [AuthController::class, 'resetPassword'])->middleware('guest')->name('password.update');
+        Route::get('/reset-password/{token}', function ($token) {
+            return response()->json(['token' => $token]);
+        })->middleware('guest')->name('password.reset');
+        Route::get('/google', [AuthController::class, 'redirectToGoogle'])->name('google.redirect');
+        Route::get('/callback/google', [AuthController::class, 'handleGoogleCallback'])->name('google.callback');
+    });
+    Route::prefix('categories')->as('categories.')->group(function () {
+        Route::get('/', [CategoryController::class, 'index'])->name('list');
+        Route::get('/{id}/products', [CategoryController::class, 'showCategoryProducts'])->name('products.show');
+    });
 });
+
+
+Route::prefix('admins')
+    ->as('admins.')
+    ->group(function () {
+        Route::post('/signin', [AdminAuthController::class, 'login'])->name('signin');
+        Route::middleware(['auth:admin', 'admin'])->group(function () {
+            Route::apiResource('products', ProductController::class)
+                ->names('products');
+            Route::apiResource('categories', AdminCategoryController::class);
+        });
+    });
