@@ -39,10 +39,7 @@ class AttributeValueController extends Controller
 
 
         // Trả về dữ liệu dưới dạng JSON
-        return response()->json([
-            'success' => true,
-            'data' => $result
-        ], 200);
+        return response()->json( $result, 200);
     }
 
     /**
@@ -102,10 +99,7 @@ class AttributeValueController extends Controller
         }
     
         // Trả về dữ liệu JSON với các giá trị tìm thấy
-        return response()->json([
-            'success' => true,
-            'data' => $result
-        ], 200);
+        return response()->json($result,200);
     }
     
     
