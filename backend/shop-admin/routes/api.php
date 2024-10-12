@@ -104,4 +104,4 @@ Route::prefix('admins')
                 Route::get('/event/{eventName}', [PromotionsController::class, 'getEventPromotions'])->name('promotions.event');
             });
         });
-    });
+    // });

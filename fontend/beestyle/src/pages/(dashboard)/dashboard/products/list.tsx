@@ -1,7 +1,36 @@
-import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query';
 import { message } from 'antd';
 import axios from 'axios';
-import React from 'react'
+import React from 'react';
+import { format } from 'date-fns';
+
+interface Product {
+  id: number;
+  name: string;
+  price: number;
+  stock: number;
+  description: string;
+  input_day: string;
+  category: {
+    name: string;
+  };
+  variations: Variation[];
+}
+
+interface Variation {
+  id: number;
+  attribute_value: {
+    value: string;
+  };
+  variation_values: VariationValue[];
+}
+
+interface VariationValue {
+  attribute_value_id: number;
+  value: string;
+  price: number;
+  discount: number;
+}
 
 type Props = {}
 
@@ -72,4 +101,4 @@ const ListProducts = (props: Props) => {
   )
 }
 
-export default ListProducts
+export default ListProducts;
