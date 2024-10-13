@@ -1,5 +1,8 @@
 <?php
 
+
+
+
 namespace App\Http\Controllers\Api\Client;
 
 use App\Http\Controllers\Controller;
@@ -13,26 +16,26 @@ use Request;
 class HomeController extends Controller
 {
 
- 
+
 
     public function index()
     {
         $parentCategories = Category::whereNull('parent_id')->with('childrenRecursive')->get();
         $productsByCategory = [];
-    
+
         foreach ($parentCategories as $parentCategory) {
             $childCategoryIds = $this->getCategoryAndChildrenIds($parentCategory);
-    
+
 
             $newProducts = Product::whereIn('category_id', $childCategoryIds)
                 ->where('is_new', 1)
                 ->orderBy('id', 'desc')
                 ->take(4)
                 ->get();
-    
+
 
             $banner = Banner::where('category_id', $parentCategory->id)->first();
-    
+
 
             $productsByCategory[] = [
                 'category_id' => $parentCategory->id,
@@ -40,36 +43,56 @@ class HomeController extends Controller
                 'products' => ProductResource::collection($newProducts)
             ];
         }
-    
+
 
         $hotProducts = Product::where('is_hot', 1)
             ->orderBy('id', 'desc')
             ->take(10)
             ->get();
-    
+
+
         $collectionProducts = Product::where('is_collection', 1)
             ->orderBy('id', 'desc')
             ->get();
-    
+
+        $categoryWithMostProducts = Product::where('is_collection', 1)
+            ->selectRaw('category_id, COUNT(*) as product_count')
+            ->groupBy('category_id')
+            ->orderBy('product_count', 'desc')
+            ->first();
+
+        if ($categoryWithMostProducts) {
+            // Lấy banner của danh mục có nhiều sản phẩm nhất
+            $bannerCollection = Banner::where('category_id', $categoryWithMostProducts->category_id)->first();
+        } else {
+            $latestCollectionProduct = Product::where('is_collection', 1)
+                ->orderBy('id', 'desc')
+                ->first();
+            if ($latestCollectionProduct) {
+                $bannerCollection = Banner::where('category_id', $latestCollectionProduct->category_id)->first();
+            } else {
+                $bannerCollection = Banner::orderBy('id', 'desc')->first();
+            }
+        }
         $banners = Banner::orderBy('id', 'desc')
             ->take(8)
             ->get();
-    
+
+
         return response()->json([
             'products_new_category' => $productsByCategory,
             'hot_products' => ProductResource::collection($hotProducts),
-            'collection_products' => ProductResource::collection($collectionProducts),
-            'banners' => BannerResource::collection($banners)
+            'collection_products' => [
+                'banner_collection' => $bannerCollection,
+                'products' => ProductResource::collection($collectionProducts)
+            ],
+            "banners" => BannerResource::collection($banners)
         ]);
     }
-    
 
-
-
- 
     private function getCategoryAndChildrenIds($category)
     {
-        $categoryIds = collect([$category->id]); 
+        $categoryIds = collect([$category->id]);
         foreach ($category->childrenRecursive as $childCategory) {
             $categoryIds = $categoryIds->merge($this->getCategoryAndChildrenIds($childCategory));
         }
