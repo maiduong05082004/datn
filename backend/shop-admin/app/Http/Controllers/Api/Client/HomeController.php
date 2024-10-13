@@ -36,6 +36,7 @@ class HomeController extends Controller
 
             $productsByCategory[] = [
                 'category_id' => $parentCategory->id,
+                'name' => $parentCategory->name,
                 'image_path' => $banner ? $banner->image_path : null,
                 'products' => ProductResource::collection($newProducts)
             ];
