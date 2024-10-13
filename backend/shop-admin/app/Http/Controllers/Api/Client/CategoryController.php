@@ -86,7 +86,7 @@ class CategoryController extends Controller
 
             if ($request->has('sizes')) {
                 $sizes = explode(',', $request->input('sizes'));
-                $query->orWhereIn('value', $sizes)
+                $query->whereIn('value', $sizes)
                     ->whereHas('attribute', function ($q) {
                         $q->where('name', 'Kích Thước'); 
                     });
