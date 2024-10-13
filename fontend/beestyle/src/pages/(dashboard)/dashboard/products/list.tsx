@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query';
+import { Mutation, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { message } from 'antd';
 import axios from 'axios';
 import React from 'react';
@@ -7,35 +7,39 @@ import { format } from 'date-fns';
 interface Product {
   id: number;
   name: string;
-  price: number;
+  price: string;
   stock: number;
   description: string;
   input_day: string;
-  category: {
+  group: {
     name: string;
-  };
+  } | null;
   variations: Variation[];
 }
 
 interface Variation {
   id: number;
-  attribute_value: {
+  stock: number;
+  attribute_value_image_variant: {
     value: string;
+    image_path: string;
   };
   variation_values: VariationValue[];
+  variation_album_images: string[];
 }
 
 interface VariationValue {
   attribute_value_id: number;
   value: string;
-  price: number;
+  price: string;
   discount: number;
 }
 
 type Props = {}
 
 const ListProducts = (props: Props) => {
-  // Fetch products
+  const [messageApi, contextHolder] = message.useMessage();
+  const queryClient = useQueryClient();
   const { data: productsData, isLoading: isLoadingProducts } = useQuery({
     queryKey: ['products'],
     queryFn: async () => {
@@ -48,153 +52,139 @@ const ListProducts = (props: Props) => {
     }
   });
 
-  // Fetch categories with hierarchy
-  const { data: categoriesData, isLoading: isLoadingCategories } = useQuery({
-    queryKey: ['categories'],
-    queryFn: async () => {
-      const response = await axios.get('http://localhost:8000/api/admins/categories');
-      return response.data; // Categories with hierarchy
+  const mutation = useMutation({
+    mutationFn: async (id: number) => {
+      try {
+        await axios.delete(`http://localhost:8000/api/admins/products/${id}`);
+      } catch (error) {
+        throw new Error(`Xóa sản phẩm thất bại`);
+      }
     },
+    onSuccess: () => {
+      messageApi.open({
+        content: 'Xóa thành công',
+        type: 'success'
+      });
+      queryClient.invalidateQueries({ queryKey: ['products'] });
+    },
+    onError: (error) => {
+      messageApi.error({
+        type: "error",
+        content: error.message,
+      });
+    }
   });
 
-  const handleDelete = async (id: number) => {
-    try {
-      await axios.delete(`http://localhost:8000/api/admins/products/${id}`);
-      message.success('Sản phẩm đã được xóa thành công');
-    } catch (error) {
-      message.error('Lỗi khi xóa sản phẩm');
-    }
-  };
-
-  if (isLoadingProducts || isLoadingCategories) {
-    return <div className="loading-container">Loading...</div>
+  if (isLoadingProducts) {
+    return <div className="flex justify-center items-center h-screen">
+      <div className="text-lg font-semibold text-gray-600">Đang tải dữ liệu...</div>
+    </div>;
   }
 
-  // Hàm tìm kiếm tên danh mục từ danh sách danh mục với cấu trúc phân cấp
-  const findCategoryNames = (categories: any[], categoryId: number): string => {
-    const categoryNames: string[] = [];
-    const findCategory = (categories: any[]) => {
-      for (const category of categories) {
-        if (category.id === categoryId) {
-          categoryNames.push(category.name); // Add the current category name
-          return true; // Found the category
-        }
-        if (category.children_recursive && category.children_recursive.length > 0) {
-          if (findCategory(category.children_recursive)) {
-            categoryNames.unshift(category.name); // Add parent category name
-            return true; // Stop searching
-          }
-        }
-      }
-      return false; // Not found
-    };
-    findCategory(categories);
-    return categoryNames.join(' > '); // Return names in parent to child order
-  };
-
   return (
-    <div className="w-full px-6 py-10">
-      <h2 className="text-4xl font-bold text-center pb-10 text-indigo-600">Quản Lý Sản Phẩm</h2>
-      <div className="overflow-x-auto shadow-lg rounded-lg">
-        <table className="min-w-full bg-white shadow-md rounded-lg">
-          <thead className="bg-gradient-to-r from-purple-600 to-blue-600 text-white">
-            <tr>
-              <th className="py-3 px-4 text-left text-xs font-semibold uppercase tracking-wider">STT</th>
-              <th className="py-3 px-4 text-left text-xs font-semibold uppercase tracking-wider">ID</th>
-              <th className="py-3 px-4 text-left text-xs font-semibold uppercase tracking-wider">Tên sản phẩm</th>
-              <th className="py-3 px-4 text-left text-xs font-semibold uppercase tracking-wider">Giá</th>
-              <th className="py-3 px-4 text-left text-xs font-semibold uppercase tracking-wider">Tồn kho</th>
-              <th className="py-3 px-4 text-left text-xs font-semibold uppercase tracking-wider">Mô tả</th>
-              <th className="py-3 px-4 text-left text-xs font-semibold uppercase tracking-wider">Ngày nhập</th>
-              <th className="py-3 px-4 text-left text-xs font-semibold uppercase tracking-wider">Danh mục</th>
-              <th className="py-3 px-4 text-left text-xs font-semibold uppercase tracking-wider">Biến thể</th>
-              <th className="py-3 px-4 text-left text-xs font-semibold uppercase tracking-wider">Hình ảnh</th>
-              <th className="py-3 px-4 text-left text-xs font-semibold uppercase tracking-wider">Hành động</th>
-            </tr>
-          </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
-            {productsData?.data.map((product: any, index: number) => (
-              <tr key={index} className="hover:bg-gray-100 transition duration-300 ease-in-out transform hover:scale-105">
-                <td className="py-4 px-4 text-sm font-medium text-gray-900">{index + 1}</td>
-                <td className="py-4 px-4 text-sm text-gray-700">{product.id}</td>
-                <td className="py-4 px-4 text-sm text-gray-700 font-semibold">{product.name}</td>
-                <td className="py-4 px-4 text-sm text-green-600 font-semibold">
-                  {parseFloat(product.price).toLocaleString()} VND
-                </td>
-                <td className="py-4 px-4 text-sm text-gray-700">{product.stock}</td>
-                <td className="py-4 px-4 text-sm text-gray-600 bg-gray-50 border border-gray-200 rounded-lg shadow-sm">
-                  <div className="max-w-xs overflow-hidden">
-                    <p className="line-clamp-3">{product.description}</p>
-                    <button
-                      className="mt-2 text-indigo-600 hover:underline"
-                      onClick={() => alert(product.description)} 
-                    >
+    <>
+      {contextHolder}
+      <div className="w-full max-w-7xl mx-auto px-6 py-10">
+        <h2 className="text-4xl font-extrabold text-center pb-10 text-indigo-600">Quản Lý Sản Phẩm</h2>
+        <div className="overflow-x-auto w-full bg-white rounded-lg shadow-md">
+          <table className="min-w-full">
+            <thead className="bg-indigo-600 text-white">
+              <tr>
+                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider">STT</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider">ID</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider">Tên sản phẩm</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider">Giá</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider">Tồn kho</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider">Mô tả</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider">Ngày nhập</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider">Danh mục</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider">Biến thể</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider">Hình ảnh</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider">Hành động</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-200">
+              {productsData?.data?.map((product: Product, index: number) => (
+                <tr key={index} className="hover:bg-gray-100 transition duration-200 ease-in-out transform">
+                  <td className="px-4 py-4 text-sm text-gray-900 font-semibold">{index + 1}</td>
+                  <td className="px-4 py-4 text-sm text-gray-700">{product.id}</td>
+                  <td className="px-4 py-4 text-sm text-gray-700 font-medium">{product.name}</td>
+                  <td className="py-4 px-4 text-sm text-green-600 font-semibold">
+                    {parseFloat(product.price).toLocaleString()} VND
+                  </td>
+                  <td className="px-4 py-4 text-sm text-gray-700">{product.stock}</td>
+                  <td className="px-4 py-4 text-sm text-gray-600 max-w-sm truncate">
+                    <div className="text-xs w-[100px]">{product.description}</div>
+                    <button className="ml-2 text-indigo-600 hover:underline" onClick={() => alert(product.description)}>
                       Xem thêm
                     </button>
-                  </div>
-                </td>
-
-
-                <td className="py-4 px-4 text-sm text-gray-700">{format(new Date(product.input_day), 'dd/MM/yyyy')}</td>
-                {/* Danh mục */}
-                <td className="py-4 px-4 text-sm">
-                  <span className="inline-block bg-indigo-100 text-indigo-800 font-bold px-3 py-1 rounded-full shadow">
-                    {findCategoryNames(categoriesData, product.category_id) || 'Không có danh mục'}
-                  </span>
-                </td>
-
-                <td className="py-4 px-4 text-sm text-gray-700">
-                  {product.variations.map((variant: any) => (
-                    <div key={variant.id} className="mb-4 p-3 bg-gray-100 rounded-lg shadow-inner">
-                      <span className="font-semibold text-indigo-800">Màu sắc: {variant.attribute_value.value}</span>
-                      <div className="flex flex-col mt-2 space-y-1">
-                        {variant.variation_values.map((value: any) => (
-                          <div key={value.attribute_value_id} className="flex justify-between items-center p-2 bg-white shadow rounded-lg">
-                            <span className="font-medium">{value.value}</span>
-                            <div className="text-right">
-                              <span className="block text-gray-700 font-semibold">{parseFloat(value.price).toLocaleString()} VND</span>
-                              {value.discount > 0 && (
-                                <span className="block text-red-500 font-semibold">-{value.discount}%</span>
-                              )}
+                  </td>
+                  <td className="px-4 py-4 text-sm text-gray-700">{format(new Date(product.input_day), 'dd/MM/yyyy')}</td>
+                  <td className="px-4 py-4 text-sm">
+                    <span className="inline-block bg-indigo-100 text-indigo-800 font-bold px-3 py-1 rounded-full">
+                      {product.group?.name || 'Không có danh mục'}
+                    </span>
+                  </td>
+                  <td className="px-4 py-4 text-sm text-gray-700">
+                    {product.variations.map((variant: Variation) => (
+                      <div key={variant.id} className="mb-4 p-2 bg-gray-50 rounded-lg">
+                        <span className="font-semibold text-indigo-700">Màu sắc: {variant.attribute_value_image_variant.value}</span>
+                        <img
+                          src={variant.attribute_value_image_variant.image_path}
+                          alt={variant.attribute_value_image_variant.value}
+                          className="w-16 h-16 object-cover rounded-lg mt-2 border border-gray-300"
+                        />
+                        <div className="flex flex-col mt-2 space-y-1">
+                          {variant.variation_values.map((value: VariationValue) => (
+                            <div key={value.attribute_value_id} className="flex justify-between p-2 bg-white shadow-sm rounded-lg">
+                              <span className="text-sm font-medium">{value.value}</span>
+                              <div className="text-right">
+                                <span className="text-sm font-semibold text-gray-700">{parseFloat(value.price).toLocaleString()} VND</span>
+                                {value.discount > 0 && (
+                                  <span className="text-sm text-red-500 font-semibold">-{value.discount}%</span>
+                                )}
+                              </div>
                             </div>
-                          </div>
-                        ))}
+                          ))}
+                        </div>
                       </div>
-                    </div>
-                  ))}
-                </td>
-
-                {/* Hình ảnh */}
-                <td className="py-4 px-4">
-                  {product.variations[0]?.variation_images?.length > 0 ? (
-                    <img
-                      src={`/path_to_default_image_folder/${product.variations[0].variation_images[0].image_path}`}
-                      alt={product.name}
-                      className="w-20 h-20 object-cover rounded-lg border border-gray-300 hover:scale-105 transform transition duration-300 ease-in-out"
-                    />
-                  ) : (
-                    <div className="w-20 h-20 bg-gray-100 text-center flex items-center justify-center rounded-lg border border-gray-300">
-                      <span className="text-sm text-gray-500">No Image</span>
-                    </div>
-                  )}
-                </td>
-
-                {/* Hành động */}
-                <td className="py-4 px-4">
-                  <button
-                    onClick={() => handleDelete(product.id)}
-                    className="bg-red-500 text-white px-4 py-2 rounded-lg shadow-lg transition-all hover:bg-red-600 focus:outline-none"
-                  >
-                    Xóa
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+                    ))}
+                  </td>
+                  <td className="px-4 py-4">
+                    {product.variations[0]?.variation_album_images?.length > 0 ? (
+                      <img
+                        src={product.variations[0].variation_album_images[0]}
+                        alt={product.name}
+                        className="w-[200px] object-cover rounded-lg border border-gray-300 hover:scale-105 transform transition duration-200 ease-in-out"
+                      />
+                    ) : (
+                      <div className="w-16 h-16 bg-gray-100 flex items-center justify-center rounded-lg border border-gray-300">
+                        <span className="text-sm text-gray-500">No Image</span>
+                      </div>
+                    )}
+                  </td>
+                  <td className="px-4 py-4">
+                    <button
+                      onClick={() => mutation.mutate(product.id)}
+                      className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition-colors duration-200"
+                    >
+                      Xóa
+                    </button>
+                  </td>
+                </tr>
+              ))}
+              {productsData?.data?.length === 0 && (
+                <tr>
+                  <td colSpan={11} className="text-center py-4 text-gray-500">Không có sản phẩm nào</td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
-    </div>
+    </>
+
   );
-}
+};
 
 export default ListProducts;

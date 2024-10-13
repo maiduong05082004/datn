@@ -1,104 +1,125 @@
+
+
 {
-    "products": [
+  "data": [
+    {
+      "id": 67,
+      "name": "MLB - Áo thun unisex cổ tròn tay ngắn hiện đại",
+      "slug": "mlb-ao-thun-unisex-co-tron-tay-ngan-hien-dai-WjHBPlbZ",
+      "price": "1500000.00",
+      "stock": 182,
+      "description": "MLB Chào bạn mới Nhận ngay ưu đãi 5% khi đăng ký thành viên và mua đơn hàng nguyên giá đầu tiên tại website* Nhập mã: MLBWELCOME Ưu đãi không áp dụng cùng với các CTKM khác",
+      "content": "mo tả dài ko",
+      "input_day": "2024-10-03",
+      "category_id": 41,
+      "is_collection": true,
+      "is_hot": false,
+      "is_new": true,
+      "group": {
+        "id": 55,
+        "name": "Biến thể cho quần áo"
+      },
+      "variations": [
         {
-            "id": 1,
-            "name": "Product 1",
-            "price": 100000,
-            "image": "https://picsum.photos/id/10/300/300",
-            "description": "This is product 1",
-            "discount": 30,
-            "quantity": 100,
-            "featured": true
+          "id": 91,
+          "stock": 92,
+          "attribute_value_image_variant": {
+            "id": 33,
+            "value": "Xanh Nước biển",
+            "image_path": "https://product.hstatic.net/200000642007/product/icon_09nys_3atsb0434_9fe737ed527b4097b68989c3cb09545e_8656e98ac81b4c1ca0dfa44adfd68bd0.jpg"
+          },
+          "variation_values": [
+            {
+              "attribute_value_id": 27,
+              "value": "S",
+              "sku": "711414809332_STQX5HMB",
+              "stock": 52,
+              "price": "1350000.00",
+              "discount": 10
+            },
+            {
+              "attribute_value_id": 28,
+              "value": "M",
+              "sku": "567137369411_XDJQVW5H",
+              "stock": 40,
+              "price": "1275000.00",
+              "discount": 15
+            }
+          ],
+          "variation_album_images": [
+            "https://product.hstatic.net/200000642007/product/50bks_3atsb0434_3_474eb680146c4a818a9463a2e8cea978_e7dcb67e8c3a4b7eaef3120888f8864a_master.jpg",
+            "https://product.hstatic.net/200000642007/product/50bks_3atsb0434_4_8513478b068d4b5690a62b1252c07b7f_ad1e8cc1043f40469866b10e4199f2c7_master.jpg",
+            "https://product.hstatic.net/200000642007/product/50bks_3atsb0434_5_ed35c335bb7f42c8bf113bad75d3c977_ecfef86b9ef84bfd8e658b6713b1ad21_master.jpg"
+          ]
         },
         {
-            "id": 2,
-            "name": "Product 2",
-            "price": 19.99,
-            "image": "https://picsum.photos/id/11/300/300",
-            "description": "This is product 2",
-            "discount": 0.1,
-            "quantity": 50,
-            "featured": false
-        },
-        {
-            "id": 3,
-            "name": "Product 3",
-            "price": 5.99,
-            "image": "https://picsum.photos/id/12/300/300",
-            "description": "This is product 3",
-            "discount": 0,
-            "quantity": 200,
-            "featured": true
-        },
-        {
-            "id": 4,
-            "name": "Product 4",
-            "price": 14.99,
-            "image": "https://picsum.photos/id/13/300/300",
-            "description": "This is product 4",
-            "discount": 0.2,
-            "quantity": 75,
-            "featured": true
-        },
-        {
-            "id": 5,
-            "name": "Product 5",
-            "price": 9.99,
-            "image": "https://picsum.photos/id/14/300/300",
-            "description": "This is product 5",
-            "discount": 0,
-            "quantity": 150,
-            "featured": false
-        },
-        {
-            "id": 6,
-            "name": "Product 6",
-            "price": 7.99,
-            "image": "https://picsum.photos/id/15/300/300",
-            "description": "This is product 6",
-            "discount": 0.15,
-            "quantity": 100,
-            "featured": false
-        },
-        {
-            "id": 7,
-            "name": "Product 7",
-            "price": 12.99,
-            "image": "https://picsum.photos/id/16/300/300",
-            "description": "This is product 7",
-            "discount": 0,
-            "quantity": 50,
-            "featured": true
-        },
-        {
-            "id": 8,
-            "name": "Product 8",
-            "price": 17.99,
-            "image": "https://picsum.photos/id/17/300/300",
-            "description": "This is product 8",
-            "discount": 0.1,
-            "quantity": 80,
-            "featured": true
-        },
-        {
-            "id": 9,
-            "name": "Product 9",
-            "price": 6.99,
-            "image": "https://picsum.photos/id/18/300/300",
-            "description": "This is product 9",
-            "discount": 0,
-            "quantity": 120,
-            "featured": false
-        },
-        {
-            "id": 10,
-            "name": "Product 10",
-            "price": 11.99,
-            "image": "https://picsum.photos/id/19/300/300",
-            "description": "This is product 10",
-            "discount": 0.25,
-            "quantity": 90,
-            "featured": true
+          "id": 92,
+          "stock": 90,
+          "attribute_value_image_variant": {
+            "id": 32,
+            "value": "Xanh lá cây",
+            "image_path": "https://product.hstatic.net/200000642007/product/icon_43bgs_3atsb0434_91ed053696e747adaeacf16a257b8f2e_9308fa3e7be64eba8f2d95cffcacd07f.jpg"
+          },
+          "variation_values": [
+            {
+              "attribute_value_id": 27,
+              "value": "S",
+              "sku": "161012976394_W99DOIL2",
+              "stock": 50,
+              "price": "1350000.00",
+              "discount": 10
+            },
+            {
+              "attribute_value_id": 28,
+              "value": "M",
+              "sku": "006032489223_KWPQMLN9",
+              "stock": 40,
+              "price": "1275000.00",
+              "discount": 15
+            }
+          ],
+          "variation_album_images": [
+            "https://product.hstatic.net/200000642007/product/43bgs_3atsb0434_3_b938fc5864604cae9512beac4329f213_35dabd90d0fb4034a8333ec0d5cb5aa9_master.jpg",
+            "https://product.hstatic.net/200000642007/product/43bgs_3atsb0434_4_3790e45bf88049ec9c5c4dce77a2fd44_7fb373cf7d454cc7b4857035ef4d09c5_master.jpg",
+            "https://product.hstatic.net/200000642007/product/43bgs_3atsb0434_6_0e595b34f55547b78e01112ac0d38578_48dbfe7941694a7bb57d014729eef33d_master.jpg"
+          ]
         }
-    ]
+      ],
+      "images": [
+        
+      ]
+    }
+  ],
+  "links": {
+    "first": "http://localhost:8000/api/admins/products?page=1",
+    "last": "http://localhost:8000/api/admins/products?page=1",
+    "prev": null,
+    "next": null
+  },
+  "meta": {
+    "current_page": 1,
+    "from": 1,
+    "last_page": 1,
+    "links": [
+      {
+        "url": null,
+        "label": "&laquo; Previous",
+        "active": false
+      },
+      {
+        "url": "http://localhost:8000/api/admins/products?page=1",
+        "label": "1",
+        "active": true
+      },
+      {
+        "url": null,
+        "label": "Next &raquo;",
+        "active": false
+      }
+    ],
+    "path": "http://localhost:8000/api/admins/products",
+    "per_page": 10,
+    "to": 4,
+    "total": 4
+  }
 }
