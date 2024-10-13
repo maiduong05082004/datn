@@ -32,12 +32,13 @@ class AttributeGroupController extends Controller
                             return ["value_{$value->id}" => $value->value];
                         })
                     ];
-                })
+                })->values() // Lấy giá trị của từng attribute
             ];
         });
     
-        return response()->json($result);
+        return response()->json(['variation' => $result->values()]);
     }
+    
     
 
 
@@ -77,13 +78,14 @@ class AttributeGroupController extends Controller
         $attributeGroups = AttributeGroup::with('group', 'attribute')
             ->where('group_id', $id)
             ->get();
-
+    
         if ($attributeGroups->isEmpty()) {
             return response()->json([
                 'success' => false,
                 'message' => 'Nhóm thuộc tính không tồn tại.'
             ], 404);
         }
+    
         $result = [
             'group_id' => $attributeGroups->first()->group->id,
             'group_name' => $attributeGroups->first()->group->name,
@@ -96,12 +98,12 @@ class AttributeGroupController extends Controller
                         return ["value_{$value->id}" => $value->value];
                     })
                 ];
-            })
+            })->values() // Sử dụng .values() để lấy danh sách attributes
         ];
-        
-
-        return response()->json( $result, 201);
+    
+        return response()->json(['variation' => [$result]], 201); // Bọc trong 'variation'
     }
+    
 
     public function update(AttributeGroupRequest $request, $id)
     {
