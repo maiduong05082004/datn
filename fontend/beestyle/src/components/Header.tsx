@@ -16,7 +16,30 @@ const Header = () => {
     })
 
 
-    console.log(categorires);
+
+    const token = localStorage.getItem("token")
+    // console.log(token);
+
+    const { data: user } = useQuery({
+        queryKey: ['user', token],
+        queryFn: () => {
+            if (!token) return null;
+            return axios.get(`http://127.0.0.1:8000/api/client/auth/profile` , {
+                headers: { Authorization: `Bearer ${token}` }
+            })
+        }
+    })
+    console.log(user);
+    
+    
+    
+    const { data: carts } = useQuery({
+        queryKey: ['carts', token],
+        queryFn: () => {
+            return axios.get(`http://127.0.0.1:8000/api/client/categories`)
+        }
+    })
+    
     
     return (
         <>
@@ -50,7 +73,7 @@ const Header = () => {
                                 {categorires?.data.map((item: any) => (
                                     <li className="group mb-[10px] lg:m-0">
                                         <h4 className="flex justify-between items-center w-[100%] py-[10px] lg:py-0">
-                                            <Link to={`category/${item.id}/products`} className="w-full flex h-full lg:h-auto hover:text-[#BB9244] lg:hover:border-b-[1px] lg:hover:border-b-black lg:py-[15px] lg:px-[18px]">{item.name}</Link>
+                                            <Link to={`categories/${item.id}`} className="w-full flex h-full lg:h-auto hover:text-[#BB9244] lg:hover:border-b-[1px] lg:hover:border-b-black lg:py-[15px] lg:px-[18px]">{item.name}</Link>
                                             <span className="lg:hidden">
                                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-4">
                                                     <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
@@ -66,7 +89,7 @@ const Header = () => {
                                                     {item.children_recursive.map((value: any, index: any) => (
                                                         <li className={`${index == 0 ? "" : "pl-[40px]"} lg:block lg:text-left`}>
                                                             <h4 className="flex justify-between items-center w-[100%] py-[10px] lg:py-0">
-                                                                <Link to={``} className="w-full flex lg:mb-[12px]">
+                                                                <Link to={`categories/${value.id}`} className="w-full flex lg:mb-[12px]">
                                                                     {value.name}
                                                                 </Link>
                                                                 <span className="lg:hidden">
@@ -79,7 +102,7 @@ const Header = () => {
 
                                                             {value.children_recursive.map((values: any) => (
                                                                 <li className="flex py-[10px] lg:p-0 lg:mt-[4px]">
-                                                                    <Link to={`#`} className="w-full flex">
+                                                                    <Link  to={`categories/${values.id}`} className="w-full flex">
                                                                     {values.name}
                                                                     </Link>
                                                                 </li>

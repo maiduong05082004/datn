@@ -16,9 +16,8 @@ const PageSignin = (props: Props) => {
     const { mutate } = useMutation({
         mutationFn: async (auth: any) => {
             try {
-                const use = await axios.post(`http://127.0.0.1:8000/api/client/auth/signin`, auth)
-                console.log(use);
-
+                const { data } = await axios.post(`http://127.0.0.1:8000/api/client/auth/signin`, auth)
+                localStorage.setItem("token", data.token)
             } catch (error) {
                 throw new Error("Signin Error!!")
             }
@@ -39,8 +38,6 @@ const PageSignin = (props: Props) => {
 
     const onSubmit = (data: any) => {
         mutate(data)
-        console.log(data);
-
     }
     return (
         <main>
