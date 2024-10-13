@@ -47,7 +47,6 @@ Route::prefix('client')->as('client.')->group(function () {
 
     Route::prefix('home')->as('home.')->group(function () {
         Route::get('/',[HomeController::class, 'index'])->name('index');
-        Route::get('/banner/{id}',[HomeController::class, 'showCategoryBanner'])->name('showCategoryBanner');
         Route::get('search',[HomeController::class, 'search'])->name('search');
 
     });
