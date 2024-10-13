@@ -31,7 +31,10 @@ class ProductVariation extends Model
         return $this->belongsTo(Group::class, 'group_id');
     }
 
-
+    public function variationValues()
+    {
+        return $this->hasMany(ProductVariationValue::class, 'product_variation_id');
+    }
 
     public function variationImages()
     {
@@ -41,14 +44,14 @@ class ProductVariation extends Model
 
 
     // Quan hệ với ProductVariationSize (mỗi biến thể màu sắc có nhiều kích thước)
-    public function variationValues()
+    public function values()
     {
         return $this->hasMany(ProductVariationValue::class);
     }
 
 
-    public function attributeValue()
+    public function attributeValues()
     {
-        return $this->belongsTo(AttributeValue::class, 'attribute_value_id');
+        return $this->belongsToMany(AttributeValue::class, 'product_variation_values', 'product_variation_id', 'attribute_value_id');
     }
 }

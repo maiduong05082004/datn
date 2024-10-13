@@ -24,6 +24,7 @@ import ListCategories from "@/pages/(dashboard)/dashboard/categories/list";
 import ListBills from "@/pages/(dashboard)/dashboard/bills/list";
 import ListBanners from "@/pages/(dashboard)/dashboard/banners/list";
 import VariantProduct from "@/pages/(dashboard)/dashboard/products/variant";
+import FilterComponent from "@/pages/research/research";
 
 const Router = () => {
     return (
@@ -37,6 +38,7 @@ const Router = () => {
                     {/* <Route path="spbt" element={<Sanphambt />} /> */}
                     <Route path="pay" element={<PayPage />} />
                     <Route path="cart" element={<CartPage />} />
+                    <Route path="research" element={<FilterComponent selectedCategory="1" />} />
                 </Route>
                 <Route path="admin" element={<LayoutAdmin />}>
                     <Route index element={<DashboardPage />} />

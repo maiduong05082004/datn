@@ -35,4 +35,15 @@ class ProductVariationValue extends Model
     {
         return $this->belongsTo(AttributeValue::class, 'attribute_value_id');
     }
+    public function attribute()
+    {
+        return $this->hasOneThrough(
+            Attribute::class, 
+            AttributeValue::class, 
+            'id', 
+            'id', 
+            'attribute_value_id', 
+            'attribute_id'
+        );
+    }
 }

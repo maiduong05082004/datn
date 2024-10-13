@@ -4,6 +4,7 @@ use App\Http\Controllers\Api\Admin\UserController;
 use App\Http\Controllers\Api\Client\AuthController;
 use App\Http\Controllers\Api\Admin\AuthController as AdminAuthController;
 use App\Http\Controllers\Api\Client\CategoryController;
+use App\Http\Controllers\Api\Client\Product\ProductController as ClientProductController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\Admin\CategoryController as AdminCategoryController;
 use App\Http\Controllers\Api\Admin\Product\AttributeController;
@@ -33,6 +34,8 @@ Route::prefix('client')->as('client.')->group(function () {
     Route::prefix('categories')->as('categories.')->group(function () {
         Route::get('/', [CategoryController::class, 'index'])->name('list');
         Route::get('/{id}', [CategoryController::class, 'showCategoryProducts'])->name('products.show');
+        Route::get('/{id}/filter', [CategoryController::class, 'getFilterOptionsByCategory'])->name('products.show');
+
     });
        Route::prefix('home')->as('home.')->group(function () {
         Route::get('/',[HomeController::class, 'index'])->name('index');
