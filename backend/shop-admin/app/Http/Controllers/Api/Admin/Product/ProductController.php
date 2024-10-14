@@ -141,38 +141,6 @@ class ProductController extends Controller
         if ($isVariation) {
             $modelType = 'product_variation_id';
     
-            // Kiểm tra và lưu ảnh đại diện (thumbnail) cho biến thể
-            if ($attributeValueId) {
-                $thumbnailInput = "thumbnail_image_$attributeValueId";
-            }
-    
-            // Xử lý thumbnail
-            if ($request->hasFile($thumbnailInput)) {
-                // Người dùng tải lên file
-                $thumbnailPath = $request->file($thumbnailInput)->store("uploads/avata/{$model->product_id}/{$model->id}", 'public');
-            } elseif (isset($request[$thumbnailInput])) {
-                // Người dùng gửi URL hoặc base64 trong raw JSON
-                $thumbnailPath = $request[$thumbnailInput];
-            }
-    
-            if (isset($thumbnailPath)) {
-                // Kiểm tra xem xem có ảnh thumbnail đã có trong biến thể chưa
-                $existingThumbnail = ProductVariationImage::where($modelType, $model->id)
-                    ->where('image_type', 'thumbnail')
-                    ->first();
-    
-                if ($existingThumbnail) {
-                    throw new \Exception('Thuộc tính này chỉ cần 1 ảnh đại diện. Không thể thêm thêm ảnh ảnh đại diện.');
-                }
-    
-                // Lưu ảnh hoặc đường dẫn mới nếu chưa có
-                ProductVariationImage::create([
-                    $modelType => $model->id,
-                    'image_path' => $thumbnailPath,
-                    'image_type' => 'thumbnail',
-                ]);
-            }
-    
             // Xử lý ảnh variant (màu sắc)
             $colorImageInput = "color_image_$attributeValueId";
             if ($request->hasFile($colorImageInput)) {
@@ -219,30 +187,6 @@ class ProductController extends Controller
             }
         } else {
             $modelType = 'product_id';
-    
-            // Xử lý ảnh đại diện (thumbnail) cho sản phẩm
-            $thumbnailInput = 'thumbnail_image';
-            if ($request->hasFile($thumbnailInput)) {
-                $thumbnailPath = $request->file($thumbnailInput)->store('uploads/products/thumbnails', 'public');
-            } elseif (isset($request[$thumbnailInput])) {
-                $thumbnailPath = $request[$thumbnailInput];
-            }
-    
-            if (isset($thumbnailPath)) {
-                $existingThumbnail = ProductImage::where($modelType, $model->id)
-                    ->where('image_type', 'thumbnail')
-                    ->first();
-    
-                if ($existingThumbnail) {
-                    throw new \Exception('Sản phẩm này đã có ảnh thumbnail. Không thể thêm thêm ảnh thumbnail.');
-                }
-    
-                ProductImage::create([
-                    $modelType => $model->id,
-                    'image_path' => $thumbnailPath,
-                    'image_type' => 'thumbnail',
-                ]);
-            }
     
             // Lưu album hình ảnh cho sản phẩm
             $albumInput = 'album_images';
