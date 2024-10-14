@@ -1,12 +1,12 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { CKEditor } from '@ckeditor/ckeditor5-react';
 import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
-import { Form, Input, Select, Button, Checkbox, InputNumber, Space, Upload, Row, Col } from 'antd';
-import { MinusCircleOutlined, PlusOutlined, UploadOutlined } from '@ant-design/icons';
+import { Form, Input, Button, Checkbox, InputNumber, Upload, Row, Col, DatePicker } from 'antd';
+import { MinusCircleOutlined, UploadOutlined } from '@ant-design/icons';
 
 interface variantProduct {
   id: number | string;
@@ -57,17 +57,23 @@ interface VariationValue {
 const AddProduct = () => {
   const [form] = Form.useForm();
   const [content, setContent] = useState<string>('');
-  const [selectedVariantGroup, setSelectedVariantGroup] = useState<any>('');
+  const [selectedVariantGroup, setSelectedVariantGroup] = useState<any>(null);
+  const [selectedColor, setSelectedColor] = useState<string>(''); // Color selected for variation
+  const [availableSizes, setAvailableSizes] = useState<any[]>([]);
+  const [sizeData, setSizeData] = useState<any[]>([]); // Store stock, discount, and images
+  const [fileList, setFileList] = useState<any[]>([]); // State to handle image uploads
+  const [albumList, setAlbumList] = useState<any[]>([]); // State to handle album uploads
+  const [customColor, setCustomColor] = useState<string>(''); // For custom colors
+  const [customColors, setCustomColors] = useState<string[]>([]); // List of custom colors
+  const [showVariantForm, setShowVariantForm] = useState<boolean>(true);
 
   const { data: variantgroup, isLoading: isLoadingVariantGroup } = useQuery({
     queryKey: ['variantgroup'],
     queryFn: async () => {
       const response = await axios.get('http://localhost:8000/api/admins/attribute_groups');
-      return response?.data;
+      return response?.data?.variation;
     },
   });
-  
-  console.log(variantgroup?.attributes?.map(((attributes : any) => console.log(attributes))));
 
   const { data: categories, isLoading: isLoadingCategories } = useQuery({
     queryKey: ['categories'],
@@ -77,26 +83,84 @@ const AddProduct = () => {
     },
   });
 
+  const handleVariantGroupChange = (e: any) => {
+    const groupId = e.target.value;
+    const selectedGroup = variantgroup.find((group: any) => group.group_id === parseInt(groupId));
+    setSelectedVariantGroup(selectedGroup);
+    setSelectedColor('');
+    setAvailableSizes([]);
+  };
 
+  const handleColorChange = (e: any) => {
+    const color = e.target.value;
+    setSelectedColor(color);
 
-  const onFinish = (values: variantProduct) => {
-    // Log dữ liệu form
-    console.log('Form data:', values);
+    const sizeAttribute = selectedVariantGroup?.attributes.find(
+      (attribute: any) =>
+        attribute.name === 'Kích Thước Quần Áo' || attribute.name === 'Kích Thước giày dép'
+    );
 
-    // Log thêm nội dung CKEditor nếu có
-    console.log('Content from CKEditor:', content);
+    if (sizeAttribute) {
+      setAvailableSizes(Object.values(sizeAttribute.attribute_values));
+      const initialSizeData = Object.values(sizeAttribute.attribute_values).map((size: any) => ({
+        size,
+        stock: 0,
+        discount: 0,
+      }));
+      setSizeData(initialSizeData);
+    }
+  };
 
-    // Nếu muốn, bạn có thể log dữ liệu hoàn chỉnh trước khi gửi đi sau này
+  const handleStockChange = (size: string, value: number) => {
+    const newSizeData = sizeData.map((data) =>
+      data.size === size ? { ...data, stock: value } : data
+    );
+    setSizeData(newSizeData);
+  };
+
+  const handleDiscountChange = (size: string, value: number) => {
+    const newSizeData = sizeData.map((data) =>
+      data.size === size ? { ...data, discount: value } : data
+    );
+    setSizeData(newSizeData);
+  };
+
+  const handleUploadChange = ({ fileList }: any) => {
+    setFileList(fileList);
+  };
+
+  const handleAlbumChange = ({ fileList }: any) => {
+    setAlbumList(fileList);
+  };
+
+  const onFinish = (values: any) => {
+    const variationsData = sizeData.reduce((acc: any, curr: any) => {
+      const { size, stock, discount } = curr;
+      if (!acc[selectedColor]) {
+        acc[selectedColor] = {};
+      }
+      acc[selectedColor][size] = { stock, discount };
+      return acc;
+    }, {});
+
+    const imageFields = {
+      [`color_image_${selectedColor}`]: fileList.length > 0 ? fileList[0].url || fileList[0].thumbUrl : '',
+      [`album_images_${selectedColor}`]: albumList.map(file => file.url || file.thumbUrl),
+    };
+
     const finalData = {
       ...values,
       content,
+      variations: JSON.stringify(variationsData),
+      group_id: selectedVariantGroup?.group_id,
+      ...imageFields,
     };
+
     console.log('Final data to be sent:', finalData);
   };
 
-
-  const handleVariantGroupChange = (e: any) => {
-    setSelectedVariantGroup(e.taget.value);
+  const toggleVariantForm = () => {
+    setShowVariantForm(!showVariantForm); // Toggle the visibility
   };
 
   if (isLoadingVariantGroup || isLoadingCategories) return <div>Loading...</div>;
@@ -115,10 +179,8 @@ const AddProduct = () => {
           initialValues={{ is_collection: false, is_hot: false, is_new: false }}
         >
           <Row gutter={16}>
-            {/* Left Column (Thông tin sản phẩm) */}
             <Col span={12}>
-              <h3 className="font-semibold text-lg">Thông tin sản phẩm</h3>
-              <Form.Item<variantProduct>
+              <Form.Item
                 label="Tên sản phẩm"
                 name="name"
                 rules={[{ required: true, message: "Tên sản phẩm bắt buộc phải điền" }]}
@@ -126,15 +188,7 @@ const AddProduct = () => {
                 <Input />
               </Form.Item>
 
-              <Form.Item<variantProduct>
-                label="Slug"
-                name="slug"
-                rules={[{ required: true, message: "Slug sản phẩm bắt buộc phải điền" }]}
-              >
-                <Input />
-              </Form.Item>
-
-              <Form.Item<variantProduct>
+              <Form.Item
                 label="Giá sản phẩm"
                 name="price"
                 rules={[{ required: true, message: "Giá sản phẩm bắt buộc phải điền" }]}
@@ -142,7 +196,7 @@ const AddProduct = () => {
                 <InputNumber min={0} style={{ width: '100%' }} />
               </Form.Item>
 
-              <Form.Item<variantProduct>
+              <Form.Item
                 label="Mô tả sản phẩm"
                 name="description"
                 rules={[{ required: true, message: "Mô tả sản phẩm bắt buộc phải điền" }]}
@@ -150,7 +204,7 @@ const AddProduct = () => {
                 <Input.TextArea rows={4} placeholder="Nhập mô tả sản phẩm ngắn gọn" />
               </Form.Item>
 
-              <Form.Item<variantProduct>
+              <Form.Item
                 label="Nội dung chi tiết"
                 name="content"
                 rules={[{ required: true, message: "Nội dung chi tiết sản phẩm bắt buộc phải điền" }]}
@@ -158,30 +212,27 @@ const AddProduct = () => {
                 <CKEditor
                   editor={ClassicEditor}
                   data={content}
-                  onChange={(event, editor) => {
+                  onChange={(event: any, editor: any) => {
                     const data = editor.getData();
                     setContent(data);
                   }}
                 />
               </Form.Item>
 
-              <Form.Item<variantProduct>
+              <Form.Item
                 label="Ngày nhập"
                 name="input_day"
                 rules={[{ required: true, message: "Ngày nhập sản phẩm bắt buộc phải điền" }]}
               >
-                <Input />
+                <DatePicker format="YYYY-MM-DD" style={{ width: '100%' }} />
               </Form.Item>
 
-              <Form.Item<variantProduct>
+              <Form.Item
                 label="Danh mục"
                 name="category_id"
                 rules={[{ required: true, message: "Danh mục sản phẩm bắt buộc phải chọn" }]}
               >
-                <select
-                  id="category"
-                  className="border rounded-lg p-2"
-                >
+                <select id="category" className="border rounded-lg p-2">
                   <option value="">--Chọn danh mục--</option>
                   {categories?.map((category: any) => (
                     <optgroup key={category.id} label={category.name}>
@@ -206,81 +257,171 @@ const AddProduct = () => {
               <Form.Item name="is_new" valuePropName="checked">
                 <Checkbox>Sản phẩm mới</Checkbox>
               </Form.Item>
-
-              {/* Upload images */}
-              <Form.Item label="Hình ảnh sản phẩm">
-                <Upload listType="picture" multiple>
-                  <Button icon={<UploadOutlined />}>Tải lên hình ảnh</Button>
-                </Upload>
-              </Form.Item>
             </Col>
 
-            {/* Right Column (Biến thể sản phẩm) */}
             <Col span={12}>
-              <div className="bg-green-100 p-4 rounded-lg mb-6">
-                <div className="flex justify-between items-center">
-                  <h3 className="text-xl font-bold text-green-700">Biến thể sản phẩm</h3>
-                  <button className="text-green-700 underline font-bold">Không thêm biến thể</button>
+              <div className="bg-green-100 p-6 rounded-lg mb-8 shadow-md">
+                <div className="flex justify-between items-center mb-4">
+                  <h3 className="text-2xl font-bold text-green-800">Biến thể sản phẩm</h3>
+                  <Button onClick={toggleVariantForm} type="default">
+                    {showVariantForm ? 'Ẩn Biến Thể' : 'Hiện Biến Thể'}
+                  </Button>
                 </div>
 
-                <div className="mt-4">
-                  <label className="font-bold block mb-2">Chọn nhóm biến thể</label>
-                  <select
-                    id="variant_group"
-                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500"
-                    onClick={(e)=> handleVariantGroupChange(e)}
-                  >
-                    <option value="">Chọn nhóm biến thể</option>
-                    {Object.entries(variantgroup).map(([groupId, group]: any) => (
-                      <option key={groupId} value={group.group_name}>
-                        {group.group_name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                    {variantgroup?.map((variant : any) => variant.attributes)}
-                    <h2>{}</h2>
-                    
-                <div className={`mt-4`}>
-                  <label className="font-bold block mb-2">Màu Sắc</label>
-                  <select className="w-full p-2 border border-black rounded-md">
-                    <option>Xanh lá cây</option>
-                  </select>
-                </div>
-              </div>
+                {showVariantForm && (
+                  <>
+                    <div className="mt-4">
+                      <label className="font-bold block mb-2 text-gray-700">Chọn nhóm biến thể</label>
+                      <select
+                        name="group_id"
+                        className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:outline-none focus:border-green-600 focus:ring-1 focus:ring-green-600"
+                        onChange={handleVariantGroupChange}
+                      >
+                        <option value="">Chọn nhóm biến thể</option>
+                        {variantgroup?.map((group: any) => (
+                          <option key={group.group_id} value={group.group_id}>
+                            {group.group_name}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
 
-              <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-300">
-                <h4 className="text-lg font-bold mb-4">Thông tin biến thể cho màu: Xanh lá cây</h4>
+                    {selectedVariantGroup && (
+                      <div className="mt-4">
+                        <label className="font-bold block mb-2 text-gray-700">Chọn Màu Sắc</label>
+                        <select className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:border-green-600 focus:ring-1 focus:ring-green-600" onChange={handleColorChange}>
+                          <option value="">Chọn Màu Sắc</option>
+                          {selectedVariantGroup.attributes
+                            .filter((attribute: any) => attribute.name === 'Màu Sắc')
+                            .flatMap((attribute: any) =>
+                              Object.entries(attribute.attribute_values).map(([colorId, color]: any) => (
+                                <option key={colorId} value={color}>
+                                  {color}
+                                </option>
+                              ))
+                            )}
+                          {customColors.map((color, index) => (
+                            <option key={index} value={color}>
+                              {color}
+                            </option>
+                          ))}
+                        </select>
 
-                {/* Size, Quantity, Discount, Remove */}
-                <div className="space-y-4">
-                  <div className="flex items-center space-x-4">
-                    <label className="w-8 font-bold">S</label>
-                    <input type="number" placeholder="Số lượng" className="w-24 p-2 border rounded-md" />
-                    <input type="number" placeholder="Giảm giá (%)" className="w-24 p-2 border rounded-md" />
-                    <button className="bg-red-500 text-white px-4 py-2 rounded-md">Xóa</button>
-                  </div>
+                        <div className="mt-2">
+                          <Input
+                            placeholder="Thêm màu sắc mới"
+                            value={customColor}
+                            onChange={(e) => setCustomColor(e.target.value)}
+                          />
+                          <Button
+                            type="primary"
+                            className="mt-5"
+                            onClick={() => {
+                              if (customColor) {
+                                setCustomColors([...customColors, customColor]);
+                                setSelectedColor(customColor);
+                                setAvailableSizes([]);
+                                setSizeData([]);
+                                setCustomColor('');
+                              }
+                            }}
+                          >
+                            Thêm Màu
+                          </Button>
+                        </div>
+                      </div>
+                    )}
 
-                  <div className="flex items-center space-x-4">
-                    <label className="w-8 font-bold">M</label>
-                    <input type="number" placeholder="Số lượng" className="w-24 p-2 border rounded-md" />
-                    <input type="number" placeholder="Giảm giá (%)" className="w-24 p-2 border rounded-md" />
-                    <button className="bg-red-500 text-white px-4 py-2 rounded-md">Xóa</button>
-                  </div>
+                    {selectedColor && availableSizes.length > 0 && (
+                      <div className="mt-4">
+                        <label className="font-bold block mb-2 text-gray-700">Kích thước, Số lượng, Giảm giá</label>
+                        {availableSizes.map((size: any) => (
+                          <div key={size} className="flex justify-between items-center space-x-4 mb-4">
+                            <label htmlFor="Kích Thước" className="text-gray-600">Kích Thước</label>
+                            <Checkbox>{size}</Checkbox>
+                            <InputNumber
+                              placeholder="Số lượng"
+                              min={0}
+                              className="w-24 border border-gray-300 rounded-md p-1"
+                              onChange={(value: any) => handleStockChange(size, value)}
+                            />
+                            <InputNumber
+                              placeholder="Giảm giá (%)"
+                              min={0}
+                              max={100}
+                              className="w-24 border border-gray-300 rounded-md p-1"
+                              onChange={(value: any) => handleDiscountChange(size, value)}
+                            />
+                            <Button type="primary" icon={<MinusCircleOutlined />} className="bg-red-500 hover:bg-red-600">
+                              Xóa
+                            </Button>
+                          </div>
+                        ))}
 
-                  {/* Repeat for other sizes */}
-                </div>
+                        <div className="flex items-center justify-between space-x-4 mt-4">
+                          <div>
+                            <label className="font-bold block mb-2 text-gray-700">Ảnh Màu</label>
+                            <Upload
+                              listType="picture"
+                              fileList={fileList}
+                              onChange={handleUploadChange}
+                              beforeUpload={() => false}
+                            >
+                              <Button icon={<UploadOutlined />} className="bg-blue-500 hover:bg-blue-600">Tải lên ảnh màu</Button>
+                            </Upload>
+                          </div>
+                          <div>
+                            <label className="font-bold block mb-2 text-gray-700">Album ảnh</label>
+                            <Upload
+                              listType="picture"
+                              multiple
+                              fileList={albumList}
+                              onChange={handleAlbumChange}
+                              beforeUpload={() => false}
+                            >
+                              <Button icon={<UploadOutlined />} className="bg-blue-500 hover:bg-blue-600">Tải lên album ảnh</Button>
+                            </Upload>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </>
+                )}
 
-                <div className="mt-6 flex items-center space-x-4">
-                  <div>
-                    <label className="font-bold block mb-2">Ảnh Màu</label>
-                    <input type="file" className="block" />
-                  </div>
-                  <div>
-                    <label className="font-bold block mb-2">Album ảnh</label>
-                    <input type="file" multiple className="block" />
-                  </div>
-                </div>
+                {!showVariantForm && (
+                  <>
+                    <div className="mt-4">
+                      <Form.Item
+                        label="Nhập số lượng sản phẩm"
+                        name="stock"
+                        rules={[{ required: true, message: 'Số lượng sản phẩm là bắt buộc' }]}
+                      >
+                        <InputNumber
+                          placeholder="Số lượng"
+                          min={0}
+                          className="w-24 border border-gray-300 rounded-md p-1"
+                        />
+                      </Form.Item>
+                    </div>
+
+                    <div className="mt-4">
+                      <Form.Item
+                        label="Tải lên album ảnh"
+                        name="variation_album_images"
+                      >
+                        <Upload
+                          listType="picture"
+                          multiple
+                          fileList={albumList}
+                          onChange={handleAlbumChange}
+                          beforeUpload={() => false}
+                        >
+                          <Button icon={<UploadOutlined />} className="bg-blue-500 hover:bg-blue-600">Tải lên album ảnh</Button>
+                        </Upload>
+                      </Form.Item>
+                    </div>
+                  </>
+                )}
               </div>
             </Col>
           </Row>

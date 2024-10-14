@@ -1,125 +1,161 @@
 
 
 {
-  "data": [
-    {
-      "id": 67,
-      "name": "MLB - Áo thun unisex cổ tròn tay ngắn hiện đại",
-      "slug": "mlb-ao-thun-unisex-co-tron-tay-ngan-hien-dai-WjHBPlbZ",
-      "price": "1500000.00",
-      "stock": 182,
-      "description": "MLB Chào bạn mới Nhận ngay ưu đãi 5% khi đăng ký thành viên và mua đơn hàng nguyên giá đầu tiên tại website* Nhập mã: MLBWELCOME Ưu đãi không áp dụng cùng với các CTKM khác",
-      "content": "mo tả dài ko",
-      "input_day": "2024-10-03",
-      "category_id": 41,
-      "is_collection": true,
-      "is_hot": false,
-      "is_new": true,
-      "group": {
-        "id": 55,
-        "name": "Biến thể cho quần áo"
-      },
-      "variations": [
-        {
-          "id": 91,
-          "stock": 92,
-          "attribute_value_image_variant": {
-            "id": 33,
-            "value": "Xanh Nước biển",
-            "image_path": "https://product.hstatic.net/200000642007/product/icon_09nys_3atsb0434_9fe737ed527b4097b68989c3cb09545e_8656e98ac81b4c1ca0dfa44adfd68bd0.jpg"
-          },
-          "variation_values": [
-            {
-              "attribute_value_id": 27,
-              "value": "S",
-              "sku": "711414809332_STQX5HMB",
-              "stock": 52,
-              "price": "1350000.00",
-              "discount": 10
-            },
-            {
-              "attribute_value_id": 28,
-              "value": "M",
-              "sku": "567137369411_XDJQVW5H",
-              "stock": 40,
-              "price": "1275000.00",
-              "discount": 15
+    "variation": [
+      {
+        "group_id": 55,
+        "group_name": "Biến thể cho quần áo",
+        "attributes": [
+          {
+            "id": 8,
+            "name": "Kích Thước Quần Áo",
+            "attribute_type": 1,
+            "attribute_values": {
+              "value_27": "S",
+              "value_28": "M",
+              "value_29": "L",
+              "value_30": "XL",
+              "value_31": "XXL"
             }
-          ],
-          "variation_album_images": [
-            "https://product.hstatic.net/200000642007/product/50bks_3atsb0434_3_474eb680146c4a818a9463a2e8cea978_e7dcb67e8c3a4b7eaef3120888f8864a_master.jpg",
-            "https://product.hstatic.net/200000642007/product/50bks_3atsb0434_4_8513478b068d4b5690a62b1252c07b7f_ad1e8cc1043f40469866b10e4199f2c7_master.jpg",
-            "https://product.hstatic.net/200000642007/product/50bks_3atsb0434_5_ed35c335bb7f42c8bf113bad75d3c977_ecfef86b9ef84bfd8e658b6713b1ad21_master.jpg"
-          ]
-        },
-        {
-          "id": 92,
-          "stock": 90,
-          "attribute_value_image_variant": {
+          },
+          {
+            "id": 9,
+            "name": "Màu Sắc",
+            "attribute_type": 0,
+            "attribute_values": {
+              "value_32": "Xanh lá cây",
+              "value_33": "Xanh Nước biển",
+              "value_34": "Đỏ",
+              "value_35": "Vàng",
+              "value_36": "Cam",
+              "value_37": "Tím"
+            }
+          }
+        ]
+      },
+      {
+        "group_id": 58,
+        "group_name": "Biến thể cho giày dép",
+        "attributes": [
+          {
+            "id": 9,
+            "name": "Màu Sắc",
+            "attribute_type": 0,
+            "attribute_values": {
+              "value_32": "Xanh lá cây",
+              "value_33": "Xanh Nước biển",
+              "value_34": "Đỏ",
+              "value_35": "Vàng",
+              "value_36": "Cam",
+              "value_37": "Tím"
+            }
+          },
+          {
+            "id": 10,
+            "name": "Kích Thước giày dép",
+            "attribute_type": 1,
+            "attribute_values": {
+              "value_39": "38",
+              "value_40": "38.5",
+              "value_41": "39",
+              "value_42": "40",
+              "value_43": "41",
+              "value_44": "42"
+            }
+          }
+        ]
+      },
+      {
+        "group_id": 62,
+        "group_name": "Biến thể cho nước hoa",
+        "attributes": [
+          {
             "id": 32,
-            "value": "Xanh lá cây",
-            "image_path": "https://product.hstatic.net/200000642007/product/icon_43bgs_3atsb0434_91ed053696e747adaeacf16a257b8f2e_9308fa3e7be64eba8f2d95cffcacd07f.jpg"
-          },
-          "variation_values": [
-            {
-              "attribute_value_id": 27,
-              "value": "S",
-              "sku": "161012976394_W99DOIL2",
-              "stock": 50,
-              "price": "1350000.00",
-              "discount": 10
-            },
-            {
-              "attribute_value_id": 28,
-              "value": "M",
-              "sku": "006032489223_KWPQMLN9",
-              "stock": 40,
-              "price": "1275000.00",
-              "discount": 15
+            "name": "Dung Tích",
+            "attribute_type": 1,
+            "attribute_values": {
+              "value_97": "10ml",
+              "value_98": "50ml",
+              "value_99": "100ml",
+              "value_100": "200ml"
             }
-          ],
-          "variation_album_images": [
-            "https://product.hstatic.net/200000642007/product/43bgs_3atsb0434_3_b938fc5864604cae9512beac4329f213_35dabd90d0fb4034a8333ec0d5cb5aa9_master.jpg",
-            "https://product.hstatic.net/200000642007/product/43bgs_3atsb0434_4_3790e45bf88049ec9c5c4dce77a2fd44_7fb373cf7d454cc7b4857035ef4d09c5_master.jpg",
-            "https://product.hstatic.net/200000642007/product/43bgs_3atsb0434_6_0e595b34f55547b78e01112ac0d38578_48dbfe7941694a7bb57d014729eef33d_master.jpg"
-          ]
-        }
-      ],
-      "images": [
-        
-      ]
-    }
-  ],
-  "links": {
-    "first": "http://localhost:8000/api/admins/products?page=1",
-    "last": "http://localhost:8000/api/admins/products?page=1",
-    "prev": null,
-    "next": null
-  },
-  "meta": {
-    "current_page": 1,
-    "from": 1,
-    "last_page": 1,
-    "links": [
-      {
-        "url": null,
-        "label": "&laquo; Previous",
-        "active": false
+          },
+          {
+            "id": 33,
+            "name": "Loại Nước Hoa",
+            "attribute_type": 0,
+            "attribute_values": {
+              "value_101": "EDT",
+              "value_102": "EDP"
+            }
+          }
+        ]
       },
       {
-        "url": "http://localhost:8000/api/admins/products?page=1",
-        "label": "1",
-        "active": true
+        "group_id": 68,
+        "group_name": "Nhóm biến thể quần áo lần 5",
+        "attributes": [
+          {
+            "id": 8,
+            "name": "Kích Thước Quần Áo",
+            "attribute_type": 1,
+            "attribute_values": {
+              "value_27": "S",
+              "value_28": "M",
+              "value_29": "L",
+              "value_30": "XL",
+              "value_31": "XXL"
+            }
+          },
+          {
+            "id": 9,
+            "name": "Màu Sắc",
+            "attribute_type": 0,
+            "attribute_values": {
+              "value_32": "Xanh lá cây",
+              "value_33": "Xanh Nước biển",
+              "value_34": "Đỏ",
+              "value_35": "Vàng",
+              "value_36": "Cam",
+              "value_37": "Tím"
+            }
+          },
+          {
+            "id": 35,
+            "name": "Chất Liệu",
+            "attribute_type": 2,
+            "attribute_values": {
+              "value_105": "vải cotton",
+              "value_106": "vaỈ FE"
+            }
+          }
+        ]
       },
       {
-        "url": null,
-        "label": "Next &raquo;",
-        "active": false
+        "group_id": 69,
+        "group_name": "Nhóm điện thoại",
+        "attributes": [
+          {
+            "id": 38,
+            "name": "Màu sắc điện thoại",
+            "attribute_type": 0,
+            "attribute_values": {
+              "value_108": "Xanh Đậm",
+              "value_121": "trắng",
+              "value_128": "Đỏ Nhạt",
+              "value_129": "Hồng mộng mơ1",
+              "value_143": "Màu Mới"
+            }
+          },
+          {
+            "id": 42,
+            "name": "tên thuộc tính",
+            "attribute_type": 0,
+            "attribute_values": [
+              
+            ]
+          }
+        ]
       }
-    ],
-    "path": "http://localhost:8000/api/admins/products",
-    "per_page": 10,
-    "to": 4,
-    "total": 4
+    ]
   }
-}
