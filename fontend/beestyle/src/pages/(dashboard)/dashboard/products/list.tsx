@@ -1,7 +1,7 @@
-import { Mutation, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { message } from 'antd';
+import React, { useState } from 'react';
+import { Table, message, Button, Image, Tag, Modal } from 'antd';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import axios from 'axios';
-import React from 'react';
 import { format } from 'date-fns';
 
 interface Product {
@@ -35,50 +35,210 @@ interface VariationValue {
   discount: number;
 }
 
-type Props = {}
-
-const ListProducts = (props: Props) => {
+const ListProducts = () => {
   const [messageApi, contextHolder] = message.useMessage();
   const queryClient = useQueryClient();
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [selectedDescription, setSelectedDescription] = useState<string | null>(null); // State cho phần mô tả
+
   const { data: productsData, isLoading: isLoadingProducts } = useQuery({
     queryKey: ['products'],
     queryFn: async () => {
-      try {
-        const response = await axios.get(`http://localhost:8000/api/admins/products`);
-        return response.data;
-      } catch (error) {
-        message.error('Lỗi khi lấy danh sách sản phẩm');
-      }
-    }
+      const response = await axios.get('http://localhost:8000/api/admins/products');
+      return response.data;
+    },
+    onError: () => {
+      message.error('Lỗi khi lấy danh sách sản phẩm');
+    },
   });
 
   const mutation = useMutation({
     mutationFn: async (id: number) => {
-      try {
-        await axios.delete(`http://localhost:8000/api/admins/products/${id}`);
-      } catch (error) {
-        throw new Error(`Xóa sản phẩm thất bại`);
-      }
+      await axios.delete(`http://localhost:8000/api/admins/products/${id}`);
     },
     onSuccess: () => {
-      messageApi.open({
-        content: 'Xóa thành công',
-        type: 'success'
-      });
+      messageApi.success('Xóa thành công');
       queryClient.invalidateQueries({ queryKey: ['products'] });
     },
     onError: (error) => {
-      messageApi.error({
-        type: "error",
-        content: error.message,
-      });
-    }
+      messageApi.error('Xóa sản phẩm thất bại');
+    },
   });
 
+  const showModal = (product: Product) => {
+    setSelectedProduct(product);
+    setIsModalVisible(true);
+  };
+
+  const showDescriptionModal = (description: string) => {
+    setSelectedDescription(description);
+    setIsModalVisible(true);
+  };
+
+  const handleCancel = () => {
+    setIsModalVisible(false);
+    setSelectedProduct(null);
+    setSelectedDescription(null);
+  };
+
+  // Bộ lọc giá sản phẩm
+  const priceFilters = [
+    { text: 'Dưới 1 triệu', value: 'under_1m' },
+    { text: '1 triệu - 5 triệu', value: '1_to_5m' },
+    { text: 'Trên 5 triệu', value: 'over_5m' },
+  ];
+
+  const onPriceFilter = (value: string, record: Product) => {
+    const price = parseFloat(record.price);
+    if (value === 'under_1m') {
+      return price < 1000000;
+    }
+    if (value === '1_to_5m') {
+      return price >= 1000000 && price <= 5000000;
+    }
+    return price > 5000000;
+  };
+
+  const columns = [
+    {
+      title: 'STT',
+      dataIndex: 'index',
+      key: 'index',
+      render: (_: any, __: any, index: number) => <span>{index + 1}</span>,
+    },
+    {
+      title: 'ID',
+      dataIndex: 'id',
+      key: 'id',
+    },
+    {
+      title: 'Tên sản phẩm',
+      dataIndex: 'name',
+      key: 'name',
+      filters: productsData?.data?.map((product: Product) => ({
+        text: product.name,
+        value: product.name,
+      })),
+      onFilter: (value: string, record: Product) => record.name.indexOf(value) === 0,
+    },
+    {
+      title: 'Giá',
+      dataIndex: 'price',
+      key: 'price',
+      filters: priceFilters,
+      onFilter: onPriceFilter,
+      render: (text: string) => <span>{parseFloat(text).toLocaleString()} VND</span>,
+    },
+    {
+      title: 'Tồn kho (Tổng)',
+      dataIndex: 'stock',
+      key: 'stock',
+      render: (_: any, record: Product) => (
+        <div>
+          {record.variations.reduce((total, variant) => total + variant.stock, 0)} {/* Tính tổng số lượng tồn kho từ các biến thể */}
+        </div>
+      ),
+    },
+    {
+      title: 'Mô tả',
+      dataIndex: 'description',
+      key: 'description',
+      render: (text: string) => (
+        <div style={{ maxWidth: '150px' }}>
+          {text.length > 20 ? (
+            <>
+              {text.slice(0, 20)}...
+              <Button type="link" onClick={() => showDescriptionModal(text)}>Xem chi tiết</Button>
+            </>
+          ) : (
+            text
+          )}
+        </div>
+      ),
+    },
+    {
+      title: 'Ngày nhập',
+      dataIndex: 'input_day',
+      key: 'input_day',
+      render: (date: string) => <span>{format(new Date(date), 'dd/MM/yyyy')}</span>,
+    },
+    {
+      title: 'Danh mục',
+      dataIndex: ['group', 'name'],
+      key: 'group',
+      filters: productsData?.data
+        .filter((product: Product) => product.group !== null)
+        .map((product: Product) => ({
+          text: product.group?.name,
+          value: product.group?.name,
+        })),
+      onFilter: (value: string, record: Product) => record.group?.name === value,
+      render: (text: string) => <Tag color="blue">{text || 'Không có danh mục'}</Tag>,
+    },
+    {
+      title: 'Biến thể',
+      key: 'variations',
+      render: (product: Product) => (
+        <Button className="bg-black" type="primary" onClick={() => showModal(product)}>
+          Xem chi tiết
+        </Button>
+      ),
+    },
+    {
+      title: 'Hành động',
+      key: 'action',
+      render: (product: Product) => (
+        <Button
+          danger
+          onClick={() => mutation.mutate(product.id)}
+        >
+          Xóa
+        </Button>
+      ),
+    },
+  ];
+
+  const renderVariationDetails = () => {
+    if (!selectedProduct) return null;
+    return selectedProduct.variations.map((variant, index) => (
+      <div key={index} className="mb-4 p-2 bg-gray-50 rounded-lg">
+        <h4 className="font-semibold text-indigo-700">Màu sắc: {variant.attribute_value_image_variant.value}</h4>
+        <Image
+          width={50}
+          height={50}
+          src={variant.attribute_value_image_variant.image_path}
+          alt={variant.attribute_value_image_variant.value}
+        />
+        {variant.variation_values.map((value) => (
+          <div key={value.attribute_value_id} className="flex justify-between mt-2">
+            <h2>Size:</h2>
+            <span>{value.value}</span>
+            <span>
+              {parseFloat(value.price).toLocaleString()} VND{' '}
+              {value.discount > 0 && <Tag color="red">-{value.discount}%</Tag>}
+            </span>
+          </div>
+        ))}
+      </div>
+    ));
+  };
+
+  const renderDescriptionDetails = () => {
+    if (!selectedDescription) return null;
+    return (
+      <div>
+        <p>{selectedDescription}</p>
+      </div>
+    );
+  };
+
   if (isLoadingProducts) {
-    return <div className="flex justify-center items-center h-screen">
-      <div className="text-lg font-semibold text-gray-600">Đang tải dữ liệu...</div>
-    </div>;
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <div className="text-lg font-semibold text-gray-600">Đang tải dữ liệu...</div>
+      </div>
+    );
   }
 
   return (
@@ -86,104 +246,25 @@ const ListProducts = (props: Props) => {
       {contextHolder}
       <div className="w-full max-w-7xl mx-auto px-6 py-10">
         <h2 className="text-4xl font-extrabold text-center pb-10 text-indigo-600">Quản Lý Sản Phẩm</h2>
-        <div className="overflow-x-auto w-full bg-white rounded-lg shadow-md">
-          <table className="min-w-full">
-            <thead className="bg-indigo-600 text-white">
-              <tr>
-                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider">STT</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider">ID</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider">Tên sản phẩm</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider">Giá</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider">Tồn kho</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider">Mô tả</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider">Ngày nhập</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider">Danh mục</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider">Biến thể</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider">Hình ảnh</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider">Hành động</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-200">
-              {productsData?.data?.map((product: Product, index: number) => (
-                <tr key={index} className="hover:bg-gray-100 transition duration-200 ease-in-out transform">
-                  <td className="px-4 py-4 text-sm text-gray-900 font-semibold">{index + 1}</td>
-                  <td className="px-4 py-4 text-sm text-gray-700">{product.id}</td>
-                  <td className="px-4 py-4 text-sm text-gray-700 font-medium">{product.name}</td>
-                  <td className="py-4 px-4 text-sm text-green-600 font-semibold">
-                    {parseFloat(product.price).toLocaleString()} VND
-                  </td>
-                  <td className="px-4 py-4 text-sm text-gray-700">{product.stock}</td>
-                  <td className="px-4 py-4 text-sm text-gray-600 max-w-sm truncate">
-                    <div className="text-xs w-[100px]">{product.description}</div>
-                    <button className="ml-2 text-indigo-600 hover:underline" onClick={() => alert(product.description)}>
-                      Xem thêm
-                    </button>
-                  </td>
-                  <td className="px-4 py-4 text-sm text-gray-700">{format(new Date(product.input_day), 'dd/MM/yyyy')}</td>
-                  <td className="px-4 py-4 text-sm">
-                    <span className="inline-block bg-indigo-100 text-indigo-800 font-bold px-3 py-1 rounded-full">
-                      {product.group?.name || 'Không có danh mục'}
-                    </span>
-                  </td>
-                  <td className="px-4 py-4 text-sm text-gray-700">
-                    {product.variations.map((variant: Variation) => (
-                      <div key={variant.id} className="mb-4 p-2 bg-gray-50 rounded-lg">
-                        <span className="font-semibold text-indigo-700">Màu sắc: {variant.attribute_value_image_variant.value}</span>
-                        <img
-                          src={variant.attribute_value_image_variant.image_path}
-                          alt={variant.attribute_value_image_variant.value}
-                          className="w-16 h-16 object-cover rounded-lg mt-2 border border-gray-300"
-                        />
-                        <div className="flex flex-col mt-2 space-y-1">
-                          {variant.variation_values.map((value: VariationValue) => (
-                            <div key={value.attribute_value_id} className="flex justify-between p-2 bg-white shadow-sm rounded-lg">
-                              <span className="text-sm font-medium">{value.value}</span>
-                              <div className="text-right">
-                                <span className="text-sm font-semibold text-gray-700">{parseFloat(value.price).toLocaleString()} VND</span>
-                                {value.discount > 0 && (
-                                  <span className="text-sm text-red-500 font-semibold">-{value.discount}%</span>
-                                )}
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    ))}
-                  </td>
-                  <td className="px-4 py-4">
-                    {product.variations[0]?.variation_album_images?.length > 0 ? (
-                      <img
-                        src={product.variations[0].variation_album_images[0]}
-                        alt={product.name}
-                        className="w-[200px] object-cover rounded-lg border border-gray-300 hover:scale-105 transform transition duration-200 ease-in-out"
-                      />
-                    ) : (
-                      <div className="w-16 h-16 bg-gray-100 flex items-center justify-center rounded-lg border border-gray-300">
-                        <span className="text-sm text-gray-500">No Image</span>
-                      </div>
-                    )}
-                  </td>
-                  <td className="px-4 py-4">
-                    <button
-                      onClick={() => mutation.mutate(product.id)}
-                      className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition-colors duration-200"
-                    >
-                      Xóa
-                    </button>
-                  </td>
-                </tr>
-              ))}
-              {productsData?.data?.length === 0 && (
-                <tr>
-                  <td colSpan={11} className="text-center py-4 text-gray-500">Không có sản phẩm nào</td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+        <div className="bg-white shadow-lg rounded-lg p-6 overflow-x-auto">
+          <Table
+            columns={columns}
+            dataSource={productsData?.data}
+            rowKey="id"
+            pagination={{ pageSize: 10 }}
+          />
         </div>
       </div>
-    </>
 
+      <Modal
+        title={selectedProduct ? `Chi tiết biến thể sản phẩm: ${selectedProduct?.name}` : 'Chi tiết mô tả'}
+        visible={isModalVisible}
+        onCancel={handleCancel}
+        footer={null}
+      >
+        {selectedProduct ? renderVariationDetails() : renderDescriptionDetails()}
+      </Modal>
+    </>
   );
 };
 
