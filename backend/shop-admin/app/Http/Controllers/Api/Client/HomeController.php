@@ -12,27 +12,24 @@ use Request;
 
 class HomeController extends Controller
 {
-
- 
-
-    public function index()
+  public function index()
     {
         $parentCategories = Category::whereNull('parent_id')->with('childrenRecursive')->get();
         $productsByCategory = [];
-    
+
         foreach ($parentCategories as $parentCategory) {
             $childCategoryIds = $this->getCategoryAndChildrenIds($parentCategory);
-    
+
 
             $newProducts = Product::whereIn('category_id', $childCategoryIds)
                 ->where('is_new', 1)
                 ->orderBy('id', 'desc')
                 ->take(4)
                 ->get();
-    
+
 
             $banner = Banner::where('category_id', $parentCategory->id)->first();
-    
+
 
             $productsByCategory[] = [
                 'category_id' => $parentCategory->id,
@@ -41,21 +38,21 @@ class HomeController extends Controller
                 'products' => ProductResource::collection($newProducts)
             ];
         }
-    
+
 
         $hotProducts = Product::where('is_hot', 1)
             ->orderBy('id', 'desc')
             ->take(10)
             ->get();
-    
+
         $collectionProducts = Product::where('is_collection', 1)
             ->orderBy('id', 'desc')
             ->get();
-    
+
         $banners = Banner::orderBy('id', 'desc')
             ->take(8)
             ->get();
-    
+
         return response()->json([
             'products_new_category' => $productsByCategory,
             'hot_products' => ProductResource::collection($hotProducts),
@@ -63,14 +60,14 @@ class HomeController extends Controller
             'banners' => BannerResource::collection($banners)
         ]);
     }
-    
 
 
 
- 
+
+
     private function getCategoryAndChildrenIds($category)
     {
-        $categoryIds = collect([$category->id]); 
+        $categoryIds = collect([$category->id]);
         foreach ($category->childrenRecursive as $childCategory) {
             $categoryIds = $categoryIds->merge($this->getCategoryAndChildrenIds($childCategory));
         }
@@ -102,4 +99,46 @@ class HomeController extends Controller
         }
         return $ids;
     }
+
+    // private function getCategoryAndChildrenIds($category)
+    // {
+    //     $categoryIds = collect([$category->id]);
+    //     foreach ($category->childrenRecursive as $childCategory) {
+    //         $categoryIds = $categoryIds->merge($this->getCategoryAndChildrenIds($childCategory));
+    //     }
+    //     return $categoryIds->all();
+    // }
+
+
+    // public function search(Request $request)
+    // {
+    //     $keyword = $request->input('keyword'); // Lấy từ khóa từ request
+    //     $categoryId = $request->input('category_id'); // Lấy ID danh mục từ request
+
+    //     // Bắt đầu truy vấn sản phẩm
+    //     $productsQuery = Product::query();
+
+    //     // Nếu có từ khóa, thêm điều kiện tìm kiếm theo tên sản phẩm
+    //     if ($keyword) {
+    //         $productsQuery->where('name', 'like', '%' . $keyword . '%');
+    //     }
+
+    //     // Nếu có ID danh mục, tìm sản phẩm theo danh mục
+    //     if ($categoryId) {
+    //         // Lấy tất cả danh mục con của danh mục cha (nếu có)
+    //         $category = Category::find($categoryId);
+    //         if ($category) {
+    //             $categoryIds = $this->getCategoryAndChildrenIds($category);
+    //             $productsQuery->whereIn('category_id', $categoryIds);
+    //         }
+    //     }
+
+    //     // Lấy các sản phẩm thỏa mãn điều kiện
+    //     $products = $productsQuery->get();
+
+    //     // Trả về kết quả JSON
+    //     return response()->json([
+    //         'products' => ProductResource::collection($products),
+    //     ]);
+    // }
 }

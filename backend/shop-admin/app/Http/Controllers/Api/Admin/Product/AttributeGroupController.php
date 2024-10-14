@@ -13,33 +13,61 @@ use App\Http\Resources\AttributeGroupResource;
 class AttributeGroupController extends Controller
 {
 
+    // public function index()
+    // {
+    //     $attributeGroups = AttributeGroup::with('group', 'attribute')->get();
+    
+    //     $groupedData = $attributeGroups->groupBy('group_id');
+    
+    //     $result = $groupedData->map(function ($group) {
+    //         return [
+    //             'group_id' => $group->first()->group->id,
+    //             'group_name' => $group->first()->group->name,
+    //             'attributes' => $group->map(function ($item) {
+    //                 return [
+    //                     'id' => $item->attribute->id,
+    //                     'name' => $item->attribute->name,
+    //                     'attribute_type' => $item->attribute->attribute_type,
+    //                     'attribute_values' => $item->attribute->values->mapWithKeys(function ($value) { 
+    //                         return ["value_{$value->id}" => $value->value];
+    //                     })
+    //                 ];
+    //             })->values() // Lấy giá trị của từng attribute
+    //         ];
+    //     });
+    
+    //     return response()->json(['variation' => $result->values()]);
+    // }
+    
     public function index()
-    {
-        $attributeGroups = AttributeGroup::with('group', 'attribute')->get();
+{
+    $attributeGroups = AttributeGroup::with('group', 'attribute')->get();
     
-        $groupedData = $attributeGroups->groupBy('group_id');
+    $groupedData = $attributeGroups->groupBy('group_id');
     
-        $result = $groupedData->map(function ($group) {
-            return [
-                'group_id' => $group->first()->group->id,
-                'group_name' => $group->first()->group->name,
-                'attributes' => $group->map(function ($item) {
-                    return [
-                        'id' => $item->attribute->id,
-                        'name' => $item->attribute->name,
-                        'attribute_type' => $item->attribute->attribute_type,
-                        'attribute_values' => $item->attribute->values->mapWithKeys(function ($value) { 
-                            return ["value_{$value->id}" => $value->value];
-                        })
-                    ];
-                })->values() // Lấy giá trị của từng attribute
-            ];
-        });
+    $result = $groupedData->map(function ($group) {
+        return [
+            'group_id' => $group->first()->group->id,
+            'group_name' => $group->first()->group->name,
+            'attributes' => $group->map(function ($item) {
+                return [
+                    'id' => $item->attribute->id,
+                    'name' => $item->attribute->name,
+                    'attribute_type' => $item->attribute->attribute_type,
+                    'attribute_values' => $item->attribute->values->map(function ($value) {
+                        return [
+                            'id' => $value->id,
+                            'value' => $value->value
+                        ];
+                    })->values() // Chuyển về danh sách các đối tượng có id và value
+                ];
+            })->values() // Lấy giá trị của từng attribute
+        ];
+    });
     
-        return response()->json(['variation' => $result->values()]);
-    }
-    
-    
+    return response()->json(['variation' => $result->values()]);
+}
+
 
 
     public function store(AttributeGroupRequest $request)
@@ -94,16 +122,18 @@ class AttributeGroupController extends Controller
                     'id' => $item->attribute->id,
                     'name' => $item->attribute->name,
                     'attribute_type' => $item->attribute->attribute_type,
-                    'attribute_values' => $item->attribute->values->mapWithKeys(function ($value) { 
-                        return ["value_{$value->id}" => $value->value];
-                    })
+                    'attribute_values' => $item->attribute->values->map(function ($value) {
+                        return [
+                            'id' => $value->id,
+                            'value' => $value->value
+                        ];
+                    })->values() // Lấy danh sách đối tượng id và value
                 ];
             })->values() // Sử dụng .values() để lấy danh sách attributes
         ];
     
         return response()->json(['variation' => [$result]], 201); // Bọc trong 'variation'
     }
-    
 
     public function update(AttributeGroupRequest $request, $id)
     {
