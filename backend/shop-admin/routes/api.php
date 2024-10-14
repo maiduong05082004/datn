@@ -13,6 +13,7 @@ use App\Http\Controllers\Api\Admin\Product\AttributeGroupController;
 use App\Http\Controllers\Api\Admin\Product\AttributeValueController;
 use App\Http\Controllers\Api\Client\HomeController;
 use App\Http\Controllers\Api\Client\Product\ProductController as ProductProductController;
+use App\Http\Controllers\Api\Admin\WishlistController;
 
 /*
 |--------------------------------------------------------------------------
@@ -92,7 +93,9 @@ Route::prefix('admins')
                 Route::get('/{id}/block', [UserController::class, 'blockUser']);
             
                 Route::put('/{id}/unblock', [UserController::class, 'unblockUser']);
+                Route::get('/wishlist', [WishlistController::class, 'index'])->name('wishlist.index');
+                Route::post('/wishlist/add/{id}', [WishlistController::class, 'addToWishlist'])->name('wishlist.add');
+                Route::delete('/wishlist/remove/{id}', [WishlistController::class, 'removeFromWishlist'])->name('wishlist.remove');
             });
         });
     });
-
