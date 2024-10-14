@@ -59,7 +59,6 @@ class User extends Authenticatable
 
     ];
 
-
     public function bill()
     {
         return $this->hasMany(Bill::class);
@@ -89,5 +88,10 @@ class User extends Authenticatable
     public function sendPasswordResetNotification($token)
     {
         $this->notify(new ResetPasswordNotification($token));
+    }
+
+    public function wishlist()
+    {
+        return $this->belongsToMany(Product::class, 'wishlists')->withTimestamps();
     }
 }
