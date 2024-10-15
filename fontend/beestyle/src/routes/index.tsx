@@ -25,8 +25,11 @@ import ListBanners from "@/pages/(dashboard)/dashboard/banners/list";
 import BlockUser from "@/pages/(dashboard)/dashboard/user/block";
 import SubCategories from "@/pages/(dashboard)/dashboard/categories/sub";
 import AddSub from "@/pages/(dashboard)/dashboard/categories/addSub";
-import ListAttribute from "@/pages/(dashboard)/dashboard/attribute/list";
-import ListAttributeValues from "@/pages/(dashboard)/dashboard/attribute/list";
+import ListAttributeValues from "@/pages/(dashboard)/dashboard/attribute_values/list";
+import AddAttributeValues from "@/pages/(dashboard)/dashboard/attribute_values/add";
+import UpdateAttributeValues from "@/pages/(dashboard)/dashboard/attribute_values/update";
+import DetailAttributeValues from "@/pages/(dashboard)/dashboard/attribute_values/detail";
+
 
 
 const Router = () => {
@@ -60,9 +63,11 @@ const Router = () => {
                     <Route path="addBanners" element={<AddBanners />} />
                     <Route path="updateBanners" element={<UpdateBanners />} />
                     <Route path="listAttributeValues" element={<ListAttributeValues />} />
-
+                    <Route path="addAttributes" element={<AddAttributeValues />} />
+                    <Route path="updateAttribute/:id" element={<UpdateAttributeValues />} />
+                    <Route path="detailAttribute/:id" element={<DetailAttributeValues />} />
                 </Route>
-                <Route path="**" element={<ErrorPage />} />
+                <Route path="*/*" element={<ErrorPage />} />
             </Routes>
         </>
     );

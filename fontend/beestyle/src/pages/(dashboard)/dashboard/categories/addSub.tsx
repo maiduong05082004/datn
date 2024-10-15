@@ -145,18 +145,20 @@ const AddSub = () => {
           </div>
         </div>
 
-        <button
-          type="submit"
-          className="mt-4 px-4 py-2 bg-green-500 text-white rounded-md shadow-lg hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500"
-        >
-          Thêm mới
-        </button>
-        <button
-          onClick={() => navigate('/admin/listCategories')} // Chuyển hướng về trang danh sách
-          className="mt-4 px-4 py-2 bg-blue-500 text-white rounded-md shadow-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
-        >
-          Quay lại
-        </button>
+        <div className="flex space-x-4"> {/* Khoảng cách giữa các button */}
+          <button
+            type="submit"
+            className="mt-4 px-4 py-2 bg-green-500 text-white rounded-md shadow-lg hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500"
+          >
+            Thêm mới
+          </button>
+          <button
+            onClick={() => navigate('/admin/listCategories')} // Chuyển hướng về trang danh sách
+            className="mt-4 px-4 py-2 bg-blue-500 text-white rounded-md shadow-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            Quay lại
+          </button>
+        </div>
       </form>
     </div>
   );

@@ -10,6 +10,7 @@ type Category = {
   children_recursive: Category[];
 };
 
+// Hàm xóa danh mục
 const deleteCategory = async (id: number) => {
   const response = await axios.delete(`http://127.0.0.1:8000/api/admins/categories/${id}`);
   return response.data;
@@ -21,21 +22,29 @@ const SubCategories = () => {
   const { category } = location.state as { category: Category };
   const queryClient = useQueryClient();
 
+  // Mutation xóa danh mục
   const deleteMutation = useMutation({
     mutationFn: deleteCategory,
     onSuccess: () => {
       alert('Xóa thành công');
-      queryClient.invalidateQueries('categories');
-      navigate(-1);
+      queryClient.invalidateQueries('categories'); // Làm mới danh sách sau khi xóa
+      navigate(-1); // Quay lại trang trước đó
     },
     onError: () => {
       alert('Có lỗi xảy ra khi xóa');
     },
   });
 
-  const handleDelete = (id: number) => {
-    if (window.confirm('Bạn có chắc chắn muốn xóa danh mục này không?')) {
-      deleteMutation.mutate(id);
+  const handleDelete = (category: Category) => {
+    // Kiểm tra nếu còn tồn tại danh mục con
+    if (category.children_recursive.length > 0) {
+      alert('Vui lòng xóa tất cả danh mục con trước khi xóa danh mục cha.');
+      return;
+    }
+
+    // Nếu không có danh mục con, tiếp tục xóa
+    if (window.confirm(`Bạn có chắc chắn muốn xóa danh mục "${category.name}" không?`)) {
+      deleteMutation.mutate(category.id);
     }
   };
 
@@ -48,13 +57,13 @@ const SubCategories = () => {
         <button
           type="button"
           className="px-4 py-2 bg-green-500 text-white rounded-md shadow-lg hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500"
-          onClick={() => navigate('/admin/addSub', { state: {category} })}
+          onClick={() => navigate('/admin/addSub', { state: { category } })}
         >
           Thêm danh mục con
         </button>
         <button
           className="mt-4 px-4 py-2 bg-yellow-500 text-white rounded-md shadow-lg hover:bg-yellow-600 focus:outline-none focus:ring-2 focus:ring-yellow-500"
-          onClick={() => navigate('/admin/trashCategories')} // Điều hướng đến trang Thùng rác
+          onClick={() => navigate('/admin/trashCategories')}
         >
           Xem Thùng rác
         </button>
@@ -104,7 +113,7 @@ const SubCategories = () => {
                   </button>
                   <button
                     className="text-red-700 flex items-center"
-                    onClick={() => handleDelete(subCategory.id)}
+                    onClick={() => handleDelete(subCategory)}
                   >
                     Xóa
                     <i className="fas fa-trash-alt ml-1"></i>
@@ -117,13 +126,13 @@ const SubCategories = () => {
       ) : (
         <div className="text-center text-gray-500">Không có danh mục con</div>
       )}
-        <button
-          type="button"
-          className="px-4 py-2 bg-blue-500 text-white rounded-md shadow-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          onClick={() => navigate(-1)}
-        >
-          Quay lại
-        </button>
+      <button
+            type="button"
+            onClick={() => navigate(-1)} // Quay lại trang trước đó
+            className="mt-4 px-4 py-2 bg-blue-500 text-white rounded-md shadow-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            Quay lại
+          </button>
     </div>
   );
 };

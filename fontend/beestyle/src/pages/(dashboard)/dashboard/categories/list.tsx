@@ -10,37 +10,24 @@ type Category = {
   children_recursive: Category[];
 };
 
+// Hàm fetch dữ liệu từ API
 const fetchCategories = async (): Promise<Category[]> => {
   const response = await axios.get('http://127.0.0.1:8000/api/admins/categories');
   return response.data;
 };
 
+// Hàm xóa danh mục từ API
 const deleteCategory = async (id: number): Promise<void> => {
   await axios.delete(`http://127.0.0.1:8000/api/admins/categories/${id}`);
 };
-  
+
 const ListCategories = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { data, error, isLoading } = useQuery<Category[]>('categories', fetchCategories);
-  const [expandedCategory, setExpandedCategory] = useState<number | null>(null);
-  const [expandedSubCategory, setExpandedSubCategory] = useState<number | null>(null);
   const [notification, setNotification] = useState<string | null>(null);
 
-  const toggleExpand = (id: number) => {
-    if (expandedCategory === id) {
-      setExpandedCategory(null);
-      setExpandedSubCategory(null); // Đóng danh mục con khi danh mục cha đóng
-    } else {
-      setExpandedCategory(id);
-      setExpandedSubCategory(null); // Đóng danh mục con trước đó nếu có
-    }
-  };
-
-  const toggleExpandSubCategory = (id: number) => {
-    setExpandedSubCategory((prev) => (prev === id ? null : id)); // Chỉ mở danh mục con mới
-  };
-
+  // Sử dụng react-query để xóa danh mục
   const mutation = useMutation(deleteCategory, {
     onSuccess: () => {
       queryClient.invalidateQueries('categories');
@@ -52,69 +39,16 @@ const ListCategories = () => {
     },
   });
 
-  const handleDelete = (id: number) => {
+  // Hàm xử lý xóa danh mục và kiểm tra nếu có danh mục con
+  const handleDelete = (id: number, children: Category[]) => {
+    if (children.length > 0) {
+      alert('Vui lòng xóa tất cả danh mục con trước khi xóa danh mục cha.');
+      return;
+    }
+
     if (window.confirm('Bạn có chắc chắn muốn xóa danh mục này không?')) {
       mutation.mutate(id);
     }
-  };
-
-  const renderSubCategories = (subCategories: Category[]) => {
-    return (
-      <table className="min-w-full bg-gray-100 rounded-lg shadow-md overflow-hidden">
-        <tbody>
-          {subCategories.map((subCategory) => (
-            <React.Fragment key={subCategory.id}>
-              <tr className="border-b border-gray-200">
-                <td className="py-3 px-4 text-center text-black">{subCategory.id}</td>
-                <td className="py-3 px-4 text-center text-black">{subCategory.name}</td>
-                <td className="py-3 px-4 text-center text-black">
-                  {subCategory.children_recursive.length > 0 ? (
-                    <button
-                      className="text-blue-600 underline"
-                      // onClick={() => toggleExpandSubCategory(subCategory.id)}
-                    >
-                      Danh mục con
-                    </button>
-                  ) : (
-                    <span className="text-gray-500">Không có danh mục con</span>
-                  )}
-                </td>
-                <td className="py-3 px-4 text-center text-black">
-                  {subCategory.status ? (
-                    <span className="text-green-600">Hoạt động</span>
-                  ) : (
-                    <span className="text-red-600">Ngừng hoạt động</span>
-                  )}
-                </td>
-                <td className="py-3 px-6 text-center text-black flex justify-center space-x-4">
-                  <button
-                    className="text-green-700 flex items-center"
-                    onClick={() => navigate('/admin/updateCategories', { state: { category: subCategory } })}
-                  >
-                    Sửa
-                    <i className="fas fa-edit ml-1"></i>
-                  </button>
-                  <button
-                    className="text-red-700 flex items-center"
-                    onClick={() => handleDelete(subCategory.id)}
-                  >
-                    Xóa
-                    <i className="fas fa-trash-alt ml-1"></i>
-                  </button>
-                </td>
-              </tr>
-              {expandedSubCategory === subCategory.id && subCategory.children_recursive.length > 0 && (
-                <tr>
-                  <td colSpan={5} className="pl-10">
-                    {renderSubCategories(subCategory.children_recursive)}
-                  </td>
-                </tr>
-              )}
-            </React.Fragment>
-          ))}
-        </tbody>
-      </table>
-    );
   };
 
   if (isLoading) {
@@ -164,18 +98,17 @@ const ListCategories = () => {
                 <td className="py-3 px-4 text-center text-black dark:text-white">{category.id}</td>
                 <td className="py-3 px-4 text-center text-black dark:text-white">{category.name}</td>
                 <td className="py-3 px-4 text-center text-black dark:text-white">
-                {category.children_recursive.length > 0 ? (
-                  <button
-                    className="text-blue-600 underline"
-                    onClick={() => navigate('/admin/subCategories', { state: { category } })}
-                  >
-                    Danh mục con ({category.children_recursive.length})
-                  </button>
-                ) : (
-                  <span className="text-gray-500">Không có danh mục con</span>
-                )}
-              </td>
-
+                  {category.children_recursive.length > 0 ? (
+                    <button
+                      className="text-blue-600 underline"
+                      onClick={() => navigate('/admin/subCategories', { state: { category } })}
+                    >
+                      Danh mục con ({category.children_recursive.length})
+                    </button>
+                  ) : (
+                    <span className="text-gray-500">Không có danh mục con</span>
+                  )}
+                </td>
                 <td className="py-3 px-4 text-center text-black dark:text-white">
                   {category.status ? (
                     <span className="text-green-600">Hoạt động</span>
@@ -193,20 +126,13 @@ const ListCategories = () => {
                   </button>
                   <button
                     className="text-red-700 flex items-center"
-                    onClick={() => handleDelete(category.id)}
+                    onClick={() => handleDelete(category.id, category.children_recursive)}
                   >
                     Xóa
                     <i className="fas fa-trash-alt ml-1"></i>
                   </button>
                 </td>
               </tr>
-              {expandedCategory === category.id && category.children_recursive.length > 0 && (
-                <tr>
-                  <td colSpan={5} className="pl-10">
-                    {renderSubCategories(category.children_recursive)}
-                  </td>
-                </tr>
-              )}
             </React.Fragment>
           ))}
         </tbody>

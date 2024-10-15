@@ -58,9 +58,7 @@ class AttributeController extends Controller
 
 
     public function update(UpdateAttributeRequest $request, $id)
-
     {
-      
     
         $attribute = Attribute::findOrFail($id);
         $attribute->update([
