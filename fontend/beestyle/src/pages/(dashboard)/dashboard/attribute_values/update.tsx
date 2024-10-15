@@ -1,13 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import axios from 'axios';
 import { useQuery, useMutation, useQueryClient } from 'react-query';
-import { useNavigate, useParams } from 'react-router-dom';
-import { Form, Input, Button, Select, Row, Col, Typography, Card } from 'antd';
+import { useNavigate } from 'react-router-dom';
+import { Form, Input, Button, Select, Row, Col, Typography, Card, Space } from 'antd';
 import { MinusCircleOutlined, PlusOutlined } from '@ant-design/icons';
 
 const { Title } = Typography;
 
-// Định nghĩa kiểu dữ liệu cho Attribute và các giá trị
 type Attribute = {
     id: number;
     name: string;
@@ -16,20 +15,13 @@ type Attribute = {
     updated_at: string | null;
 };
 
-type AttributeValue = {
-    id: number;
-    value: string;
+const fetchAttributes = async (): Promise<Attribute[]> => {
+    const response = await axios.get('http://127.0.0.1:8000/api/admins/attributes');
+    return response.data.data;
 };
 
-// Hàm lấy chi tiết thuộc tính và giá trị từ API
-const fetchAttributeDetails = async (id: number): Promise<{ attribute: Attribute; values: AttributeValue[] }> => {
-    const response = await axios.get(`http://127.0.0.1:8000/api/admins/attributes/${id}`);
-    return response.data;
-};
-
-// Hàm cập nhật giá trị thuộc tính qua API
-const updateAttributeValues = async ({ id, data }: { id: number; data: any }): Promise<any> => {
-    const response = await axios.put(`http://127.0.0.1:8000/api/admins/attribute_values/${id}`, data, {
+const addAttributeValues = async (data: any): Promise<any> => {
+    const response = await axios.post('http://127.0.0.1:8000/api/admins/attribute_groups/', data, {
         headers: {
             'Content-Type': 'application/json',
         },
@@ -38,23 +30,18 @@ const updateAttributeValues = async ({ id, data }: { id: number; data: any }): P
 };
 
 const UpdateAttributeValues: React.FC = () => {
-    const { id } = useParams<{ id: string }>(); // Lấy ID từ URL
+    const [selectedAttribute, setSelectedAttribute] = useState<number | ''>(''); 
+    const navigate = useNavigate(); 
     const queryClient = useQueryClient();
-    const navigate = useNavigate();
-    const [form] = Form.useForm();
-    const [selectedAttribute, setSelectedAttribute] = useState<number | ''>(''); // Thuộc tính đã chọn
 
-    // Sử dụng react-query để lấy chi tiết thuộc tính
-    const { data, isLoading, error } = useQuery(['attributeDetails', id], () => fetchAttributeDetails(Number(id)), {
-        enabled: !!id, // Chỉ fetch khi có ID
-    });
+    // Sử dụng react-query để lấy danh sách thuộc tính
+    const { data: attributeList, isLoading, error } = useQuery('attributes', fetchAttributes);
 
-    // Sử dụng react-query để thực hiện thao tác cập nhật giá trị thuộc tính
-    const mutation = useMutation(updateAttributeValues, {
+    const mutation = useMutation(addAttributeValues, {
         onSuccess: () => {
             alert('Giá trị thuộc tính đã được cập nhật thành công');
-            queryClient.invalidateQueries(['attributeDetails', id]); // Làm mới dữ liệu
-            navigate('/admin/listAttributeValues'); // Điều hướng quay lại danh sách
+            queryClient.invalidateQueries('attributes'); 
+            navigate('/admin/listAttributeValues'); 
         },
         onError: (error: any) => {
             console.error('Lỗi chi tiết từ API:', error.response?.data?.errors || error.response?.data || error.message);
@@ -62,84 +49,96 @@ const UpdateAttributeValues: React.FC = () => {
         },
     });
 
-    // Đổ dữ liệu ra form khi có dữ liệu
-    useEffect(() => {
-        if (data && data.attribute) {
-            form.setFieldsValue({
-                attribute: data.attribute.name,
-                values: data.values.map((value) => value.value),
-            });
-            setSelectedAttribute(data.attribute.id);
-        }
-    }, [data, form]);
-
-    // Xử lý khi submit form
     const onFinish = (values: any) => {
         if (!selectedAttribute) {
             alert('Vui lòng chọn thuộc tính.');
             return;
         }
 
-        // Chuyển đổi mảng các giá trị thành đối tượng với các khóa value_1, value_2,...
         const payload = {
             attribute_id: selectedAttribute,
             values: values.values.reduce((acc: any, curr: string, index: number) => {
-                acc[`value_${index + 1}`] = curr; // Sử dụng các khóa value_1, value_2,...
+                acc[`value_${index + 1}`] = curr;
                 return acc;
             }, {}),
         };
 
-        console.log('Payload cập nhật:', payload); // Kiểm tra payload
-        mutation.mutate({ id: Number(id), data: payload });
+        mutation.mutate(payload);
     };
 
-    // Kiểm tra nếu đang tải dữ liệu hoặc có lỗi
-    if (isLoading) return <div>Đang tải dữ liệu...</div>;
-    if (error) return <div>Không thể tải dữ liệu: {error instanceof Error ? error.message : 'Có lỗi xảy ra'}</div>;
-
-    // Kiểm tra nếu không có thuộc tính hoặc dữ liệu thiếu
-    if (!data || !data.attribute) {
-        return <div>Không có dữ liệu thuộc tính để hiển thị</div>;
+    // Kiểm tra nếu có lỗi trong quá trình fetch dữ liệu
+    if (error) {
+        return <div>Không thể tải danh sách thuộc tính: {error instanceof Error ? error.message : 'Lỗi không xác định'}</div>;
     }
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gray-100 p-6">
+        <div className="min-h-screen flex items-center justify-center bg-gradient-to-r from-blue-50 to-indigo-100 p-6">
             <div className="w-full max-w-7xl">
-                <Title level={2} className="text-center mb-8">
-                    Cập nhật giá trị thuộc tính
-                </Title>
+                <Card bordered={false} className="shadow-lg p-8 bg-white rounded-lg">
+                    <Title level={3} className="text-center mb-8">
+                        Cập nhật giá trị thuộc tính
+                    </Title>
 
-                <Form form={form} onFinish={onFinish} layout="vertical">
-                    <Card bordered={false} className="shadow-lg">
-                        <Form.Item label="Chọn thuộc tính" name="attribute" rules={[{ required: true, message: 'Vui lòng chọn thuộc tính!' }]}>
-                            <Select placeholder="Chọn một thuộc tính" value={selectedAttribute} disabled>
-                                {data && (
-                                    <Select.Option key={data.attribute.id} value={data.attribute.id}>
-                                        {data.attribute.name}
-                                    </Select.Option>
+                    <Form onFinish={onFinish} layout="vertical">
+                        <Form.Item
+                            label="Chọn thuộc tính"
+                            name="attribute"
+                            rules={[{ required: true, message: 'Vui lòng chọn thuộc tính!' }]}
+                        >
+                            <Select
+                                placeholder="Chọn một thuộc tính"
+                                onChange={setSelectedAttribute}
+                                value={selectedAttribute}
+                                allowClear
+                                loading={isLoading}
+                                size="large"
+                            >
+                                {Array.isArray(attributeList) && attributeList.length > 0 ? (
+                                    attributeList.map((attribute) => (
+                                        <Select.Option key={attribute.id} value={attribute.id}>
+                                            {attribute.name}
+                                        </Select.Option>
+                                    ))
+                                ) : (
+                                    <Select.Option disabled>Không có thuộc tính nào</Select.Option>
                                 )}
                             </Select>
                         </Form.Item>
 
-                        <Form.List name="values">
+                        <Form.List name="values" rules={[{ required: true, message: 'Vui lòng thêm ít nhất một giá trị!' }]}>
                             {(fields, { add, remove }) => (
                                 <>
                                     {fields.map((field) => (
-                                        <Form.Item key={field.key} label={`Giá trị ${field.name + 1}`}>
-                                            <Row gutter={16}>
-                                                <Col span={20}>
-                                                    <Form.Item {...field} name={[field.name]} fieldKey={[field.fieldKey]} noStyle>
-                                                        <Input placeholder="Nhập giá trị thuộc tính" />
-                                                    </Form.Item>
-                                                </Col>
-                                                <Col span={4}>
-                                                    <MinusCircleOutlined onClick={() => remove(field.name)} />
-                                                </Col>
-                                            </Row>
-                                        </Form.Item>
+                                        <Row gutter={16} key={field.key}>
+                                            <Col span={20}>
+                                                <Form.Item
+                                                    {...field}
+                                                    name={[field.name]}
+                                                    fieldKey={[field.fieldKey]}
+                                                    rules={[{ required: true, message: 'Vui lòng nhập giá trị thuộc tính!' }]}
+                                                >
+                                                    <Input placeholder="Nhập giá trị thuộc tính" size="large" />
+                                                </Form.Item>
+                                            </Col>
+                                            <Col span={4}>
+                                                <Button
+                                                    type="link"
+                                                    icon={<MinusCircleOutlined />}
+                                                    onClick={() => remove(field.name)}
+                                                    danger
+                                                />
+                                            </Col>
+                                        </Row>
                                     ))}
                                     <Form.Item>
-                                        <Button type="dashed" onClick={() => add()} block icon={<PlusOutlined />}>
+                                        <Button
+                                            type="dashed"
+                                            onClick={() => add()}
+                                            block
+                                            icon={<PlusOutlined />}
+                                            size="large"
+                                            className="bg-blue-50 hover:bg-blue-100"
+                                        >
                                             Thêm giá trị
                                         </Button>
                                     </Form.Item>
@@ -148,12 +147,23 @@ const UpdateAttributeValues: React.FC = () => {
                         </Form.List>
 
                         <Form.Item>
-                            <Button type="primary" htmlType="submit" block>
-                                Cập nhật
-                            </Button>
+                            <div className="flex space-x-4"> {/* Khoảng cách giữa các button */}
+                                <button
+                                    type="submit"
+                                    className="mt-4 px-4 py-2 bg-green-500 text-white rounded-md shadow-lg hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500"
+                                >
+                                    Cập nhật
+                                </button>
+                                <button
+                                    onClick={() => navigate('/admin/listAttributeValues')} // Chuyển hướng về trang danh sách
+                                    className="mt-4 px-4 py-2 bg-blue-500 text-white rounded-md shadow-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                >
+                                    Quay lại
+                                </button>
+                            </div>
                         </Form.Item>
-                    </Card>
-                </Form>
+                    </Form>
+                </Card>
             </div>
         </div>
     );

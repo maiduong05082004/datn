@@ -104,7 +104,7 @@ const ListAttributeValues: React.FC = () => {
             )}
 
             {/* Nút Thêm Mới */}
-            <div className="flex justify-end mb-4">
+            <div className="flex justify-start mb-4">
                 <Button type="primary" onClick={handleAddNew}>
                     Thêm Mới
                 </Button>

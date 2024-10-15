@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import { useQuery, useMutation, useQueryClient } from 'react-query';
 import { useNavigate } from 'react-router-dom';
-import { Form, Input, Button, Select, Row, Col, Typography, Card } from 'antd';
+import { Form, Input, Button, Select, Row, Col, Typography, Card, Space } from 'antd';
 import { MinusCircleOutlined, PlusOutlined } from '@ant-design/icons';
 
 const { Title } = Typography;
@@ -19,8 +19,7 @@ type Attribute = {
 // Hàm lấy danh sách thuộc tính từ API
 const fetchAttributes = async (): Promise<Attribute[]> => {
     const response = await axios.get('http://127.0.0.1:8000/api/admins/attributes');
-    console.log('Dữ liệu từ API:', response.data); // Kiểm tra dữ liệu trả về
-    return response.data.data; // Đảm bảo rằng API trả về một mảng các thuộc tính
+    return response.data.data;
 };
 
 // Hàm thêm giá trị thuộc tính qua API
@@ -69,7 +68,6 @@ const AddAttributeValues: React.FC = () => {
             }, {}),
         };
 
-        console.log('Payload gửi lên API:', payload); // Kiểm tra payload trước khi gửi
         mutation.mutate(payload);
     };
 
@@ -79,56 +77,73 @@ const AddAttributeValues: React.FC = () => {
     }
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gray-100 p-6">
+        <div className="min-h-screen flex items-center justify-center bg-gradient-to-r from-blue-50 to-indigo-100 p-6">
             <div className="w-full max-w-7xl">
-                <Title level={2} className="text-center mb-8">
-                    Thêm mới giá trị thuộc tính
-                </Title>
+                <Card bordered={false} className="shadow-lg p-8 bg-white rounded-lg">
+                    <Title level={3} className="text-center mb-8">
+                        Thêm mới giá trị thuộc tính
+                    </Title>
 
-                <Form onFinish={onFinish} layout="vertical">
-                    <Card bordered={false} className="shadow-lg">
-                        <Form.Item label="Chọn thuộc tính" name="attribute" rules={[{ required: true, message: 'Vui lòng chọn thuộc tính!' }]}>
+                    <Form onFinish={onFinish} layout="vertical">
+                        <Form.Item
+                            label="Chọn thuộc tính"
+                            name="attribute"
+                            rules={[{ required: true, message: 'Vui lòng chọn thuộc tính!' }]}
+                        >
                             <Select
                                 placeholder="Chọn một thuộc tính"
                                 onChange={setSelectedAttribute}
                                 value={selectedAttribute}
                                 allowClear
                                 loading={isLoading}
+                                size="large"
                             >
                                 {Array.isArray(attributeList) && attributeList.length > 0 ? (
-                                    attributeList
-                                        .filter((attribute) => attribute.id !== null && attribute.name !== null) // Lọc bỏ các giá trị null
-                                        .map((attribute) => (
-                                            <Select.Option key={attribute.id} value={attribute.id}>
-                                                {attribute.name}
-                                            </Select.Option>
-                                        ))
+                                    attributeList.map((attribute) => (
+                                        <Select.Option key={attribute.id} value={attribute.id}>
+                                            {attribute.name}
+                                        </Select.Option>
+                                    ))
                                 ) : (
                                     <Select.Option disabled>Không có thuộc tính nào</Select.Option>
                                 )}
                             </Select>
-
                         </Form.Item>
 
                         <Form.List name="values" rules={[{ required: true, message: 'Vui lòng thêm ít nhất một giá trị!' }]}>
                             {(fields, { add, remove }) => (
                                 <>
                                     {fields.map((field) => (
-                                        <Form.Item key={field.key} label={`Giá trị ${field.name + 1}`}>
-                                            <Row gutter={16}>
-                                                <Col span={20}>
-                                                    <Form.Item {...field} name={[field.name]} fieldKey={[field.fieldKey]} noStyle rules={[{ required: true, message: 'Vui lòng nhập giá trị thuộc tính!' }]}>
-                                                        <Input placeholder="Nhập giá trị thuộc tính" />
-                                                    </Form.Item>
-                                                </Col>
-                                                <Col span={4}>
-                                                    <MinusCircleOutlined onClick={() => remove(field.name)} />
-                                                </Col>
-                                            </Row>
-                                        </Form.Item>
+                                        <Row gutter={16} key={field.key}>
+                                            <Col span={20}>
+                                                <Form.Item
+                                                    {...field}
+                                                    name={[field.name]}
+                                                    fieldKey={[field.fieldKey]}
+                                                    rules={[{ required: true, message: 'Vui lòng nhập giá trị thuộc tính!' }]}
+                                                >
+                                                    <Input placeholder="Nhập giá trị thuộc tính" size="large" />
+                                                </Form.Item>
+                                            </Col>
+                                            <Col span={4}>
+                                                <Button
+                                                    type="link"
+                                                    icon={<MinusCircleOutlined />}
+                                                    onClick={() => remove(field.name)}
+                                                    danger
+                                                />
+                                            </Col>
+                                        </Row>
                                     ))}
                                     <Form.Item>
-                                        <Button type="dashed" onClick={() => add()} block icon={<PlusOutlined />}>
+                                        <Button
+                                            type="dashed"
+                                            onClick={() => add()}
+                                            block
+                                            icon={<PlusOutlined />}
+                                            size="large"
+                                            className="bg-blue-50 hover:bg-blue-100"
+                                        >
                                             Thêm giá trị
                                         </Button>
                                     </Form.Item>
@@ -137,12 +152,23 @@ const AddAttributeValues: React.FC = () => {
                         </Form.List>
 
                         <Form.Item>
-                            <Button type="primary" htmlType="submit" block>
-                                Lưu
-                            </Button>
+                            <div className="flex space-x-4"> {/* Khoảng cách giữa các button */}
+                                <button
+                                    type="submit"
+                                    className="mt-4 px-4 py-2 bg-green-500 text-white rounded-md shadow-lg hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500"
+                                >
+                                    Thêm mới
+                                </button>
+                                <button
+                                    onClick={() => navigate('/admin/listAttributeValues')} // Chuyển hướng về trang danh sách
+                                    className="mt-4 px-4 py-2 bg-blue-500 text-white rounded-md shadow-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                >
+                                    Quay lại
+                                </button>
+                            </div>
                         </Form.Item>
-                    </Card>
-                </Form>
+                    </Form>
+                </Card>
             </div>
         </div>
     );
