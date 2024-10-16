@@ -65,4 +65,10 @@ class Product extends Model
         return $this->hasMany(BillDentail::class, 'product_id');
     }
     protected $dates = ['deleted_at'];
+
+    // Relationship with wishlist
+    public function wishlistedBy()
+    {
+        return $this->belongsToMany(User::class, 'wishlists')->withTimestamps();
+    }
 }
