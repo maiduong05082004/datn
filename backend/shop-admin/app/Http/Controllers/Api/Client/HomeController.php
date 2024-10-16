@@ -8,7 +8,8 @@ use App\Http\Resources\ProductResource;
 use App\Models\Product;
 use App\Models\Category;
 use App\Models\Banner;
-use Request;
+use Illuminate\Http\Request;
+
 
 class HomeController extends Controller
 {
@@ -75,6 +76,8 @@ class HomeController extends Controller
         return $categoryIds->all();
     }
 
+    
+
 
     public function showCategoryBanner($id)
     {
@@ -100,45 +103,35 @@ class HomeController extends Controller
         return $ids;
     }
 
-    // private function getCategoryAndChildrenIds($category)
-    // {
-    //     $categoryIds = collect([$category->id]);
-    //     foreach ($category->childrenRecursive as $childCategory) {
-    //         $categoryIds = $categoryIds->merge($this->getCategoryAndChildrenIds($childCategory));
-    //     }
-    //     return $categoryIds->all();
-    // }
 
 
-    // public function search(Request $request)
-    // {
-    //     $keyword = $request->input('keyword'); // Lấy từ khóa từ request
-    //     $categoryId = $request->input('category_id'); // Lấy ID danh mục từ request
+    public function search(Request $request)
+    {
+        $keyword = $request->input('keyword'); 
+        $categoryId = $request->input('category_id'); 
 
-    //     // Bắt đầu truy vấn sản phẩm
-    //     $productsQuery = Product::query();
+        $productsQuery = Product::query();
 
-    //     // Nếu có từ khóa, thêm điều kiện tìm kiếm theo tên sản phẩm
-    //     if ($keyword) {
-    //         $productsQuery->where('name', 'like', '%' . $keyword . '%');
-    //     }
+        if ($keyword) {
+            $productsQuery->where('name', 'like', '%' . $keyword . '%');
+        }
 
-    //     // Nếu có ID danh mục, tìm sản phẩm theo danh mục
-    //     if ($categoryId) {
-    //         // Lấy tất cả danh mục con của danh mục cha (nếu có)
-    //         $category = Category::find($categoryId);
-    //         if ($category) {
-    //             $categoryIds = $this->getCategoryAndChildrenIds($category);
-    //             $productsQuery->whereIn('category_id', $categoryIds);
-    //         }
-    //     }
 
-    //     // Lấy các sản phẩm thỏa mãn điều kiện
-    //     $products = $productsQuery->get();
+        if ($categoryId) {
 
-    //     // Trả về kết quả JSON
-    //     return response()->json([
-    //         'products' => ProductResource::collection($products),
-    //     ]);
-    // }
+            $category = Category::find($categoryId);
+            if ($category) {
+                $categoryIds = $this->getCategoryAndChildrenIds($category);
+                $productsQuery->whereIn('category_id', $categoryIds);
+            }
+        }
+
+
+        $products = $productsQuery->get();
+
+  
+        return response()->json([
+            'products' => ProductResource::collection($products),
+        ]);
+    }
 }
