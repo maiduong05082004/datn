@@ -8,6 +8,7 @@ class VariationValueResource extends JsonResource
     public function toArray($request)
     {
         return [
+            "id"=> $this->id,
             'attribute_value_id' => $this->attribute_value_id, // Trả về attribute_value_id
             'value' => $this->attributeValue->value, // Lấy 'value' từ mối quan hệ attributeValue
             'sku' => $this->sku,
