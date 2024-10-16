@@ -18,47 +18,61 @@ class CategoryController extends Controller
         return response()->json($categories);
     }
     public function showCategoryProducts($id)
-    {
-        if (empty($id) || !is_numeric($id)) {
-            return response()->json(['error' => 'Invalid category ID'], 400);
-        }
-        $category = Category::findOrFail($id);
-        $categoryIds = $this->getAllChildrenIds($category);
-        if (!empty($id) && is_numeric($id)) {
-            $categoryIds[] = $id;
-        }
-
-        $products = Product::whereIn('category_id', $categoryIds)->paginate(20);
-
-        $productIds = $products->pluck('id');
-
-        $attributes = Attribute::whereHas('attributeValues.productVariations', function ($query) use ($productIds) {
-            $query->whereIn('product_id', $productIds);
-        })
-            ->with('attributeValues')
-            ->distinct()
-            ->get();
-
-        $attributeOptions = [];
-        foreach ($attributes as $attribute) {
-            $attributeName = $attribute->name;
-
-            foreach ($attribute->attributeValues as $attributeValue) {
-                if (!isset($attributeOptions[$attributeName])) {
-                    $attributeOptions[$attributeName] = [];
-                }
-                if (!in_array($attributeValue->value, $attributeOptions[$attributeName])) {
-                    $attributeOptions[$attributeName][] = $attributeValue->value;
-                }
-            }
-        }
-
-        return response()->json([
-            'products' => ProductResource::collection($products),
-            'attributes' => $attributeOptions,
-        ]);
+{
+    if (empty($id) || !is_numeric($id)) {
+        return response()->json(['error' => 'Invalid category ID'], 400);
     }
 
+    $category = Category::findOrFail($id);
+    $categoryIds = $this->getAllChildrenIds($category);
+    if (!empty($id) && is_numeric($id)) {
+        $categoryIds[] = $id;
+    }
+
+    $products = Product::with([
+        'variations' => function($query) {
+            $query->with(['variationValues' => function($subQuery) {
+                $subQuery->with('attributeValue');
+            }]);
+        }
+    ])->whereIn('category_id', $categoryIds)->paginate(20);
+
+    foreach ($products as $product) {
+        foreach ($product->variations as $variation) {
+            if ($variation->attribute_value === null && $variation->variationValues->isNotEmpty()) {
+                $variation->attribute_value = $variation->variationValues->pluck('attributeValue.value')->join(', ');
+            }
+        }
+    }
+
+    $productIds = $products->pluck('id');
+
+    $attributes = Attribute::whereHas('attributeValues.productVariations', function ($query) use ($productIds) {
+        $query->whereIn('product_id', $productIds);
+    })
+        ->with('attributeValues')
+        ->distinct()
+        ->get();
+
+    $attributeOptions = [];
+    foreach ($attributes as $attribute) {
+        $attributeName = $attribute->name;
+
+        foreach ($attribute->attributeValues as $attributeValue) {
+            if (!isset($attributeOptions[$attributeName])) {
+                $attributeOptions[$attributeName] = [];
+            }
+            if (!in_array($attributeValue->value, $attributeOptions[$attributeName])) {
+                $attributeOptions[$attributeName][] = $attributeValue->value;
+            }
+        }
+    }
+
+    return response()->json([
+        'products' => ProductResource::collection($products),
+        'attributes' => $attributeOptions,
+    ]);
+}
 
     public function getFilterOptionsByCategory($categoryId, Request $request)
 {
