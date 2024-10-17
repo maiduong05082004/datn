@@ -136,21 +136,23 @@ class AttributeValueController extends Controller
     
     
     
-    public function destroy(DeleteAttributeValuesRequest $request, $attributeId)
+    public function destroy($id)
 {
-  
-    // Lấy danh sách các ID cần xóa
-    $valueIds = array_column($request->values, 'id');
-
-    // Xóa các giá trị thuộc tính tương ứng
-    AttributeValue::whereIn('id', $valueIds)
-        ->where('attribute_id', $attributeId)
-        ->delete();
-
+    $attribute_values = AttributeValue::find($id);
+    if (!$attribute_values) {
+        return response()->json([
+            'success' => false,
+            'message' => 'attribute_values not found.'
+        ], 404);
+    }
+    $attribute_values->delete();
     return response()->json([
         'success' => true,
-        'message' => 'Xóa giá trị thuộc tính thành công',
+        'message' => 'Xóa thánh công'
     ], 200);
+
 }
+
+
 
 }
