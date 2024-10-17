@@ -7,13 +7,16 @@ interface Users {
   id?: number;
   name: string;
   email: string;
+  phone: string;
+  password: string;
+  address: string;
   role: 'admin' | 'user' | 'moderator';
   is_active: boolean;
   date_of_birth: string;
   sex: 'male' | 'female';
+  email_verified_at?: string | null;
   provider_name?: string | null;
   provider_id?: string | null;
-  email_verified_at?: string | null;
   last_login_at?: string | null;
 }
 
@@ -47,6 +50,9 @@ const AddUser: React.FC = () => {
     const payload: Users = {
       name: values.name.trim(),
       email: values.email.trim(),
+      phone: values.phone.trim(),
+      password: values.password.trim(),
+      address: values.address.trim(),
       role: values.role,
       is_active: true,
       date_of_birth: values.date_of_birth
@@ -64,7 +70,7 @@ const AddUser: React.FC = () => {
   return (
     <>
       {contextHolder}
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 p-8">
+      <div className="min-h-screen flex items-center justify-center p-8">
         <div className="w-full max-w-7xl bg-white p-10 rounded-xl shadow-lg">
           <Form
             form={form}
@@ -76,10 +82,7 @@ const AddUser: React.FC = () => {
             <Form.Item
               label="Tên Người Dùng"
               name="name"
-              rules={[
-                { required: true, message: 'Tên người dùng là bắt buộc' },
-                { pattern: /^[a-zA-Z\s-]+$/, message: 'Tên chỉ chứa chữ cái, khoảng trắng và dấu gạch nối' },
-              ]}
+              rules={[{ required: true, message: 'Tên người dùng là bắt buộc' }]}
             >
               <Input placeholder="Nhập tên người dùng" size="large" />
             </Form.Item>
@@ -93,6 +96,34 @@ const AddUser: React.FC = () => {
               ]}
             >
               <Input placeholder="Nhập email" size="large" />
+            </Form.Item>
+
+            <Form.Item
+              label="Số Điện Thoại"
+              name="phone"
+              rules={[
+                { required: true, message: 'Số điện thoại là bắt buộc' },
+                { pattern: /^[0-9]{10,11}$/, message: 'Số điện thoại không hợp lệ' },
+              ]}
+            >
+              <Input placeholder="Nhập số điện thoại" size="large" />
+            </Form.Item>
+
+            <Form.Item
+              label="Địa Chỉ"
+              name="address"
+              rules={[
+              ]}
+            >
+              <Input placeholder="Địa chỉ" size="large" />
+            </Form.Item>
+
+            <Form.Item
+              label="Mật Khẩu"
+              name="password"
+              rules={[{ required: true, message: 'Mật khẩu là bắt buộc' }]}
+            >
+              <Input.Password placeholder="Nhập mật khẩu" size="large" />
             </Form.Item>
 
             <Form.Item

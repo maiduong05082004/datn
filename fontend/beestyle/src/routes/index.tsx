@@ -21,11 +21,9 @@ const ListUser = lazy(() => import("@/pages/(dashboard)/dashboard/user/list"));
 const ListProducts = lazy(() => import("@/pages/(dashboard)/dashboard/products/list"));
 const AddProduct = lazy(() => import("@/pages/(dashboard)/dashboard/products/add"));
 const UpdateProduct = lazy(() => import("@/pages/(dashboard)/dashboard/products/update"));
-const ListComments = lazy(() => import("@/pages/(dashboard)/dashboard/comments/list"));
 const ListCategories = lazy(() => import("@/pages/(dashboard)/dashboard/categories/list"));
 const AddCategories = lazy(() => import("@/pages/(dashboard)/dashboard/categories/add"));
 const UpdateCategories = lazy(() => import("@/pages/(dashboard)/dashboard/categories/update"));
-const ListBills = lazy(() => import("@/pages/(dashboard)/dashboard/bills/list"));
 const ListBanners = lazy(() => import("@/pages/(dashboard)/dashboard/banners/list"));
 const AddBanners = lazy(() => import("@/pages/(dashboard)/dashboard/banners/add"));
 const UpdateBanners = lazy(() => import("@/pages/(dashboard)/dashboard/banners/update"));
@@ -45,6 +43,7 @@ const Router = () => {
                     <Route path="auth/google/callback" element={<GoogleCallback />} />
                     <Route path="pay" element={<PayPage />} />
                     <Route path="cart" element={<CartPage />} />
+                    {/* <Route path="research" element={<FilterComponent selectedCategory="1" />} /> */}
                 </Route>
 
                 {/* Admin Routes */}
@@ -73,7 +72,7 @@ const Router = () => {
                     <Route path="updateCategories/:id" element={<UpdateCategories />} />
                 </Route>
 
-                <Route path="*" element={<ErrorPage />} />
+                {/* <Route path="*" element={<ErrorPage />} /> */}
             </Routes>
         </Suspense>
     );

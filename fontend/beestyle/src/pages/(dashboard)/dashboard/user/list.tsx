@@ -23,7 +23,7 @@ const UserList: React.FC = () => {
   const [messageApi, contextHolder] = message.useMessage();
   const navigate = useNavigate();
 
-  const { data: userManager = [], isLoading } = useQuery<User[]>({
+  const { data: users = [], isLoading } = useQuery<User[]>({
     queryKey: ['userManager'],
     queryFn: async () => {
       const response = await axios.get('http://127.0.0.1:8000/api/admins/users');
@@ -49,18 +49,18 @@ const UserList: React.FC = () => {
     return <Spin tip="Đang tải dữ liệu..." className="flex justify-center items-center h-screen" />;
   }
 
-  const dataSource = userManager.map((item: User, index: number) => ({
-    key: item.id,
+  const dataSource = users.map((user: User, index: number) => ({
+    key: user.id,
     index: index + 1,
-    id: item.id,
-    name: item.name,
-    email: item.email,
-    role: item.role,
-    isActive: item.is_active ? 'Active' : 'Inactive',
-    dateOfBirth: item.date_of_birth,
-    sex: item.sex === 'male' ? 'Nam' : 'Nữ',
-    createdAt: new Date(item.created_at).toLocaleString(),
-    updatedAt: new Date(item.updated_at).toLocaleString(),
+    id: user.id,
+    name: user.name,
+    email: user.email,
+    role: user.role,
+    isActive: user.is_active ? 'Active' : 'Inactive',
+    dateOfBirth: user.date_of_birth,
+    sex: user.sex === 'male' ? 'Nam' : 'Nữ',
+    createdAt: new Date(user.created_at).toLocaleString(),
+    updatedAt: new Date(user.updated_at).toLocaleString(),
   }));
 
   const columns = [
