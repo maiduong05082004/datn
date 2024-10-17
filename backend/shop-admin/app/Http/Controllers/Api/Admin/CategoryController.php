@@ -16,26 +16,27 @@ class CategoryController extends Controller
     }
 
     public function store(Request $request)
-{
-    $request->validate([
-        'name' => 'required|string|max:255',
-        'status' => 'required|boolean',
-        'parent_id' => 'nullable|exists:categories,id',
-        'image' => 'nullable|string|max:2048', 
-    ]);
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'status' => 'required|boolean',
+            'parent_id' => 'nullable|exists:categories,id',
+            'image' => 'nullable|image|max:2048',
+        ]);
 
-    $data = $request->only('name', 'parent_id', 'status');
+        $data = $request->only('name', 'parent_id', 'status');
 
-    if ($request->hasFile('image')) {
-        $data['image'] = $request->file('image')->store('categories', 'public');
-    } elseif ($request->filled('image')) {
-        $data['image'] = $request->input('image');
+        // Xử lý ảnh từ file hoặc URL
+        if ($request->hasFile('image')) {
+            $data['image'] = $request->file('image')->store('categories', 'public');
+        } else{
+            return response()->json(['error' => 'Không có ảnh được tải lên.'], 400);
+        }
+
+        $category = Category::create($data);
+
+        return response()->json($category, 201);
     }
-
-    $category = Category::create($data);
-
-    return response()->json($category, 201);
-}
 
     public function show($id)
     {
@@ -45,6 +46,8 @@ class CategoryController extends Controller
 
     public function update(Request $request, $id)
     {
+        $category = Category::findOrFail($id);
+
         $request->validate([
             'name' => 'required|string|max:255',
             'status' => 'required|boolean',
@@ -52,20 +55,22 @@ class CategoryController extends Controller
             'image' => 'nullable|image|max:2048',
         ]);
 
-        $category = Category::findOrFail($id);
         $data = $request->only('name', 'parent_id', 'status');
-        
+
+        // Xử lý ảnh mới từ file hoặc URL
         if ($request->hasFile('image')) {
-            // Xóa ảnh cũ (nếu có)
-            if ($category->image) {
+            if ($category->image && !filter_var($category->image, FILTER_VALIDATE_URL)) {
                 Storage::disk('public')->delete($category->image);
             }
             $data['image'] = $request->file('image')->store('categories', 'public');
+        } else{
+            return response()->json(['error' => 'Không có ảnh được tải lên.'], 400);
         }
 
         $category->update($data);
         return response()->json($category, 200);
     }
+
 
     public function destroy($id)
 {
