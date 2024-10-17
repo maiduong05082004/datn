@@ -18,7 +18,7 @@ class AttributeValue extends Model
     {
         return $this->hasMany(ProductVariationValue::class, 'attribute_value_id');
     }
-    
+
     // Quan hệ với ProductVariation (Màu sắc của biến thể)
     public function productVariations()
     {
@@ -28,5 +28,8 @@ class AttributeValue extends Model
     {
         return $this->belongsToMany(Product::class, 'product_variation_values', 'attribute_value_id', 'product_id');
     }
-    
+    public function productVariationValues()
+    {
+        return $this->hasMany(\App\Models\ProductVariationValue::class, 'attribute_value_id', 'id');
+    }
 }
