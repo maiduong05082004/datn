@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
-import { Table, message, Button, Image, Tag, Modal } from 'antd';
+import { Table, message, Button, Image, Tag, Modal, Popconfirm, Spin } from 'antd';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import axios from 'axios';
 import { format } from 'date-fns';
+import { keys } from 'lodash';
+import { useNavigate } from 'react-router-dom';
 
 interface Product {
   id: number;
@@ -41,16 +43,14 @@ const ListProducts = () => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [selectedDescription, setSelectedDescription] = useState<string | null>(null); // State cho phần mô tả
+  const navigate = useNavigate();
 
-  const { data: productsData, isLoading: isLoadingProducts } = useQuery({
+  const { data: productsData, isLoading } = useQuery({
     queryKey: ['products'],
     queryFn: async () => {
       const response = await axios.get('http://localhost:8000/api/admins/products');
       return response.data;
-    },
-    onError: () => {
-      message.error('Lỗi khi lấy danh sách sản phẩm');
-    },
+    }
   });
 
   const mutation = useMutation({
@@ -61,7 +61,7 @@ const ListProducts = () => {
       messageApi.success('Xóa thành công');
       queryClient.invalidateQueries({ queryKey: ['products'] });
     },
-    onError: (error) => {
+    onError: () => {
       messageApi.error('Xóa sản phẩm thất bại');
     },
   });
@@ -76,41 +76,19 @@ const ListProducts = () => {
     setIsModalVisible(true);
   };
 
+
   const handleCancel = () => {
     setIsModalVisible(false);
     setSelectedProduct(null);
     setSelectedDescription(null);
   };
 
-  // Bộ lọc giá sản phẩm
-  const priceFilters = [
-    { text: 'Dưới 1 triệu', value: 'under_1m' },
-    { text: '1 triệu - 5 triệu', value: '1_to_5m' },
-    { text: 'Trên 5 triệu', value: 'over_5m' },
-  ];
-
-  const onPriceFilter = (value: string, record: Product) => {
-    const price = parseFloat(record.price);
-    if (value === 'under_1m') {
-      return price < 1000000;
-    }
-    if (value === '1_to_5m') {
-      return price >= 1000000 && price <= 5000000;
-    }
-    return price > 5000000;
-  };
-
-  const columns = [
+  const columns: Array<any> = [
     {
       title: 'STT',
       dataIndex: 'index',
       key: 'index',
-      render: (_: any, __: any, index: number) => <span>{index + 1}</span>,
-    },
-    {
-      title: 'ID',
-      dataIndex: 'id',
-      key: 'id',
+      render: (_: any, __: Product, index: number) => <span>{index + 1}</span>,
     },
     {
       title: 'Tên sản phẩm',
@@ -126,19 +104,14 @@ const ListProducts = () => {
       title: 'Giá',
       dataIndex: 'price',
       key: 'price',
-      filters: priceFilters,
-      onFilter: onPriceFilter,
+      sorter: (a: Product, b: Product) => parseFloat(a.price) - parseFloat(b.price),
+      sortDirections: ['ascend', 'descend'],
       render: (text: string) => <span>{parseFloat(text).toLocaleString()} VND</span>,
     },
     {
-      title: 'Tồn kho (Tổng)',
+      title: 'Số Lượng',
       dataIndex: 'stock',
       key: 'stock',
-      render: (_: any, record: Product) => (
-        <div>
-          {record.variations.reduce((total, variant) => total + variant.stock, 0)} {/* Tính tổng số lượng tồn kho từ các biến thể */}
-        </div>
-      ),
     },
     {
       title: 'Mô tả',
@@ -165,16 +138,16 @@ const ListProducts = () => {
     },
     {
       title: 'Danh mục',
-      dataIndex: ['group', 'name'],
-      key: 'group',
+      dataIndex: 'category_id',
+      key: 'category_id',
       filters: productsData?.data
-        .filter((product: Product) => product.group !== null)
-        .map((product: Product) => ({
+        ?.filter((product: Product) => product.group !== null)
+        ?.map((product: Product) => ({
           text: product.group?.name,
           value: product.group?.name,
         })),
       onFilter: (value: string, record: Product) => record.group?.name === value,
-      render: (text: string) => <Tag color="blue">{text || 'Không có danh mục'}</Tag>,
+      render: (category_id: number) => <span>{category_id}</span>,
     },
     {
       title: 'Biến thể',
@@ -189,40 +162,76 @@ const ListProducts = () => {
       title: 'Hành động',
       key: 'action',
       render: (product: Product) => (
-        <Button
-          danger
-          onClick={() => mutation.mutate(product.id)}
+        <Popconfirm
+          title="Xóa sản phẩm"
+          description="Bạn có chắc muốn xóa sản phẩm này không?"
+          onConfirm={() => mutation.mutate(product.id)}
+          okText="Yes"
+          cancelText="No"
         >
-          Xóa
-        </Button>
+          <Button type="primary" danger>
+            Xóa
+          </Button>
+        </Popconfirm>
       ),
     },
   ];
+
 
   const renderVariationDetails = () => {
     if (!selectedProduct) return null;
     return selectedProduct.variations.map((variant, index) => (
       <div key={index} className="mb-4 p-2 bg-gray-50 rounded-lg">
-        <h4 className="font-semibold text-indigo-700">Màu sắc: {variant.attribute_value_image_variant.value}</h4>
+        <h4 className="font-semibold text-indigo-700">
+          Tên biến thể: {selectedProduct?.group?.name}
+        </h4>
+        <h4 className="font-semibold text-indigo-700">
+          Tên màu biến thể: {variant.attribute_value_image_variant.value}
+        </h4>
         <Image
           width={50}
           height={50}
           src={variant.attribute_value_image_variant.image_path}
           alt={variant.attribute_value_image_variant.value}
         />
-        {variant.variation_values.map((value) => (
-          <div key={value.attribute_value_id} className="flex justify-between mt-2">
-            <h2>Size:</h2>
-            <span>{value.value}</span>
-            <span>
-              {parseFloat(value.price).toLocaleString()} VND{' '}
-              {value.discount > 0 && <Tag color="red">-{value.discount}%</Tag>}
-            </span>
+        {variant.variation_values.map((value: any) => (
+          <div key={value.attribute_value_id} className="mt-2 p-2 bg-gray-50 rounded-lg border">
+            <div className="flex justify-between items-center">
+              <h2 className="font-semibold">Size: {value.value}</h2>
+              <div className="flex space-x-2 items-center">
+                <span className="text-lg font-bold">{parseFloat(value.price).toLocaleString()} VND</span>
+                {value.discount > 0 && <Tag color="red" className="ml-2">-{value.discount}%</Tag>}
+              </div>
+            </div>
+            <div className="flex justify-between items-center mt-2">
+              <h2 className="font-semibold">Số Lượng:</h2>
+              <h2 className="border border-[#ffa39e] rounded-sm bg-[#fff1f0] text-[#cf1322] mt-2 w-[44px] flex justify-center">
+                {value.stock}
+              </h2>
+            </div>
           </div>
         ))}
+
+        {/* Hiển thị album ảnh cho biến thể */}
+        <div className="mt-4">
+          <h2 className="font-bold">Album ảnh:</h2>
+          <div className="flex space-x-2 mt-2">
+            {variant.variation_album_images.map((image, index) => (
+              <Image
+                key={index}
+                src={image}
+                alt={`Album image ${index + 1}`}
+                width={200}
+                height={200}
+                className="rounded border"
+              />
+            ))}
+          </div>
+        </div>
       </div>
     ));
   };
+
 
   const renderDescriptionDetails = () => {
     if (!selectedDescription) return null;
@@ -233,27 +242,25 @@ const ListProducts = () => {
     );
   };
 
-  if (isLoadingProducts) {
-    return (
-      <div className="flex justify-center items-center h-screen">
-        <div className="text-lg font-semibold text-gray-600">Đang tải dữ liệu...</div>
-      </div>
-    );
-  }
-
+  if (isLoading) return <Spin tip="Loading..." className="flex justify-center items-center h-screen" />;
   return (
     <>
       {contextHolder}
-      <div className="w-full max-w-7xl mx-auto px-6 py-10">
-        <h2 className="text-4xl font-extrabold text-center pb-10 text-indigo-600">Quản Lý Sản Phẩm</h2>
-        <div className="bg-white shadow-lg rounded-lg p-6 overflow-x-auto">
-          <Table
-            columns={columns}
-            dataSource={productsData?.data}
-            rowKey="id"
-            pagination={{ pageSize: 10 }}
-          />
+      <div className="w-full mx-auto px-6 py-8">
+        <div className="flex justify-between items-center mb-6">
+          <Button type="primary" onClick={() => navigate('/add')}>
+            Thêm mới
+          </Button>
         </div>
+        <Table
+          columns={columns}
+          dataSource={productsData?.data}
+          rowKey="id"
+          pagination={{
+            pageSize: 7,
+            showTotal: (total) => `Tổng ${total} danh mục`,
+          }}
+        />
       </div>
 
       <Modal

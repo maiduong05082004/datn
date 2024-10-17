@@ -3,10 +3,11 @@ import { CKEditor } from '@ckeditor/ckeditor5-react';
 import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import axios from 'axios';
 import { Form, Input, Button, Checkbox, InputNumber, Upload, Row, Col, DatePicker } from 'antd';
 import { MinusCircleOutlined, UploadOutlined } from '@ant-design/icons';
+import { FormProps } from 'react-hook-form';
 
 interface variantProduct {
   id: number | string;
@@ -58,13 +59,13 @@ const AddProduct = () => {
   const [form] = Form.useForm();
   const [content, setContent] = useState<string>('');
   const [selectedVariantGroup, setSelectedVariantGroup] = useState<any>(null);
-  const [selectedColor, setSelectedColor] = useState<string>(''); // Color selected for variation
+  const [selectedColor, setSelectedColor] = useState<string>(''); 
   const [availableSizes, setAvailableSizes] = useState<any[]>([]);
-  const [sizeData, setSizeData] = useState<any[]>([]); // Store stock, discount, and images
-  const [fileList, setFileList] = useState<any[]>([]); // State to handle image uploads
-  const [albumList, setAlbumList] = useState<any[]>([]); // State to handle album uploads
-  const [customColor, setCustomColor] = useState<string>(''); // For custom colors
-  const [customColors, setCustomColors] = useState<string[]>([]); // List of custom colors
+  const [sizeData, setSizeData] = useState<any[]>([]); 
+  const [fileList, setFileList] = useState<any[]>([]); 
+  const [albumList, setAlbumList] = useState<any[]>([]); 
+  const [customColor, setCustomColor] = useState<string>(''); 
+  const [customColors, setCustomColors] = useState<string[]>([]); 
   const [showVariantForm, setShowVariantForm] = useState<boolean>(true);
 
   const { data: variantgroup, isLoading: isLoadingVariantGroup } = useQuery({
@@ -82,6 +83,29 @@ const AddProduct = () => {
       return response?.data;
     },
   });
+  const { mutate } = useMutation({
+    mutationFn: async (data: variantProduct) => {
+      const response = await axios.post('http://localhost:8000/api/admins/products', data);
+      return response.data;
+    },
+    onSuccess: () => {
+      toast.success('Thêm sản phẩm thành công!');
+      form.resetFields();
+      setContent('');
+      setSelectedVariantGroup(null);
+      setSelectedColor('');
+      setAvailableSizes([]);
+      setSizeData([]);
+      setFileList([]);
+      setAlbumList([]);
+      setCustomColors([]);
+      setShowVariantForm(true);
+    },
+    onError: (error) => {
+      toast.error('Thêm sản phẩm thất bại!');
+      console.error(error);
+    },
+  })
 
   const handleVariantGroupChange = (e: any) => {
     const groupId = e.target.value;
@@ -97,13 +121,16 @@ const AddProduct = () => {
 
     const sizeAttribute = selectedVariantGroup?.attributes.find(
       (attribute: any) =>
-        attribute.name === 'Kích Thước Quần Áo' || attribute.name === 'Kích Thước giày dép'
+        attribute.name.toLowerCase().includes('kích thước') ||
+        attribute.name.toLowerCase().includes('size')
     );
 
+
     if (sizeAttribute) {
-      setAvailableSizes(Object.values(sizeAttribute.attribute_values));
-      const initialSizeData = Object.values(sizeAttribute.attribute_values).map((size: any) => ({
-        size,
+      setAvailableSizes(sizeAttribute.attribute_values);
+      const initialSizeData = sizeAttribute.attribute_values.map((size: any) => ({
+        sizeId: size.id, // Thêm ID cho kích thước
+        sizeValue: size.value,
         stock: 0,
         discount: 0,
       }));
@@ -111,16 +138,16 @@ const AddProduct = () => {
     }
   };
 
-  const handleStockChange = (size: string, value: number) => {
+  const handleStockChange = (sizeId: number, value: number) => {
     const newSizeData = sizeData.map((data) =>
-      data.size === size ? { ...data, stock: value } : data
+      data.sizeId === sizeId ? { ...data, stock: value } : data
     );
     setSizeData(newSizeData);
   };
 
-  const handleDiscountChange = (size: string, value: number) => {
+  const handleDiscountChange = (sizeId: number, value: number) => {
     const newSizeData = sizeData.map((data) =>
-      data.size === size ? { ...data, discount: value } : data
+      data.sizeId === sizeId ? { ...data, discount: value } : data
     );
     setSizeData(newSizeData);
   };
@@ -133,36 +160,46 @@ const AddProduct = () => {
     setAlbumList(fileList);
   };
 
+  const toggleVariantForm = () => {
+    setShowVariantForm(!showVariantForm);
+  };
   const onFinish = (values: any) => {
-    const variationsData = sizeData.reduce((acc: any, curr: any) => {
-      const { size, stock, discount } = curr;
-      if (!acc[selectedColor]) {
-        acc[selectedColor] = {};
+    const variationsData: any = {};
+
+    sizeData.forEach((curr: any) => {
+      const { sizeId, stock, discount } = curr;
+
+      if (!variationsData[selectedColor]) {
+        variationsData[selectedColor] = {};
       }
-      acc[selectedColor][size] = { stock, discount };
-      return acc;
-    }, {});
+
+      variationsData[selectedColor][sizeId] = { stock, discount };
+    });
 
     const imageFields = {
-      [`color_image_${selectedColor}`]: fileList.length > 0 ? fileList[0].url || fileList[0].thumbUrl : '',
-      [`album_images_${selectedColor}`]: albumList.map(file => file.url || file.thumbUrl),
+      [`color_image_${selectedColor}`]: fileList.length > 0 ? fileList[0].url || '' : '',
+
+      [`album_images_${selectedColor}`]: albumList.map(file => file.url || '').filter(url => url !== ''),
     };
+
+
+
+
+    const formattedDate = values.input_day ? values.input_day.format('YYYY-MM-DD') : null;
 
     const finalData = {
       ...values,
+      input_day: formattedDate,
       content,
       variations: JSON.stringify(variationsData),
       group_id: selectedVariantGroup?.group_id,
       ...imageFields,
     };
 
-    console.log('Final data to be sent:', finalData);
-  };
+    console.log("Final data to be sent:", finalData);
 
-  const toggleVariantForm = () => {
-    setShowVariantForm(!showVariantForm); // Toggle the visibility
+    mutate(finalData);
   };
-
   if (isLoadingVariantGroup || isLoadingCategories) return <div>Loading...</div>;
 
   return (
@@ -294,9 +331,9 @@ const AddProduct = () => {
                           {selectedVariantGroup.attributes
                             .filter((attribute: any) => attribute.name === 'Màu Sắc')
                             .flatMap((attribute: any) =>
-                              Object.entries(attribute.attribute_values).map(([colorId, color]: any) => (
-                                <option key={colorId} value={color}>
-                                  {color}
+                              attribute.attribute_values.map((color: any) => (
+                                <option key={color.id} value={color.id}>
+                                  {color.value}
                                 </option>
                               ))
                             )}
@@ -336,21 +373,21 @@ const AddProduct = () => {
                       <div className="mt-4">
                         <label className="font-bold block mb-2 text-gray-700">Kích thước, Số lượng, Giảm giá</label>
                         {availableSizes.map((size: any) => (
-                          <div key={size} className="flex justify-between items-center space-x-4 mb-4">
+                          <div key={size.id} className="flex justify-between items-center space-x-4 mb-4">
                             <label htmlFor="Kích Thước" className="text-gray-600">Kích Thước</label>
-                            <Checkbox>{size}</Checkbox>
+                            <Checkbox>{size.value}</Checkbox>
                             <InputNumber
                               placeholder="Số lượng"
                               min={0}
                               className="w-24 border border-gray-300 rounded-md p-1"
-                              onChange={(value: any) => handleStockChange(size, value)}
+                              onChange={(value: any) => handleStockChange(size.id, value)}
                             />
                             <InputNumber
                               placeholder="Giảm giá (%)"
                               min={0}
                               max={100}
                               className="w-24 border border-gray-300 rounded-md p-1"
-                              onChange={(value: any) => handleDiscountChange(size, value)}
+                              onChange={(value: any) => handleDiscountChange(size.id, value)}
                             />
                             <Button type="primary" icon={<MinusCircleOutlined />} className="bg-red-500 hover:bg-red-600">
                               Xóa
@@ -427,7 +464,7 @@ const AddProduct = () => {
           </Row>
 
           <Form.Item>
-            <Button type="primary" htmlType="submit">
+            <Button type="primary" className='bg-black' htmlType="submit">
               Thêm sản phẩm
             </Button>
           </Form.Item>
