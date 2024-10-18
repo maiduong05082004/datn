@@ -129,7 +129,7 @@ const AddProduct = () => {
     if (sizeAttribute) {
       setAvailableSizes(sizeAttribute.attribute_values);
       const initialSizeData = sizeAttribute.attribute_values.map((size: any) => ({
-        sizeId: size.id, // Thêm ID cho kích thước
+        sizeId: size.id,
         sizeValue: size.value,
         stock: 0,
         discount: 0,
@@ -196,7 +196,6 @@ const AddProduct = () => {
       ...imageFields,
     };
 
-    console.log("Final data to be sent:", finalData);
 
     mutate(finalData);
   };
@@ -206,7 +205,7 @@ const AddProduct = () => {
     <>
       <div className="container mx-auto">
         <ToastContainer />
-        <h2 className="text-2xl font-bold mb-6">Thêm sản phẩm</h2>
+        <h2 className="text-4xl font-bold mb-6 ">Thêm sản phẩm</h2>
 
         <Form
           form={form}
@@ -297,7 +296,7 @@ const AddProduct = () => {
             </Col>
 
             <Col span={12}>
-              <div className="bg-green-100 p-6 rounded-lg mb-8 shadow-md">
+              <div className="bg-green-100 p-6 rounded-lg mb-8 shadow-md mt-7">
                 <div className="flex justify-between items-center mb-4">
                   <h3 className="text-2xl font-bold text-green-800">Biến thể sản phẩm</h3>
                   <Button onClick={toggleVariantForm} type="default">

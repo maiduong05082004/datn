@@ -28,7 +28,6 @@ const ListCategories: React.FC = () => {
     },
   });
 
-  // Mutation to delete category
   const { mutate: deleteCategory } = useMutation({
     mutationFn: async (id: number) => {
       await axios.delete(`http://127.0.0.1:8000/api/admins/categories/${id}`);
@@ -43,20 +42,25 @@ const ListCategories: React.FC = () => {
     },
   });
 
-  // Helper function to get category name by ID
+  const handleDelete = (category: Category) => {
+    if (category.children_recursive.length > 0) {
+      messageApi.warning('Không thể xóa danh mục này. Vui lòng xóa các danh mục con trước.');
+      return;
+    }
+    deleteCategory(category.id);
+  };
+
   const getCategoryNameById = (id: number | null): string | null => {
     const category = categories.find((cat) => cat.id === id);
     return category ? category.name : '';
   };
 
-  // Convert recursive children to tree data
   const convertToTreeData = (categories: Category[]): Category[] => {
     return categories.map((category) => ({
       ...category,
-      children:
-        category.children_recursive.length > 0
-          ? convertToTreeData(category.children_recursive)
-          : undefined,
+      children: category.children_recursive.length
+        ? convertToTreeData(category.children_recursive)
+        : undefined,
     }));
   };
 
@@ -82,8 +86,8 @@ const ListCategories: React.FC = () => {
       title: 'Ảnh',
       dataIndex: 'image',
       key: 'image',
-      render: (image: string | null, record: Category) =>
-        record.parent_id === null && image ? (
+      render: (image: string | null) =>
+        image ? (
           <Image
             width={90}
             height={90}
@@ -101,7 +105,7 @@ const ListCategories: React.FC = () => {
           <Popconfirm
             title="Xóa danh mục"
             description="Bạn có chắc muốn xóa danh mục này không?"
-            onConfirm={() => deleteCategory(category.id)}
+            onConfirm={() => handleDelete(category)}
             okText="Có"
             cancelText="Không"
           >

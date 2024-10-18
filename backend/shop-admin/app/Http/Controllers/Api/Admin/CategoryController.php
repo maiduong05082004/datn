@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Controllers\Api\Admin;
 
 use App\Http\Controllers\Controller;
@@ -19,7 +20,7 @@ class CategoryController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:255',
-            'status' => 'required|boolean',
+            'status' => 'required|in:0,1',
             'parent_id' => 'nullable|exists:categories,id',
             'image' => 'nullable|image|max:2048',
         ]);
@@ -29,7 +30,7 @@ class CategoryController extends Controller
         // Xử lý ảnh từ file hoặc URL
         if ($request->hasFile('image')) {
             $data['image'] = $request->file('image')->store('categories', 'public');
-        } else{
+        } else {
             return response()->json(['error' => 'Không có ảnh được tải lên.'], 400);
         }
 
@@ -63,10 +64,10 @@ class CategoryController extends Controller
                 Storage::disk('public')->delete($category->image);
             }
             $data['image'] = $request->file('image')->store('categories', 'public');
-        } else{
+        } else {
             return response()->json(['error' => 'Không có ảnh được tải lên.'], 400);
         }
-    
+
 
         $category->update($data);
         return response()->json($category, 200);
@@ -74,26 +75,26 @@ class CategoryController extends Controller
 
 
     public function destroy($id)
-{
-    $category = Category::findOrFail($id);
+    {
+        $category = Category::findOrFail($id);
 
-    if ($category->children()->exists()) {
-        return response()->json([
-            'error' => 'Không thể xóa danh mục vì nó có danh mục con.'
-        ], 400);
+        if ($category->children()->exists()) {
+            return response()->json([
+                'error' => 'Không thể xóa danh mục vì nó có danh mục con.'
+            ], 400);
+        }
+
+        if ($category->products()->exists()) {
+            return response()->json([
+                'error' => 'Không thể xóa danh mục vì nó có sản phẩm liên quan.'
+            ], 400);
+        }
+
+        $category->delete();
+
+        return response()->json(['message' => 'Danh mục đã được xóa thành công.'], 200);
     }
 
-    if ($category->products()->exists()) {
-        return response()->json([
-            'error' => 'Không thể xóa danh mục vì nó có sản phẩm liên quan.'
-        ], 400);
-    }
-
-    $category->delete();
-
-    return response()->json(['message' => 'Danh mục đã được xóa thành công.'], 200);
-}
-    
 
     public function subcategories($id)
     {
@@ -108,7 +109,7 @@ class CategoryController extends Controller
         $category->restore();
         return response()->json(['message' => 'Danh mục đã được xóa thành công'], 200);
     }
-    
+
 
     public function trash()
     {
@@ -124,19 +125,19 @@ class CategoryController extends Controller
     public function softDestroy($id)
     {
         $category = Category::findOrFail($id);
-    
+
         if ($category->children()->exists()) {
             return response()->json([
                 'message' => 'Không thể xóa danh mục vì nó có danh mục con.'
             ], 400);
         }
-    
+
         if ($category->products()->exists()) {
             return response()->json([
                 'message' => 'Không thể xóa danh mục vì nó có sản phẩm liên quan.'
             ], 400);
         }
-    
+
         $category->delete();
         return response()->json([
             'message' => 'Danh mục đã được thêm vào thùng rác thành công.'

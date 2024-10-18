@@ -5,6 +5,7 @@ import axios from 'axios';
 import { format } from 'date-fns';
 import { keys } from 'lodash';
 import { useNavigate } from 'react-router-dom';
+import { PlusOutlined } from '@ant-design/icons';
 
 interface Product {
   id: number;
@@ -248,13 +249,14 @@ const ListProducts = () => {
       {contextHolder}
       <div className="w-full mx-auto px-6 py-8">
         <div className="flex justify-between items-center mb-6">
-          <Button type="primary" onClick={() => navigate('/add')}>
+            <Button icon={<PlusOutlined />} type="primary"onClick={() => navigate('admin/addProducts')}className="bg-indigo-600 hover:bg-indigo-700 text-white">
             Thêm mới
           </Button>
         </div>
         <Table
           columns={columns}
           dataSource={productsData?.data}
+          bordered
           rowKey="id"
           pagination={{
             pageSize: 7,
