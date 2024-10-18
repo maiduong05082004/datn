@@ -1,23 +1,38 @@
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 
 type Props = {}
 
 const HomePage = (props: Props) => {
-   // Load dau trang
-   useEffect(() => {
+
+  const [categoryId, setCategoryId] = useState<any>({})
+
+  // Load dau trang
+  useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
 
-const {data: home} = useQuery({
-  queryKey: ["home"],
-  queryFn: async () => {
-    return await axios.get(`http://127.0.0.1:8000/api/client/home`)
-  }
-})
+  const { data: home } = useQuery({
+    queryKey: ["home"],
+    queryFn: async () => {
+      return await axios.get(`http://127.0.0.1:8000/api/client/home`)
+    }
+  })
 
-console.log(home);
+  // console.log(home?.data?.products_new_category.find((item: any) => item));
+  console.log(categoryId)
+
+
+  useEffect(() => {
+    if (home?.data?.products_new_category) {
+      const foundCategory = home.data.products_new_category.find((item: any) => item);
+      if (foundCategory) {
+        setCategoryId(foundCategory);
+      }
+    }
+  }, [home?.data?.products_new_category]);
 
   return (
     <main>
@@ -43,214 +58,64 @@ console.log(home);
             <div className="mb-[20px] lg:mb-[24px] lg:flex lg:justify-between lg:items-center">
               <h3 className='font-[600] text-[24px] lg:text-[32px]'>HÀNG MỚI VỀ</h3>
               <div className="flex gap-2.5 justify-start mt-[10px] font-[600] *:rounded-[25px] *:border-black *:border-[1px] *:py-[5px] *:leading-8 *:px-[15px] lg:mt-[0] *:lg:py-[0]">
-                <div className="bg-black text-white">QUẦN ÁO</div>
-                <div className="">NÓN</div>
-                <div className="">GIÀY</div>
-                <div className="">TÚI</div>
+                {home?.data?.products_new_category.map((item: any) => (
+                  item.name === "GIẢM GIÁ" || item.name === "PHỤ KIỆN" ? null : (
+                    <div onClick={() => setCategoryId(item)} className={`${item.name === categoryId.name ? "bg-black text-white" : "bg-white text-black"}`} >{item.name}</div>
+                  )
+                ))}
               </div>
             </div>
-            <div className="-mx-[15px] overflow-x-auto whitespace-nowrap flex scrollbar lg:mx-[0]">
-              <div className="w-[100%] shrink-0 lg:grid lg:grid-cols-12">
 
-                <div className="lg:col-span-7">
-                  <picture>
-                    <img className='w-full' src="https://file.hstatic.net/200000642007/file/quan-ao-675x873_ce48dc1bbd84421eab39bc6ab6487ce8.jpg" alt="" />
-                  </picture>
-                </div>
+            {home?.data.products_new_category.map((item: any) => (
+              <div className={`${item.name === categoryId.name ? "" : "hidden"} -mx-[15px] overflow-x-auto whitespace-nowrap flex scrollbar lg:mx-[0]`}>
+                <div className="w-[100%] shrink-0 lg:grid lg:grid-cols-12">
 
-                <div className="lg:col-span-5">
-                  <div className="pt-[10px] overflow-x-auto whitespace-nowrap scrollbar flex gap-2 grid-">
+                  <Link to={`/categories/${item.category_id}`} className="lg:col-span-7 relative group cursor-pointer">
+                    <picture className="">
+                      <img className='w-full' src={item.image_path} alt="" />
+                    </picture>
+                    <div className="absolute top-0 left-0 w-full h-full group-hover:bg-black opacity-0 group-hover:opacity-50 transition-opacity duration-300">
+                      <div className="text-white font-[700] absolute top-[50%] left-[50%] translate-x-[-50%] translate-y-[-50%] p-[15px_35px] border-[1px] rounded-[5px]">Xem tất cả</div>
+                    </div>
+                  </Link>
 
-                    <div className="max-w-[33.333%] grow-0 basis-[33.333%] shrink-0 relative ">
-                      <div className="absolute top-[16px] right-[16px]">
-                        <div className="bg-black flex justify-center w-[40px] h-[40px] rounded-[100%] items-center opacity-10">
-                          <div className="w-[24px] h-[24px]">
-                            <img src="https://file.hstatic.net/200000642007/file/shopping-cart_3475f727ea204ccfa8fa7c70637d1d06.svg" alt="" />
+                  <div className="lg:col-span-5">
+
+                    <div className="pt-[10px] overflow-x-auto whitespace-nowrap scrollbar flex gap-2 grid-">
+                      {item.products.map((item: any) => (
+                        <>
+                          <div className="max-w-[33.333%] grow-0 basis-[33.333%] shrink-0 relative ">
+                            <div className="absolute top-[16px] right-[16px]">
+                              <div className="bg-black flex justify-center w-[40px] h-[40px] rounded-[100%] items-center opacity-10">
+                                <div className="w-[24px] h-[24px]">
+                                  <img src="https://file.hstatic.net/200000642007/file/shopping-cart_3475f727ea204ccfa8fa7c70637d1d06.svg" alt="" />
+                                </div>
+                              </div>
+                            </div>
+                            <div className="">
+                              <picture>
+                                <div className="pt-[124%] bg-cover bg-center bg-no-repeat" style={{ backgroundImage: `url(${item?.variations[0]?.variation_album_images[0]})`, }}></div>
+                              </picture>
+                            </div>
+                            <div className="w-[100%] text-wrap px-[8px] pt-[10px]">
+                              <h4 className='description mb-[30px] text-[14px] font-[600]'>{item.name}</h4>
+                              <div className="flex gap-1 justify-start">
+                                <div className="w-[12px] h-[12px] rounded-[100%] border-black border-[6px] bg-black"></div>
+                                <div className="w-[12px] h-[12px] rounded-[100%] border-red-500 border-[6px] bg-red-500"></div>
+                              </div>
+                            </div>
                           </div>
-                        </div>
-                      </div>
-                      <div className="">
-                        <picture>
-                          <div className="pt-[124%] bg-cover bg-center bg-no-repeat" style={{ backgroundImage: "url('https://product.hstatic.net/200000642007/product/50ivs_3atsv2143_1_bc24aeae61864aac8fd717a2e5837448_34181f53e68d4b439b1bc95d333cbd79_grande.jpg')", }}></div>
-                        </picture>
-                      </div>
-                      <div className="w-[100%] text-wrap px-[8px] pt-[10px]">
-                        <h4 className='description mb-[30px] text-[14px] font-[600]'>MLB - Áo thun cổ tròn tay ngắn Varsity Number Overfit</h4>
-                        <div className="flex gap-1 justify-start">
-                          <div className="w-[12px] h-[12px] rounded-[100%] border-black border-[6px] bg-black"></div>
-                          <div className="w-[12px] h-[12px] rounded-[100%] border-red-500 border-[6px] bg-red-500"></div>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="max-w-[33.333%] grow-0 basis-[33.333%] shrink-0 relative">
-                      <div className="absolute top-[16px] right-[16px]">
-                        <div className="bg-black flex justify-center w-[40px] h-[40px] rounded-[100%] items-center opacity-10">
-                          <div className="w-[24px] h-[24px]">
-                            <img src="https://file.hstatic.net/200000642007/file/shopping-cart_3475f727ea204ccfa8fa7c70637d1d06.svg" alt="" />
-                          </div>
-                        </div>
-                      </div>
-                      <div className="">
-                        <picture>
-                          <div className="pt-[124%] bg-cover bg-center bg-no-repeat" style={{ backgroundImage: "url('https://product.hstatic.net/200000642007/product/50ivs_3atsv2143_1_bc24aeae61864aac8fd717a2e5837448_34181f53e68d4b439b1bc95d333cbd79_grande.jpg')", }}></div>
-                        </picture>
-                      </div>
-                      <div className="w-[100%] text-wrap px-[8px] pt-[10px]">
-                        <h4 className='description mb-[30px] text-[14px] font-[600]'>MLB - Áo thun cổ tròn tay ngắn Varsity Number Overfit</h4>
-                        <div className="flex gap-1 justify-start">
-                          <div className="w-[12px] h-[12px] rounded-[100%] border-black border-[6px] bg-black"></div>
-                          <div className="w-[12px] h-[12px] rounded-[100%] border-red-500 border-[6px] bg-red-500"></div>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="max-w-[33.333%] grow-0 basis-[33.333%] shrink-0 relative">
-                      <div className="absolute top-[16px] right-[16px]">
-                        <div className="bg-black flex justify-center w-[40px] h-[40px] rounded-[100%] items-center opacity-10">
-                          <div className="w-[24px] h-[24px]">
-                            <img src="https://file.hstatic.net/200000642007/file/shopping-cart_3475f727ea204ccfa8fa7c70637d1d06.svg" alt="" />
-                          </div>
-                        </div>
-                      </div>
-                      <div className="">
-                        <picture>
-                          <div className="pt-[124%] bg-cover bg-center bg-no-repeat" style={{ backgroundImage: "url('https://product.hstatic.net/200000642007/product/50ivs_3atsv2143_1_bc24aeae61864aac8fd717a2e5837448_34181f53e68d4b439b1bc95d333cbd79_grande.jpg')", }}></div>
-                        </picture>
-                      </div>
-                      <div className="w-[100%] text-wrap px-[8px] pt-[10px]">
-                        <h4 className='description mb-[30px] text-[14px] font-[600]'>MLB - Áo thun cổ tròn tay ngắn Varsity Number Overfit</h4>
-                        <div className="flex gap-1 justify-start">
-                          <div className="w-[12px] h-[12px] rounded-[100%] border-black border-[6px] bg-black"></div>
-                          <div className="w-[12px] h-[12px] rounded-[100%] border-red-500 border-[6px] bg-red-500"></div>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="max-w-[33.333%] grow-0 basis-[33.333%] shrink-0 relative">
-                      <div className="absolute top-[16px] right-[16px]">
-                        <div className="bg-black flex justify-center w-[40px] h-[40px] rounded-[100%] items-center opacity-10">
-                          <div className="w-[24px] h-[24px]">
-                            <img src="https://file.hstatic.net/200000642007/file/shopping-cart_3475f727ea204ccfa8fa7c70637d1d06.svg" alt="" />
-                          </div>
-                        </div>
-                      </div>
-                      <div className="">
-                        <picture>
-                          <div className="pt-[124%] bg-cover bg-center bg-no-repeat" style={{ backgroundImage: "url('https://product.hstatic.net/200000642007/product/50ivs_3atsv2143_1_bc24aeae61864aac8fd717a2e5837448_34181f53e68d4b439b1bc95d333cbd79_grande.jpg')", }}></div>
-                        </picture>
-                      </div>
-                      <div className="w-[100%] text-wrap px-[8px] pt-[10px]">
-                        <h4 className='description mb-[30px] text-[14px] font-[600]'>MLB - Áo thun cổ tròn tay ngắn Varsity Number Overfit</h4>
-                        <div className="flex gap-1 justify-start">
-                          <div className="w-[12px] h-[12px] rounded-[100%] border-black border-[6px] bg-black"></div>
-                          <div className="w-[12px] h-[12px] rounded-[100%] border-red-500 border-[6px] bg-red-500"></div>
-                        </div>
-                      </div>
+                        </>
+                      ))}
+
                     </div>
 
                   </div>
+
                 </div>
 
               </div>
-
-              {/* <div className="w-[100%] shrink-0">
-                <div className="">
-                  <picture>
-                    <img className='w-full h-full' src="https://file.hstatic.net/200000642007/file/quan-ao-675x873_ce48dc1bbd84421eab39bc6ab6487ce8.jpg" alt="" />
-                  </picture>
-                </div>
-                <div className="">
-                  <div className="pt-[10px] overflow-x-auto whitespace-nowrap scrollbar flex gap-1">
-
-                    <div className="w-[38.2%] shrink-0 relative">
-                      <div className="absolute top-[16px] right-[16px]">
-                        <div className="bg-black flex justify-center w-[40px] h-[40px] rounded-[100%] items-center opacity-10">
-                          <div className="w-[24px] h-[24px]">
-                            <img src="https://file.hstatic.net/200000642007/file/shopping-cart_3475f727ea204ccfa8fa7c70637d1d06.svg" alt="" />
-                          </div>
-                        </div>
-                      </div>
-                      <div className="">
-                        <picture>
-                          <div className="pt-[124%] bg-cover bg-center bg-no-repeat" style={{ backgroundImage: "url('https://product.hstatic.net/200000642007/product/50ivs_3atsv2143_1_bc24aeae61864aac8fd717a2e5837448_34181f53e68d4b439b1bc95d333cbd79_grande.jpg')", }}></div>
-                        </picture>
-                      </div>
-                      <div className="w-[100%] text-wrap px-[8px] pt-[10px]">
-                        <h4 className='description mb-[30px] text-[14px] font-[600]'>MLB - Áo thun cổ tròn tay ngắn Varsity Number Overfit</h4>
-                        <div className="flex gap-1 justify-start">
-                          <div className="w-[12px] h-[12px] rounded-[100%] border-black border-[6px] bg-black"></div>
-                          <div className="w-[12px] h-[12px] rounded-[100%] border-red-500 border-[6px] bg-red-500"></div>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="w-[38.2%] shrink-0 relative">
-                      <div className="absolute top-[16px] right-[16px]">
-                        <div className="bg-black flex justify-center w-[40px] h-[40px] rounded-[100%] items-center opacity-10">
-                          <div className="w-[24px] h-[24px]">
-                            <img src="https://file.hstatic.net/200000642007/file/shopping-cart_3475f727ea204ccfa8fa7c70637d1d06.svg" alt="" />
-                          </div>
-                        </div>
-                      </div>
-                      <div className="">
-                        <picture>
-                          <div className="pt-[124%] bg-cover bg-center bg-no-repeat" style={{ backgroundImage: "url('https://product.hstatic.net/200000642007/product/50ivs_3atsv2143_1_bc24aeae61864aac8fd717a2e5837448_34181f53e68d4b439b1bc95d333cbd79_grande.jpg')", }}></div>
-                        </picture>
-                      </div>
-                      <div className="w-[100%] text-wrap px-[8px] pt-[10px]">
-                        <h4 className='description mb-[30px] text-[14px] font-[600]'>MLB - Áo thun cổ tròn tay ngắn Varsity Number Overfit</h4>
-                        <div className="flex gap-1 justify-start">
-                          <div className="w-[12px] h-[12px] rounded-[100%] border-black border-[6px] bg-black"></div>
-                          <div className="w-[12px] h-[12px] rounded-[100%] border-red-500 border-[6px] bg-red-500"></div>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="w-[38.2%] shrink-0 relative">
-                      <div className="absolute top-[16px] right-[16px]">
-                        <div className="bg-black flex justify-center w-[40px] h-[40px] rounded-[100%] items-center opacity-10">
-                          <div className="w-[24px] h-[24px]">
-                            <img src="https://file.hstatic.net/200000642007/file/shopping-cart_3475f727ea204ccfa8fa7c70637d1d06.svg" alt="" />
-                          </div>
-                        </div>
-                      </div>
-                      <div className="">
-                        <picture>
-                          <div className="pt-[124%] bg-cover bg-center bg-no-repeat" style={{ backgroundImage: "url('https://product.hstatic.net/200000642007/product/50ivs_3atsv2143_1_bc24aeae61864aac8fd717a2e5837448_34181f53e68d4b439b1bc95d333cbd79_grande.jpg')", }}></div>
-                        </picture>
-                      </div>
-                      <div className="w-[100%] text-wrap px-[8px] pt-[10px]">
-                        <h4 className='description mb-[30px] text-[14px] font-[600]'>MLB - Áo thun cổ tròn tay ngắn Varsity Number Overfit</h4>
-                        <div className="flex gap-1 justify-start">
-                          <div className="w-[12px] h-[12px] rounded-[100%] border-black border-[6px] bg-black"></div>
-                          <div className="w-[12px] h-[12px] rounded-[100%] border-red-500 border-[6px] bg-red-500"></div>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="w-[38.2%] shrink-0 relative">
-                      <div className="absolute top-[16px] right-[16px]">
-                        <div className="bg-black flex justify-center w-[40px] h-[40px] rounded-[100%] items-center opacity-10">
-                          <div className="w-[24px] h-[24px]">
-                            <img src="https://file.hstatic.net/200000642007/file/shopping-cart_3475f727ea204ccfa8fa7c70637d1d06.svg" alt="" />
-                          </div>
-                        </div>
-                      </div>
-                      <div className="">
-                        <picture>
-                          <div className="pt-[124%] bg-cover bg-center bg-no-repeat" style={{ backgroundImage: "url('https://product.hstatic.net/200000642007/product/50ivs_3atsv2143_1_bc24aeae61864aac8fd717a2e5837448_34181f53e68d4b439b1bc95d333cbd79_grande.jpg')", }}></div>
-                        </picture>
-                      </div>
-                      <div className="w-[100%] text-wrap px-[8px] pt-[10px]">
-                        <h4 className='description mb-[30px] text-[14px] font-[600]'>MLB - Áo thun cổ tròn tay ngắn Varsity Number Overfit</h4>
-                        <div className="flex gap-1 justify-start">
-                          <div className="w-[12px] h-[12px] rounded-[100%] border-black border-[6px] bg-black"></div>
-                          <div className="w-[12px] h-[12px] rounded-[100%] border-red-500 border-[6px] bg-red-500"></div>
-                        </div>
-                      </div>
-                    </div>
-
-                  </div>
-                </div>
-
-              </div> */}
-
-            </div>
+            ))}
           </div>
         </div>
       </section>
@@ -456,7 +321,7 @@ console.log(home);
       <section>
         <div className="pt-[40px]">
           <div className="px-[15px] pc:px-[48px]">
-            
+
             <div className="mb-[20px] lg:flex lg:justify-between lg:items-center">
               <h3 className='font-[600] text-[24px] lg:text-[32px]'>HÀNG BÁN CHẠY</h3>
               <div className="flex overflow-x-auto whitespace-nowrap scrollbar">
