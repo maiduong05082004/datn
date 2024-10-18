@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import axios from 'axios';
-import { Button, Form, Input, Select, message, Spin, Radio } from 'antd';
+import { Button, Form, Input, Select, message, Spin } from 'antd';
 import { useNavigate } from 'react-router-dom';
 
 interface Category {
@@ -17,10 +17,9 @@ const AddCategories: React.FC = () => {
   const [form] = Form.useForm();
   const [messageApi, contextHolder] = message.useMessage();
   const navigate = useNavigate();
-  const [imageUrl, setImageUrl] = useState<string>(''); // State để lưu URL ảnh
+  const [fileUrl, setFileUrl] = useState<string | null>(null);
 
-  // Fetch categories from API
-  const { data: categories, isLoading } = useQuery({
+  const { data: categories, isLoading } = useQuery<Category[]>({
     queryKey: ['categories'],
     queryFn: async () => {
       const response = await axios.get('http://127.0.0.1:8000/api/admins/categories');
@@ -28,36 +27,35 @@ const AddCategories: React.FC = () => {
     },
   });
 
-  // Mutation to add a new category
   const { mutate } = useMutation({
-    mutationFn: async (categoryData: any) => {
-      return await axios.post('http://127.0.0.1:8000/api/admins/categories', categoryData);
+    mutationFn: async (categoryData: FormData) => {
+      return await axios.post('http://127.0.0.1:8000/api/admins/categories', categoryData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
     },
     onSuccess: () => {
       messageApi.success('Thêm danh mục thành công!');
       form.resetFields();
-      setImageUrl(''); // Reset lại URL ảnh
+      setFileUrl(null);
       navigate('/admin/listCategories');
     },
     onError: (error: any) => {
-      messageApi.error(`Lỗi: ${error.message}`);
+      const errorMessage = error.response?.data?.message || `Lỗi: ${error.message}`;
+      messageApi.error(errorMessage);
     },
   });
 
-  // Handle form submission
   const onFinish = (values: any) => {
-    const payload = {
-      name: values.name,
-      status: values.status,
-      parent_id: values.parent_id || null,
-      image: imageUrl, // Gửi URL ảnh vào payload
-    };
+    const formData = new FormData();
+    formData.append('name', values.name);
+    if (values.parent_id) formData.append('parent_id', String(values.parent_id));
+    if (fileUrl) formData.append('image_url', fileUrl);
 
-    mutate(payload);
+    mutate(formData);
   };
 
   if (isLoading) {
-    return <Spin tip="Loading..." className="flex justify-center items-center h-screen" />;
+    return <Spin tip="Đang tải..." className="flex justify-center items-center h-screen" />;
   }
 
   return (
@@ -96,7 +94,7 @@ const AddCategories: React.FC = () => {
                 placeholder="Chọn danh mục cha (nếu có)"
                 size="large"
                 className="w-full border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-400"
-                options={categories.map((cat: Category) => ({
+                options={categories?.map((cat) => ({
                   value: cat.id,
                   label: cat.name,
                 }))}
@@ -104,28 +102,11 @@ const AddCategories: React.FC = () => {
             </Form.Item>
 
             <Form.Item
-              label={<span className="font-medium text-gray-700">Ảnh (URL)</span>}
+              label={<span className="font-medium text-gray-700">Ảnh</span>}
               name="image"
-              rules={[{ required: true, message: 'URL ảnh là bắt buộc' }]}
+              rules={[{ required: true, message: 'Ảnh là bắt buộc' }]}
             >
-              <Input
-                placeholder="Nhập URL ảnh"
-                size="large"
-                value={imageUrl}
-                onChange={(e) => setImageUrl(e.target.value)} 
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400"
-              />
-            </Form.Item>
-
-            <Form.Item
-              label={<span className="font-medium text-gray-700">Trạng thái</span>}
-              name="status"
-              rules={[{ required: true, message: 'Trạng thái là bắt buộc' }]}
-            >
-              <Radio.Group>
-                <Radio value={true}>Hoạt động</Radio>
-                <Radio value={false}>Không hoạt động</Radio>
-              </Radio.Group>
+              <input type="file"/>
             </Form.Item>
 
             <Form.Item>

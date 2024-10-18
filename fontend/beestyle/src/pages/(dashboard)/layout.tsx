@@ -32,8 +32,6 @@ const items1: MenuProps['items'] = [
     children: [
       { key: 'sub1-1', label: <NavLink to="/admin/listUser">Danh sách tài Khoản</NavLink> },
       { key: 'sub1-2', label: <NavLink to="/admin/addUser">Thêm Tài Khoản</NavLink> },
-      { key: 'sub1-3', label: <NavLink to="/admin/updateUser">Cập nhật Tài Khoản</NavLink> },
-      { key: 'sub1-4', label: <NavLink to="/admin/delete-account">Xóa Tài Khoản</NavLink> },
     ],
   },
   {
@@ -42,10 +40,8 @@ const items1: MenuProps['items'] = [
     label: "Banners",
     children: [
 
-      { key: 'sub2-1', label: <NavLink to="/admin/listBanners">Danh sách Banners</NavLink> },
-      { key: 'sub2-2', label: <NavLink to="/admin/addBanners">Thêm Banners</NavLink> },
-      { key: 'sub2-3', label: <NavLink to="/admin/updateBanners">Cập nhật Banners</NavLink> },
-      { key: 'sub2-4', label: <NavLink to="/admin/delete-account">Xóa Tài Khoản</NavLink> },
+      { key: 'sub2-1', label: <NavLink to="/admin/listbanners">Danh sách Banners</NavLink> },
+      { key: 'sub2-2', label: <NavLink to="/admin/addbanners">Thêm Banners</NavLink> },
     ],
   },
   {
@@ -55,7 +51,6 @@ const items1: MenuProps['items'] = [
     children: [
       { key: 'sub3-1', label: <NavLink to="/admin/listProducts">Danh sách sản phẩm</NavLink> },
       { key: 'sub3-2', label: <NavLink to="/admin/addProducts">Thêm Sản phẩm</NavLink> },
-      { key: 'sub3-3', label: <NavLink to="/admin/updateProducts">Cập nhật sản phẩm</NavLink> },
 
     ],
   },
@@ -66,9 +61,7 @@ const items1: MenuProps['items'] = [
     children: [
       { key: 'sub4-1', label: <NavLink to="/admin/listattribute_value">Danh sách Attribute</NavLink> },
       { key: 'sub4-2', label: <NavLink to="/admin/addattribute_value">Thêm Attribute_values</NavLink> },
-      { key: 'sub4-3', label: <NavLink to="/admin/updateProducts_value">Cập Nhật Attribute_values</NavLink> },
       { key: 'sub4-4', label: <NavLink to="/admin/addattribute">Thêm Atrribute</NavLink> },
-      { key: 'sub4-5', label: <NavLink to="/admin/updateProducts">Update Atrribute</NavLink> },
 
     ],
   },
@@ -79,7 +72,6 @@ const items1: MenuProps['items'] = [
     children: [
       { key: 'sub5-1', label: <NavLink to="/admin/listCategories">Danh sách danh mục</NavLink> },
       { key: 'sub5-2', label: <NavLink to="/admin/addCategories">Thêm mới danh mục</NavLink> },
-      { key: 'sub5-3', label: <NavLink to="/admin/updateCategories">Cập nhật danh mục</NavLink> },
     ],
   },
   {
@@ -88,8 +80,6 @@ const items1: MenuProps['items'] = [
     label: 'Đơn Hàng',
     children: [
       { key: 'sub6-1', label: <NavLink to="/admin/listBills">Danh sách đơn hàng</NavLink> },
-      { key: 'sub6-2', label: <NavLink to="/admin">Danh sách</NavLink> },
-      { key: 'sub6-3', label: 'Xóa Đơn Hàng' },
     ],
   },
   {
@@ -109,7 +99,6 @@ const items1: MenuProps['items'] = [
     children: [
       { key: 'sub8-1', label: <NavLink to="/admin/listBanners">Danh sách</NavLink> },
       { key: 'sub8-2', label: <NavLink to="/admin/addBanners">Thêm mới</NavLink> },
-      { key: 'sub8-3', label: <NavLink to="/admin/updateBanners">Cập nhật</NavLink> },
       { key: 'sub8-4', label: 'Xóa Khuyến Mại' },
     ],
   },
