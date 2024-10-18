@@ -4,7 +4,9 @@ use App\Http\Controllers\Api\Admin\UserController;
 use App\Http\Controllers\Api\Admin\Product\ProductController;
 use App\Http\Controllers\Api\Client\AuthController;
 use App\Http\Controllers\Api\Admin\AuthController as AdminAuthController;
+use App\Http\Controllers\Api\Admin\Cart\CartController;
 use App\Http\Controllers\Api\Client\CategoryController;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\Admin\CategoryController as AdminCategoryController;
 use App\Http\Controllers\Api\Admin\Product\AttributeController;
@@ -57,43 +59,47 @@ Route::prefix('client')->as('client.')->group(function () {
         Route::get('/showDetail/{id}', [ProductProductController::class, 'showDetail'])->name('showDetail');
     });
 });
-
-
 Route::prefix('admins')
     ->as('admins.')
-    ->group(
-        function () {
-            Route::post('/signin', [AdminAuthController::class, 'login'])->name('signin');
-            Route::middleware(['auth:admin', 'admin'])->group(
-                function () {
-                    Route::apiResource('products', ProductController::class)
-                        ->names('products');
-                    Route::apiResource('attributes', AttributeController::class)
-                        ->names('attributes');
-                    Route::apiResource('attribute_groups', AttributeGroupController::class)
-                        ->names('attribute_groups');
-                    Route::apiResource('attribute_values', AttributeValueController::class)
-                        ->names('attribute_values');
-                    Route::prefix('categories')->group(function () {
-                        Route::post('{id}/soft-delete', [AdminCategoryController::class, 'softDestroy'])->name('categories.soft-delete');
-                        Route::post('{id}/restore', [AdminCategoryController::class, 'restore'])->name('categories.restore');
-                        Route::get('trash', [AdminCategoryController::class, 'trash']);
-                    });
-                    Route::apiResource('categories', AdminCategoryController::class);
+    ->group(function () {
+        Route::post('/signin', [AdminAuthController::class, 'login'])->name('signin');
+        Route::middleware(['auth:admin', 'admin'])->group(function () {
+            Route::apiResource('products', ProductController::class)
+                ->names('products');
+            Route::apiResource('attributes', AttributeController::class)
+                ->names('attributes');
+            Route::apiResource('attribute_groups', AttributeGroupController::class)
+                ->names('attribute_groups');
+            Route::apiResource('attribute_values', AttributeValueController::class)
+                ->names('attribute_values');
+            Route::prefix('categories')->group(function () {
+                Route::post('{id}/soft-delete', [AdminCategoryController::class, 'softDestroy'])->name('categories.soft-delete');
+                Route::post('{id}/restore', [AdminCategoryController::class, 'restore'])->name('categories.restore');
+                Route::get('trash', [AdminCategoryController::class, 'trash']);
+            });
+            Route::apiResource('categories', AdminCategoryController::class);
+            Route::prefix('users')->group(function () {
+                Route::get('/wishlist', [WishlistController::class, 'index'])->name('wishlist.index');
+                Route::get('/', [UserController::class, 'index']);
+                Route::post('/store', [UserController::class, 'store']);
+                Route::get('/{id}', [UserController::class, 'show']);
+                Route::put('/{id}', [UserController::class, 'update']);
 
-                    Route::get('users/', [UserController::class, 'index']);
+                Route::apiResource('users', UserController::class);
 
-                    Route::post('users/', [UserController::class, 'store']);
-                    Route::get('users/{id}', [UserController::class, 'show']);
-                    Route::put('users/{id}', [UserController::class, 'update']);
-                    Route::apiResource('users', UserController::class);
-                    Route::put('user/{id}/block', [UserController::class, 'blockUser']);
-                    Route::put('user/{id}/unblock', [UserController::class, 'unblockUser']);
+                Route::get('/{id}/block', [UserController::class, 'blockUser']);
 
-                    Route::get('/wishlist', [WishlistController::class, 'index'])->name('wishlist.index');
-                    Route::post('/wishlist/add/{id}', [WishlistController::class, 'addToWishlist'])->name('wishlist.add');
-                    Route::delete('/wishlist/remove/{id}', [WishlistController::class, 'removeFromWishlist'])->name('wishlist.remove');
-                }
-            );
-        }
-    );
+                Route::put('/{id}/unblock', [UserController::class, 'unblockUser']);
+                Route::post('/wishlist/add/{id}', [WishlistController::class, 'addToWishlist'])->name('wishlist.add');
+                Route::delete('/wishlist/remove/{id}', [WishlistController::class, 'destroy'])->name('wishlist.remove');
+            });
+
+
+            // Api cart item
+            Route::prefix('cart')->group(function () {
+                Route::get('/', [CartController::class, 'index'])->name('cart.index');
+                Route::post('/add/{productId}', [CartController::class, 'add'])->name('cart.add');
+                Route::delete('/remove/{productId}', [CartController::class, 'destroy'])->name('cart.destroy');
+            });
+        });
+    });

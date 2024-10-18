@@ -44,7 +44,7 @@ class ProductController extends Controller
     public function store(ProductRequest $request)
     {
         DB::beginTransaction();
-    
+
         try {
             // Tạo slug cho sản phẩm
             $slug = $this->generateSeoFriendlySlug($request->name);
@@ -56,51 +56,51 @@ class ProductController extends Controller
                 'content' => $request->content,
                 'input_day' => $request->input_day,
                 'category_id' => $request->category_id,
-                'is_collection' => $request->has('is_collection') ? 1 : 0, 
-                'is_hot' => $request->has('is_hot') ? 1 : 0,               
-                'is_new' => $request->has('is_new') ? 1 : 0,              
+                'is_collection' => $request->has('is_collection') ? 1 : 0,
+                'is_hot' => $request->has('is_hot') ? 1 : 0,
+                'is_new' => $request->has('is_new') ? 1 : 0,
             ]);
-    
+
 
             $hasVariations = $request->has('variations') && !empty($request->variations);
             $variations = json_decode($request->input('variations'), true);
             if (!$hasVariations || !is_array($variations)) {
                 // Cập nhật tồn kho
                 $product->update(['stock' => $request->stock]);
-    
+
                 // Lưu ảnh sản phẩm
                 $this->saveImages($product, $request);
             }
-    
+
 
             if ($hasVariations && is_array($variations)) {
-                $totalProductStock = 0; 
-    
+                $totalProductStock = 0;
+
                 foreach ($variations as $attributeValueId => $sizes) {
 
                     if (!$this->isValidAttributeForGroup($request->group_id, $attributeValueId)) {
                         throw new \Exception("Thuộc tính không hợp lệ cho nhóm đã chọn.");
                     }
-    
+
 
                     $productVariation = ProductVariation::create([
                         'product_id' => $product->id,
                         'group_id' => $request->group_id,
                         'attribute_value_id' => $attributeValueId,
                     ]);
-    
+
 
                     $this->saveImages($productVariation, $request, true, $attributeValueId);
-    
+
 
                     $totalVariationStock = 0;
-    
+
                     // Lưu các size (kích thước) của từng biến thể
                     foreach ($sizes as $sizeId => $details) {
                         if (!empty($details['stock']) && isset($details['discount'])) {
                             $sku = $this->generateVariationSku();
                             $calculatedPrice = $product->price - ($product->price * ($details['discount'] / 100));
-    
+
                             ProductVariationValue::create([
                                 'product_variation_id' => $productVariation->id,
                                 'attribute_value_id' => $sizeId,
@@ -118,9 +118,9 @@ class ProductController extends Controller
                 }
                 $product->update(['stock' => $totalProductStock]);
             }
-    
+
             DB::commit();
-    
+
             return response()->json([
                 'success' => true,
                 'message' => 'Product created successfully',
@@ -134,13 +134,13 @@ class ProductController extends Controller
             ], 500);
         }
     }
-    
+
 
     private function saveImages($model, $request, $isVariation = false, $attributeValueId = null)
     {
         if ($isVariation) {
             $modelType = 'product_variation_id';
-    
+
             // Xử lý ảnh variant (màu sắc)
             $colorImageInput = "color_image_$attributeValueId";
             if ($request->hasFile($colorImageInput)) {
@@ -148,23 +148,23 @@ class ProductController extends Controller
             } elseif (isset($request[$colorImageInput])) {
                 $colorImagePath = $request[$colorImageInput];
             }
-    
+
             if (isset($colorImagePath)) {
                 $existingVariant = ProductVariationImage::where($modelType, $model->id)
                     ->where('image_type', 'variant')
                     ->first();
-    
+
                 if ($existingVariant) {
                     throw new \Exception('Biến thể này đã có ảnh variant. Không thể thêm thêm ảnh variant.');
                 }
-    
+
                 ProductVariationImage::create([
                     $modelType => $model->id,
                     'image_path' => $colorImagePath,
                     'image_type' => 'variant',
                 ]);
             }
-    
+
             // Lưu album hình ảnh cho biến thể
             $albumInput = "album_images_$attributeValueId";
             if ($request->hasFile($albumInput)) {
@@ -187,7 +187,7 @@ class ProductController extends Controller
             }
         } else {
             $modelType = 'product_id';
-    
+
             // Lưu album hình ảnh cho sản phẩm
             $albumInput = 'album_images';
             if ($request->hasFile($albumInput)) {
@@ -210,7 +210,7 @@ class ProductController extends Controller
             }
         }
     }
-    
+
 
 
     private function isValidAttributeForGroup($groupId, $attributeValueId)
@@ -227,14 +227,6 @@ class ProductController extends Controller
         return $attributeGroup ? true : false;
     }
 
-
-
-
-
-
-
-
-
     public function show(string $id)
     {
         $product = Product::with([
@@ -250,109 +242,109 @@ class ProductController extends Controller
 
 
 
-public function update(UpdateProductRequest $request, $id)
-{
-    DB::beginTransaction();
+    public function update(UpdateProductRequest $request, $id)
+    {
+        DB::beginTransaction();
 
-    try {
-        $product = Product::findOrFail($id);
+        try {
+            $product = Product::findOrFail($id);
 
-        $product->update([
-            'name' => $request->name,
-            'slug' => $request->slug ?? $product->slug,  
-            'price' => $request->price,
-            'description' => $request->description,  
-            'content' => $request->content,         
-            'input_day' => $request->input_day,    
-            'category_id' => $request->category_id,  
-            'is_collection' => $request->has('is_collection') ? 1 : 0,  
-            'is_hot' => $request->has('is_hot') ? 1 : 0,              
-            'is_new' => $request->has('is_new') ? 1 : 0,               
-        ]);
+            $product->update([
+                'name' => $request->name,
+                'slug' => $request->slug ?? $product->slug,
+                'price' => $request->price,
+                'description' => $request->description,
+                'content' => $request->content,
+                'input_day' => $request->input_day,
+                'category_id' => $request->category_id,
+                'is_collection' => $request->has('is_collection') ? 1 : 0,
+                'is_hot' => $request->has('is_hot') ? 1 : 0,
+                'is_new' => $request->has('is_new') ? 1 : 0,
+            ]);
 
-        
-        if ($request->has('delete_images')) {
-            $this->deleteSelectedImages($request->input('delete_images'), false); 
-        }
 
-        
-        $hasVariations = $request->has('variations') && !empty($request->variations);
-        $variations = json_decode($request->input('variations'), true);
-
-        // Xử lý cập nhật sản phẩm nếu không có biến thể
-        if (!$hasVariations || !is_array($variations)) {
-            $product->update(['stock' => $request->stock]);
-            $this->saveImages($product, $request); // Lưu ảnh sản phẩm
-        }
-
-        // Xử lý cập nhật sản phẩm và biến thể nếu có
-        if ($hasVariations && is_array($variations)) {
-            $totalProductStock = 0;
-
-            // Lấy danh sách tất cả attribute_value_id từ các biến thể
-            $attributeValueIds = array_keys($variations);
-
-            // Kiểm tra tính hợp lệ của tất cả các attribute_value_id với group_id
-            if (!$this->isValidAttributeForGroup_Update($request->group_id, $attributeValueIds)) {
-                throw new \Exception("Có giá trị thuộc tính không hợp lệ trong nhóm đã chọn.");
+            if ($request->has('delete_images')) {
+                $this->deleteSelectedImages($request->input('delete_images'), false);
             }
 
-            // Lặp qua từng biến thể và cập nhật
-            foreach ($variations as $attributeValueId => $sizes) {
-                // Tìm hoặc tạo biến thể chính (ví dụ: màu sắc)
-                $productVariation = ProductVariation::updateOrCreate(
-                    ['product_id' => $product->id, 'attribute_value_id' => $attributeValueId],
-                    ['group_id' => $request->group_id]
-                );
 
-                // Xử lý việc xóa ảnh cũ của biến thể (nếu có yêu cầu)
-                if ($request->has('delete_images')) {
-                    $this->deleteSelectedImages($request->input('delete_images'), true); // true vì đây là biến thể
+            $hasVariations = $request->has('variations') && !empty($request->variations);
+            $variations = json_decode($request->input('variations'), true);
+
+            // Xử lý cập nhật sản phẩm nếu không có biến thể
+            if (!$hasVariations || !is_array($variations)) {
+                $product->update(['stock' => $request->stock]);
+                $this->saveImages($product, $request); // Lưu ảnh sản phẩm
+            }
+
+            // Xử lý cập nhật sản phẩm và biến thể nếu có
+            if ($hasVariations && is_array($variations)) {
+                $totalProductStock = 0;
+
+                // Lấy danh sách tất cả attribute_value_id từ các biến thể
+                $attributeValueIds = array_keys($variations);
+
+                // Kiểm tra tính hợp lệ của tất cả các attribute_value_id với group_id
+                if (!$this->isValidAttributeForGroup_Update($request->group_id, $attributeValueIds)) {
+                    throw new \Exception("Có giá trị thuộc tính không hợp lệ trong nhóm đã chọn.");
                 }
 
-                // Lưu ảnh mới cho biến thể (nếu có)
-                $this->saveImages($productVariation, $request, true, $attributeValueId);
+                // Lặp qua từng biến thể và cập nhật
+                foreach ($variations as $attributeValueId => $sizes) {
+                    // Tìm hoặc tạo biến thể chính (ví dụ: màu sắc)
+                    $productVariation = ProductVariation::updateOrCreate(
+                        ['product_id' => $product->id, 'attribute_value_id' => $attributeValueId],
+                        ['group_id' => $request->group_id]
+                    );
 
-                // Xử lý cập nhật các size (kích thước) của biến thể
-                $totalVariationStock = 0;
-                foreach ($sizes as $sizeId => $details) {
-                    if (!empty($details['stock']) && isset($details['discount'])) {
-                        // Tìm hoặc tạo giá trị biến thể (size)
-                        $productVariationValue = ProductVariationValue::updateOrCreate(
-                            ['product_variation_id' => $productVariation->id, 'attribute_value_id' => $sizeId],
-                            [
-                                'sku' => $this->generateVariationSku(),
-                                'stock' => $details['stock'],
-                                'price' => $product->price - ($product->price * ($details['discount'] / 100)),
-                                'discount' => $details['discount'] ?? null
-                            ]
-                        );
-
-                        $totalVariationStock += $details['stock'];
+                    // Xử lý việc xóa ảnh cũ của biến thể (nếu có yêu cầu)
+                    if ($request->has('delete_images')) {
+                        $this->deleteSelectedImages($request->input('delete_images'), true); // true vì đây là biến thể
                     }
+
+                    // Lưu ảnh mới cho biến thể (nếu có)
+                    $this->saveImages($productVariation, $request, true, $attributeValueId);
+
+                    // Xử lý cập nhật các size (kích thước) của biến thể
+                    $totalVariationStock = 0;
+                    foreach ($sizes as $sizeId => $details) {
+                        if (!empty($details['stock']) && isset($details['discount'])) {
+                            // Tìm hoặc tạo giá trị biến thể (size)
+                            $productVariationValue = ProductVariationValue::updateOrCreate(
+                                ['product_variation_id' => $productVariation->id, 'attribute_value_id' => $sizeId],
+                                [
+                                    'sku' => $this->generateVariationSku(),
+                                    'stock' => $details['stock'],
+                                    'price' => $product->price - ($product->price * ($details['discount'] / 100)),
+                                    'discount' => $details['discount'] ?? null
+                                ]
+                            );
+
+                            $totalVariationStock += $details['stock'];
+                        }
+                    }
+
+                    $productVariation->update(['stock' => $totalVariationStock]);
+                    $totalProductStock += $totalVariationStock;
                 }
-
-                $productVariation->update(['stock' => $totalVariationStock]);
-                $totalProductStock += $totalVariationStock;
+                $product->update(['stock' => $totalProductStock]);
             }
-            $product->update(['stock' => $totalProductStock]);
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Product updated successfully',
+                'data' => new ProductResource($product),
+            ], 200);
+        } catch (\Exception $e) {
+            DB::rollback();
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to update product: ' . $e->getMessage(),
+            ], 500);
         }
-
-        DB::commit();
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Product updated successfully',
-            'data' => new ProductResource($product),
-        ], 200);
-    } catch (\Exception $e) {
-        DB::rollback();
-        return response()->json([
-            'success' => false,
-            'message' => 'Failed to update product: ' . $e->getMessage(),
-        ], 500);
     }
-}
 
 
     private function isValidAttributeForGroup_Update($groupId, $attributeValueIds)
@@ -360,20 +352,20 @@ public function update(UpdateProductRequest $request, $id)
 
         $validAttributes = DB::table('attribute_groups')
             ->where('group_id', $groupId)
-            ->pluck('attribute_id')  
-            ->toArray();  
+            ->pluck('attribute_id')
+            ->toArray();
 
         if (empty($validAttributes)) {
             return false;
         }
 
-      
+
         $validAttributeValues = DB::table('attribute_values')
             ->whereIn('attribute_id', $validAttributes)
-            ->pluck('id')  
+            ->pluck('id')
             ->toArray();
 
-     
+
         foreach ($attributeValueIds as $attributeValueId) {
             if (!in_array($attributeValueId, $validAttributeValues)) {
                 return false;
@@ -436,7 +428,7 @@ public function update(UpdateProductRequest $request, $id)
     }
 
 
- 
+
 
 
     private function generateSeoFriendlySlug($productName)
@@ -474,60 +466,59 @@ public function update(UpdateProductRequest $request, $id)
     }
 
 
-   
+
 
     public function destroy(string $id)
-{
-    DB::beginTransaction();
+    {
+        DB::beginTransaction();
 
-    try {
-        $product = Product::withTrashed()->findOrFail($id);
-        $variations = ProductVariation::where('product_id', $product->id)->get();
+        try {
+            $product = Product::withTrashed()->findOrFail($id);
+            $variations = ProductVariation::where('product_id', $product->id)->get();
 
 
-        foreach ($variations as $variation) {
-            $variationImages = ProductVariationImage::where('product_variation_id', $variation->id)->get();
+            foreach ($variations as $variation) {
+                $variationImages = ProductVariationImage::where('product_variation_id', $variation->id)->get();
 
-   
-            foreach ($variationImages as $variationImage) {
-                if (Storage::disk('public')->exists($variationImage->image_path)) {
-                    Storage::disk('public')->delete($variationImage->image_path);
+
+                foreach ($variationImages as $variationImage) {
+                    if (Storage::disk('public')->exists($variationImage->image_path)) {
+                        Storage::disk('public')->delete($variationImage->image_path);
+                    }
+
+                    $directoryPath = dirname($variationImage->image_path);
+                    $this->deleteDirectoryIfEmpty($directoryPath);
+
+                    $variationImage->delete();
+                }
+                ProductVariationValue::where('product_variation_id', $variation->id)->delete();
+                $variation->forceDelete();
+            }
+
+            $productImages = ProductImage::where('product_id', $product->id)->get();
+            foreach ($productImages as $productImage) {
+                if (Storage::disk('public')->exists($productImage->image_path)) {
+                    Storage::disk('public')->delete($productImage->image_path);
                 }
 
-                $directoryPath = dirname($variationImage->image_path);
+                $directoryPath = dirname($productImage->image_path);
                 $this->deleteDirectoryIfEmpty($directoryPath);
-
-                $variationImage->delete();
+                $productImage->delete();
             }
-            ProductVariationValue::where('product_variation_id', $variation->id)->delete();
-            $variation->forceDelete();
+            $product->forceDelete();
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Xóa sản phẩm thành công'
+            ], 200);
+        } catch (\Exception $e) {
+            DB::rollback();
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to delete product: ' . $e->getMessage(),
+            ], 500);
         }
-
-        $productImages = ProductImage::where('product_id', $product->id)->get();
-        foreach ($productImages as $productImage) {
-            if (Storage::disk('public')->exists($productImage->image_path)) {
-                Storage::disk('public')->delete($productImage->image_path);
-            }
-
-            $directoryPath = dirname($productImage->image_path);
-            $this->deleteDirectoryIfEmpty($directoryPath);
-            $productImage->delete();
-        }
-        $product->forceDelete();  
-
-        DB::commit();
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Xóa sản phẩm thành công'
-        ], 200);
-    } catch (\Exception $e) {
-        DB::rollback();
-        return response()->json([
-            'success' => false,
-            'message' => 'Failed to delete product: ' . $e->getMessage(),
-        ], 500);
     }
-}
-
 }

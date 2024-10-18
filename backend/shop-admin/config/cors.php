@@ -17,8 +17,6 @@ return [
 
     'max_age' => 0,
 
-    // Nếu bạn không cần gửi cookie hoặc xác thực, để false
-    // Nếu sử dụng Laravel Sanctum với SPA thì đặt thành true
     'supports_credentials' => true,
 
 ];

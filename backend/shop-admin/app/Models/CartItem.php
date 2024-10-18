@@ -18,6 +18,7 @@ class CartItem extends Model
         'product_id',
         'product_variation_id',
         'quantity',
+        'total_price',
     ];
 
     /**
