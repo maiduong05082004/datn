@@ -32,7 +32,8 @@ const AddAttributeValues = lazy(() => import("@/pages/(dashboard)/dashboard/attr
 const ListAttributeValues = lazy(() => import("@/pages/(dashboard)/dashboard/attribute_values/list"));
 const UpdateAttributeValues = lazy(() => import("@/pages/(dashboard)/dashboard/attribute_values/updateValue"));
 const UpdateAttribute = lazy(() => import("@/pages/(dashboard)/dashboard/attribute_values/update"));
-
+const ListComments = lazy(() => import("@/pages/(dashboard)/dashboard/comments/list"));
+const ListBills = lazy(() => import("@/pages/(dashboard)/dashboard/bills/list"));
 const Router = () => {
     return (
         <Suspense fallback={<div>Loading...</div>}>
@@ -52,6 +53,14 @@ const Router = () => {
                 <Route path="admin" element={<LayoutAdmin />}>
                     <Route path="profile" element={<MyProfile />} />
                     <Route index element={<DashboardPage />} />
+                    {/* bills */}
+                    <Route path="listbills" element={<ListBills />} />
+                    {/* comments */}
+                    <Route path="listComments" element={<ListComments />} />
+                    {/* bills */}
+                    <Route path="addbanner" element={<AddBanners />} />
+                    <Route path="listbanner" element={<ListBanners />} />
+                    <Route path="updatebanner/:id" element={<UpdateBanners />} />
                     {/* users */}
                     <Route path="addUser" element={<AddUser />} />
                     <Route path="updateUser/:id" element={<UpdateUser />} />
@@ -70,7 +79,7 @@ const Router = () => {
                     <Route path="updateattribute_value/:id" element={<UpdateAttributeValues />} />
                     <Route path="listattribute_value" element={<ListAttributeValues />} />
                     <Route path="addattribute" element={<AddAttribute />} />
-                    <Route path="updateattribute/:id" element={< UpdateAttribute/>} />
+                    <Route path="updateattribute/:id" element={< UpdateAttribute />} />
                     {/* Danh Mục */}
                     <Route path="listCategories" element={<ListCategories />} />
                     <Route path="addCategories" element={<AddCategories />} />

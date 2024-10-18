@@ -96,6 +96,7 @@ const ListAttribute: React.FC = () => {
             title: 'STT',
             dataIndex: 'index',
             key: 'index',
+            width: 80,
             render: (_: any, __: any, index: number) => <span>{index + 1}</span>,
         },
         {
@@ -106,11 +107,12 @@ const ListAttribute: React.FC = () => {
         {
             title: 'Action',
             key: 'action',
+            width: 200,
             render: (attribute: Attribute) => (
                 <div className="flex space-x-2">
                     <Button
                         icon={<EyeOutlined />}
-                        className="bg-black text-white hover:bg-gray-800"
+                        className="bg-blue-400 text-white hover:bg-gray-800"
                         onClick={() => handleViewDetails(attribute)}
                     />
                     <Button
@@ -146,24 +148,23 @@ const ListAttribute: React.FC = () => {
             {contextHolder}
             <div className="w-full mx-auto px-6 py-8">
                 <div className="flex justify-between items-center mb-6">
-                    <Button type="primary" icon={<PlusCircleFilled />}>
-                        <Link to={`/admin/addattribute_value`} className="text-white">
+                    <Button className="bg-indigo-600 hover:bg-indigo-700 text-white" type="primary" icon={<PlusCircleFilled />}>
+                        <Link to={`/admin/addattribute_value`}>
                             Thêm giá trị
                         </Link>
                     </Button>
                 </div>
 
-                <div className="bg-white shadow rounded-lg overflow-hidden">
-                    <Table
-                        columns={columns}
-                        dataSource={attributes}
-                        rowKey="id"
-                        pagination={{
-                            pageSize: 7,
-                            showTotal: (total) => `Tổng ${total} danh mục`,
-                        }}
-                    />
-                </div>
+                <Table
+                    columns={columns}
+                    dataSource={attributes}
+                    rowKey="id"
+                    bordered
+                    pagination={{
+                        pageSize: 7,
+                        showTotal: (total) => `Tổng ${total} danh mục`,
+                    }}
+                />
             </div>
 
             <Modal
