@@ -28,6 +28,7 @@ import UpdateProduct from "@/pages/(dashboard)/dashboard/products/update";
 import ListUser from "@/pages/(dashboard)/dashboard/user/list";
 import PageSignin from "@/pages/(website)/auth/signin/page";
 import PageSignup from "@/pages/(website)/auth/signup/page";
+import DetailPage from "@/pages/(website)/detail/page";
 import ListPage from "@/pages/(website)/list/page";
 
 
@@ -39,6 +40,7 @@ const Router = () => {
                 <Route path="/" element={<LayoutWebsite />}>
                     <Route index element={<HomePage />} />
                     <Route path="categories/:id" element={<ListPage />} />
+                    <Route path="products/:id" element={<DetailPage />} />
                     <Route path="signin" element={<PageSignin />} />
                     <Route path="signup" element={<PageSignup />} />
                 </Route>
