@@ -1,130 +1,132 @@
 import React, { useState } from 'react';
+import { useMutation } from '@tanstack/react-query';
+import axios from 'axios';
+import { Button, Form, Input, Radio, message, Spin } from 'antd';
+import { useNavigate } from 'react-router-dom';
 
-type Props = {}
+interface UserForm {
+  name: string;
+  date_of_birth: string;
+  sex: string;
+  email: string;
+  password: string;
+  address: string;
+}
 
-const AddUser = (props: Props) => {
+const AddUser: React.FC = () => {
+  const [form] = Form.useForm();
+  const [messageApi, contextHolder] = message.useMessage();
+  const navigate = useNavigate();
   const [darkMode, setDarkMode] = useState(false);
 
-  const toggleDarkMode = () => {
-    setDarkMode(!darkMode);
+  // Mutation to add a new user
+  const { mutate, isLoading: isSubmitting } = useMutation({
+    mutationFn: async (userData: UserForm) => {
+      return await axios.post('http://127.0.0.1:8000/api/admins/users', userData);
+    },
+    onSuccess: () => {
+      messageApi.success('Thêm người dùng thành công!');
+      form.resetFields();
+      navigate('/admin/listUser');
+    },
+    onError: (error: any) => {
+      messageApi.error(`Lỗi: ${error.message}`);
+    },
+  });
+
+  // Handle form submission
+  const onFinish = (values: UserForm) => {
+    mutate(values);
   };
+
+  if (isSubmitting) {
+    return <Spin tip="Đang gửi..." className="flex justify-center items-center h-screen" />;
+  }
+
   return (
-    <div className={`container mx-auto px-4 py-8 ${darkMode ? 'bg-gray-900' : 'bg-white'} transition-colors duration-300`}>
-      <h1 className={`text-3xl font-bold mb-6 text-center ${darkMode ? 'text-white' : 'text-gray-800'} transition-colors duration-300`}>
-        Thêm tài khoản mới
-      </h1>
+    <>
+      {contextHolder}
+      <div className="min-h-screen flex items-center justify-center p-8">
+        <div className={`container mx-auto px-4 py-8 ${darkMode ? 'bg-gray-900' : 'bg-white'} transition-colors duration-300`}>
+          <h1 className={`text-3xl font-bold mb-6 text-center ${darkMode ? 'text-white' : 'text-gray-800'} transition-colors duration-300`}>
+            Thêm tài khoản mới
+          </h1>
+          <Form form={form} layout="vertical" onFinish={onFinish}>
+            <Form.Item
+              label={<span className={`${darkMode ? 'text-white' : 'text-gray-700'}`}>Tên người dùng</span>}
+              name="name"
+              rules={[{ required: true, message: 'Vui lòng nhập tên người dùng' }]}
+            >
+              <Input className={`${darkMode ? 'bg-gray-700 text-white' : 'bg-white text-gray-700'}`} />
+            </Form.Item>
 
-      <form>
-        <div className={`bg-white dark:bg-gray-800 shadow-lg rounded-lg mb-6 overflow-hidden transition-colors duration-300`}>
-          <div className={`p-4 rounded-t-lg ${darkMode ? 'bg-gray-700' : 'bg-blue-100'} transition-colors duration-300`}>
-            <h4 className={`text-lg font-semibold ${darkMode ? 'text-white' : 'text-blue-800'} transition-colors duration-300`}>
-              Thông tin người dùng
-            </h4>
-          </div>
-          <div className={`p-6 ${darkMode ? 'bg-gray-800' : 'bg-gray-50'} transition-colors duration-300`}>
+            <Form.Item
+              label={<span className={`${darkMode ? 'text-white' : 'text-gray-700'}`}>Ngày sinh</span>}
+              name="date_of_birth"
+              rules={[{ required: true, message: 'Vui lòng chọn ngày sinh' }]}
+            >
+              <Input type="date" className={`${darkMode ? 'bg-gray-700 text-white' : 'bg-white text-gray-700'}`} />
+            </Form.Item>
 
-            {/* Tên người dùng */}
-            <div className="mb-4">
-              <label htmlFor="name" className={`block font-medium ${darkMode ? 'text-white' : 'text-gray-700'} transition-colors duration-300`}>
-                Tên người dùng
-              </label>
-              <input
-                type="text"
-                name="name"
-                id="name"
-                className={`mt-1 block w-full border ${darkMode ? 'border-gray-600 bg-gray-700 text-white' : 'border-gray-300 bg-white text-gray-700'} rounded-md shadow-sm p-2 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors duration-300`}
-                required
-              />
-            </div>
+            <Form.Item
+              label={<span className={`${darkMode ? 'text-white' : 'text-gray-700'}`}>Giới tính</span>}
+              name="sex"
+              rules={[{ required: true, message: 'Vui lòng chọn giới tính' }]}
+            >
+              <Radio.Group>
+                <Radio value="male" className={`${darkMode ? 'text-white' : 'text-gray-700'}`}>Nam</Radio>
+                <Radio value="female" className={`${darkMode ? 'text-white' : 'text-gray-700'}`}>Nữ</Radio>
+                <Radio value="other" className={`${darkMode ? 'text-white' : 'text-gray-700'}`}>Khác</Radio>
+              </Radio.Group>
+            </Form.Item>
 
-            {/* Ngày sinh */}
-            <div className="mb-4">
-              <label htmlFor="date_of_birth" className={`block font-medium ${darkMode ? 'text-white' : 'text-gray-700'} transition-colors duration-300`}>
-                Ngày sinh
-              </label>
-              <input
-                type="date"
-                name="date_of_birth"
-                id="date_of_birth"
-                className={`mt-1 block w-full border ${darkMode ? 'border-gray-600 bg-gray-700 text-white' : 'border-gray-300 bg-white text-gray-700'} rounded-md shadow-sm p-2 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors duration-300`}
-                required
-              />
-            </div>
+            <Form.Item
+              label={<span className={`${darkMode ? 'text-white' : 'text-gray-700'}`}>Email</span>}
+              name="email"
+              rules={[{ required: true, message: 'Vui lòng nhập email' }, { type: 'email', message: 'Email không hợp lệ' }]}
+            >
+              <Input className={`${darkMode ? 'bg-gray-700 text-white' : 'bg-white text-gray-700'}`} />
+            </Form.Item>
 
-            {/* Giới tính */}
-            <div className="mb-4">
-              <label
-                htmlFor="sex"
-                className={`block font-medium ${darkMode ? "text-white" : "text-gray-700"
-                  } transition-colors duration-300`}
-              >
-                Giới tính
-              </label>
-              <select
-                id="sex"
-                name="sex"
-                className={`mt-1 block w-full border ${darkMode ? "border-gray-600 bg-gray-700 text-white" : "border-gray-300 bg-white text-gray-700"
-                  } rounded-md shadow-sm p-2 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors duration-300`}
-                required
-              >
-                <option value="">Chọn giới tính</option>
-                <option value="male">Nam</option>
-                <option value="female">Nữ</option>
-                <option value="other">Khác</option>
-              </select>
-            </div>
+            <Form.Item
+              label={<span className={`${darkMode ? 'text-white' : 'text-gray-700'}`}>Mật khẩu</span>}
+              name="password"
+              rules={[{ required: true, message: 'Vui lòng nhập mật khẩu' }]}
+            >
+              <Input.Password className={`${darkMode ? 'bg-gray-700 text-white' : 'bg-white text-gray-700'}`} />
+            </Form.Item>
 
-            {/* Email */}
-            <div className="mb-4">
-              <label htmlFor="email" className={`block font-medium ${darkMode ? 'text-white' : 'text-gray-700'} transition-colors duration-300`}>
-                Email
-              </label>
-              <input
-                type="email"
-                name="email"
-                id="email"
-                className={`mt-1 block w-full border ${darkMode ? 'border-gray-600 bg-gray-700 text-white' : 'border-gray-300 bg-white text-gray-700'} rounded-md shadow-sm p-2 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors duration-300`}
-                required
-              />
-            </div>
+            <Form.Item
+              label={<span className={`${darkMode ? 'text-white' : 'text-gray-700'}`}>Địa chỉ</span>}
+              name="address"
+            >
+              <Input className={`${darkMode ? 'bg-gray-700 text-white' : 'bg-white text-gray-700'}`} />
+            </Form.Item>
 
-            {/* Mật khẩu */}
-            <div className="mb-4">
-              <label htmlFor="password" className={`block font-medium ${darkMode ? 'text-white' : 'text-gray-700'} transition-colors duration-300`}>
-                Mật khẩu
-              </label>
-              <input
-                type="password"
-                name="password"
-                id="password"
-                className={`mt-1 block w-full border ${darkMode ? 'border-gray-600 bg-gray-700 text-white' : 'border-gray-300 bg-white text-gray-700'} rounded-md shadow-sm p-2 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors duration-300`}
-                required
-              />
-            </div>
-
-            {/* Địa chỉ */}
-            <div className="mb-4">
-              <label htmlFor="address" className={`block font-medium ${darkMode ? 'text-white' : 'text-gray-700'} transition-colors duration-300`}>
-                Địa chỉ
-              </label>
-              <input
-                type="text"
-                name="address"
-                id="address"
-                className={`mt-1 block w-full border ${darkMode ? 'border-gray-600 bg-gray-700 text-white' : 'border-gray-300 bg-white text-gray-700'} rounded-md shadow-sm p-2 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors duration-300`}
-              />
-            </div>
-          </div>
+            <Form.Item>
+              <div className="flex justify-end space-x-4">
+                <Button
+                  type="primary"
+                  htmlType="submit"
+                  size="large"
+                  className="bg-indigo-600 hover:bg-indigo-700 text-white rounded-md px-6"
+                >
+                  Thêm mới
+                </Button>
+                <Button
+                  onClick={() => navigate('/admin/listUser')}
+                  size="large"
+                  className="bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-md px-6"
+                >
+                  Quay lại
+                </Button>
+              </div>
+            </Form.Item>
+          </Form>
         </div>
+      </div>
 
-        <button
-          type="submit"
-          className="mt-4 px-4 py-2 bg-green-500 text-white rounded-md shadow-lg hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500"
-        >
-          Thêm mới
-        </button>
-      </form>
-    </div>
+    </>
   );
 };
 

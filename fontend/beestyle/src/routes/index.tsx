@@ -46,7 +46,7 @@ const Router = () => {
                     <Route index element={<DashboardPage />} />
                     <Route path="addUser" element={<AddUser />} />
                     <Route path="blockUser" element={<BlockUser />} />
-                    <Route path="updateUser" element={<UpdateUser />} />
+                    <Route path="updateUser/:id" element={<UpdateUser />} />
                     <Route path="listUser" element={<ListUser />} />
                     <Route path="listProducts" element={<ListProducts />} />
                     <Route path="addProducts" element={<Addproduct />} />
@@ -61,10 +61,10 @@ const Router = () => {
                     <Route path="listBills" element={<ListBills />} />
                     <Route path="listBanners" element={<ListBanners />} />
                     <Route path="addBanners" element={<AddBanners />} />
-                    <Route path="updateBanners" element={<UpdateBanners />} />
+                    <Route path="updateBanners/:id" element={<UpdateBanners />} />
                     <Route path="listAttributeValues" element={<ListAttributeValues />} />
                     <Route path="addAttributes" element={<AddAttributeValues />} />
-                    <Route path="updateAttribute/:id" element={<UpdateAttributeValues />} />
+                    <Route path="updateAttributes/:id" element={<UpdateAttributeValues />} />
                     <Route path="detailAttribute/:id" element={<DetailAttributeValues />} />
                 </Route>
                 <Route path="*/*" element={<ErrorPage />} />

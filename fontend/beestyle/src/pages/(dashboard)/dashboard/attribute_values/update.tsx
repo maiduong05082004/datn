@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useQuery, useMutation, useQueryClient } from 'react-query';
-import { useNavigate } from 'react-router-dom';
-import { Form, Input, Button, Select, Row, Col, Typography, Card, Space } from 'antd';
+import { useNavigate, useParams } from 'react-router-dom';
+import { Form, Input, Button, Select, Row, Col, Typography, Card } from 'antd';
 import { MinusCircleOutlined, PlusOutlined } from '@ant-design/icons';
 
 const { Title } = Typography;
@@ -20,6 +20,16 @@ const fetchAttributes = async (): Promise<Attribute[]> => {
     return response.data.data;
 };
 
+const fetchAttributeById = async (id: number): Promise<any> => {
+    try {
+        const response = await axios.get(`http://127.0.0.1:8000/api/admins/attribute_groups/${id}`);
+        return response.data.data;
+    } catch (error) {
+        console.error('Lỗi khi lấy thuộc tính:', error);
+        throw error; // Để có thể xử lý lỗi ở nơi gọi
+    }
+};
+
 const addAttributeValues = async (data: any): Promise<any> => {
     const response = await axios.post('http://127.0.0.1:8000/api/admins/attribute_groups/', data, {
         headers: {
@@ -30,18 +40,24 @@ const addAttributeValues = async (data: any): Promise<any> => {
 };
 
 const UpdateAttributeValues: React.FC = () => {
-    const [selectedAttribute, setSelectedAttribute] = useState<number | ''>(''); 
-    const navigate = useNavigate(); 
+    const { id } = useParams<{ id: string }>();
+    const [selectedAttribute, setSelectedAttribute] = useState<number | undefined>(undefined);
+    const navigate = useNavigate();
     const queryClient = useQueryClient();
+    const form = Form.useFormInstance();
 
-    // Sử dụng react-query để lấy danh sách thuộc tính
-    const { data: attributeList, isLoading, error } = useQuery('attributes', fetchAttributes);
+    const { data: attributeList, isLoading: isLoadingAttributes, error: errorAttributes } = useQuery('attributes', fetchAttributes);
+    const { data: attributeData, isLoading: isLoadingAttributeData, error: errorAttributeData } = useQuery(
+        ['attribute', id],
+        () => fetchAttributeById(Number(id)),
+        { enabled: !!id }
+    );
 
     const mutation = useMutation(addAttributeValues, {
         onSuccess: () => {
             alert('Giá trị thuộc tính đã được cập nhật thành công');
-            queryClient.invalidateQueries('attributes'); 
-            navigate('/admin/listAttributeValues'); 
+            queryClient.invalidateQueries('attributes');
+            navigate('/admin/listAttributeValues');
         },
         onError: (error: any) => {
             console.error('Lỗi chi tiết từ API:', error.response?.data?.errors || error.response?.data || error.message);
@@ -63,12 +79,36 @@ const UpdateAttributeValues: React.FC = () => {
             }, {}),
         };
 
+        console.log('Payload gửi lên:', payload); // Logging payload
         mutation.mutate(payload);
     };
 
-    // Kiểm tra nếu có lỗi trong quá trình fetch dữ liệu
-    if (error) {
-        return <div>Không thể tải danh sách thuộc tính: {error instanceof Error ? error.message : 'Lỗi không xác định'}</div>;
+    useEffect(() => {
+        if (attributeData) {
+            form.setFieldsValue({
+                attribute: attributeData.attribute_id,
+                values: Object.values(attributeData.values || {}),
+            });
+            setSelectedAttribute(attributeData.attribute_id);
+        }
+    }, [attributeData, form]);
+
+    useEffect(() => {
+        if (id) {
+            queryClient.refetchQueries(['attribute', id]); // Tải lại dữ liệu khi ID thay đổi
+        }
+    }, [id, queryClient]);
+
+    if (errorAttributes) {
+        return <div>Không thể tải danh sách thuộc tính: {errorAttributes instanceof Error ? errorAttributes.message : 'Lỗi không xác định'}</div>;
+    }
+
+    if (errorAttributeData) {
+        return <div>Không thể tải thuộc tính: {errorAttributeData instanceof Error ? errorAttributeData.message : 'Lỗi không xác định'}</div>;
+    }
+
+    if (isLoadingAttributeData || isLoadingAttributes) {
+        return <div>Đang tải dữ liệu...</div>;
     }
 
     return (
@@ -79,7 +119,7 @@ const UpdateAttributeValues: React.FC = () => {
                         Cập nhật giá trị thuộc tính
                     </Title>
 
-                    <Form onFinish={onFinish} layout="vertical">
+                    <Form form={form} onFinish={onFinish} layout="vertical">
                         <Form.Item
                             label="Chọn thuộc tính"
                             name="attribute"
@@ -90,7 +130,7 @@ const UpdateAttributeValues: React.FC = () => {
                                 onChange={setSelectedAttribute}
                                 value={selectedAttribute}
                                 allowClear
-                                loading={isLoading}
+                                loading={isLoadingAttributes}
                                 size="large"
                             >
                                 {Array.isArray(attributeList) && attributeList.length > 0 ? (
@@ -147,7 +187,7 @@ const UpdateAttributeValues: React.FC = () => {
                         </Form.List>
 
                         <Form.Item>
-                            <div className="flex space-x-4"> {/* Khoảng cách giữa các button */}
+                            <div className="flex space-x-4">
                                 <button
                                     type="submit"
                                     className="mt-4 px-4 py-2 bg-green-500 text-white rounded-md shadow-lg hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500"
@@ -155,7 +195,7 @@ const UpdateAttributeValues: React.FC = () => {
                                     Cập nhật
                                 </button>
                                 <button
-                                    onClick={() => navigate('/admin/listAttributeValues')} // Chuyển hướng về trang danh sách
+                                    onClick={() => navigate('/admin/listAttributeValues')}
                                     className="mt-4 px-4 py-2 bg-blue-500 text-white rounded-md shadow-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
                                 >
                                     Quay lại

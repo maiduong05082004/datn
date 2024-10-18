@@ -1,76 +1,152 @@
-import React, { useState } from 'react';
-import { format } from 'date-fns'; // Import thư viện date-fns để định dạng ngày
+import React from 'react';
+import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { Table, Spin, message, Button, Popconfirm, Space, Modal } from 'antd';
+import { DeleteOutlined, EditOutlined, PlusOutlined } from '@ant-design/icons';
 
-type Props = {}
+type User = {
+    id: number;
+    name: string;
+    email: string;
+};
 
-const ListUser = (props: Props) => {
+const ListUsers: React.FC = () => {
+    const navigate = useNavigate();
+    const queryClient = useQueryClient();
+    const [messageApi, contextHolder] = message.useMessage();
+    const [isModalOpen, setIsModalOpen] = React.useState(false);
+    const [selectedUser, setSelectedUser] = React.useState<User | null>(null);
 
-    const [darkMode, setDarkMode] = useState(false); // Chế độ tối mặc định là false (chế độ sáng)
+    // Fetch all users
+    const { data: users = [], isLoading } = useQuery<User[]>({
+        queryKey: ['users'],
+        queryFn: async () => {
+            const response = await axios.get('http://127.0.0.1:8000/api/admins/users/');
+            return response.data;
+        },
+    });
 
-    const toggleDarkMode = () => {
-        setDarkMode(!darkMode);
+    // Mutation to delete user
+    const { mutate: deleteUser } = useMutation({
+        mutationFn: async (id: number) => {
+            await axios.delete(`http://127.0.0.1:8000/api/admins/users/${id}`);
+        },
+        onSuccess: () => {
+            messageApi.success('Đã xóa người dùng thành công');
+            queryClient.invalidateQueries({ queryKey: ['users'] });
+        },
+        onError: (error: any) => {
+            const errorMessage = error.response?.data?.message || 'Đã có lỗi xảy ra';
+            messageApi.error(errorMessage);
+        },
+    });
+
+    // Open modal to show user details
+    const handleViewDetails = (user: User) => {
+        setSelectedUser(user);
+        setIsModalOpen(true);
     };
 
-    // Hàm định dạng ngày sinh thành dd-vv-yyyyy
-    const formatBirthDate = (date: string) => {
-        const parsedDate = new Date(date);
-        return format(parsedDate, 'dd-MM-yyyy'); // Định dạng thành dd-MM-yyyy
+    // Define table columns
+    const columns = [
+        {
+            title: 'STT',
+            dataIndex: 'id',
+            key: 'id',
+            width: '10%',
+        },
+        {
+            title: 'Tên người dùng',
+            dataIndex: 'name',
+            key: 'name',
+            width: '30%',  // Dành nhiều không gian hơn cho tên người dùng
+        },
+        {
+            title: 'Email',
+            dataIndex: 'email',
+            key: 'email',
+            width: '40%',  // Email chiếm nhiều không gian để không bị cắt chữ
+        },
+        {
+            title: 'Hành động',
+            key: 'action',
+            width: '20%',
+            render: (_: any, user: User) => (
+                <Space size="middle" className="flex justify-around">
+                    <Button
+                        type="default"
+                        icon={<EditOutlined />}
+                        onClick={() => navigate(`/admin/updateUser/${user.id}`)}
+                    />
+                    <Popconfirm
+                        title="Xóa người dùng"
+                        description="Bạn có chắc muốn xóa người dùng này không?"
+                        onConfirm={() => deleteUser(user.id)}
+                        okText="Có"
+                        cancelText="Không"
+                    >
+                        <Button type="primary" danger icon={<DeleteOutlined />} />
+                    </Popconfirm>
+                    <Button type="link" onClick={() => handleViewDetails(user)}>
+                        Xem chi tiết
+                    </Button>
+                </Space>
+            ),
+        },
+    ];
+
+    // Render loading state
+    if (isLoading) {
+        return <Spin tip="Đang tải người dùng..." className="flex justify-center items-center h-screen" />;
     }
 
     return (
-        <div className={`w-full mx-auto p-6 rounded-lg shadow-lg mt-10 ${darkMode ? 'bg-gray-800' : 'bg-white'}`}>
-            <h3 className={`text-2xl font-bold mb-6 text-center ${darkMode ? 'text-white' : 'text-black'}`}>
-                Danh sách tài khoản
-            </h3>
-            <div className={`bg-gray-100 ${darkMode ? 'dark:bg-gray-700' : 'bg-gray-100'} p-6 rounded-md mb-6`}>
-                <table className={`min-w-full rounded-lg shadow-md overflow-hidden ${darkMode ? 'bg-gray-800' : 'bg-white'}`}>
-                    <thead className="bg-gray-800 dark:bg-gray-900 text-white">
-                        <tr>
-                            <th className="py-3 px-4 text-center">ID</th>
-                            <th className="py-3 px-4 text-center">Tên</th>
-                            <th className="py-3 px-4 text-center">Ngày sinh</th>
-                            <th className="py-3 px-4 text-center">Giới tính</th>
-                            <th className="py-3 px-4 text-center">Email</th>
-                            <th className="py-3 px-4 text-center">Địa chỉ</th>
-                            <th className="py-3 px-4 text-center">Tên nhà cung cấp</th>
-                            <th className="py-3 px-4 text-center">Thao tác</th> {/* Thêm cột thao tác */}
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr className="border-b border-gray-200 dark:border-gray-700">
-                            <td className="py-3 px-4 text-center text-black dark:text-white">1</td>
-                            <td className="py-3 px-4 text-center text-black dark:text-white">Người dùng 1</td>
-                            <td className="py-3 px-4 text-center text-black dark:text-white">
-                                {formatBirthDate('1990-01-01')}
-                            </td>
-                            <td className="py-3 px-4 text-center text-black dark:text-white">male</td>
-                            <td className="py-3 px-4 text-center text-black dark:text-white">user1@example.com</td>
-                            <td className="py-3 px-4 text-center text-black dark:text-white">Hà Nội</td>
-                            <td className="py-3 px-4 text-center text-black dark:text-white">Google</td>
-                            <td className="py-3 px-4 text-center text-black dark:text-white">
-                                <button className="bg-blue-500 text-white py-1 px-3 rounded-lg mr-2">Sửa</button>
-                                <button className="bg-red-500 text-white py-1 px-3 rounded-lg">Block</button>
-                            </td>
-                        </tr>
-                        <tr className="border-b border-gray-200 dark:border-gray-700">
-                            <td className="py-3 px-4 text-center text-black dark:text-white">2</td>
-                            <td className="py-3 px-4 text-center text-black dark:text-white">Người dùng 2</td>
-                            <td className="py-3 px-4 text-center text-black dark:text-white">
-                                {formatBirthDate('1992-02-02')}
-                            </td>
-                            <td className="py-3 px-4 text-center text-black dark:text-white">female</td>
-                            <td className="py-3 px-4 text-center text-black dark:text-white">user2@example.com</td>
-                            <td className="py-3 px-4 text-center text-black dark:text-white">Nam Định</td>
-                            <td className="py-3 px-4 text-center text-black dark:text-white">Facebook</td>
-                            <td className="py-3 px-4 text-center text-black dark:text-white">
-                                <button className="bg-blue-500 text-white py-1 px-3 rounded-lg mr-2">Sửa</button>
-                                <button className="bg-red-500 text-white py-1 px-3 rounded-lg">Block</button>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
+        <>
+            {contextHolder}
+            <div className="w-full mx-auto items-center justify-center px-6 py-8">
+                <div className="flex justify-between items-center mb-6">
+                    <Button
+                        type="primary"
+                        icon={<PlusOutlined />}
+                        onClick={() => navigate('/admin/addUser')}
+                        className="bg-indigo-600 hover:bg-indigo-700 text-white"
+                    >
+                        Thêm người dùng
+                    </Button>
+                </div>
+                <Table
+                    dataSource={users}
+                    columns={columns}
+                    rowKey={(record) => record.id}
+                    bordered
+                    pagination={{
+                        pageSize: 7,
+                        showTotal: (total) => `Tổng ${total} người dùng`,
+                    }}
+                    className="w-full"
+                />
             </div>
-        </div>
+
+            {/* Modal hiển thị chi tiết */}
+            {selectedUser && (
+                <Modal
+                    title={`Chi tiết người dùng: ${selectedUser.name}`}
+                    open={isModalOpen}
+                    onCancel={() => setIsModalOpen(false)}
+                    footer={[
+                        <Button key="close" onClick={() => setIsModalOpen(false)}>
+                            Đóng
+                        </Button>,
+                    ]}
+                >
+                    <p><strong>ID:</strong> {selectedUser.id}</p>
+                    <p><strong>Tên:</strong> {selectedUser.name}</p>
+                    <p><strong>Email:</strong> {selectedUser.email}</p>
+                </Modal>
+            )}
+        </>
     );
-}
-export default ListUser;
+};
+
+export default ListUsers;

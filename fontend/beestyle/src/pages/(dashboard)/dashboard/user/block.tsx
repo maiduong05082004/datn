@@ -1,61 +1,154 @@
-import React, { useState } from 'react';
-import { format } from 'date-fns'; // Import thư viện date-fns để định dạng ngày
+import React from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Table, Button, Popconfirm, Space, Modal } from 'antd';
+import { DeleteOutlined, EditOutlined, PlusOutlined } from '@ant-design/icons';
 
-type Props = {}
+type User = {
+    id: number;
+    name: string;
+    birthDate: string;
+    gender: string;
+    email: string;
+    address: string;
+    providerName: string;
+};
 
-const BlockUser = (props: Props) => {
+const BlockUser: React.FC = () => {
+    const navigate = useNavigate();
+    const [isModalOpen, setIsModalOpen] = React.useState(false);
+    const [selectedUser, setSelectedUser] = React.useState<User | null>(null);
 
-    const [darkMode, setDarkMode] = useState(false); // Chế độ tối mặc định là false (chế độ sáng)
+    const blockedUsers: User[] = [
+        {
+            id: 1,
+            name: 'Người dùng 1',
+            birthDate: '1990-01-01',
+            gender: 'male',
+            email: 'user1@example.com',
+            address: 'Hà Nội',
+            providerName: 'Google',
+        },
+        // Bạn có thể thêm dữ liệu người dùng tại đây nếu cần
+    ];
 
-    const toggleDarkMode = () => {
-        setDarkMode(!darkMode);
+    const handleViewDetails = (user: User) => {
+        setSelectedUser(user);
+        setIsModalOpen(true);
     };
 
-    // Hàm định dạng ngày sinh thành dd-vv-yyyyy
-    const formatBirthDate = (date: string) => {
-        const parsedDate = new Date(date);
-        return format(parsedDate, 'dd-MM-yyyy'); // Định dạng thành dd-MM-yyyy
-    }
+    const columns = [
+        {
+            title: 'STT',
+            dataIndex: 'id',
+            key: 'id',
+            width: '10%',
+        },
+        {
+            title: 'Tên người dùng',
+            dataIndex: 'name',
+            key: 'name',
+            width: '20%',
+        },
+        {
+            title: 'Ngày sinh',
+            dataIndex: 'birthDate',
+            key: 'birthDate',
+            width: '20%',
+        },
+        {
+            title: 'Giới tính',
+            dataIndex: 'gender',
+            key: 'gender',
+            width: '10%',
+        },
+        {
+            title: 'Email',
+            dataIndex: 'email',
+            key: 'email',
+            width: '20%',
+        },
+        {
+            title: 'Địa chỉ',
+            dataIndex: 'address',
+            key: 'address',
+            width: '20%',
+        },
+        {
+            title: 'Hành động',
+            key: 'action',
+            width: '20%',
+            render: (_: any, user: User) => (
+                <Space size="middle">
+                    <Button
+                        type="default"
+                        icon={<EditOutlined />}
+                        onClick={() => navigate(`/admin/updateUser/${user.id}`)}
+                    />
+                    <Popconfirm
+                        title="Xóa người dùng"
+                        description="Bạn có chắc muốn xóa người dùng này không?"
+                        onConfirm={() => console.log('Xóa người dùng', user.id)}
+                        okText="Có"
+                        cancelText="Không"
+                    >
+                        <Button type="primary" danger icon={<DeleteOutlined />} />
+                    </Popconfirm>
+                    <Button type="link" onClick={() => handleViewDetails(user)}>
+                        Xem chi tiết
+                    </Button>
+                </Space>
+            ),
+        },
+    ];
 
     return (
-        <div className={`w-full mx-auto p-6 rounded-lg shadow-lg mt-10 ${darkMode ? 'bg-gray-800' : 'bg-white'}`}>
-            <h3 className={`text-2xl font-bold mb-6 text-center ${darkMode ? 'text-white' : 'text-black'}`}>
-                Danh sách tài khoản bị chặn
-            </h3>
-            <div className={`bg-gray-100 ${darkMode ? 'dark:bg-gray-700' : 'bg-gray-100'} p-6 rounded-md mb-6`}>
-                <table className={`min-w-full rounded-lg shadow-md overflow-hidden ${darkMode ? 'bg-gray-800' : 'bg-white'}`}>
-                    <thead className="bg-gray-800 dark:bg-gray-900 text-white">
-                        <tr>
-                            <th className="py-3 px-4 text-center">ID</th>
-                            <th className="py-3 px-4 text-center">Tên</th>
-                            <th className="py-3 px-4 text-center">Ngày sinh</th>
-                            <th className="py-3 px-4 text-center">Giới tính</th>
-                            <th className="py-3 px-4 text-center">Email</th>
-                            <th className="py-3 px-4 text-center">Địa chỉ</th>
-                            <th className="py-3 px-4 text-center">Tên nhà cung cấp</th>
-                            <th className="py-3 px-4 text-center">Thao tác</th> {/* Thêm cột thao tác */}
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr className="border-b border-gray-200 dark:border-gray-700">
-                            <td className="py-3 px-4 text-center text-black dark:text-white">1</td>
-                            <td className="py-3 px-4 text-center text-black dark:text-white">Người dùng 1</td>
-                            <td className="py-3 px-4 text-center text-black dark:text-white">
-                                {formatBirthDate('1990-01-01')}
-                            </td>
-                            <td className="py-3 px-4 text-center text-black dark:text-white">male</td>
-                            <td className="py-3 px-4 text-center text-black dark:text-white">user1@example.com</td>
-                            <td className="py-3 px-4 text-center text-black dark:text-white">Hà Nội</td>
-                            <td className="py-3 px-4 text-center text-black dark:text-white">Google</td>
-                            <td className="py-3 px-4 text-center text-black dark:text-white">
-                                <button className="bg-blue-500 text-white py-1 px-3 rounded-lg mr-2">Sửa</button>
-                                <button className="bg-red-500 text-white py-1 px-3 rounded-lg">Bỏ chặn</button>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
+        <>
+            <div className="w-full mx-auto items-center justify-center px-6 py-8">
+                <div className="flex justify-between items-center mb-6">
+                    <Button
+                        type="primary"
+                        icon={<PlusOutlined />}
+                        onClick={() => navigate('/admin/addUser')}
+                        className="bg-indigo-600 hover:bg-indigo-700 text-white"
+                    >
+                        Thêm người dùng
+                    </Button>
+                </div>
+                <Table
+                    dataSource={blockedUsers}
+                    columns={columns}
+                    rowKey={(record) => record.id}
+                    bordered
+                    pagination={{
+                        pageSize: 7,
+                        showTotal: (total) => `Tổng ${total} người dùng`,
+                    }}
+                    className="w-full"
+                />
             </div>
-        </div>
+
+            {selectedUser && (
+                <Modal
+                    title={`Chi tiết người dùng: ${selectedUser.name}`}
+                    open={isModalOpen}
+                    onCancel={() => setIsModalOpen(false)}
+                    footer={[
+                        <Button key="close" onClick={() => setIsModalOpen(false)}>
+                            Đóng
+                        </Button>,
+                    ]}
+                >
+                    <p><strong>ID:</strong> {selectedUser.id}</p>
+                    <p><strong>Tên:</strong> {selectedUser.name}</p>
+                    <p><strong>Email:</strong> {selectedUser.email}</p>
+                    <p><strong>Ngày sinh:</strong> {selectedUser.birthDate}</p>
+                    <p><strong>Giới tính:</strong> {selectedUser.gender}</p>
+                    <p><strong>Địa chỉ:</strong> {selectedUser.address}</p>
+                    <p><strong>Nhà cung cấp:</strong> {selectedUser.providerName}</p>
+                </Modal>
+            )}
+        </>
     );
-}
+};
+
 export default BlockUser;

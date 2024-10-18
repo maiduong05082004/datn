@@ -59,7 +59,7 @@ const ListAttributeValues: React.FC = () => {
 
     const handleEdit = (attributeId: number) => {
         // Ví dụ khi bạn điều hướng từ danh sách
-        navigate(`/admin/updateAttribute/${attributeId}`);
+        navigate(`/admin/updateAttributes/${attributeId}`);
 
     };
 
