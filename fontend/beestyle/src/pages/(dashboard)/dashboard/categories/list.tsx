@@ -46,7 +46,7 @@ const ListCategories: React.FC = () => {
   // Helper function to get category name by ID
   const getCategoryNameById = (id: number | null): string | null => {
     const category = categories.find((cat) => cat.id === id);
-    return category ? category.name : 'Không có';
+    return category ? category.name : '';
   };
 
   // Convert recursive children to tree data
@@ -60,7 +60,6 @@ const ListCategories: React.FC = () => {
     }));
   };
 
-  // Define table columns
   const columns = [
     {
       title: 'Tên danh mục',
@@ -118,7 +117,6 @@ const ListCategories: React.FC = () => {
     },
   ];
 
-  // Render loading state
   if (isLoading) {
     return <Spin tip="Đang tải danh mục..." className="flex justify-center items-center h-screen" />;
   }
@@ -131,7 +129,7 @@ const ListCategories: React.FC = () => {
           <Button
             type="primary"
             icon={<PlusOutlined />}
-            onClick={() => navigate('/admin/add')}
+            onClick={() => navigate('/admin/addCategories')}
             className="bg-indigo-600 hover:bg-indigo-700 text-white"
           >
             Thêm danh mục

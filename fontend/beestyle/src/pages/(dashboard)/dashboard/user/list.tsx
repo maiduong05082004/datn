@@ -1,21 +1,23 @@
 import React from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Table, Spin, message, Button, Popconfirm, Space } from 'antd';
-import { DeleteOutlined, EditOutlined, PlusOutlined } from '@ant-design/icons';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { Table, Spin, message, Button, Space } from 'antd';
+import { EditOutlined, PlusOutlined, EyeOutlined } from '@ant-design/icons';
+import dayjs from 'dayjs';
 
 interface User {
-  key: number;
   id: number;
   name: string;
   email: string;
+  phone: string;
+  address: string;
   role: 'admin' | 'user' | 'moderator';
   is_active: boolean;
+  date_of_birth: string | null;
+  sex: 'male' | 'female' | null;
   created_at: string;
   updated_at: string;
-  date_of_birth: string;
-  sex: 'male' | 'female';
 }
 
 const UserList: React.FC = () => {
@@ -28,20 +30,6 @@ const UserList: React.FC = () => {
     queryFn: async () => {
       const response = await axios.get('http://127.0.0.1:8000/api/admins/users');
       return response.data;
-    },
-  });
-
-  const deleteUser = useMutation({
-    mutationFn: async (id: number) => {
-      await axios.delete(`http://127.0.0.1:8000/api/admins/users/${id}`);
-    },
-    onSuccess: () => {
-      messageApi.success('Xóa thành công!');
-      queryClient.invalidateQueries({ queryKey: ['userManager'] });
-    },
-    onError: (error: any) => {
-      const errorMessage = error.response?.data?.message || 'Đã có lỗi xảy ra';
-      messageApi.error(errorMessage);
     },
   });
 
@@ -81,6 +69,11 @@ const UserList: React.FC = () => {
       key: 'email',
     },
     {
+      title: 'Địa chỉ',
+      dataIndex: 'address',
+      key: 'address',
+    },
+    {
       title: 'Vai trò',
       dataIndex: 'role',
       key: 'role',
@@ -113,21 +106,18 @@ const UserList: React.FC = () => {
     {
       title: 'Hành động',
       key: 'actions',
-      width: 150,
-      render: (_: any, user: User) => (
+      width: 200,
+      render: (_: any, record: any) => (
         <Space size="middle">
-          <Popconfirm
-            title="Bạn có chắc chắn muốn xóa người dùng này không?"
-            onConfirm={() => deleteUser.mutate(user.id)}
-            okText="Có"
-            cancelText="Không"
-          >
-            <Button type="primary" danger icon={<DeleteOutlined />} />
-          </Popconfirm>
+          <Button
+            type="default"
+            icon={<EyeOutlined />}
+            onClick={() => navigate(`/admin/viewUser/${record.id}`)} // View details navigation
+          />
           <Button
             type="default"
             icon={<EditOutlined />}
-            onClick={() => navigate(`/admin/updateUser/${user.id}`)}
+            onClick={() => navigate(`/admin/updateUser/${record.id}`)} // Edit navigation
           />
         </Space>
       ),
