@@ -126,18 +126,6 @@ class CategoryController extends Controller
             'colors' => $colors
         ]);
     }
-    private function addAttributeValueToOptions(&$attributeOptions, $attributeValue)
-    {
-        if (!$attributeValue) return;
-
-        $attributeName = $attributeValue->attribute->name;
-        if (!isset($attributeOptions[$attributeName])) {
-            $attributeOptions[$attributeName] = [];
-        }
-        if (!in_array($attributeValue->value, $attributeOptions[$attributeName])) {
-            $attributeOptions[$attributeName][] = $attributeValue->value;
-        }
-    }
 
     private function filterCategory($category)
     {
