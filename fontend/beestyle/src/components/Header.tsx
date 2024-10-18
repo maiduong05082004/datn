@@ -29,7 +29,7 @@ const Header = () => {
             })
         }
     })
-    console.log(user);
+    // console.log(user);
     
     
     
@@ -64,7 +64,7 @@ const Header = () => {
                         </div>
                     </div>
 
-                    <div className={`fixed top-0 left-0 bg-white w-[100%] h-[100%] z-20 lg:static lg:items-center lg:ml-[30px]`}>
+                    <div className={`hidden fixed top-0 left-0 bg-white w-[100%] h-[100%] z-20 lg:static lg:items-center lg:ml-[30px]`}>
                         <div className="lg:hidden p-[19px_20px]">
                             <svg xmlns="http://www.w3.org/2000/svg" width="19" height="20" viewBox="0 0 19 20" fill="none"><path d="M3 10L18.1667 10" stroke="black" stroke-width="1.2" stroke-linecap="square"></path><path d="M10 1.83325L1.83334 9.99992L10 18.1666" stroke="black" stroke-width="1.2" stroke-linecap="square"></path></svg>
                         </div>
