@@ -1,21 +1,23 @@
 import React from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Table, Spin, message, Button, Popconfirm, Space } from 'antd';
-import { DeleteOutlined, EditOutlined, PlusOutlined } from '@ant-design/icons';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { Table, Spin, message, Button, Space } from 'antd';
+import { EditOutlined, PlusOutlined, EyeOutlined } from '@ant-design/icons';
+import dayjs from 'dayjs';
 
 interface User {
-  key: number;
   id: number;
   name: string;
   email: string;
+  phone: string;
+  address: string;
   role: 'admin' | 'user' | 'moderator';
   is_active: boolean;
+  date_of_birth: string | null;
+  sex: 'male' | 'female' | null;
   created_at: string;
   updated_at: string;
-  date_of_birth: string;
-  sex: 'male' | 'female';
 }
 
 const UserList: React.FC = () => {
@@ -23,7 +25,8 @@ const UserList: React.FC = () => {
   const [messageApi, contextHolder] = message.useMessage();
   const navigate = useNavigate();
 
-  const { data: users = [], isLoading } = useQuery<User[]>({
+  // Fetch users from API
+  const { data: users = [], isLoading, isError } = useQuery<User[]>({
     queryKey: ['userManager'],
     queryFn: async () => {
       const response = await axios.get('http://127.0.0.1:8000/api/admins/users');
@@ -31,36 +34,33 @@ const UserList: React.FC = () => {
     },
   });
 
-  const deleteUser = useMutation({
-    mutationFn: async (id: number) => {
-      await axios.delete(`http://127.0.0.1:8000/api/admins/users/${id}`);
-    },
-    onSuccess: () => {
-      messageApi.success('Xóa thành công!');
-      queryClient.invalidateQueries({ queryKey: ['userManager'] });
-    },
-    onError: (error: any) => {
-      const errorMessage = error.response?.data?.message || 'Đã có lỗi xảy ra';
-      messageApi.error(errorMessage);
-    },
-  });
-
   if (isLoading) {
     return <Spin tip="Đang tải dữ liệu..." className="flex justify-center items-center h-screen" />;
   }
 
-  const dataSource = users.map((user: User, index: number) => ({
+  if (isError) {
+    return <div className="text-center text-red-500">Không thể tải dữ liệu</div>;
+  }
+
+  // Lọc danh sách người dùng (bỏ admin)
+  const filteredUsers = users.filter((user) => user.role !== 'admin');
+
+  const dataSource = filteredUsers.map((user: User, index: number) => ({
     key: user.id,
     index: index + 1,
     id: user.id,
     name: user.name,
     email: user.email,
+    phone: user.phone || 'N/A',
+    address: user.address || 'N/A',
     role: user.role,
     isActive: user.is_active ? 'Active' : 'Inactive',
-    dateOfBirth: user.date_of_birth,
-    sex: user.sex === 'male' ? 'Nam' : 'Nữ',
-    createdAt: new Date(user.created_at).toLocaleString(),
-    updatedAt: new Date(user.updated_at).toLocaleString(),
+    dateOfBirth: user.date_of_birth
+      ? dayjs(user.date_of_birth).format('DD/MM/YYYY')
+      : 'Không có',
+    sex: user.sex === 'male' ? 'Nam' : user.sex === 'female' ? 'Nữ' : 'Không rõ',
+    createdAt: dayjs(user.created_at).format('DD/MM/YYYY HH:mm:ss'),
+    updatedAt: dayjs(user.updated_at).format('DD/MM/YYYY HH:mm:ss'),
   }));
 
   const columns = [
@@ -79,6 +79,11 @@ const UserList: React.FC = () => {
       title: 'Email',
       dataIndex: 'email',
       key: 'email',
+    },
+    {
+      title: 'Địa chỉ',
+      dataIndex: 'address',
+      key: 'address',
     },
     {
       title: 'Vai trò',
@@ -113,21 +118,18 @@ const UserList: React.FC = () => {
     {
       title: 'Hành động',
       key: 'actions',
-      width: 150,
-      render: (_: any, user: User) => (
+      width: 200,
+      render: (_: any, record: any) => (
         <Space size="middle">
-          <Popconfirm
-            title="Bạn có chắc chắn muốn xóa người dùng này không?"
-            onConfirm={() => deleteUser.mutate(user.id)}
-            okText="Có"
-            cancelText="Không"
-          >
-            <Button type="primary" danger icon={<DeleteOutlined />} />
-          </Popconfirm>
+          <Button
+            type="default"
+            icon={<EyeOutlined />}
+            onClick={() => navigate(`/admin/viewUser/${record.id}`)} // View details navigation
+          />
           <Button
             type="default"
             icon={<EditOutlined />}
-            onClick={() => navigate(`/admin/updateUser/${user.id}`)}
+            onClick={() => navigate(`/admin/updateUser/${record.id}`)} // Edit navigation
           />
         </Space>
       ),

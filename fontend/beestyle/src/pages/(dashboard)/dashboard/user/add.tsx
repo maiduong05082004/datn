@@ -23,42 +23,51 @@ interface Users {
 const AddUser: React.FC = () => {
   const [form] = Form.useForm();
   const [messageApi, contextHolder] = message.useMessage();
-  const [loading, setLoading] = useState(false);
+  const [loading] = useState(false);
 
   const mutation = useMutation({
     mutationFn: async (user: Users) => {
       try {
-        return await axios.post(`http://127.0.0.1:8000/api/admins/users`, user);
+        const response = await axios.post(
+          `http://127.0.0.1:8000/api/admins/users`,
+          user,
+          {
+            headers: { 'Content-Type': 'application/json' },
+          }
+        );
+        return response.data;
       } catch (error: any) {
-        const errorMessage = error.response?.data?.message || 'Đã có lỗi xảy ra';
-        throw new Error(errorMessage);
+        if (error.response) {
+          const errorMessage = error.response.data.message || 'Có lỗi xảy ra';
+          throw new Error(errorMessage);
+        } else {
+          throw new Error('Không thể kết nối tới máy chủ');
+        }
       }
     },
     onSuccess: () => {
       messageApi.success('Thêm người dùng thành công');
       form.resetFields();
-      setLoading(false);
     },
     onError: (error: Error) => {
       messageApi.error(`Lỗi: ${error.message}`);
-      setLoading(false);
     },
   });
+  
 
   const onFinish = (values: any) => {
-    setLoading(true);
     const payload: Users = {
       name: values.name.trim(),
-      email: values.email.trim(),
-      phone: values.phone.trim(),
+      email: values.email?.trim() || null,
+      phone: values.phone?.trim() || '',
       password: values.password.trim(),
-      address: values.address.trim(),
+      address: values.address?.trim() || '',
       role: values.role,
       is_active: true,
       date_of_birth: values.date_of_birth
         ? values.date_of_birth.format('YYYY-MM-DD')
-        : '',
-      sex: values.sex,
+        : null,
+      sex: values.sex || null,
       provider_name: null,
       provider_id: null,
       email_verified_at: null,
@@ -66,6 +75,9 @@ const AddUser: React.FC = () => {
     };
     mutation.mutate(payload);
   };
+
+
+
 
   return (
     <>
@@ -79,6 +91,7 @@ const AddUser: React.FC = () => {
             onFinish={onFinish}
             className="space-y-6"
           >
+            {/* Name */}
             <Form.Item
               label="Tên Người Dùng"
               name="name"
@@ -87,6 +100,7 @@ const AddUser: React.FC = () => {
               <Input placeholder="Nhập tên người dùng" size="large" />
             </Form.Item>
 
+            {/* Email */}
             <Form.Item
               label="Email"
               name="email"
@@ -96,6 +110,14 @@ const AddUser: React.FC = () => {
               ]}
             >
               <Input placeholder="Nhập email" size="large" />
+            </Form.Item>
+
+            <Form.Item
+              label="Mật Khẩu"
+              name="password"
+              rules={[{ required: true, message: 'Mật khẩu là bắt buộc' }]}
+            >
+              <Input.Password placeholder="Nhập mật khẩu" size="large" />
             </Form.Item>
 
             <Form.Item
@@ -109,21 +131,8 @@ const AddUser: React.FC = () => {
               <Input placeholder="Nhập số điện thoại" size="large" />
             </Form.Item>
 
-            <Form.Item
-              label="Địa Chỉ"
-              name="address"
-              rules={[
-              ]}
-            >
-              <Input placeholder="Địa chỉ" size="large" />
-            </Form.Item>
-
-            <Form.Item
-              label="Mật Khẩu"
-              name="password"
-              rules={[{ required: true, message: 'Mật khẩu là bắt buộc' }]}
-            >
-              <Input.Password placeholder="Nhập mật khẩu" size="large" />
+            <Form.Item label="Địa Chỉ" name="address">
+              <Input placeholder="Nhập địa chỉ" size="large" />
             </Form.Item>
 
             <Form.Item

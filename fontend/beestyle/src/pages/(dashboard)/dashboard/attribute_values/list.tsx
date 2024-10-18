@@ -2,8 +2,8 @@ import React, { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import axios from 'axios';
 import { Button, message, Modal, Popconfirm, Spin, Table } from 'antd';
-import { Link } from 'react-router-dom';
-import { PlusCircleFilled, DeleteOutlined, EyeOutlined } from '@ant-design/icons';
+import { Link, useNavigate } from 'react-router-dom';
+import { PlusCircleFilled, DeleteOutlined, EyeOutlined, EditOutlined } from '@ant-design/icons';
 
 type Attribute = {
     id: number;
@@ -22,12 +22,14 @@ type AttributeWithValues = {
     values: AttributeValue[];
 };
 
-const ListAttribute = () => {
+const ListAttribute: React.FC = () => {
     const [messageApi, contextHolder] = message.useMessage();
     const queryClient = useQueryClient();
+    const navigate = useNavigate();
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedAttribute, setSelectedAttribute] = useState<AttributeWithValues | null>(null);
 
+    // Fetch attributes
     const { data: attributes = [], isLoading, error } = useQuery({
         queryKey: ['attributes'],
         queryFn: async () => {
@@ -67,7 +69,7 @@ const ListAttribute = () => {
             messageApi.success('Xóa giá trị thành công');
             queryClient.invalidateQueries({
                 queryKey: ['attributeValues'],
-            })
+            });
         },
         onError: (error: any) => {
             messageApi.error(`Lỗi: ${error.message}`);
@@ -83,7 +85,6 @@ const ListAttribute = () => {
             messageApi.error('Không tìm thấy giá trị thuộc tính.');
         }
     };
-    
 
     const handleCloseModal = () => {
         setIsModalOpen(false);
@@ -112,6 +113,11 @@ const ListAttribute = () => {
                         className="bg-black text-white hover:bg-gray-800"
                         onClick={() => handleViewDetails(attribute)}
                     />
+                    <Button
+                        type="default"
+                        icon={<EditOutlined />}
+                        onClick={() => navigate(`/admin/updateattribute/${attribute.id}`)}
+                    />
                     <Popconfirm
                         title="Xóa thuộc tính"
                         description="Bạn có chắc muốn xóa thuộc tính này không?"
@@ -127,8 +133,13 @@ const ListAttribute = () => {
         },
     ];
 
-    if (isLoading) return <Spin tip="Loading..." className="flex justify-center items-center h-screen" />;
-    if (error) return <div className="text-center text-red-500">Không thể tải dữ liệu</div>;
+    if (isLoading) {
+        return <Spin tip="Loading..." className="flex justify-center items-center h-screen" />;
+    }
+
+    if (error) {
+        return <div className="text-center text-red-500">Không thể tải dữ liệu</div>;
+    }
 
     return (
         <>
@@ -136,8 +147,8 @@ const ListAttribute = () => {
             <div className="w-full mx-auto px-6 py-8">
                 <div className="flex justify-between items-center mb-6">
                     <Button type="primary" icon={<PlusCircleFilled />}>
-                        <Link to={`/admin/addattribute`} className="text-white">
-                            Thêm thuộc tính
+                        <Link to={`/admin/addattribute_value`} className="text-white">
+                            Thêm giá trị
                         </Link>
                     </Button>
                 </div>
@@ -176,26 +187,39 @@ const ListAttribute = () => {
                                     className="border rounded-lg p-3 bg-white text-black shadow-sm hover:shadow-md transition relative"
                                 >
                                     <p className="text-gray-900">{value.value}</p>
-                                    <Popconfirm
-                                        title="Xóa giá trị"
-                                        description="Bạn có chắc muốn xóa giá trị này không?"
-                                        onConfirm={() => deleteAttributeValueMutation.mutate(value.id)}
-                                        okText="Yes"
-                                        cancelText="No"
-                                    >
+                                    <div className="flex justify-center space-x-4 mt-4">
+                                        {/* Nút sửa */}
                                         <Button
-                                            type="text"
-                                            danger
-                                            icon={<DeleteOutlined />}
-                                            className="absolute top-2 right-2"
-                                        />
-                                    </Popconfirm>
+                                            type="link"
+                                            icon={<EditOutlined />}
+                                            onClick={() => navigate(`/admin/updateattribute_value/${value.id}`)}
+                                            className="text-blue-500 hover:text-blue-700 hover:underline focus:outline-none"
+                                        >
+                                        </Button>
+
+                                        <Popconfirm
+                                            title="Xóa giá trị"
+                                            description="Bạn có chắc muốn xóa giá trị này không?"
+                                            onConfirm={() => deleteAttributeValueMutation.mutate(value.id)}
+                                            okText="Yes"
+                                            cancelText="No"
+                                        >
+                                            <Button
+                                                type="text"
+                                                danger
+                                                icon={<DeleteOutlined />}
+                                                className="text-red-500 hover:text-red-700 transition-all duration-300 focus:outline-none"
+                                            />
+                                        </Popconfirm>
+                                    </div>
+
                                 </div>
                             ))}
                         </div>
                     </div>
                 )}
             </Modal>
+
         </>
     );
 };

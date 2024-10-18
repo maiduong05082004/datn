@@ -1,6 +1,7 @@
 import { Route, Routes } from "react-router-dom";
 import { lazy, Suspense } from "react";
 import MyProfile from "@/pages/(dashboard)/dashboard/profile";
+import AddAttribute from "@/pages/(dashboard)/dashboard/attribute_values/add";
 
 // Website pages (Lazy loading)
 const HomePage = lazy(() => import("@/pages/(website)/home/page"));
@@ -27,9 +28,10 @@ const UpdateCategories = lazy(() => import("@/pages/(dashboard)/dashboard/catego
 const ListBanners = lazy(() => import("@/pages/(dashboard)/dashboard/banners/list"));
 const AddBanners = lazy(() => import("@/pages/(dashboard)/dashboard/banners/add"));
 const UpdateBanners = lazy(() => import("@/pages/(dashboard)/dashboard/banners/update"));
-const AddAttributeValues = lazy(() => import("@/pages/(dashboard)/dashboard/attribute_values/add"));
+const AddAttributeValues = lazy(() => import("@/pages/(dashboard)/dashboard/attribute_values/addValue"));
 const ListAttributeValues = lazy(() => import("@/pages/(dashboard)/dashboard/attribute_values/list"));
-const UpdateAttributeValues = lazy(() => import("@/pages/(dashboard)/dashboard/attribute_values/update"));
+const UpdateAttributeValues = lazy(() => import("@/pages/(dashboard)/dashboard/attribute_values/updateValue"));
+const UpdateAttribute = lazy(() => import("@/pages/(dashboard)/dashboard/attribute_values/update"));
 
 const Router = () => {
     return (
@@ -63,9 +65,12 @@ const Router = () => {
                     <Route path="addBanners" element={<AddBanners />} />
                     <Route path="updateBanners" element={<UpdateBanners />} />
                     {/*giá trị attribute */}
-                    <Route path="addattribute" element={<AddAttributeValues />} />
-                    <Route path="listattribute" element={<ListAttributeValues />} />
-                    <Route path="updateattribute" element={<UpdateAttributeValues />} />
+                    <Route path="addattribute_value" element={<AddAttributeValues />} />
+                    <Route path="listattribute_value" element={<ListAttributeValues />} />
+                    <Route path="updateattribute_value/:id" element={<UpdateAttributeValues />} />
+                    <Route path="listattribute_value" element={<ListAttributeValues />} />
+                    <Route path="addattribute" element={<AddAttribute />} />
+                    <Route path="updateattribute/:id" element={< UpdateAttribute/>} />
                     {/* Danh Mục */}
                     <Route path="listCategories" element={<ListCategories />} />
                     <Route path="addCategories" element={<AddCategories />} />

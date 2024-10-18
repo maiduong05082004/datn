@@ -1,181 +1,94 @@
-import React, { useState } from 'react';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { Form, Input, Button, message, Card, Select, Spin } from 'antd';
 import axios from 'axios';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useNavigate } from 'react-router-dom';
-import { Form, Input, Button, Select, Row, Col, Typography, Card, message, Spin } from 'antd';
-import { MinusCircleOutlined, PlusOutlined } from '@ant-design/icons';
+import React, { useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 
-const { Title } = Typography;
+const { Option } = Select;
 
-// Định nghĩa kiểu dữ liệu cho Attribute
-type Attribute = {
-    id: number;
-    name: string;
-    attribute_type: number;
-    created_at: string | null;
-    updated_at: string | null;
+const UpdateAttribute: React.FC = () => {
+  const [messageApi, contextHolder] = message.useMessage();
+  const [form] = Form.useForm();
+  const queryClient = useQueryClient();
+  const { id } = useParams();
+  const navigate = useNavigate();
+
+  // Fetch the attribute to update
+  const { data: attribute, isLoading, isError } = useQuery({
+    queryKey: ['attribute', id],
+    queryFn: async () => {
+      const response = await axios.get(`http://127.0.0.1:8000/api/admins/attributes/${id}`);
+      return response.data;
+    },
+  });
+  console.log(attribute);
+  
+  
+  const updateAttributeMutation = useMutation({
+    mutationFn: async (updatedAttribute: { name: string; attribute_type: number }) => {
+      return await axios.put(
+        `http://127.0.0.1:8000/api/admins/attributes/${id}`,
+        updatedAttribute
+      );
+    },
+    onSuccess: () => {
+      messageApi.success('Cập nhật thuộc tính thành công!');
+      queryClient.invalidateQueries({ queryKey: ['attribute'] }); 
+    },
+    onError: (error: any) => {
+      messageApi.error(
+        `Cập nhật thuộc tính thất bại: ${error.response?.data?.message || error.message}`
+      );
+    },
+  });
+
+  const onFinish = (values: { name: string; attribute_type: number }) => {
+    updateAttributeMutation.mutate(values);
+  };
+
+  if (isLoading) {
+    return <Spin tip="Loading..." className="flex justify-center items-center h-screen" />;
+  }
+
+
+  return (
+    <>
+      {contextHolder}
+      <div className="min-h-screen flex items-center justify-center p-8">
+        <Card className="w-full max-w-7xl p-10 rounded-xl shadow-lg">
+          <Form
+            form={form}
+            layout="vertical"
+            onFinish={onFinish}
+            initialValues={{...attribute?.data}}
+          >
+            <Form.Item
+              label="Tên thuộc tính"
+              name="name"
+              rules={[{ required: true, message: 'Vui lòng nhập tên thuộc tính' }]}
+            >
+              <Input placeholder="Nhập tên thuộc tính" />
+            </Form.Item>
+            <Form.Item
+              label="Phân cấp thuộc tính"
+              name="attribute_type"
+              rules={[{ required: true, message: 'Vui lòng chọn loại thuộc tính' }]}
+            >
+              <Select placeholder="Chọn loại thuộc tính">
+                <Option value={0}>Cấp bậc cha</Option>
+                <Option value={1}>Cấp bậc con</Option>
+              </Select>
+            </Form.Item>
+            <Form.Item>
+              <Button type="primary" htmlType="submit">
+                Cập nhật thuộc tính
+              </Button>
+            </Form.Item>
+          </Form>
+        </Card>
+      </div>
+    </>
+  );
 };
 
-const UpdateAttributeValues = () => {
-    const [messageApi, contextHolder] = message.useMessage();
-    const [form] = Form.useForm();
-    const [selectedAttribute, setSelectedAttribute] = useState<number | null>(null);
-    const queryClient = useQueryClient();
-    const navigate = useNavigate();
-
-    // Lấy danh sách thuộc tính
-    const { data: attributeList, isLoading, error } = useQuery({
-        queryKey: ['attributes'],
-        queryFn: async () => {
-            const response = await axios.get('http://127.0.0.1:8000/api/admins/attributes');  
-            return response.data.data;  
-        },
-    });
-
-    // Mutation để thêm giá trị thuộc tính
-    const { mutate } = useMutation({
-        mutationFn: async (attributes: any) => {
-            try {
-                const response = await axios.post('http://127.0.0.1:8000/api/admins/attribute_values', attributes, {
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                });
-                return response.data;
-            } catch (error) {
-                throw new Error('Thêm giá trị thuộc tính thất bại');
-            }
-        },
-        onSuccess: () => {
-            messageApi.success('Thêm giá trị thuộc tính thành công');
-            form.resetFields();
-            queryClient.invalidateQueries({
-                queryKey: ['attributes'],
-            });
-        },
-        onError: (error: any) => {
-            messageApi.error(`Có lỗi xảy ra: ${error.message}`);
-        },
-    });
-
-    // Hàm xử lý khi submit form
-    const onFinish = (values: any) => {
-        console.log("Success:", values);
-        // Chuẩn bị payload với selectedAttribute và các giá trị đã nhập
-        const payload = {
-            attribute_id: selectedAttribute,
-            values: values.values.map((value: { value: string }) => ({
-                value: value
-            }))
-        };
-        mutate(payload);
-    };
-    
-
-    if (isLoading) return <Spin tip="Loading..." className="flex justify-center items-center h-screen" />;
-    if (error) return <div>Có lỗi xảy ra: {(error as Error).message}</div>;
-
-    return (
-        <>
-            {contextHolder}
-            <div className="min-h-screen flex items-center justify-center bg-gradient-to-r from-blue-50 to-indigo-100 p-6">
-                <div className="w-full max-w-7xl">
-                    <Card bordered={false} className="shadow-lg p-8 bg-white rounded-lg">
-                        <Title level={3} className="text-center mb-8">
-                            Thêm mới giá trị thuộc tính
-                        </Title>
-
-                        <Form onFinish={onFinish} layout="vertical" form={form} name="basic">
-                            <Form.Item
-                                label="Chọn thuộc tính"
-                                name="attribute"
-                                rules={[{ required: true, message: 'Vui lòng chọn thuộc tính!' }]}
-                            >
-                                <Select
-                                    placeholder="Chọn một thuộc tính"
-                                    onChange={setSelectedAttribute}
-                                    value={selectedAttribute}
-                                    allowClear
-                                    size="large"
-                                >
-                                    {Array.isArray(attributeList) && attributeList.length > 0 ? (
-                                        attributeList.map((attribute: Attribute) => (
-                                            <Select.Option key={attribute.id} value={attribute.id}>
-                                                {attribute.name}
-                                            </Select.Option>
-                                        ))
-                                    ) : (
-                                        <Select.Option disabled>Không có thuộc tính nào</Select.Option>
-                                    )}
-                                </Select>
-                            </Form.Item>
-
-                            {/* Form.List để nhập các giá trị thuộc tính */}
-                            <Form.List name="values">
-                                {(fields, { add, remove }) => (
-                                    <>
-                                        {fields.map((field) => (
-                                            <Row gutter={16} key={field.key}>
-                                                <Col span={20}>
-                                                    <Form.Item
-                                                        {...field}
-                                                        name={[field.name, 'value']}
-                                                        rules={[{ required: true, message: 'Vui lòng nhập giá trị thuộc tính!' }]}
-                                                    >
-                                                        <Input placeholder="Nhập giá trị thuộc tính" size="large" />
-                                                    </Form.Item>
-                                                </Col>
-                                                <Col span={4}>
-                                                    <Button
-                                                        type="link"
-                                                        icon={<MinusCircleOutlined />}
-                                                        onClick={() => remove(field.name)}
-                                                        danger
-                                                    />
-                                                </Col>
-                                            </Row>
-                                        ))}
-                                        <Form.Item>
-                                            <Button
-                                                type="dashed"
-                                                onClick={() => add()}
-                                                block
-                                                icon={<PlusOutlined />}
-                                                size="large"
-                                                className="bg-blue-50 hover:bg-blue-100"
-                                            >
-                                                Thêm giá trị
-                                            </Button>
-                                        </Form.Item>
-                                    </>
-                                )}
-                            </Form.List>
-
-                            <Form.Item>
-                                <div className="flex space-x-4">
-                                    <Button
-                                        type="primary"
-                                        htmlType="submit"
-                                        className="mt-4 bg-black"
-                                        size="large"
-                                    >
-                                        Thêm mới
-                                    </Button>
-                                    <Button
-                                        onClick={() => navigate('/admin/listAttributeValues')}
-                                        className="mt-4"
-                                        size="large"
-                                    >
-                                        Quay lại
-                                    </Button>
-                                </div>
-                            </Form.Item>
-                        </Form>
-                    </Card>
-                </div>
-            </div>
-        </>
-    );
-};
-
-export default UpdateAttributeValues;
+export default UpdateAttribute;
