@@ -64,9 +64,11 @@ const items1: MenuProps['items'] = [
     icon: React.createElement(ShoppingCartOutlined),
     label: 'Attributes',
     children: [
-      { key: 'sub4-1', label: <NavLink to="/admin/listattribute">Danh sách Attribute</NavLink> },
-      { key: 'sub4-2', label: <NavLink to="/admin/detailattribute">Chi tiết Attribute</NavLink> },
-      { key: 'sub4-3', label: <NavLink to="/admin/updateProducts">Cập Nhật Attribute</NavLink> },
+      { key: 'sub4-1', label: <NavLink to="/admin/listattribute_value">Danh sách Attribute</NavLink> },
+      { key: 'sub4-2', label: <NavLink to="/admin/addattribute_value">Thêm Attribute_values</NavLink> },
+      { key: 'sub4-3', label: <NavLink to="/admin/updateProducts_value">Cập Nhật Attribute_values</NavLink> },
+      { key: 'sub4-4', label: <NavLink to="/admin/addattribute">Thêm Atrribute</NavLink> },
+      { key: 'sub4-5', label: <NavLink to="/admin/updateProducts">Update Atrribute</NavLink> },
 
     ],
   },
