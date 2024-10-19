@@ -94,4 +94,8 @@ class User extends Authenticatable
     {
         return $this->belongsToMany(Product::class, 'wishlists')->withTimestamps();
     }
+    public function userPromotions()
+    {
+        return $this->hasMany(UserPromotion::class);
+    }
 }
