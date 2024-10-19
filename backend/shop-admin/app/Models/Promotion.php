@@ -17,11 +17,11 @@ class Promotion extends Model
 
     // Các trường có thể điền hàng loạt (fillable)
     protected $fillable = [
-        'code', 
-        'description', 
-        'start_date', 
-        'end_date', 
-        'discount_amount', 
+        'code',
+        'description',
+        'start_date',
+        'end_date',
+        'discount_amount',
         'is_active',
         'status', // Trạng thái của khuyến mãi
     ];
@@ -71,4 +71,14 @@ class Promotion extends Model
 
         return $statuses[$this->status] ?? 'Không xác định';
     }
+    public function event()
+    {
+        return $this->belongsTo(Event::class);
+    }
+    public function userPromotions()
+    {
+        return $this->hasMany(UserPromotion::class);
+    }
+    
+    
 }
