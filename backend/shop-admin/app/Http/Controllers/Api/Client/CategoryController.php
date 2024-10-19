@@ -22,59 +22,111 @@ class CategoryController extends Controller
         if (empty($id) || !is_numeric($id)) {
             return response()->json(['error' => 'Invalid category ID'], 400);
         }
-    
         $category = Category::with('childrenRecursive')->findOrFail($id);
         $categoryIds = $this->getAllChildrenIds($category);
         $categoryIds[] = $id;
-    
+
         $products = Product::with([
             'variations.attributeValue',
             'variations.variationValues.attributeValue'
         ])->whereIn('category_id', $categoryIds)->get();
-    
-        $productVariationIds = $products->pluck('variations.*.id')->flatten()->unique();
-    
-        $usedAttributeIds = AttributeValue::whereHas('productVariationValues', function ($query) use ($productVariationIds) {
-            $query->whereIn('product_variation_id', $productVariationIds);
-        })->orWhereHas('productVariations', function ($query) use ($productVariationIds) {
-            $query->whereIn('id', $productVariationIds);
-        })->pluck('attribute_id')->unique();
-    
-        $attributes = Attribute::whereIn('id', $usedAttributeIds)->with('attributeValues')->get();
-    
-        $attributeOptions = [];
-    
-        foreach ($attributes as $attribute) {
-            $attributeName = $attribute->name;
-            $attributeOptions[$attributeName] = [];
-    
-            foreach ($attribute->attributeValues as $attributeValue) {
-                $attributeOptions[$attributeName][] = $attributeValue->value;
-            }
+
+        if ($products->isNotEmpty()) {
+            $productVariationIds = $products->pluck('variations.*.id')->flatten()->unique();
+
+            $usedAttributeIds = AttributeValue::whereHas('productVariationValues', function ($query) use ($productVariationIds) {
+                $query->whereIn('product_variation_id', $productVariationIds);
+            })->orWhereHas('productVariations', function ($query) use ($productVariationIds) {
+                $query->whereIn('id', $productVariationIds);
+            })->pluck('attribute_id')->unique();
+
+            $attributes = Attribute::whereIn('id', $usedAttributeIds)->with('attributeValues')->get();
+        } else {
+            $attributes = $this->getAttributesFromHighestAncestor($category);
         }
+
+        $attributeOptions = $this->prepareAttributeOptions($attributes);
+
+        return response()->json([
+            'products' => ProductResource::collection($products),
+            
+        ]);
+    }
     
+    public function getCategoryAttributes($id)
+    {
+        $category = Category::findOrFail($id);
+        $attributes = $this->getAttributesFromHighestAncestor($category);
+
+        $attributeOptions = $this->prepareAttributeOptions($attributes);
+
+        return response()->json([
+            'attributes' => $attributeOptions
+        ]);
+    }
+    public function getCategoryChildren($id)
+    {
+        $category = Category::with('childrenRecursive')->findOrFail($id);
         $filteredCategory = $this->filterCategory($category);
     
         return response()->json([
-            'products' => ProductResource::collection($products),
-            'attributes' => $attributeOptions,
             'categories' => $filteredCategory
         ]);
     }
     
-    private function addAttributeValueToOptions(&$attributeOptions, $attributeValue)
+    private function getAttributesFromHighestAncestor($category)
     {
-        if (!$attributeValue) return;
-    
-        $attributeName = $attributeValue->attribute->name;
-        if (!isset($attributeOptions[$attributeName])) {
-            $attributeOptions[$attributeName] = [];
+        $highestAncestor = $this->findHighestAncestorWithAttributes($category);
+
+        if ($highestAncestor && $highestAncestor->attribute_ids) {
+            $attributeIds = explode(',', $highestAncestor->attribute_ids);
+            return Attribute::whereIn('id', $attributeIds)->with('attributeValues')->get();
         }
-        if (!in_array($attributeValue->value, $attributeOptions[$attributeName])) {
-            $attributeOptions[$attributeName][] = $attributeValue->value;
-        }
+
+        return collect();
     }
+
+    private function findHighestAncestorWithAttributes($category)
+    {
+        if ($category->attribute_ids) {
+            return $category;
+        }
+
+        $parent = Category::find($category->parent_id);
+        if ($parent) {
+            return $this->findHighestAncestorWithAttributes($parent);
+        }
+
+        return null;
+    }
+
+    private function prepareAttributeOptions($attributes)
+    {
+        $attributeOptions = [];
+
+        foreach ($attributes as $attribute) {
+            $attributeName = $attribute->name;
+            $attributeOptions[$attributeName] = [];
+
+            foreach ($attribute->attributeValues as $attributeValue) {
+                $attributeOptions[$attributeName][] = $attributeValue->value;
+            }
+        }
+
+        return $attributeOptions;
+    }
+
+    public function getAllColors()
+    {
+        $colors = AttributeValue::whereHas('attribute', function ($query) {
+            $query->where('name', 'Màu Sắc');
+        })->pluck('value');
     
+        return response()->json([
+            'colors' => $colors
+        ]);
+    }
+
     private function filterCategory($category)
     {
         return [
@@ -88,13 +140,11 @@ class CategoryController extends Controller
     }
     public function getFilterOptionsByCategory($categoryId, Request $request)
     {
-        if (empty($categoryId) || !is_numeric($categoryId)) {
-            return response()->json(['error' => 'Invalid category ID'], 400);
-        }
-
-        $category = Category::findOrFail($categoryId);
-        $categoryIds = $this->getAllChildrenIds($category);
-        if (!empty($categoryId) && is_numeric($categoryId)) {
+        if ($request->filled('category_ids')) {
+            $categoryIds = $request->input('category_ids');
+        } else {
+            $category = Category::with('children')->findOrFail($categoryId);
+            $categoryIds = $this->getAllChildrenIds($category);
             $categoryIds[] = $categoryId;
         }
 
@@ -102,87 +152,73 @@ class CategoryController extends Controller
             ->with(['variations.variationValues.attributeValue']);
 
         // Lọc theo màu sắc
-        if ($request->has('colors')) {
-            $colors = explode(',', $request->input('colors'));
+        if ($request->filled('colors')) {
+            $colors = $request->input('colors');
             $productsQuery->whereHas('variations.attributeValue', function ($query) use ($colors) {
                 $query->whereIn('value', $colors);
             });
         }
 
         // Lọc theo kích thước
-        if ($request->has('sizes')) {
-            $sizes = explode(',', $request->input('sizes'));
-            $productsQuery->whereHas('variations.variationValues', function ($query) use ($sizes) {
-                $query->whereHas('attributeValue', function ($q) use ($sizes) {
-                    $q->whereIn('value', $sizes);
-                });
+        if ($request->filled('sizes')) {
+            $sizes = $request->input('sizes');
+            $productsQuery->whereHas('variations.variationValues.attributeValue', function ($query) use ($sizes) {
+                $query->whereIn('value', $sizes);
             });
         }
 
-        // Lọc theo giá cả
-        if ($request->has('price_range')) {
-            $priceRanges = explode(',', $request->input('price_range'));
-
-            $productsQuery->where(function ($query) use ($priceRanges) {
-                foreach ($priceRanges as $priceRange) {
-                    switch ($priceRange) {
-                        case 'under_1m':
-                            $query->orWhere(function ($subQuery) {
-                                $subQuery->where('price', '<', 1000000)
-                                    ->orWhereHas('variations.variationValues', function ($variationQuery) {
-                                        $variationQuery->where('price', '<', 1000000);
-                                    });
-                            });
-                            break;
-                        case '1m_to_2m':
-                            $query->orWhere(function ($subQuery) {
-                                $subQuery->whereBetween('price', [1000000, 2000000])
-                                    ->orWhereHas('variations.variationValues', function ($variationQuery) {
-                                        $variationQuery->whereBetween('price', [1000000, 2000000]);
-                                    });
-                            });
-                            break;
-                        case '2m_to_3m':
-                            $query->orWhere(function ($subQuery) {
-                                $subQuery->whereBetween('price', [2000000, 3000000])
-                                    ->orWhereHas('variations.variationValues', function ($variationQuery) {
-                                        $variationQuery->whereBetween('price', [2000000, 3000000]);
-                                    });
-                            });
-                            break;
-                        case '3m_to_4m':
-                            $query->orWhere(function ($subQuery) {
-                                $subQuery->whereBetween('price', [3000000, 4000000])
-                                    ->orWhereHas('variations.variationValues', function ($variationQuery) {
-                                        $variationQuery->whereBetween('price', [3000000, 4000000]);
-                                    });
-                            });
-                            break;
-                        case 'above_4m':
-                            $query->orWhere(function ($subQuery) {
-                                $subQuery->where('price', '>', 4000000)
-                                    ->orWhereHas('variations.variationValues', function ($variationQuery) {
-                                        $variationQuery->where('price', '>', 4000000);
-                                    });
-                            });
-                            break;
-                    }
+        if ($request->filled('price_range')) {
+            $priceRange = $request->input('price_range');
+        
+            // Kiểm tra nếu `price_range` là mảng và có nhiều hơn 1 giá trị
+            if (is_array($priceRange) && count($priceRange) > 1) {
+                return response()->json([
+                    'error' => 'Chỉ được phép chọn một khoảng giá.'
+                ], 400);
+            }
+        
+            // Nếu `price_range` là mảng, lấy giá trị đầu tiên
+            if (is_array($priceRange)) {
+                $priceRange = $priceRange[0];
+            }
+        
+            // Áp dụng bộ lọc giá dựa trên `price_range`
+            $productsQuery->where(function ($query) use ($priceRange) {
+                switch ($priceRange) {
+                    case 'under_1m':
+                        $query->where('price', '<', 1000000);
+                        break;
+                    case '1m_to_2m':
+                        $query->whereBetween('price', [1000000, 2000000]);
+                        break;
+                    case '2m_to_3m':
+                        $query->whereBetween('price', [2000000, 3000000]);
+                        break;
+                    case '3m_to_4m':
+                        $query->whereBetween('price', [3000000, 4000000]);
+                        break;
+                    case 'above_4m':
+                        $query->where('price', '>', 4000000);
+                        break;
+                    default:
+                        return response()->json([
+                            'error' => 'Khoảng giá không hợp lệ.'
+                        ], 400);
                 }
             });
+        
         }
 
         $products = $productsQuery->paginate(20);
 
         if ($products->isEmpty()) {
-            return response()->json(['message' => 'Không có sản phẩm nào phù hợp với bộ lọc.'], 404);
+            return response()->json([], 200);
         }
 
         return response()->json([
             'products' => ProductResource::collection($products),
         ]);
     }
-
-
 
     private function getAllChildrenIds($category)
     {

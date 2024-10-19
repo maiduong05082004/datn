@@ -66,6 +66,7 @@ class CategoryController extends Controller
         } else{
             return response()->json(['error' => 'Không có ảnh được tải lên.'], 400);
         }
+    
 
         $category->update($data);
         return response()->json($category, 200);
