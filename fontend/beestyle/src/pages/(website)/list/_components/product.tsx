@@ -1,9 +1,5 @@
-import { getAllProducts } from '@/services/product'
-import { useQuery } from '@tanstack/react-query'
-import React, { useEffect, useState } from 'react'
-import { Link, useParams } from 'react-router-dom'
-import ErrorPage from '../../404/page'
-import axios from 'axios'
+import React, { useEffect } from 'react'
+import { Link } from 'react-router-dom'
 
 type Props = {}
 
@@ -23,6 +19,7 @@ const ProductsList = (props: Props) => {
     })
 
     console.log(products?.data?.products.map((item: any) => item));
+      if(products?.data?.length === 0) return (<div>DEO CO SAN PHAM NAO</div>)
 
     return (
         <div className="grid grid-cols-4 lg:grid-cols-12 lg:px-[15px] lg:gap-2 pc:px-[48px]">
