@@ -21,14 +21,41 @@ const ListPage = (props: Props) => {
     const { data: products } = useQuery({
         queryKey: ['products', id],
         queryFn: () => {
-            return axios.get(`http://127.0.0.1:8000/api/client/categories/${id}` , {})
+            return axios.post(`http://127.0.0.1:8000/api/client/categories/${id}`, { sizes, price_range: priceRange, category_ids: categoryIds })
         }
     })
 
-    const [ categoryIds, setCategoryIds ] = useState<any>([])
-    const [ colors, setColors ] = useState<any>([])
-    const [ sizes, setSizes ] = useState<any>([])
-    const [ priceRange, setPriceRange ] = useState<string>("")
+
+    const { data: categoryChildren } = useQuery({
+        queryKey: ['categoryChildren', id],
+        queryFn: () => {
+            return axios.get(`http://127.0.0.1:8000/api/client/categories/${id}/children`)
+        }
+    })
+
+    const { data: color } = useQuery({
+        queryKey: ['color'],
+        queryFn: () => {
+            return axios.get(`http://127.0.0.1:8000/api/client/categories/colors`)
+        }
+    })
+
+    const { data: size } = useQuery({
+        queryKey: ['size'],
+        queryFn: () => {
+            return axios.get(`http://127.0.0.1:8000/api/client/categories/${id}/sizes`)
+        }
+    })
+
+    console.log(size);
+
+
+
+
+    const [categoryIds, setCategoryIds] = useState<any>("")
+    const [colors, setColors] = useState<any>("")
+    const [sizes, setSizes] = useState<any>("")
+    const [priceRange, setPriceRange] = useState<any>("")
 
     return (
         <main>
@@ -109,7 +136,7 @@ const ListPage = (props: Props) => {
                 </div>
             </div>
 
-            <ProductsList products={products}/>
+            <ProductsList products={products} />
 
             <div className={`${filter ? "flex" : "hidden"} fixed max-w-[440px] w-[100%] top-0 right-0 z-20 bg-white flex-col justify-between h-full`}>
                 <div className=" bg-white z-20 h-full">
@@ -151,9 +178,9 @@ const ListPage = (props: Props) => {
                         </div>
                         <div className="mt-[16px]">
                             <div onClick={() => setIsDesignMenuOpen(!isDesignMenuOpen)} className="flex justify-between items-center pb-[16px] border-b-[1px] border-b-[#E8E8E8]">
-                                <h3 className="font-medium">Loại sản phẩm</h3>
+                                <h3 className="font-medium cursor-pointer select-none">Loại sản phẩm</h3>
                                 <div className="w-[24px] h-[24px] border-[1px] border-[#E8E8E8] rounded-[100%] flex justify-center items-center cursor-pointer">
-                                {isDesignMenuOpen ? (
+                                    {isDesignMenuOpen ? (
                                         <svg xmlns="http://www.w3.org/2000/svg" width="10" height="6" viewBox="0 0 10 6" fill="none"><path d="M1 5L4.75 1.25L8.5 5" stroke="black" stroke-width="1.2" stroke-linecap="square"></path></svg>) :
                                         (<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-3.5">
                                             <path strokeLinecap="round" strokeLinejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
@@ -162,20 +189,31 @@ const ListPage = (props: Props) => {
                                 </div>
                             </div>
                             {isDesignMenuOpen && (
-                            <div className="flex flex-wrap justify-start mt-[26px] mb-[46px] ">
-                                <div className="bg-black text-white px-4 py-2 rounded-full mr-[8px] mb-[8px]">
-                                    Áo ba lỗ
-                                </div>
-                                <div className="bg-white text-black px-4 py-2 rounded-full border-[1px] border-[#E8E8E8] mr-[8px] mb-[8px]">
-                                    Áo ba lỗ
-                                </div>
-                            </div>)}
+                                <div className="flex flex-wrap justify-start mt-[26px] mb-[46px] ">
+                                    <div className="flex flex-wrap justify-start mt-[26px] mb-[46px] ">
+                                        {categoryChildren?.data?.categories?.children.map((item: any) => (
+                                            item.children.length > 0 ? (
+                                                item.children.map((item: any) => (
+                                                    <div className="cursor-pointer select-none bg-white text-black px-4 py-2 rounded-full border-[1px] border-[#E8E8E8] mr-[8px] mb-[8px]">
+                                                        {item.name}
+                                                    </div>
+                                                ))
+                                            ) : (
+                                                <div className="cursor-pointer select-none bg-white text-black px-4 py-2 rounded-full border-[1px] border-[#E8E8E8] mr-[8px] mb-[8px]">
+                                                    {item.name}
+                                                </div>
+                                            )
+                                        ))}
+
+                                    </div>
+
+                                </div>)}
                         </div>
                         <div className="mt-[16px]">
                             <div onClick={() => setIsSizeMenuOpen(!isSizeMenuOpen)} className="flex justify-between items-center pb-[16px] border-b-[1px] border-b-[#E8E8E8]">
-                                <h3 className="font-medium">Kích thước</h3>
+                                <h3 className="font-medium cursor-pointer select-none">Kích thước</h3>
                                 <div className="w-[24px] h-[24px] border-[1px] border-[#E8E8E8] rounded-[100%] flex justify-center items-center cursor-pointer">
-                                {isSizeMenuOpen ? (
+                                    {isSizeMenuOpen ? (
                                         <svg xmlns="http://www.w3.org/2000/svg" width="10" height="6" viewBox="0 0 10 6" fill="none"><path d="M1 5L4.75 1.25L8.5 5" stroke="black" stroke-width="1.2" stroke-linecap="square"></path></svg>) :
                                         (<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-3.5">
                                             <path strokeLinecap="round" strokeLinejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
@@ -184,20 +222,19 @@ const ListPage = (props: Props) => {
                                 </div>
                             </div>
                             {isSizeMenuOpen && (
-                            <div className="flex flex-wrap justify-start mt-[26px] mb-[46px] ">
-                                <div className="flex justify-center items-center w-[40px] h-[40px] bg-white text-black px-4 py-2 border-[1px] border-[#E8E8E8] mr-[8px] mb-[8px]">
-                                    XL
-                                </div>
-                                <div className="flex justify-center items-center w-[40px] h-[40px] bg-white text-black px-4 py-2 border-[1px] border-[#E8E8E8] mr-[8px] mb-[8px]">
-                                    XL
-                                </div>
-                            </div>)}
+                                <div className="flex flex-wrap justify-start mt-[26px] mb-[46px] ">
+                                    {size?.data?.attributes.map((item: any) => (
+                                        <div className="cursor-pointer select-none flex justify-center items-center w-[40px] h-[40px] bg-white text-black px-4 py-2 border-[1px] border-[#E8E8E8] mr-[8px] mb-[8px]">
+                                            {item}
+                                        </div>
+                                    ))}
+                                </div>)}
                         </div>
                         <div className="mt-[16px]">
                             <div onClick={() => setIsPriceMenuOpen(!isPriceMenuOpen)} className="flex justify-between items-center pb-[16px] border-b-[1px] border-b-[#E8E8E8]">
                                 <h3 className="font-medium">Giá</h3>
                                 <div className="w-[24px] h-[24px] border-[1px] border-[#E8E8E8] rounded-[100%] flex justify-center items-center cursor-pointer">
-                                {isPriceMenuOpen ? (
+                                    {isPriceMenuOpen ? (
                                         <svg xmlns="http://www.w3.org/2000/svg" width="10" height="6" viewBox="0 0 10 6" fill="none"><path d="M1 5L4.75 1.25L8.5 5" stroke="black" stroke-width="1.2" stroke-linecap="square"></path></svg>) :
                                         (<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-3.5">
                                             <path strokeLinecap="round" strokeLinejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
@@ -206,24 +243,24 @@ const ListPage = (props: Props) => {
                                 </div>
                             </div>
                             {isPriceMenuOpen && (
-                            <div className="flex flex-col mt-[26px] mb-[46px] ">
-                                <div className="flex items-center mb-[5px]">
-                                    <input className='w-[20px] h-[20px]' type="checkbox" />
-                                    <label className='ml-[10px]' htmlFor="">Dưới 1.000.000 VND</label>
-                                </div>
-                                <div className="flex items-center mb-[5px]">
-                                    <input className='w-[20px] h-[20px]' type="checkbox" />
-                                    <label className='ml-[10px]' htmlFor="">1.000.000 - 2.000.000 VND</label>
-                                </div>
-                                <div className="flex items-center mb-[5px]">
-                                    <input className='w-[20px] h-[20px]' type="checkbox" />
-                                    <label className='ml-[10px]' htmlFor="">2.000.000 - 3.000.000 VND</label>
-                                </div>
-                                <div className="flex items-center mb-[5px]">
-                                    <input className='w-[20px] h-[20px]' type="checkbox" />
-                                    <label className='ml-[10px]' htmlFor="">Trên 4.000.000 VND</label>
-                                </div>
-                            </div>)}
+                                <div className="flex flex-col mt-[26px] mb-[46px] ">
+                                    <div className="flex items-center mb-[5px]">
+                                        <input className='w-[20px] h-[20px]' type="checkbox" />
+                                        <label className='ml-[10px]' htmlFor="">Dưới 1.000.000 VND</label>
+                                    </div>
+                                    <div className="flex items-center mb-[5px]">
+                                        <input className='w-[20px] h-[20px]' type="checkbox" />
+                                        <label className='ml-[10px]' htmlFor="">1.000.000 - 2.000.000 VND</label>
+                                    </div>
+                                    <div className="flex items-center mb-[5px]">
+                                        <input className='w-[20px] h-[20px]' type="checkbox" />
+                                        <label className='ml-[10px]' htmlFor="">2.000.000 - 3.000.000 VND</label>
+                                    </div>
+                                    <div className="flex items-center mb-[5px]">
+                                        <input className='w-[20px] h-[20px]' type="checkbox" />
+                                        <label className='ml-[10px]' htmlFor="">Trên 4.000.000 VND</label>
+                                    </div>
+                                </div>)}
                         </div>
                     </div>
                 </div>
