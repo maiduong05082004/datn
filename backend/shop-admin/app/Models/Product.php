@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Product extends Model
 {
-    use HasFactory,SoftDeletes;
+    use HasFactory, SoftDeletes;
 
     protected $fillable = [
         'slug',
@@ -37,19 +37,16 @@ class Product extends Model
         return $this->belongsTo(Category::class);
     }
 
-
-
     public function variations()
     {
         return $this->hasMany(ProductVariation::class);
     }
 
-
-        // Liên kết với model ProductImage
-        public function images()
-        {
-            return $this->hasMany(ProductImage::class);
-        }
+    // Liên kết với model ProductImage
+    public function images()
+    {
+        return $this->hasMany(ProductImage::class);
+    }
 
     // Quan hệ với Comment
     public function comments()
@@ -57,7 +54,7 @@ class Product extends Model
         return $this->hasMany(Comment::class);
     }
 
-  
+
 
     // Quan hệ với BillDetail
     public function billDetails()
@@ -65,4 +62,10 @@ class Product extends Model
         return $this->hasMany(BillDentail::class, 'product_id');
     }
     protected $dates = ['deleted_at'];
+
+    // Relationship with wishlist
+    public function wishlistedBy()
+    {
+        return $this->belongsToMany(User::class, 'wishlists')->withTimestamps();
+    }
 }

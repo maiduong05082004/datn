@@ -1,11 +1,34 @@
 import { Select, Space } from 'antd'
 import ProductsList from './_components/product'
+import { useState } from 'react'
+import { useParams } from 'react-router-dom'
+import axios from 'axios'
+import { useQuery } from '@tanstack/react-query'
 
 
 type Props = {}
 
 const ListPage = (props: Props) => {
 
+    const [filter, setFilter] = useState<boolean>(false)
+    const [isColorMenuOpen, setIsColorMenuOpen] = useState(false);
+    const [isSizeMenuOpen, setIsSizeMenuOpen] = useState(false);
+    const [isDesignMenuOpen, setIsDesignMenuOpen] = useState(false);
+    const [isPriceMenuOpen, setIsPriceMenuOpen] = useState(false);
+
+    const { id } = useParams()
+
+    const { data: products } = useQuery({
+        queryKey: ['products', id],
+        queryFn: () => {
+            return axios.get(`http://127.0.0.1:8000/api/client/categories/${id}` , {})
+        }
+    })
+
+    const [ categoryIds, setCategoryIds ] = useState<any>([])
+    const [ colors, setColors ] = useState<any>([])
+    const [ sizes, setSizes ] = useState<any>([])
+    const [ priceRange, setPriceRange ] = useState<string>("")
 
     return (
         <main>
@@ -63,7 +86,7 @@ const ListPage = (props: Props) => {
                     </div>
 
                     <div className="flex justify-between">
-                        <div className="flex cursor-pointer items-center lg:border-[#E8E8E8] lg:border-[1px] lg:px-[16px] lg:py-[10px] lg:rounded-[4px]">
+                        <div onClick={() => setFilter(!filter)} className="flex cursor-pointer items-center lg:border-[#E8E8E8] lg:border-[1px] lg:px-[16px] lg:py-[10px] lg:rounded-[4px]">
                             <span className='mr-[5px] text-[14px] font-[500] lg:mr-[20px]'>Bộ lọc</span>
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="12" viewBox="0 0 16 12" fill="none"><path d="M1.33325 2.66699H8.83325" stroke="black" stroke-linecap="square"></path><path d="M12.1665 2.66699L14.6665 2.66699" stroke="black" stroke-linecap="square"></path><path d="M7.1665 9.33301L14.6665 9.33301" stroke="black" stroke-linecap="square"></path><path d="M1.33325 9.33301H3.83325" stroke="black" stroke-linecap="square"></path><ellipse cx="5.49992" cy="9.33366" rx="1.66667" ry="1.66667" stroke="black"></ellipse><ellipse cx="10.4999" cy="2.66667" rx="1.66667" ry="1.66667" stroke="black"></ellipse></svg>
                         </div>
@@ -86,19 +109,19 @@ const ListPage = (props: Props) => {
                 </div>
             </div>
 
-            <ProductsList />
+            <ProductsList products={products}/>
 
-            {/* <div className={` fixed max-w-[440px] w-[100%] top-0 right-0 z-20 bg-white flex-col justify-between h-full`}>
+            <div className={`${filter ? "flex" : "hidden"} fixed max-w-[440px] w-[100%] top-0 right-0 z-20 bg-white flex-col justify-between h-full`}>
                 <div className=" bg-white z-20 h-full">
                     <div className="flex justify-between items-center p-[8px_20px] shadow-sm">
                         <h2 className="text-lg font-semibold">Bộ lọc</h2>
-                        <div className="flex cursor-pointer w-[40px] h-[40px] justify-center items-center">
+                        <div onClick={() => setFilter(!filter)} className="flex cursor-pointer w-[40px] h-[40px] justify-center items-center">
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M18 6L6 18" stroke="black" stroke-width="1.2" stroke-linecap="square" stroke-linejoin="round"></path><path d="M6 6L18 18" stroke="black" stroke-width="1.2" stroke-linecap="square" stroke-linejoin="round"></path></svg>
                         </div>
                     </div>
                     <div className="p-[48px_24px] h-full overflow-y-auto whitespace-nowrap scrollbar">
                         <div className="">
-                            <div className="flex justify-between items-center pb-[16px] border-b-[1px] border-b-[#E8E8E8]">
+                            <div onClick={() => setIsColorMenuOpen(!isColorMenuOpen)} className="flex justify-between items-center pb-[16px] border-b-[1px] border-b-[#E8E8E8]">
                                 <h3 className="font-medium">Màu sắc</h3>
                                 <div className="w-[24px] h-[24px] border-[1px] border-[#E8E8E8] rounded-[100%] flex justify-center items-center cursor-pointer">
                                     {isColorMenuOpen ? (
@@ -205,7 +228,7 @@ const ListPage = (props: Props) => {
                     </div>
                 </div>
                 <div className="block bg-black opacity-[0.24] fixed w-[100%] h-[100%] top-0 left-0 z-10"></div>
-            </div> */}
+            </div>
 
         </main>
     )

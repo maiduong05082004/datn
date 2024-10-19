@@ -1,9 +1,10 @@
 <?php
-
 use App\Http\Controllers\Api\Admin\Product\ProductController;
+use App\Http\Controllers\Api\Admin\UserController;
 use App\Http\Controllers\Api\Client\AuthController;
 use App\Http\Controllers\Api\Admin\AuthController as AdminAuthController;
 use App\Http\Controllers\Api\Client\CategoryController;
+use App\Http\Controllers\Api\Client\Product\ProductController as ClientProductController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\Admin\CategoryController as AdminCategoryController;
 use App\Http\Controllers\Api\Admin\Product\AttributeController;
@@ -11,17 +12,8 @@ use App\Http\Controllers\Api\Admin\Product\AttributeGroupController;
 use App\Http\Controllers\Api\Admin\Product\AttributeValueController;
 use App\Http\Controllers\Api\Client\HomeController;
 use App\Http\Controllers\Api\Client\Product\ProductController as ProductProductController;
-
-/*
-|--------------------------------------------------------------------------
-| API Routes
-|--------------------------------------------------------------------------
-|
-| Here is where you can register API routes for your application. These
-| routes are loaded by the RouteServiceProvider and all of them will
-| be assigned to the "api" middleware group. Make something great!
-|
-*/
+use App\Http\Controllers\Api\Admin\WishlistController;
+use App\Http\Controllers\Api\Client\Product\ShippingController;
 
 Route::prefix('client')->as('client.')->group(function () {
     Route::prefix('auth')
@@ -42,20 +34,17 @@ Route::prefix('client')->as('client.')->group(function () {
     Route::prefix('categories')->as('categories.')->group(function () {
         Route::get('/', [CategoryController::class, 'index'])->name('list');
         Route::get('/{id}', [CategoryController::class, 'showCategoryProducts'])->name('products.show');
+        Route::get('/{id}/filter', [CategoryController::class, 'getFilterOptionsByCategory'])->name('products.show');
+
     });
-
-
-    Route::prefix('home')->as('home.')->group(function () {
+       Route::prefix('home')->as('home.')->group(function () {
         Route::get('/',[HomeController::class, 'index'])->name('index');
         Route::get('search',[HomeController::class, 'search'])->name('search');
-
     });
-
-
+    Route::apiResource('shippingaddress', ShippingController::class)
+    ->names('shippingaddress');
     Route::prefix('products')->as('products.')->group(function () {
         Route::get('/showDetail/{id}',[ProductProductController::class, 'showDetail'])->name('showDetail');
-
-
     });
 });
 
@@ -79,5 +68,17 @@ Route::prefix('admins')
                 Route::get('trash', [AdminCategoryController::class, 'trash']);
             });
             Route::apiResource('categories', AdminCategoryController::class);
+            Route::prefix('users')->group(function () {
+                Route::get('/', [UserController::class, 'index']);
+                Route::post('/', [UserController::class, 'store']);
+                Route::get('/{id}', [UserController::class, 'show']);
+                Route::put('/{id}', [UserController::class, 'update']);
+                Route::apiResource('users', UserController::class);
+                Route::get('/{id}/block', [UserController::class, 'blockUser']);
+                Route::put('/{id}/unblock', [UserController::class, 'unblockUser']);
+                Route::get('/wishlist', [WishlistController::class, 'index'])->name('wishlist.index');
+                Route::post('/wishlist/add/{id}', [WishlistController::class, 'addToWishlist'])->name('wishlist.add');
+                Route::delete('/wishlist/remove/{id}', [WishlistController::class, 'removeFromWishlist'])->name('wishlist.remove');
+            });
         });
     });

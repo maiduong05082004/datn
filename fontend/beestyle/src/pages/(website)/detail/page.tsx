@@ -4,18 +4,23 @@ import axios from 'axios';
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import ErrorPage from '../404/page';
-// import Favorite from './_components/favorite';
-// ${item?.attribute_value_image_variant?.id === variatons?.attribute_value_image_variant?.id ? "border-black" : ""}
+
 type Props = {
     //   onClicks: () => void;
 }
 const DetailPage = () => {
 
-    const [variatons, setVariatons] = useState<any>("")
+    const [variations, setVariations] = useState<any>("")
     const [variationValues, setVariatonValues] = useState<any>("")
-    console.log(variatons);
+    const [quantity, setQuantity] = useState<number>(1)
 
     const { id } = useParams();
+
+    useEffect(() => {
+        if (quantity <= 0) return setQuantity(1)
+    }, [quantity])
+
+    if (quantity <= 0) setQuantity(1)
 
     const { data: products, isLoading, isError, error } = useQuery({
         queryKey: ['products', id],
@@ -24,39 +29,38 @@ const DetailPage = () => {
         },
     })
 
-    console.log(products?.data?.product);
-
     useEffect(() => {
         if (products?.data?.product.variations[0]) {
-            setVariatons(products?.data?.product.variations[0])
+            setVariations(products?.data?.product.variations[0])
         }
     }, [products])
 
     useEffect(() => {
-        if (variatons) {
-            const foundVariation = variatons.variation_values.find((item: any) => item.stock > 0)
+        if (variations) {
+            const foundVariation = products?.data?.product.variations.find((item: any) => item.attribute_value_image_variant?.id === variations?.attribute_value_image_variant?.id)
             if (foundVariation) {
-                setVariatonValues(foundVariation)
-            } else {
-                setVariatonValues('')
+                const foundVariationValue = foundVariation.variation_values.find((item: any) => item.stock > 0)
+                if (foundVariationValue) {
+                    setVariatonValues(foundVariationValue)
+                } else {
+                    setVariatonValues('')
+                }
             }
-            // setVariatonValues(foundVariation)
         }
-    }, [variatons, products])
+    }, [variations, products])
 
-    // useEffect(() => {
-    //     if (variatons) {
-    //         const foundVariation = products?.data?.product.variations.find((item: any) => item.attribute_value_image_variant?.id === variatons?.attribute_value_image_variant?.id)
-    //         if (foundVariation) {
-    //             const foundVariationValue = foundVariation.variation_values.find((item: any) => item.stock > 0)
-    //             if (foundVariationValue) {
-    //                 setVariatonValues(foundVariationValue)
-    //             } else {
-    //                 setVariatonValues('')
-    //             }
-    //         }
-    //     }
-    // }, [variatons, products])
+    const [currentIndex, setCurrentIndex] = useState<number>(0);
+    const handleThumbnailClick = (index: any) => {
+        setCurrentIndex(index);
+      };
+
+      const handleNext = () => {
+        setCurrentIndex((currentIndex + 1) % products?.data?.product.variations[0].variation_album_images.length);
+      };
+      const handlePrev = () => {
+        setCurrentIndex((currentIndex - 1 + products?.data?.product.variations[0].variation_album_images.length) % products?.data?.product.variations[0].variation_album_images.length);
+      };
+    
 
     if (isLoading) return (<>Loading....</>)
     if (isError) return (<>{error}</>)
@@ -71,55 +75,59 @@ const DetailPage = () => {
                             <div className="relative lg:w-[86%] lg:order-2">
                                 <div className="">
                                     <div className="w-[100%] relative">
-
+                
                                         <div className={``}>
 
-                                            <div
+                                            {variations && variations.variation_album_images.map((item: any, index: any) => (
+                                                <div
 
-                                                className={` pt-[124%] bg-cover bg-no-repeat bg-center`}
-                                                style={{ backgroundImage: `url()` }}
-                                            >
-                                                <div className="absolute top-[50%] translate-y-[-50%] text-black flex w-[100%] justify-between">
-                                                    <button
-                                                        className="w-[40px] h-[40px] flex justify-center items-center"
-
-                                                    >
-                                                        <svg
-                                                            xmlns="http://www.w3.org/2000/svg"
-                                                            width="30"
-                                                            height="30"
-                                                            viewBox="0 0 24 46"
-                                                            fill="none"
+                                                    className={`${index === currentIndex ? "" : "hidden"} pt-[124%] bg-cover bg-no-repeat bg-center`}
+                                                    style={{ backgroundImage: `url(${item})` }}
+                                                >
+                                                    <div className="absolute top-[50%] translate-y-[-50%] text-black flex w-[100%] justify-between">
+                                                        <button
+                                                            className="w-[40px] h-[40px] flex justify-center items-center"
+                                                            onClick={handlePrev}
                                                         >
-                                                            <path
-                                                                d="M22.5 43.8335L1.66666 23.0002L22.5 2.16683"
-                                                                stroke="black"
-                                                                strokeWidth="2"
-                                                                strokeLinecap="square"
-                                                            ></path>
-                                                        </svg>
-                                                    </button>
-                                                    <button
-                                                        className="w-[40px] h-[40px] flex justify-center items-center"
-
-                                                    >
-                                                        <svg
-                                                            xmlns="http://www.w3.org/2000/svg"
-                                                            width="30"
-                                                            height="30"
-                                                            viewBox="0 0 24 46"
-                                                            fill="none"
+                                                            <svg
+                                                                xmlns="http://www.w3.org/2000/svg"
+                                                                width="30"
+                                                                height="30"
+                                                                viewBox="0 0 24 46"
+                                                                fill="none"
+                                                            >
+                                                                <path
+                                                                    d="M22.5 43.8335L1.66666 23.0002L22.5 2.16683"
+                                                                    stroke="black"
+                                                                    strokeWidth="2"
+                                                                    strokeLinecap="square"
+                                                                ></path>
+                                                            </svg>
+                                                        </button>
+                                                        <button
+                                                            className="w-[40px] h-[40px] flex justify-center items-center"
+                                                            onClick={handleNext}
                                                         >
-                                                            <path
-                                                                d="M1.66675 2.1665L22.5001 22.9998L1.66675 43.8332"
-                                                                stroke="black"
-                                                                strokeWidth="2"
-                                                                strokeLinecap="square"
-                                                            ></path>
-                                                        </svg>
-                                                    </button>
+                                                            <svg
+                                                                xmlns="http://www.w3.org/2000/svg"
+                                                                width="30"
+                                                                height="30"
+                                                                viewBox="0 0 24 46"
+                                                                fill="none"
+                                                            >
+                                                                <path
+                                                                    d="M1.66675 2.1665L22.5001 22.9998L1.66675 43.8332"
+                                                                    stroke="black"
+                                                                    strokeWidth="2"
+                                                                    strokeLinecap="square"
+                                                                ></path>
+                                                            </svg>
+                                                        </button>
+                                                    </div>
                                                 </div>
-                                            </div>
+                                            ))}
+
+
 
                                         </div>
 
@@ -127,32 +135,33 @@ const DetailPage = () => {
                                 </div>
 
                                 <div className="absolute bottom-[15px] left-[50%] translate-x-[-50%] lg:hidden">
-
-                                    <button
-
-                                        className={`w-[8px] h-[8px] rounded-[50%] border-[1px] mx-[3.5px] `}
-
-                                    >
-                                    </button>
+                                    {variations && variations.variation_album_images.map((_: any, dotIndex: any) => (
+                                        <button
+                                            key={dotIndex}
+                                            className={`w-[8px] h-[8px] rounded-[50%] border-[1px] mx-[3.5px] ${dotIndex === currentIndex ? 'bg-black border-transparent' : 'bg-white border-[#bcbcbc]'}`}
+                                            onClick={() => handleThumbnailClick(dotIndex)}
+                                        >
+                                        </button>
+                                    ))}
 
                                 </div>
                             </div>
 
-
-                            <div
-
-                                className={` hidden lg:w-[14%] lg:flex-col lg:overflow-auto lg:order-1 lg:gap-4 lg:pr-[8px] lg:h-[96%] scrollbar`}
-                            >
-
+                            {variations && (
                                 <div
 
-                                    className={`pt-[120%] bg-cover bg-no-repeat bg-center cursor-pointer relative`} // Apply the custom border class
-                                    style={{ backgroundImage: `url()` }}
+                                    className={`${variations ? "lg:flex" : "lg:hidden"} hidden lg:w-[14%] lg:flex-col lg:overflow-auto lg:order-1 lg:gap-4 lg:pr-[8px] lg:h-[96%] scrollbar`}
+                                >
+                                    {variations?.variation_album_images.map((item: any, index: any) => (
+                                        <div
+                                            className={`${index === currentIndex ? 'border-[#bcbcbc] border-[1px]' : ''} pt-[120%] bg-cover bg-no-repeat bg-center cursor-pointer relative`} // Apply the custom border class
+                                            style={{ backgroundImage: `url(${item})` }}
+                                            onClick={() => handleThumbnailClick(index)}
+                                        ></div>
 
-                                ></div>
-
-                            </div>
-
+                                    ))}
+                                </div>
+                            )}
                         </div>
 
 
@@ -165,9 +174,11 @@ const DetailPage = () => {
                                         <h1 className='text-[18px] mb-[8px] font-[500] leading-6'>{products?.data?.product.name}</h1>
 
 
-                                        <p className={` text-[12px] leading-3 font-[500]`}>
-                                            Mã sản phẩm: <span> 11111</span>
-                                        </p>
+                                        {variationValues && (
+                                            <p className={` text-[12px] leading-3 font-[500]`}>
+                                                Mã sản phẩm: <span> {variationValues.sku}</span>
+                                            </p>
+                                        )}
 
                                     </div>
 
@@ -197,9 +208,9 @@ const DetailPage = () => {
                                                 id={item?.attribute_value_image_variant?.id}
                                                 name="options"
                                                 value="1"
-                                                onChange={() => setVariatons(item)}
+                                                onClick={() => setVariations(item)}
                                             />
-                                            <label htmlFor={item?.attribute_value_image_variant?.id} className={`${item?.attribute_value_image_variant?.id == variatons?.attribute_value_image_variant?.id ? "border-black" : ""} relative w-[42px] h-[42px] rounded-[50%] border-[1px] border-solid flex justify-center text-center`}>
+                                            <label htmlFor={item?.attribute_value_image_variant?.id} className={`${item?.attribute_value_image_variant?.id == variations?.attribute_value_image_variant?.id ? "border-black" : ""} relative cursor-pointer  w-[42px] h-[42px] rounded-[50%] border-[1px] border-solid flex justify-center text-center`}>
                                                 <div className="w-[40px] h-[40px] rounded-[50%] border-[5px] border-solid border-white" style={{ backgroundImage: `url('${item?.attribute_value_image_variant?.image_path}')` }}></div>
                                             </label>
                                         </>
@@ -222,22 +233,22 @@ const DetailPage = () => {
 
 
                                     {products?.data?.product.variations.map((item: any) => (
-                                        <div className={`${item?.attribute_value_image_variant?.id == variatons?.attribute_value_image_variant?.id ? "" : "hidden"} flex flex-wrap *:text-[14px] *:justify-center *:items-center *:rounded-[18px] *:mb-[8px] *:mr-[8px] *:px-[16px] *:py-[7.5px] *:cursor-pointer *:min-w-[65px] *:border-[#E8E8E8] *:border-[1px] *:border-solid *:font-[500]`}>
+                                        <div className={`${item?.attribute_value_image_variant?.id == variations?.attribute_value_image_variant?.id ? "" : "hidden"} flex flex-wrap *:text-[14px] *:justify-center *:items-center *:rounded-[18px] *:mb-[8px] *:mr-[8px] *:px-[16px] *:py-[7.5px] *:cursor-pointer *:min-w-[65px] *:border-[#E8E8E8] *:border-[1px] *:border-solid *:font-[500]`}>
 
                                             {item.variation_values.map((value: any) => (
                                                 <>
                                                     <input
                                                         className='hidden'
                                                         type="radio"
-                                                        id={value?.sku}
+                                                        id={value?.id}
                                                         name="options1"
                                                         value="1"
-                                                        onChange={() => setVariatonValues(value)}
+                                                        onClick={() => setVariatonValues(value)}
                                                     />
 
                                                     {value.stock < 0 ?
-                                                        <label htmlFor={value.sku} className="flex pointer-events-none bg-[#F8F8F8] text-[#D0D0D0]">{value.value}</label> :
-                                                        <label htmlFor={value.sku} className={`${value?.attribute_value_id === variationValues?.attribute_value_id ? "bg-black text-white" : "bg-white text-black"}  flex`}>{value.value}</label>
+                                                        <label htmlFor={value.id} className="flex select-none pointer-events-none bg-[#F8F8F8] text-[#D0D0D0]">{value.value}</label> :
+                                                        <label htmlFor={value.id} className={`${value?.attribute_value_id === variationValues?.attribute_value_id ? "bg-black text-white" : "bg-white text-black"} flex select-none`}>{value.value}</label>
                                                     }
                                                 </>
                                             ))}
@@ -250,9 +261,9 @@ const DetailPage = () => {
 
                                 <div className="my-[24px]">
                                     <div className="border-[#E8E8E8] border-[1px] border-solid h-[48px] w-full flex justify-between *:justify-center">
-                                        <button className='flex items-center w-[48px]'>-</button>
-                                        <input className='pointer-events-none bg-transparent outline-none border-none w-[calc(100%-96px)] flex text-center text-[14.5px] font-[500]' min={1} max={10} type="number" name="" id="" />
-                                        <button className='flex items-center w-[48px]'>+</button>
+                                        <button onClick={() => { setQuantity(quantity - 1) }} className='flex items-center w-[48px]'>-</button>
+                                        <input className='pointer-events-none bg-transparent outline-none border-none w-[calc(100%-96px)] flex text-center text-[14.5px] font-[500]' min={1} max={10} type="number" name="" id="" value={quantity} />
+                                        <button onClick={() => { setQuantity(quantity + 1) }} className='flex items-center w-[48px]'>+</button>
                                     </div>
                                 </div>
 

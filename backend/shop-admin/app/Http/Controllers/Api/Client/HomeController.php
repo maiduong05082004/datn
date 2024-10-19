@@ -8,31 +8,29 @@ use App\Http\Resources\ProductResource;
 use App\Models\Product;
 use App\Models\Category;
 use App\Models\Banner;
-use Request;
+use Illuminate\Http\Request;
+
 
 class HomeController extends Controller
 {
-
- 
-
-    public function index()
+  public function index()
     {
         $parentCategories = Category::whereNull('parent_id')->with('childrenRecursive')->get();
         $productsByCategory = [];
-    
+
         foreach ($parentCategories as $parentCategory) {
             $childCategoryIds = $this->getCategoryAndChildrenIds($parentCategory);
-    
+
 
             $newProducts = Product::whereIn('category_id', $childCategoryIds)
                 ->where('is_new', 1)
                 ->orderBy('id', 'desc')
                 ->take(4)
                 ->get();
-    
+
 
             $banner = Banner::where('category_id', $parentCategory->id)->first();
-    
+
 
             $productsByCategory[] = [
                 'category_id' => $parentCategory->id,
@@ -41,21 +39,21 @@ class HomeController extends Controller
                 'products' => ProductResource::collection($newProducts)
             ];
         }
-    
+
 
         $hotProducts = Product::where('is_hot', 1)
             ->orderBy('id', 'desc')
             ->take(10)
             ->get();
-    
+
         $collectionProducts = Product::where('is_collection', 1)
             ->orderBy('id', 'desc')
             ->get();
-    
+
         $banners = Banner::orderBy('id', 'desc')
             ->take(8)
             ->get();
-    
+
         return response()->json([
             'products_new_category' => $productsByCategory,
             'hot_products' => ProductResource::collection($hotProducts),
@@ -63,20 +61,22 @@ class HomeController extends Controller
             'banners' => BannerResource::collection($banners)
         ]);
     }
-    
 
 
 
- 
+
+
     private function getCategoryAndChildrenIds($category)
     {
-        $categoryIds = collect([$category->id]); 
+        $categoryIds = collect([$category->id]);
         foreach ($category->childrenRecursive as $childCategory) {
             $categoryIds = $categoryIds->merge($this->getCategoryAndChildrenIds($childCategory));
         }
 
         return $categoryIds->all();
     }
+
+    
 
 
     public function showCategoryBanner($id)
@@ -101,5 +101,37 @@ class HomeController extends Controller
             $ids = array_merge($ids, $this->getAllChildrenIds($child));
         }
         return $ids;
+    }
+
+
+
+    public function search(Request $request)
+    {
+        $keyword = $request->input('keyword'); 
+        $categoryId = $request->input('category_id'); 
+
+        $productsQuery = Product::query();
+
+        if ($keyword) {
+            $productsQuery->where('name', 'like', '%' . $keyword . '%');
+        }
+
+
+        if ($categoryId) {
+
+            $category = Category::find($categoryId);
+            if ($category) {
+                $categoryIds = $this->getCategoryAndChildrenIds($category);
+                $productsQuery->whereIn('category_id', $categoryIds);
+            }
+        }
+
+
+        $products = $productsQuery->get();
+
+  
+        return response()->json([
+            'products' => ProductResource::collection($products),
+        ]);
     }
 }
