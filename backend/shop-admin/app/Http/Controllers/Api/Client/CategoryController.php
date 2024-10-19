@@ -57,9 +57,15 @@ class CategoryController extends Controller
     {
         $category = Category::findOrFail($id);
         $attributes = $this->getAttributesFromHighestAncestor($category);
-
-        $attributeOptions = $this->prepareAttributeOptions($attributes);
-
+    
+        $attributeOptions = $attributes->map(function ($attribute) {
+            return [
+                'id' => $attribute->id,
+                'name' => $attribute->name,
+                'value' => $attribute->attributeValues->pluck('value')->toArray()
+            ];
+        });
+    
         return response()->json([
             'attributes' => $attributeOptions
         ]);
