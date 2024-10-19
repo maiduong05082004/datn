@@ -64,13 +64,11 @@ class CategoryController extends Controller
                 Storage::disk('public')->delete($category->image);
             }
             $data['image'] = $request->file('image')->store('categories', 'public');
-            // } else{
-            //     // return response()->json(['error' => 'Không có ảnh được tải lên.'], 400);
-            // }
-
+        } else{
+            return response()->json(['error' => 'Không có ảnh được tải lên.'], 400);
+        }
             $category->update($data);
             return response()->json($category, 200);
-        }
     }
 
 

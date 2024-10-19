@@ -1,21 +1,22 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import axios from 'axios';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Form, Input, Button, Select, Row, Col, Typography, Card, message, Spin } from 'antd';
+import { Form, Input, Button, Row, Col, Typography, Card, message, Spin } from 'antd';
 import { MinusCircleOutlined, PlusOutlined } from '@ant-design/icons';
 
 const { Title } = Typography;
 
 type AttributeValue = {
-    id?: number;
+    value_id?: number;
     value: string;
 };
 
 type Attribute = {
-    id: number;
-    name: string;
+    attribute_id: number;
+    attribute_name: string;
     attribute_type: number;
+    values: AttributeValue[];
 };
 
 const AddAttributeValues: React.FC = () => {
@@ -25,45 +26,38 @@ const AddAttributeValues: React.FC = () => {
     const { id } = useParams();
     const navigate = useNavigate();
 
-    const { data: attributeValues, isLoading, error } = useQuery({
-        queryKey: ['attribute', id],
-        queryFn: async () => {
-            const response = await axios.get(
-                `http://127.0.0.1:8000/api/admins/attribute_values/${id}`
-            );
-            return response.data.data;
-        },
-    });
-    console.log(attributeValues);
-    
-
-    const { data: attributeList } = useQuery({
+    // Fetch attributes with their values
+    const { data: attributeList, isLoading, error } = useQuery({
         queryKey: ['attributes'],
         queryFn: async () => {
-            const response = await axios.get('http://127.0.0.1:8000/api/admins/attributes');
-            return response.data.data;
+            const response = await axios.get('http://127.0.0.1:8000/api/admins/attribute_values');
+            return response.data;
         },
     });
 
-    // Mutation to update attribute values
+    const selectedAttribute = attributeList?.find(
+        (attribute: Attribute) => attribute.attribute_id === Number(id)
+    );
+
     const { mutate } = useMutation({
         mutationFn: async (data: { attribute_id: number; values: string[] }) => {
             return await axios.put(`http://127.0.0.1:8000/api/admins/attribute_values/${id}`, data);
         },
         onSuccess: () => {
             messageApi.success('Cập nhật giá trị thuộc tính thành công!');
-            queryClient.invalidateQueries({ queryKey: ['attribute'] }); 
-            form.resetFields(); 
+            queryClient.invalidateQueries({
+                queryKey: ['attributes'],
+            })
+            form.resetFields();
         },
         onError: (error: any) => {
             messageApi.error(`Lỗi: ${error.response?.data?.message || error.message}`);
         },
     });
 
-    // Handle form submission
     const onFinish = (values: any) => {
         const payload = {
-            attribute_id: values.attribute,
+            attribute_id: Number(id),
             values: values.values.map((item: { value: string }) => item.value.trim()),
         };
         mutate(payload);
@@ -87,25 +81,15 @@ const AddAttributeValues: React.FC = () => {
                             layout="vertical"
                             onFinish={onFinish}
                             className="space-y-6"
-                            initialValues={{...attributeValues?.data}}
+                            initialValues={{ values: selectedAttribute?.values || [] }}
                         >
-                            <Form.Item
-                                label={<span className="text-gray-700">Chọn thuộc tính</span>}
-                                name="attribute"
-                                rules={[{ required: true, message: 'Vui lòng chọn thuộc tính!' }]}
-                            >
-                                <Select
-                                    placeholder="Chọn một thuộc tính"
+                            <Form.Item label={<span className="text-gray-700">Thuộc tính</span>}>
+                                <Input
+                                    value={selectedAttribute?.attribute_name || ''}
+                                    disabled
                                     size="large"
-                                    allowClear
                                     className="rounded-md"
-                                >
-                                    {attributeList?.map((attribute: Attribute) => (
-                                        <Select.Option key={attribute.id} value={attribute.id}>
-                                            {attribute.name}
-                                        </Select.Option>
-                                    ))}
-                                </Select>
+                                />
                             </Form.Item>
 
                             <Form.List name="values">

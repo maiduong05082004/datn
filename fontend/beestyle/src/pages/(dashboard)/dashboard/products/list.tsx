@@ -3,9 +3,8 @@ import { Table, message, Button, Image, Tag, Modal, Popconfirm, Spin } from 'ant
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import axios from 'axios';
 import { format } from 'date-fns';
-import { keys } from 'lodash';
-import { useNavigate } from 'react-router-dom';
-import { PlusOutlined } from '@ant-design/icons';
+import { Link, useNavigate } from 'react-router-dom';
+import { DeleteOutlined, EditOutlined, EyeOutlined, PlusOutlined } from '@ant-design/icons';
 
 interface Product {
   id: number;
@@ -14,6 +13,7 @@ interface Product {
   stock: number;
   description: string;
   input_day: string;
+  category_name: string;  
   group: {
     name: string;
   } | null;
@@ -53,7 +53,6 @@ const ListProducts = () => {
       return response.data;
     }
   });
-
   const mutation = useMutation({
     mutationFn: async (id: number) => {
       await axios.delete(`http://localhost:8000/api/admins/products/${id}`);
@@ -138,42 +137,47 @@ const ListProducts = () => {
       render: (date: string) => <span>{format(new Date(date), 'dd/MM/yyyy')}</span>,
     },
     {
-      title: 'Danh mục',
-      dataIndex: 'category_id',
-      key: 'category_id',
-      filters: productsData?.data
-        ?.filter((product: Product) => product.group !== null)
-        ?.map((product: Product) => ({
-          text: product.group?.name,
-          value: product.group?.name,
-        })),
-      onFilter: (value: string, record: Product) => record.group?.name === value,
-      render: (category_id: number) => <span>{category_id}</span>,
+      title: 'Danh mục', // Cột danh mục sản phẩm
+      dataIndex: 'category_name',
+      key: 'category_name',
+      filters: productsData?.data?.map((product: Product) => ({
+        text: product.category_name,
+        value: product.category_name,
+      })),
+      onFilter: (value: string, record: Product) => record.category_name === value,
+      render: (text: string) => <span>{text}</span>,
     },
     {
       title: 'Biến thể',
       key: 'variations',
       render: (product: Product) => (
-        <Button className="bg-black" type="primary" onClick={() => showModal(product)}>
-          Xem chi tiết
+        <Button className="bg-black" type="primary" icon={<EyeOutlined/>} onClick={() => showModal(product)}>
         </Button>
       ),
     },
     {
-      title: 'Hành động',
+      title: 'Action',
       key: 'action',
       render: (product: Product) => (
-        <Popconfirm
-          title="Xóa sản phẩm"
-          description="Bạn có chắc muốn xóa sản phẩm này không?"
-          onConfirm={() => mutation.mutate(product.id)}
-          okText="Yes"
-          cancelText="No"
-        >
-          <Button type="primary" danger>
-            Xóa
-          </Button>
-        </Popconfirm>
+        <>
+          <div className='flex justify-between'>
+            <Popconfirm
+              title="Xóa sản phẩm"
+              description="Bạn có chắc muốn xóa sản phẩm này không?"
+              onConfirm={() => mutation.mutate(product.id)}
+              okText="Yes"
+              cancelText="No"
+            >
+              <Button icon={<DeleteOutlined />} type="primary" danger>
+              </Button>
+            </Popconfirm>
+            <Button
+              type="default"
+              icon={<EditOutlined />}
+              onClick={() => navigate(`/admin/products/${product.id}`)}
+            />
+          </div>
+        </>
       ),
     },
   ];
@@ -249,7 +253,7 @@ const ListProducts = () => {
       {contextHolder}
       <div className="w-full mx-auto px-6 py-8">
         <div className="flex justify-between items-center mb-6">
-            <Button icon={<PlusOutlined />} type="primary"onClick={() => navigate('admin/addProducts')}className="bg-indigo-600 hover:bg-indigo-700 text-white">
+          <Button className='bg-indigo-600 hover:bg-indigo-700 text-white' icon={<PlusOutlined />} type="primary" onClick={() => navigate('/addProducts')} >
             Thêm mới
           </Button>
         </div>

@@ -5,13 +5,8 @@ import { Button, message, Modal, Popconfirm, Spin, Table } from 'antd';
 import { Link, useNavigate } from 'react-router-dom';
 import { PlusCircleFilled, DeleteOutlined, EyeOutlined, EditOutlined } from '@ant-design/icons';
 
-type Attribute = {
-    id: number;
-    name: string;
-};
-
 type AttributeValue = {
-    id: number;
+    value_id: number;
     value: string;
 };
 
@@ -29,17 +24,9 @@ const ListAttribute: React.FC = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedAttribute, setSelectedAttribute] = useState<AttributeWithValues | null>(null);
 
-    // Fetch attributes
+    // Fetch attributes and their values
     const { data: attributes = [], isLoading, error } = useQuery({
-        queryKey: ['attributes'],
-        queryFn: async () => {
-            const response = await axios.get('http://127.0.0.1:8000/api/admins/attributes');
-            return response.data.data;
-        },
-    });
-
-    const { data: attributeValues = {} } = useQuery({
-        queryKey: ['attributeValues'],
+        queryKey: ['attributesWithValues'],
         queryFn: async () => {
             const response = await axios.get('http://127.0.0.1:8000/api/admins/attribute_values');
             return response.data;
@@ -53,7 +40,7 @@ const ListAttribute: React.FC = () => {
         onSuccess: () => {
             messageApi.success('Xóa thuộc tính thành công');
             queryClient.invalidateQueries({
-                queryKey: ['attributes'],
+                queryKey: ['attributesWithValues'],
             })
         },
         onError: (error: any) => {
@@ -68,22 +55,17 @@ const ListAttribute: React.FC = () => {
         onSuccess: () => {
             messageApi.success('Xóa giá trị thành công');
             queryClient.invalidateQueries({
-                queryKey: ['attributeValues'],
-            });
+                queryKey: ['attributesWithValues'],
+            })
         },
         onError: (error: any) => {
             messageApi.error(`Lỗi: ${error.message}`);
         },
     });
 
-    const handleViewDetails = (attribute: Attribute) => {
-        const attributeDetail = attributeValues[attribute.id];
-        if (attributeDetail) {
-            setSelectedAttribute(attributeDetail);
-            setIsModalOpen(true);
-        } else {
-            messageApi.error('Không tìm thấy giá trị thuộc tính.');
-        }
+    const handleViewDetails = (attribute: AttributeWithValues) => {
+        setSelectedAttribute(attribute);
+        setIsModalOpen(true);
     };
 
     const handleCloseModal = () => {
@@ -101,14 +83,14 @@ const ListAttribute: React.FC = () => {
         },
         {
             title: 'Tên thuộc tính',
-            dataIndex: 'name',
-            key: 'name',
+            dataIndex: 'attribute_name',
+            key: 'attribute_name',
         },
         {
             title: 'Action',
             key: 'action',
             width: 200,
-            render: (attribute: Attribute) => (
+            render: (attribute: AttributeWithValues) => (
                 <div className="flex space-x-2">
                     <Button
                         icon={<EyeOutlined />}
@@ -118,12 +100,12 @@ const ListAttribute: React.FC = () => {
                     <Button
                         type="default"
                         icon={<EditOutlined />}
-                        onClick={() => navigate(`/admin/updateattribute/${attribute.id}`)}
+                        onClick={() => navigate(`/admin/updateattribute/${attribute.attribute_id}`)}
                     />
                     <Popconfirm
                         title="Xóa thuộc tính"
                         description="Bạn có chắc muốn xóa thuộc tính này không?"
-                        onConfirm={() => deleteAttributeMutation.mutate(attribute.id)}
+                        onConfirm={() => deleteAttributeMutation.mutate(attribute.attribute_id)}
                         okText="Yes"
                         cancelText="No"
                         icon={<DeleteOutlined style={{ color: 'red' }} />}
@@ -149,16 +131,14 @@ const ListAttribute: React.FC = () => {
             <div className="w-full mx-auto px-6 py-8">
                 <div className="flex justify-between items-center mb-6">
                     <Button className="bg-indigo-600 hover:bg-indigo-700 text-white" type="primary" icon={<PlusCircleFilled />}>
-                        <Link to={`/admin/addattribute_value`}>
-                            Thêm giá trị
-                        </Link>
+                        <Link to={`/admin/addattribute_value`}>Thêm giá trị</Link>
                     </Button>
                 </div>
 
                 <Table
                     columns={columns}
                     dataSource={attributes}
-                    rowKey="id"
+                    rowKey="attribute_id"
                     bordered
                     pagination={{
                         pageSize: 7,
@@ -184,24 +164,21 @@ const ListAttribute: React.FC = () => {
                         <div className="grid grid-cols-2 gap-4 mt-2">
                             {selectedAttribute.values.map((value) => (
                                 <div
-                                    key={value.id}
+                                    key={value.value_id}
                                     className="border rounded-lg p-3 bg-white text-black shadow-sm hover:shadow-md transition relative"
                                 >
                                     <p className="text-gray-900">{value.value}</p>
                                     <div className="flex justify-center space-x-4 mt-4">
-                                        {/* Nút sửa */}
                                         <Button
                                             type="link"
                                             icon={<EditOutlined />}
-                                            onClick={() => navigate(`/admin/updateattribute_value/${value.id}`)}
+                                            onClick={() => navigate(`/admin/updateattribute_value/${value.value_id}`)}
                                             className="text-blue-500 hover:text-blue-700 hover:underline focus:outline-none"
-                                        >
-                                        </Button>
-
+                                        />
                                         <Popconfirm
                                             title="Xóa giá trị"
                                             description="Bạn có chắc muốn xóa giá trị này không?"
-                                            onConfirm={() => deleteAttributeValueMutation.mutate(value.id)}
+                                            onConfirm={() => deleteAttributeValueMutation.mutate(value.value_id)}
                                             okText="Yes"
                                             cancelText="No"
                                         >
@@ -213,14 +190,12 @@ const ListAttribute: React.FC = () => {
                                             />
                                         </Popconfirm>
                                     </div>
-
                                 </div>
                             ))}
                         </div>
                     </div>
                 )}
             </Modal>
-
         </>
     );
 };

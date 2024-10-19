@@ -108,12 +108,15 @@ const AddProduct = () => {
   })
 
   const handleVariantGroupChange = (e: any) => {
-    const groupId = e.target.value;
-    const selectedGroup = variantgroup.find((group: any) => group.group_id === parseInt(groupId));
-    setSelectedVariantGroup(selectedGroup);
-    setSelectedColor('');
-    setAvailableSizes([]);
-  };
+  const groupId = e.target.value;
+  const selectedGroup = variantgroup.find(
+    (group: any) => group.group_id === parseInt(groupId)
+  );
+  setSelectedVariantGroup(selectedGroup);
+  setSelectedColor('');
+  setAvailableSizes([]);
+};
+
 
   const handleColorChange = (e: any) => {
     const color = e.target.value;
@@ -176,15 +179,6 @@ const AddProduct = () => {
       variationsData[selectedColor][sizeId] = { stock, discount };
     });
 
-    const imageFields = {
-      [`color_image_${selectedColor}`]: fileList.length > 0 ? fileList[0].url || '' : '',
-
-      [`album_images_${selectedColor}`]: albumList.map(file => file.url || '').filter(url => url !== ''),
-    };
-
-
-
-
     const formattedDate = values.input_day ? values.input_day.format('YYYY-MM-DD') : null;
 
     const finalData = {
@@ -193,7 +187,6 @@ const AddProduct = () => {
       content,
       variations: JSON.stringify(variationsData),
       group_id: selectedVariantGroup?.group_id,
-      ...imageFields,
     };
 
 
@@ -342,29 +335,6 @@ const AddProduct = () => {
                             </option>
                           ))}
                         </select>
-
-                        <div className="mt-2">
-                          <Input
-                            placeholder="Thêm màu sắc mới"
-                            value={customColor}
-                            onChange={(e) => setCustomColor(e.target.value)}
-                          />
-                          <Button
-                            type="primary"
-                            className="mt-5"
-                            onClick={() => {
-                              if (customColor) {
-                                setCustomColors([...customColors, customColor]);
-                                setSelectedColor(customColor);
-                                setAvailableSizes([]);
-                                setSizeData([]);
-                                setCustomColor('');
-                              }
-                            }}
-                          >
-                            Thêm Màu
-                          </Button>
-                        </div>
                       </div>
                     )}
 
