@@ -56,7 +56,8 @@ Route::prefix('client')->as('client.')->group(function () {
     Route::apiResource('shippingaddress', ShippingController::class)
         ->names('shippingaddress');
     Route::prefix('products')->as('products.')->group(function () {
-        Route::get('/showDetail/{id}', [ProductProductController::class, 'showDetail'])->name('showDetail');
+        Route::get('/showDetail/{id}',[ProductProductController::class, 'showDetail'])->name('showDetail');
+        Route::post('/purchase',[ProductProductController::class, 'purchase'])->name('purchase');
     });
 });
 
