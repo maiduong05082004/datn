@@ -127,23 +127,24 @@ class CategoryController extends Controller
         $colorsWithImages = AttributeValue::whereHas('attribute', function ($query) {
             $query->where('name', 'Màu Sắc');
         })
-        ->with(['productVariations.images' => function ($query) {
-            $query->where('image_type', 'variant')
-                  ->select('product_variation_id', 'image_path');
-        }])->get();
-    
+            ->with(['productVariations.variationImages' => function ($query) {
+                $query->where('image_type', 'variant');
+            }])->get();
+
         $formattedColors = $colorsWithImages->map(function ($color) {
             return [
-                'color' => $color->value,
-                'images' => $color->productVariations->flatMap(function ($variation) {
-                    return $variation->images->pluck('image_path');
-                })->unique()->values()
+                'id' => $color->id,
+                'name' => $color->value,
+                'image' => $color->productVariations->flatMap(function ($variation) {
+                    return $variation->variationImages->pluck('image_path');
+                })->first()
             ];
         });
-    
-        return response()->json(['colors' => $formattedColors], 200);
+
+        return response()->json([
+            'colors' => $formattedColors
+        ], 200);
     }
-    
 
     private function filterCategory($category)
     {
