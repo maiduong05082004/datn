@@ -40,7 +40,7 @@ input[type="number"]::-webkit-inner-spin-button {
   margin: 0;
 }
 
-input[type="checkbox"] {
+input[type="radio"] {
   appearance: none;
   -webkit-appearance: none;
   width: 20px;
@@ -51,14 +51,14 @@ input[type="checkbox"] {
   cursor: pointer;
 }
 
-/* Thay đổi màu nền khi checkbox được chọn */
-input[type="checkbox"]:checked {
+/* Thay đổi màu nền khi radio được chọn */
+input[type="radio"]:checked {
   background-color: black;
   border: 2px solid black;
 }
 
 /* Thêm dấu kiểm */
-input[type="checkbox"]:checked::before {
+input[type="radio"]:checked::before {
   content: "✓";
   color: white;
   font-weight: bold;

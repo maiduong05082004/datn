@@ -4,8 +4,8 @@ import axios from 'axios';
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import ErrorPage from '../404/page';
-// import Favorite from './_components/favorite';
-// ${item?.attribute_value_image_variant?.id === variatons?.attribute_value_image_variant?.id ? "border-black" : ""}
+import LoadingPage from '../loading/page';
+
 type Props = {
     //   onClicks: () => void;
 }
@@ -58,7 +58,7 @@ const DetailPage = () => {
     //     }
     // }, [variatons, products])
 
-    if (isLoading) return (<>Loading....</>)
+    if (isLoading) return (<LoadingPage />)
     if (isError) return (<>{error}</>)
 
 
