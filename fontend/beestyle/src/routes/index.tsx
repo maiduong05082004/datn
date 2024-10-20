@@ -12,9 +12,6 @@ const CartPage = lazy(() => import("@/pages/(website)/home/_components/CartPage"
 const Signin = lazy(() => import("@/pages/signin/signin"));
 const Signup = lazy(() => import("@/pages/signup/signup"));
 const GoogleCallback = lazy(() => import("@/pages/GoogleCallback/GoogleCallback"));
-const ErrorPage = lazy(() => import("@/pages/(website)/404/page"));
-
-// Admin pages (Lazy loading)
 const LayoutAdmin = lazy(() => import("@/pages/(dashboard)/layout"));
 const DashboardPage = lazy(() => import("@/pages/(dashboard)/dashboard/page"));
 const AddUser = lazy(() => import("@/pages/(dashboard)/dashboard/user/add"));
@@ -37,6 +34,7 @@ const UpdateAttributeValues = lazy(() => import("@/pages/(dashboard)/dashboard/a
 const UpdateAttribute = lazy(() => import("@/pages/(dashboard)/dashboard/attribute_values/update"));
 const ListComments = lazy(() => import("@/pages/(dashboard)/dashboard/comments/list"));
 const ListBills = lazy(() => import("@/pages/(dashboard)/dashboard/bills/list"));
+const DetailProducts = lazy(() => import("@/pages/(dashboard)/dashboard/products/detail"));
 const Router = () => {
     return (
         <Suspense fallback={<div>Loading...</div>}>
@@ -71,7 +69,8 @@ const Router = () => {
                     {/* products */}
                     <Route path="listProducts" element={<ListProducts />} />
                     <Route path="addProducts" element={<AddProduct />} />
-                    <Route path="updateProducts" element={<UpdateProduct />} />
+                    <Route path="updateProducts/:id" element={<UpdateProduct />} />
+                    <Route path="detailProducts/:id" element={<DetailProducts />} />
                     {/* banner */}
                     <Route path="listBanners" element={<ListBanners />} />
                     <Route path="addBanners" element={<AddBanners />} />
