@@ -58,6 +58,7 @@ Route::prefix('client')->as('client.')->group(function () {
     Route::prefix('products')->as('products.')->group(function () {
         Route::get('/showDetail/{id}',[ProductProductController::class, 'showDetail'])->name('showDetail');
         Route::post('/purchase',[ProductProductController::class, 'purchase'])->name('purchase');
+        Route::get('/index',[ProductProductController::class, 'index'])->name('index');
     });
 });
 
