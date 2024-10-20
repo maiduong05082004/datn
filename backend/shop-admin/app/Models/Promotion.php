@@ -22,8 +22,11 @@ class Promotion extends Model
         'start_date',
         'end_date',
         'discount_amount',
+        'usage_limit',
+        'min_order_value',
+        'promotion_type',
         'is_active',
-        'status', // Trạng thái của khuyến mãi
+        'status',
     ];
 
     // Quan hệ với bảng users (thông qua bảng trung gian user_promotions)
@@ -79,6 +82,14 @@ class Promotion extends Model
     {
         return $this->hasMany(UserPromotion::class);
     }
-    
-    
+
+    public function category()
+    {
+        return $this->belongsTo(Category::class);
+    }
+
+    public function product()
+    {
+        return $this->belongsTo(Product::class);
+    }
 }

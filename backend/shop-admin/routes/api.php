@@ -16,6 +16,7 @@ use App\Http\Controllers\Api\Client\HomeController;
 use App\Http\Controllers\Api\Client\Product\ProductController as ProductProductController;
 use App\Http\Controllers\Api\Admin\WishlistController;
 use App\Http\Controllers\Api\Client\Product\ShippingController;
+use App\Http\Controllers\Api\Client\PromotionController;
 
 Route::prefix('client')->as('client.')->group(function () {
     Route::prefix('auth')
@@ -33,14 +34,21 @@ Route::prefix('client')->as('client.')->group(function () {
             Route::get('/google', [AuthController::class, 'redirectToGoogle'])->name('google.redirect');
             Route::get('/callback/google', [AuthController::class, 'handleGoogleCallback'])->name('google.callback');
         });
-        Route::prefix('categories')->as('categories.')->group(function () {
-            Route::get('/', [CategoryController::class, 'index'])->name('list');
-            Route::get('/colors', [CategoryController::class, 'getAllColors']);
-            Route::post('/{id}', [CategoryController::class, 'getFilterOptionsByCategory']);
-            Route::get('/{id}/sizes', [CategoryController::class, 'getCategoryAttributes']);
-            Route::get('/{id}/children', [CategoryController::class, 'getCategoryChildren']);
-        });
-        
+    Route::prefix('categories')->as('categories.')->group(function () {
+        Route::get('/', [CategoryController::class, 'index'])->name('list');
+        Route::get('/colors', [CategoryController::class, 'getAllColors']);
+        Route::post('/{id}', [CategoryController::class, 'getFilterOptionsByCategory']);
+        Route::get('/{id}/sizes', [CategoryController::class, 'getCategoryAttributes']);
+        Route::get('/{id}/children', [CategoryController::class, 'getCategoryChildren']);
+    });
+    Route::prefix('promotions')->middleware('auth:sanctum')->group(function () {
+        Route::post('/', [PromotionController::class, 'applyPromotion']);
+        Route::get('/available-promotions', [PromotionController::class, 'getAvailablePromotions']);
+        Route::get('/history', [PromotionController::class, 'getPromotionHistory']);
+        Route::post('/check', [PromotionController::class, 'checkPromotion']);
+        Route::get('/product/{productId}', [PromotionController::class, 'getProductPromotions']);
+
+    });
     Route::prefix('home')->as('home.')->group(function () {
         Route::get('/', [HomeController::class, 'index'])->name('index');
         Route::get('search', [HomeController::class, 'search'])->name('search');

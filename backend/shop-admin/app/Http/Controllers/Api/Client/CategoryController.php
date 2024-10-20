@@ -49,15 +49,15 @@ class CategoryController extends Controller
 
         return response()->json([
             'products' => ProductResource::collection($products),
-            
+
         ]);
     }
-    
+
     public function getCategoryAttributes($id)
     {
         $category = Category::findOrFail($id);
         $attributes = $this->getAttributesFromHighestAncestor($category);
-    
+
         $attributeOptions = $attributes->map(function ($attribute) {
             return [
                 'id' => $attribute->id,
@@ -65,7 +65,7 @@ class CategoryController extends Controller
                 'value' => $attribute->attributeValues->pluck('value')->toArray()
             ];
         });
-    
+
         return response()->json([
             'attributes' => $attributeOptions
         ]);
@@ -74,12 +74,12 @@ class CategoryController extends Controller
     {
         $category = Category::with('childrenRecursive')->findOrFail($id);
         $filteredCategory = $this->filterCategory($category);
-    
+
         return response()->json([
             'categories' => $filteredCategory
         ]);
     }
-    
+
     private function getAttributesFromHighestAncestor($category)
     {
         $highestAncestor = $this->findHighestAncestorWithAttributes($category);
@@ -124,14 +124,26 @@ class CategoryController extends Controller
 
     public function getAllColors()
     {
-        $colors = AttributeValue::whereHas('attribute', function ($query) {
+        $colorsWithImages = AttributeValue::whereHas('attribute', function ($query) {
             $query->where('name', 'Màu Sắc');
-        })->pluck('value');
+        })
+        ->with(['productVariations.images' => function ($query) {
+            $query->where('image_type', 'variant')
+                  ->select('product_variation_id', 'image_path');
+        }])->get();
     
-        return response()->json([
-            'colors' => $colors
-        ]);
+        $formattedColors = $colorsWithImages->map(function ($color) {
+            return [
+                'color' => $color->value,
+                'images' => $color->productVariations->flatMap(function ($variation) {
+                    return $variation->images->pluck('image_path');
+                })->unique()->values()
+            ];
+        });
+    
+        return response()->json(['colors' => $formattedColors], 200);
     }
+    
 
     private function filterCategory($category)
     {
@@ -175,19 +187,19 @@ class CategoryController extends Controller
 
         if ($request->filled('price_range')) {
             $priceRange = $request->input('price_range');
-        
+
             // Kiểm tra nếu `price_range` là mảng và có nhiều hơn 1 giá trị
             if (is_array($priceRange) && count($priceRange) > 1) {
                 return response()->json([
                     'error' => 'Chỉ được phép chọn một khoảng giá.'
                 ], 400);
             }
-        
+
             // Nếu `price_range` là mảng, lấy giá trị đầu tiên
             if (is_array($priceRange)) {
                 $priceRange = $priceRange[0];
             }
-        
+
             // Áp dụng bộ lọc giá dựa trên `price_range`
             $productsQuery->where(function ($query) use ($priceRange) {
                 switch ($priceRange) {
@@ -212,7 +224,6 @@ class CategoryController extends Controller
                         ], 400);
                 }
             });
-        
         }
 
         $products = $productsQuery->paginate(20);
