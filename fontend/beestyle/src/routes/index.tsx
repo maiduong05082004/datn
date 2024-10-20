@@ -29,6 +29,7 @@ import ListAttributeValues from "@/pages/(dashboard)/dashboard/attribute_values/
 import AddAttributeValues from "@/pages/(dashboard)/dashboard/attribute_values/add";
 import UpdateAttributeValues from "@/pages/(dashboard)/dashboard/attribute_values/update";
 import DetailAttributeValues from "@/pages/(dashboard)/dashboard/attribute_values/detail";
+import DetailBill from "@/pages/(dashboard)/dashboard/bills/detail";
 
 
 
@@ -59,6 +60,7 @@ const Router = () => {
                     <Route path="addSub" element={<AddSub />} />
                     <Route path="updateCategories" element={<UpdateCategories />} />
                     <Route path="listBills" element={<ListBills />} />
+                    <Route path="detailBill/:id" element={<DetailBill />} />
                     <Route path="listBanners" element={<ListBanners />} />
                     <Route path="addBanners" element={<AddBanners />} />
                     <Route path="updateBanners/:id" element={<UpdateBanners />} />
