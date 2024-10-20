@@ -6,7 +6,7 @@ import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import axios from 'axios';
-import { Form, Input, Button, Checkbox, InputNumber, Upload, Row, Col, DatePicker } from 'antd';
+import { Form, Input, Button, Checkbox, InputNumber, Upload, Row, Col, DatePicker, Spin } from 'antd';
 import { MinusCircleOutlined, UploadOutlined } from '@ant-design/icons';
 import { FormProps } from 'react-hook-form';
 
@@ -91,7 +91,7 @@ const AddProduct = () => {
     },
     onSuccess: () => {
       toast.success('Thêm sản phẩm thành công!');
-      form.resetFields();
+      form.resetFields(); // Reset form sau khi thành công
       setContent('');
       setSelectedVariantGroup(null);
       setSelectedColor('');
@@ -103,10 +103,10 @@ const AddProduct = () => {
       setShowVariantForm(true);
     },
     onError: (error) => {
+      console.error('Lỗi khi thêm sản phẩm:', error);
       toast.error('Thêm sản phẩm thất bại!');
-      console.error(error);
     },
-  })
+  });
 
   const handleVariantGroupChange = (e: any) => {
     const groupId = e.target.value;
@@ -155,43 +155,50 @@ const AddProduct = () => {
     );
     setSizeData(newSizeData);
   };
-
+  const toggleVariantForm = () => {
+    setShowVariantForm(!showVariantForm);
+  };
   const handleUploadChange = ({ fileList }: any) => {
     setFileList(fileList);
   };
 
   const handleAlbumChange = ({ fileList }: any) => {
     setAlbumList(fileList);
+
   };
 
-  const toggleVariantForm = () => {
-    setShowVariantForm(!showVariantForm);
-  };
   const onFinish = (values: any) => {
-    const variationsData: any = {};
-
-    sizeData.forEach((curr: any) => {
+    const variationsData = sizeData.reduce((acc: any, curr: any) => {
       const { sizeId, stock, discount } = curr;
-
-      if (!variationsData[selectedColor]) {
-        variationsData[selectedColor] = {};
+      if (!acc[selectedColor]) {
+        acc[selectedColor] = {};
       }
+      acc[selectedColor][sizeId] = { stock, discount };
+      return acc;
+    }, {});
 
-      variationsData[selectedColor][sizeId] = { stock, discount };
-    });
-
+    const imageFields = {
+      [`color_image_${selectedColor}`]: fileList[0].name,
+      [`album_images_${selectedColor}`]: albumList[0].name,
+    };
     const formattedDate = values.input_day ? values.input_day.format('YYYY-MM-DD') : null;
-
     const finalData = {
       ...values,
       input_day: formattedDate,
       content,
       variations: JSON.stringify(variationsData),
       group_id: selectedVariantGroup?.group_id,
+      ...imageFields,
+
     };
+    console.log(imageFields);
+
     mutate(finalData);
   };
-  if (isLoadingVariantGroup || isLoadingCategories) return <div>Loading...</div>;
+
+
+  // if (isLoading) return <Spin tip="Loading..." className="flex justify-center items-center h-screen" />;
+
 
   return (
     <>
