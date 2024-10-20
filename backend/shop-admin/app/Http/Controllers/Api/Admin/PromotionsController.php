@@ -101,6 +101,8 @@ class PromotionsController extends Controller
             'end_date' => 'required|date|after_or_equal:start_date',
             'discount_amount' => 'required|numeric|min:0',
             'promotion_type' => 'required|in:shipping,product_discount,order_discount,first_order,free_gift',
+            'category_id' => 'nullable|exists:categories,id',
+            'product_id' => 'nullable|exists:products,id',
             'usage_limit' => 'nullable|integer|min:1',
             'status' => 'required'
         ]);
