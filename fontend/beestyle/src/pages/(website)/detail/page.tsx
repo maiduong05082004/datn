@@ -4,6 +4,7 @@ import axios from 'axios';
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import ErrorPage from '../404/page';
+import LoadingPage from '../loading/page';
 
 type Props = {
     //   onClicks: () => void;
@@ -62,7 +63,7 @@ const DetailPage = () => {
       };
     
 
-    if (isLoading) return (<>Loading....</>)
+    if (isLoading) return (<LoadingPage />)
     if (isError) return (<>{error}</>)
 
 
