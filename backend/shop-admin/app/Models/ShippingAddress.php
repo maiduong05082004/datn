@@ -48,4 +48,9 @@ class ShippingAddress extends Model
         $this->is_default = true;
         $this->save();
     }
+
+
+    protected $casts = [
+        'is_default' => 'boolean',
+    ];
 }

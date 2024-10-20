@@ -57,7 +57,6 @@ public function purchase(Request $request)
     $validated = $request->validate([
         'product_id' => 'required|exists:products,id',
         'email_receiver' => 'required|email',
-        'phone_receiver' => 'required|string',
         'note' => 'nullable|string',
         'payment_type' => 'required|in:' . Bill::PAYMENT_TYPE_ONLINE . ',' . Bill::PAYMENT_TYPE_COD,
         'shipping_address_id' => 'required|exists:shipping_addresses,id',
@@ -158,6 +157,26 @@ public function purchase(Request $request)
     }
 }
 
-    
+// public function index(Request $request)
+// {
+//     // Lấy danh sách hóa đơn cùng với thông tin liên quan
+//     $bills = Bill::with([
+//         'user', // Thông tin người dùng
+//         'promotion', // Khuyến mãi nếu có
+//         'shippingAddress', // Địa chỉ giao hàng
+//         'billDentail.product', // Sản phẩm
+//         'billDentail.productVariationValue.attributeValue' // Biến thể và giá trị thuộc tính
+//     ])
+//     ->orderBy('created_at', 'desc') // Sắp xếp theo ngày tạo
+//     ->paginate(10); // Phân trang 10 đơn mỗi trang
+
+//     // Trả về JSON chứa danh sách hóa đơn
+//     return response()->json([
+//         'message' => 'Danh sách đơn hàng',
+//         'data' => $bills,
+//     ], 200);
+// }
+
+
 
 }
