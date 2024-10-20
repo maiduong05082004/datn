@@ -26,23 +26,32 @@ import AddProduct from "@/pages/(dashboard)/dashboard/products/add";
 import ListProducts from "@/pages/(dashboard)/dashboard/products/list";
 import UpdateProduct from "@/pages/(dashboard)/dashboard/products/update";
 import ListUser from "@/pages/(dashboard)/dashboard/user/list";
+import ErrorPage from "@/pages/(website)/404/page";
+import Search from "@/pages/(website)/_components/Search";
 import PageSignin from "@/pages/(website)/auth/signin/page";
 import PageSignup from "@/pages/(website)/auth/signup/page";
+import CheckOutPage from "@/pages/(website)/checkout/page";
 import DetailPage from "@/pages/(website)/detail/page";
 import ListPage from "@/pages/(website)/list/page";
-
+import SearchPage from "@/pages/(website)/search/page";
+import { useState } from "react";
 
 const Router = () => {
+
+    const [isSearch, setIsSearch] = useState<boolean>(false)
+    const [isKeySearch, setKeySearch] = useState<string>("")
     return (
         <Suspense fallback={<div>Loading...</div>}>
             <Routes>
-                {/* Website Routes */}
-                <Route path="/" element={<LayoutWebsite />}>
+                <Route path="/" element={<LayoutWebsite isSearch={isSearch} setIsSearch={setIsSearch} />}>
                     <Route index element={<HomePage />} />
                     <Route path="categories/:id" element={<ListPage />} />
                     <Route path="products/:id" element={<DetailPage />} />
+                    <Route path="checkout" element={<CheckOutPage />} />
                     <Route path="signin" element={<PageSignin />} />
                     <Route path="signup" element={<PageSignup />} />
+                    <Route path="search" element={<SearchPage isKeySearch={isKeySearch}/>} />
+
                 </Route>
 
                 {/* Admin Routes */}
@@ -85,6 +94,8 @@ const Router = () => {
                 </Route>
 
             </Routes>
+            <Search isSearch={isSearch} setIsSearch={setIsSearch} setKeySearch={setKeySearch}/>
+
         </Suspense>
     );
 };

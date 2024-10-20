@@ -1,15 +1,82 @@
 import { Select, Space } from 'antd'
 import ProductsList from './_components/product'
+import { useState } from 'react'
+import { useParams } from 'react-router-dom'
+import axios from 'axios'
+import { useQuery } from '@tanstack/react-query'
+import LoadingPage from '../loading/page'
 
 
 type Props = {}
 
 const ListPage = (props: Props) => {
 
+    const [filter, setFilter] = useState<boolean>(false)
+    const [isColorMenuOpen, setIsColorMenuOpen] = useState(false);
+    const [isSizeMenuOpen, setIsSizeMenuOpen] = useState(false);
+    const [isDesignMenuOpen, setIsDesignMenuOpen] = useState(false);
+    const [isPriceMenuOpen, setIsPriceMenuOpen] = useState(false);
+
+    const { id } = useParams()
+    const [categoryIds, setCategoryIds] = useState<number[]>([]);
+    const [sizeIds, setSizeIds] = useState<string[]>([]);
+    const [priceCheck, setPiceCheck] = useState<string>("");
+
+    console.log(priceCheck);
+
+
+    const { data: products , isLoading } = useQuery({
+        queryKey: ['products', id, categoryIds, sizeIds, priceCheck],
+        queryFn: () => {
+            return axios.post(`http://127.0.0.1:8000/api/client/categories/${id}`, {sizes: sizeIds.length === 0 ? "" : sizeIds ,category_ids: categoryIds.length === 0 ? "" : categoryIds, price_range: priceCheck })
+        }
+    })
+
+
+    const { data: categoryChildren } = useQuery({
+        queryKey: ['categoryChildren', id],
+        queryFn: () => {
+            return axios.get(`http://127.0.0.1:8000/api/client/categories/${id}/children`)
+        }
+    })
+
+    const { data: color } = useQuery({
+        queryKey: ['color'],
+        queryFn: () => {
+            return axios.get(`http://127.0.0.1:8000/api/client/categories/colors`)
+        }
+    })
+
+    const { data: size } = useQuery({
+        queryKey: ['size'],
+        queryFn: () => {
+            return axios.get(`http://127.0.0.1:8000/api/client/categories/${id}/sizes`)
+        }
+    })
+
+    // console.log(size);
+
+
+
+
+
+
+    const toggleSelect = (id: string) => {
+        setCategoryIds((prev: any) =>
+            prev.includes(id) ? prev.filter((item: any) => item !== id) : [...prev, id]
+        );
+    };
+    const toggleSize = (id: string) => {
+        setSizeIds((prev: any) =>
+            prev.includes(id) ? prev.filter((item: any) => item !== id) : [...prev, id]
+        );
+    };
+
+    // if(isLoading) return (<LoadingPage />)
 
     return (
         <main>
-
+            {isLoading && <LoadingPage />}
             <div className="my-[15px] text-center flex justify-center lg:my-[30px]">
                 <h1 className='text-[24px] font-[650] lg:text-[32px]'>Quần Áo</h1>
             </div>
@@ -139,14 +206,29 @@ const ListPage = (props: Props) => {
                                 </div>
                             </div>
                             {isDesignMenuOpen && (
-                            <div className="flex flex-wrap justify-start mt-[26px] mb-[46px] ">
-                                <div className="bg-black text-white px-4 py-2 rounded-full mr-[8px] mb-[8px]">
-                                    Áo ba lỗ
-                                </div>
-                                <div className="bg-white text-black px-4 py-2 rounded-full border-[1px] border-[#E8E8E8] mr-[8px] mb-[8px]">
-                                    Áo ba lỗ
-                                </div>
-                            </div>)}
+                                <div className="flex flex-wrap justify-start mt-[26px] mb-[46px] ">
+                                    <div className="flex flex-wrap justify-start mb-[46px] ">
+                                        {categoryChildren?.data?.categories?.children.map((item: any) => (
+                                            item.children.length > 0 ? (
+                                                item.children.map((item: any) => (
+                                                    <div onClick={() => toggleSelect(item.id)} className={`${
+                                                        categoryIds.includes(item.id)
+                                                          ? 'bg-black text-white'
+                                                          : 'bg-white text-black'
+                                                      } cursor-pointer select-none  px-4 py-2 rounded-full border-[1px] border-[#E8E8E8] mr-[8px] mb-[8px] text-[12px]`}>
+                                                        {item.name}
+                                                    </div>
+                                                ))
+                                            ) : (
+                                                <div className="cursor-pointer select-none bg-white text-black px-4 py-2 rounded-full border-[1px] border-[#E8E8E8] mr-[8px] mb-[8px] text-[12px]">
+                                                    {item.name}
+                                                </div>
+                                            )
+                                        ))}
+
+                                    </div>
+
+                                </div>)}
                         </div>
                         <div className="mt-[16px]">
                             <div onClick={() => setIsSizeMenuOpen(!isSizeMenuOpen)} className="flex justify-between items-center pb-[16px] border-b-[1px] border-b-[#E8E8E8]">
@@ -161,18 +243,24 @@ const ListPage = (props: Props) => {
                                 </div>
                             </div>
                             {isSizeMenuOpen && (
-                            <div className="flex flex-wrap justify-start mt-[26px] mb-[46px] ">
-                                <div className="flex justify-center items-center w-[40px] h-[40px] bg-white text-black px-4 py-2 border-[1px] border-[#E8E8E8] mr-[8px] mb-[8px]">
-                                    XL
-                                </div>
-                                <div className="flex justify-center items-center w-[40px] h-[40px] bg-white text-black px-4 py-2 border-[1px] border-[#E8E8E8] mr-[8px] mb-[8px]">
-                                    XL
-                                </div>
-                            </div>)}
+                                <div className="flex flex-wrap justify-start mt-[26px] mb-[46px] ">
+                                    {size?.data?.attributes.map((item: any) => (
+                                        item.value.map((value: any, index: any) => (
+
+                                            <div key={index + 1} onClick={() => toggleSize(value)} className={`${
+                                                sizeIds.includes(value)
+                                                  ? 'bg-black text-white'
+                                                  : 'bg-white text-black'}
+                                                   cursor-pointer select-none flex justify-center items-center w-[40px] h-[40px] px-4 py-2 border-[1px] border-[#E8E8E8] mr-[8px] mb-[8px]`}>
+                                                {value}
+                                            </div>
+                                        ))
+                                    ))}
+                                </div>)}
                         </div>
                         <div className="mt-[16px]">
                             <div onClick={() => setIsPriceMenuOpen(!isPriceMenuOpen)} className="flex justify-between items-center pb-[16px] border-b-[1px] border-b-[#E8E8E8]">
-                                <h3 className="font-medium">Giá</h3>
+                                <h3 className="cursor-pointer select-none  font-medium">Giá</h3>
                                 <div className="w-[24px] h-[24px] border-[1px] border-[#E8E8E8] rounded-[100%] flex justify-center items-center cursor-pointer">
                                 {isPriceMenuOpen ? (
                                         <svg xmlns="http://www.w3.org/2000/svg" width="10" height="6" viewBox="0 0 10 6" fill="none"><path d="M1 5L4.75 1.25L8.5 5" stroke="black" stroke-width="1.2" stroke-linecap="square"></path></svg>) :
@@ -183,24 +271,24 @@ const ListPage = (props: Props) => {
                                 </div>
                             </div>
                             {isPriceMenuOpen && (
-                            <div className="flex flex-col mt-[26px] mb-[46px] ">
-                                <div className="flex items-center mb-[5px]">
-                                    <input className='w-[20px] h-[20px]' type="checkbox" />
-                                    <label className='ml-[10px]' htmlFor="">Dưới 1.000.000 VND</label>
-                                </div>
-                                <div className="flex items-center mb-[5px]">
-                                    <input className='w-[20px] h-[20px]' type="checkbox" />
-                                    <label className='ml-[10px]' htmlFor="">1.000.000 - 2.000.000 VND</label>
-                                </div>
-                                <div className="flex items-center mb-[5px]">
-                                    <input className='w-[20px] h-[20px]' type="checkbox" />
-                                    <label className='ml-[10px]' htmlFor="">2.000.000 - 3.000.000 VND</label>
-                                </div>
-                                <div className="flex items-center mb-[5px]">
-                                    <input className='w-[20px] h-[20px]' type="checkbox" />
-                                    <label className='ml-[10px]' htmlFor="">Trên 4.000.000 VND</label>
-                                </div>
-                            </div>)}
+                                <div className="flex flex-col mt-[26px] mb-[46px] ">
+                                    <div className=" cursor-pointer select-none flex items-center mb-[5px]">
+                                        <input onClick={() => setPiceCheck("under_1m")} id="under_1m" className='w-[20px] h-[20px]' type="radio" name="otp" />
+                                        <label htmlFor="under_1m"  className='ml-[10px]'>Dưới 1.000.000 VND</label>
+                                    </div>
+                                    <div className="flex items-center mb-[5px]">
+                                        <input onClick={() => setPiceCheck("1m_to_2m")} id="1m_to_2m" className='w-[20px] h-[20px]' type="radio" name="otp" />
+                                        <label htmlFor="1m_to_2m" onClick={() => setPiceCheck("1m_to_2m")} className='ml-[10px]'>1.000.000 - 2.000.000 VND</label>
+                                    </div>
+                                    <div className="flex items-center mb-[5px]">
+                                        <input onClick={() => setPiceCheck("2m_to_3m")} id="2m_to_3m" className='w-[20px] h-[20px]' type="radio" name="otp" />
+                                        <label htmlFor="2m_to_3m" onClick={() => setPiceCheck("2m_to_3m")} className='ml-[10px]'>2.000.000 - 3.000.000 VND</label>
+                                    </div>
+                                    <div className="flex items-center mb-[5px]">
+                                        <input onClick={() => setPiceCheck("above_4m")} id="above_4m" className='w-[20px] h-[20px]' type="radio" name="otp" />
+                                        <label htmlFor="above_4m" onClick={() => setPiceCheck("above_4m")} className='ml-[10px]'>Trên 4.000.000 VND</label>
+                                    </div>
+                                </div>)}
                         </div>
                     </div>
                 </div>

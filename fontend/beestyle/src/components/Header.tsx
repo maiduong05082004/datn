@@ -1,12 +1,15 @@
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
 import { values } from "lodash";
+import { Dispatch, SetStateAction, useState } from "react";
 import { Link } from "react-router-dom";
 type Props = {
-    onClicks: () => void;
-}
+    isSearch: boolean
+    // onClicks: () => void;
+    setIsSearch: Dispatch<SetStateAction<boolean>>;
+  }
 
-const Header = () => {
+const Header = ({isSearch, setIsSearch}: Props) => {
 
     const { data: categorires } = useQuery({
         queryKey: ['categories'],
@@ -221,10 +224,10 @@ const Header = () => {
 
 
                     <div className="ml-auto grid grid-cols-3 grid-rows-1 lg:grid-cols-4">
-                        <div className="flex items-center">
-                            <a href="" className='w-[40px] h-[40px] flex justify-center items-center text-center'>
+                        <div onClick={() => setIsSearch(!isSearch)} className="flex items-center">
+                            <div className='w-[40px] h-[40px] flex justify-center items-center text-center'>
                                 <img className=" ls-is-cached lazyloaded" src="https://file.hstatic.net/200000642007/file/icon-search_f3577f42c6314038a0636c20100bd8d9.svg" data-src="https://file.hstatic.net/200000642007/file/icon-search_f3577f42c6314038a0636c20100bd8d9.svg" alt="Icon search" width={24} height={24} />
-                            </a>
+                            </div>
                         </div>
                         <Link to={`/carts`} className="relative flex items-center col-start-3 lg:col-start-2">
                             <div
