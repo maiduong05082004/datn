@@ -26,6 +26,8 @@ class Promotion extends Model
         'min_order_value',
         'promotion_type',
         'is_active',
+        'category_id',
+        'product_id',
         'status',
     ];
 
