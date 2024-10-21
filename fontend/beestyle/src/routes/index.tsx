@@ -10,7 +10,7 @@ import DashboardPage from "@/pages/(dashboard)/dashboard/page";
 import Addproduct from "@/pages/(dashboard)/dashboard/products/add";
 import ListProducts from "@/pages/(dashboard)/dashboard/products/list";
 import UpdateProduct from "@/pages/(dashboard)/dashboard/products/update";
-import VariantProduct from "@/pages/(dashboard)/dashboard/products/variant";
+// import VariantProduct from "@/pages/(dashboard)/dashboard/products/variant";
 import AddUser from "@/pages/(dashboard)/dashboard/user/add";
 import ListUser from "@/pages/(dashboard)/dashboard/user/list";
 import UpdateUser from "@/pages/(dashboard)/dashboard/user/update";
@@ -53,7 +53,7 @@ const Router = () => {
                     <Route path="listProducts" element={<ListProducts />} />
                     <Route path="addProducts" element={<Addproduct />} />
                     <Route path="updateProducts" element={<UpdateProduct />} />
-                    <Route path="variantProducts" element={<VariantProduct />} />
+                    {/* <Route path="variantProducts" element={<VariantProduct />} /> */}
                     <Route path="listComments" element={<ListComments />} />
                     <Route path="listCategories" element={<ListCategories />} />
                     <Route path="addCategories" element={<AddCategories />} />

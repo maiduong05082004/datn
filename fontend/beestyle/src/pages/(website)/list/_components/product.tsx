@@ -1,5 +1,7 @@
+import { useQuery } from '@tanstack/react-query';
+import axios from 'axios';
 import React, { useEffect } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useParams } from 'react-router-dom'
 
 type Props = {}
 
