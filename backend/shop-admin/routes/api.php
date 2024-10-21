@@ -15,8 +15,10 @@ use App\Http\Controllers\Api\Admin\PromotionsController;
 use App\Http\Controllers\Api\Client\HomeController;
 use App\Http\Controllers\Api\Client\Product\ProductController as ProductProductController;
 use App\Http\Controllers\Api\Admin\WishlistController;
+use App\Http\Controllers\Api\Client\Product\CartController as ProductCartController;
 use App\Http\Controllers\Api\Client\Product\ShippingController;
 use App\Http\Controllers\Api\Client\PromotionController;
+use App\Http\Controllers\CartController;
 
 Route::prefix('client')->as('client.')->group(function () {
     Route::prefix('auth')
@@ -58,8 +60,16 @@ Route::prefix('client')->as('client.')->group(function () {
     Route::prefix('products')->as('products.')->group(function () {
         Route::get('/showDetail/{id}',[ProductProductController::class, 'showDetail'])->name('showDetail');
         Route::post('/purchase',[ProductProductController::class, 'purchase'])->name('purchase');
-        Route::get('/index',[ProductProductController::class, 'index'])->name('index');
+        Route::get('/',[ProductProductController::class, 'index'])->name('index');
     });
+
+    Route::prefix('cart')->as('cart.')->middleware('auth:sanctum')->group(function () {
+        Route::get('/', [ProductCartController::class, 'getCartItems'])->name('index');
+        Route::post('/add', [ProductCartController::class, 'addToCart'])->name('add');
+        Route::put('/update/{id}', [ProductCartController::class, 'updateCartItem'])->name('update');
+        Route::delete('/{id}', [ProductCartController::class, 'removeCartItem'])->name('remove');
+    });
+    
 });
 
 
@@ -67,9 +77,9 @@ Route::prefix('admins')
     ->as('admins.')
     ->group(function () {
         Route::post('/signin', [AdminAuthController::class, 'login'])->name('signin');
-        // Route::middleware(['auth:admin', 'admin'])->group(function () {
+        Route::middleware(['auth:admin', 'admin'])->group(function () {
             Route::apiResource('products', ProductController::class)
-                ->names('products');
+            ->names('products');
             Route::apiResource('attributes', AttributeController::class)
                 ->names('attributes');
             Route::apiResource('attribute_groups', AttributeGroupController::class)
@@ -105,4 +115,4 @@ Route::prefix('admins')
                 Route::get('/event/{eventName}', [PromotionsController::class, 'getEventPromotions'])->name('promotions.event');
             });
         });
-    // });
+    });
