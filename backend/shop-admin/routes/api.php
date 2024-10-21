@@ -78,8 +78,8 @@ Route::prefix('admins')
     ->group(function () {
         Route::post('/signin', [AdminAuthController::class, 'login'])->name('signin');
         Route::middleware(['auth:admin', 'admin'])->group(function () {
-            Route::apiResource('products', ProductController::class)
-            ->names('products');
+         Route::apiResource('products', ProductController::class)
+          ->names('products');
             Route::apiResource('attributes', AttributeController::class)
                 ->names('attributes');
             Route::apiResource('attribute_groups', AttributeGroupController::class)
