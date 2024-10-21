@@ -95,11 +95,11 @@ Route::prefix('admins')
             });
             Route::prefix('promotions')->group(function () {
                 Route::get('/new-users', [PromotionsController::class, 'getNewUserPromotions'])->name('promotions.new-users');
-                Route::get('/', [PromotionsController::class, 'index'])->name('promotions.index'); // List tất cả khuyến mãi
-                Route::post('/', [PromotionsController::class, 'store'])->name('promotions.store'); // Tạo khuyến mãi mới
-                Route::get('/{id}', [PromotionsController::class, 'show'])->name('promotions.show'); // Xem chi tiết khuyến mãi
-                Route::put('/{id}', [PromotionsController::class, 'update'])->name('promotions.update'); // Cập nhật khuyến mãi
-                Route::delete('/{id}', [PromotionsController::class, 'destroy'])->name('promotions.destroy'); // Xóa khuyến mãi
+                Route::get('/', [PromotionsController::class, 'index'])->name('promotions.index');
+                Route::post('/', [PromotionsController::class, 'store'])->name('promotions.store');
+                Route::get('/{id}', [PromotionsController::class, 'show'])->name('promotions.show');
+                Route::put('/{id}', [PromotionsController::class, 'update'])->name('promotions.update');
+                Route::delete('/{id}', [PromotionsController::class, 'destroy'])->name('promotions.destroy');
                 Route::get('/user/{userId}/product/{productId}', [PromotionsController::class, 'getUserProductPromotions'])->name('promotions.user-product');
                 Route::get('/event/{eventName}', [PromotionsController::class, 'getEventPromotions'])->name('promotions.event');
             });

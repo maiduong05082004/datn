@@ -3,6 +3,9 @@ import { lazy, Suspense } from "react";
 import MyProfile from "@/pages/(dashboard)/dashboard/profile";
 import AddAttribute from "@/pages/(dashboard)/dashboard/attribute_values/add";
 import FilterComponent from "@/pages/research/research";
+import ListPromotions from "@/pages/(dashboard)/dashboard/promotions/list";
+import AddPromotion from "@/pages/(dashboard)/dashboard/promotions/add";
+import UpdatePromotion from "@/pages/(dashboard)/dashboard/promotions/update";
 
 // Website pages (Lazy loading)
 const HomePage = lazy(() => import("@/pages/(website)/home/page"));
@@ -84,6 +87,10 @@ const Router = () => {
                     <Route path="listCategories" element={<ListCategories />} />
                     <Route path="addCategories" element={<AddCategories />} />
                     <Route path="updateCategories/:id" element={<UpdateCategories />} />
+                    {/* promotions */}
+                    <Route path="listPromotions" element={<ListPromotions />} />
+                    <Route path="addPromotions" element={<AddPromotion />} />
+                    <Route path="updatePromotions/:id" element={<UpdatePromotion />} />
                 </Route>
 
             </Routes>
