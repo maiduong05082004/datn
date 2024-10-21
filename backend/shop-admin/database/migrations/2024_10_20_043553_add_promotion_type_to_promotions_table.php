@@ -9,13 +9,12 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-    public function up()
-{
-    Schema::table('promotions', function (Blueprint $table) {
-        $table->foreignId('event_id')->nullable()->constrained('events')->onDelete('cascade');
-    });
-}
-
+    public function up(): void
+    {
+        Schema::table('promotions', function (Blueprint $table) {
+            $table->string('promotion_type')->nullable()->after('min_order_value');
+        });
+    }
 
     /**
      * Reverse the migrations.
@@ -23,7 +22,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('promotions', function (Blueprint $table) {
-            //
+            $table->dropColumn('promotion_type');
         });
     }
 };

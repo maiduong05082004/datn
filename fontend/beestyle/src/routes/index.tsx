@@ -1,20 +1,32 @@
-import AddBanners from "@/pages/(dashboard)/dashboard/banners/add";
-import ListBanners from "@/pages/(dashboard)/dashboard/banners/list";
-import UpdateBanners from "@/pages/(dashboard)/dashboard/banners/update";
-import ListBills from "@/pages/(dashboard)/dashboard/bills/list";
-import AddCategories from "@/pages/(dashboard)/dashboard/categories/add";
-import ListCategories from "@/pages/(dashboard)/dashboard/categories/list";
-import UpdateCategories from "@/pages/(dashboard)/dashboard/categories/update";
-import ListComments from "@/pages/(dashboard)/dashboard/comments/list";
-import DashboardPage from "@/pages/(dashboard)/dashboard/page";
-import Addproduct from "@/pages/(dashboard)/dashboard/products/add";
-import ListProducts from "@/pages/(dashboard)/dashboard/products/list";
-import UpdateProduct from "@/pages/(dashboard)/dashboard/products/update";
-import VariantProduct from "@/pages/(dashboard)/dashboard/products/variant";
-import AddUser from "@/pages/(dashboard)/dashboard/user/add";
-import ListUser from "@/pages/(dashboard)/dashboard/user/list";
-import UpdateUser from "@/pages/(dashboard)/dashboard/user/update";
+import MyProfile from "@/pages/(dashboard)/dashboard/profile";
+import AddAttribute from "@/pages/(dashboard)/dashboard/attribute_values/add";
+
+
+// Website pages
 import LayoutAdmin from "@/pages/(dashboard)/layout";
+import DashboardPage from "@/pages/(dashboard)/dashboard/page";
+import AddUser from "@/pages/(dashboard)/dashboard/user/add";
+import UpdateUser from "@/pages/(dashboard)/dashboard/user/update";
+import ListUser from "@/pages/(dashboard)/dashboard/user/list";
+import ListProducts from "@/pages/(dashboard)/dashboard/products/list";
+import AddProduct from "@/pages/(dashboard)/dashboard/products/add";
+import UpdateProduct from "@/pages/(dashboard)/dashboard/products/update";
+import ListCategories from "@/pages/(dashboard)/dashboard/categories/list";
+import AddCategories from "@/pages/(dashboard)/dashboard/categories/add";
+import UpdateCategories from "@/pages/(dashboard)/dashboard/categories/update";
+import ListBanners from "@/pages/(dashboard)/dashboard/banners/list";
+import AddBanners from "@/pages/(dashboard)/dashboard/banners/add";
+import UpdateBanners from "@/pages/(dashboard)/dashboard/banners/update";
+import AddAttributeValues from "@/pages/(dashboard)/dashboard/attribute_values/addValue";
+import ListAttributeValues from "@/pages/(dashboard)/dashboard/attribute_values/list";
+import UpdateAttributeValues from "@/pages/(dashboard)/dashboard/attribute_values/updateValue";
+import UpdateAttribute from "@/pages/(dashboard)/dashboard/attribute_values/update";
+import ListComments from "@/pages/(dashboard)/dashboard/comments/list";
+import ListBills from "@/pages/(dashboard)/dashboard/bills/list";
+import DetailProducts from "@/pages/(dashboard)/dashboard/products/detail";
+
+
+// Client
 import ErrorPage from "@/pages/(website)/404/page";
 import Search from "@/pages/(website)/_components/Search";
 import PageSignin from "@/pages/(website)/auth/signin/page";
@@ -35,6 +47,7 @@ const Router = () => {
     return (
         <>
             <Routes>
+                {/* Website Routes */}
                 <Route path="/" element={<LayoutWebsite isSearch={isSearch} setIsSearch={setIsSearch} />}>
                     <Route index element={<HomePage />} />
                     <Route path="categories/:id" element={<ListPage />} />
@@ -42,32 +55,43 @@ const Router = () => {
                     <Route path="checkout" element={<CheckOutPage />} />
                     <Route path="signin" element={<PageSignin />} />
                     <Route path="signup" element={<PageSignup />} />
-                    <Route path="search" element={<SearchPage isKeySearch={isKeySearch}/>} />
-
+                    <Route path="search" element={<SearchPage isKeySearch={isKeySearch} />} />
                 </Route>
+
+                {/* Admin Routes */}
                 <Route path="admin" element={<LayoutAdmin />}>
+                    <Route path="profile" element={<MyProfile />} />
                     <Route index element={<DashboardPage />} />
-                    <Route path="addUser" element={<AddUser />} />
-                    <Route path="updateUser" element={<UpdateUser />} />
-                    <Route path="listUser" element={<ListUser />} />
-                    <Route path="listProducts" element={<ListProducts />} />
-                    <Route path="addProducts" element={<Addproduct />} />
-                    <Route path="updateProducts" element={<UpdateProduct />} />
-                    <Route path="variantProducts" element={<VariantProduct />} />
+                    {/* bills */}
+                    <Route path="listbills" element={<ListBills />} />
+                    {/* comments */}
                     <Route path="listComments" element={<ListComments />} />
+                    {/* banners */}
+                    <Route path="addbanner" element={<AddBanners />} />
+                    <Route path="listbanner" element={<ListBanners />} />
+                    <Route path="updatebanner/:id" element={<UpdateBanners />} />
+                    {/* users */}
+                    <Route path="addUser" element={<AddUser />} />
+                    <Route path="updateUser/:id" element={<UpdateUser />} />
+                    <Route path="listUser" element={<ListUser />} />
+                    {/* products */}
+                    <Route path="listProducts" element={<ListProducts />} />
+                    <Route path="addProducts" element={<AddProduct />} />
+                    <Route path="updateProducts/:id" element={<UpdateProduct />} />
+                    <Route path="detailProducts/:id" element={<DetailProducts />} />
+                    {/* attribute values */}
+                    <Route path="addattribute_value" element={<AddAttributeValues />} />
+                    <Route path="listattribute_value" element={<ListAttributeValues />} />
+                    <Route path="updateattribute_value/:id" element={<UpdateAttributeValues />} />
+                    <Route path="addattribute" element={<AddAttribute />} />
+                    <Route path="updateattribute/:id" element={<UpdateAttribute />} />
+                    {/* categories */}
                     <Route path="listCategories" element={<ListCategories />} />
                     <Route path="addCategories" element={<AddCategories />} />
-                    <Route path="updateCategories" element={<UpdateCategories />} />
-                    <Route path="listBills" element={<ListBills />} />
-                    <Route path="listBanners" element={<ListBanners />} />
-                    <Route path="addBanners" element={<AddBanners />} />
-                    <Route path="updateBanners" element={<UpdateBanners />} />
-
+                    <Route path="updateCategories/:id" element={<UpdateCategories />} />
                 </Route>
-                <Route path="**" element={<ErrorPage />} />
             </Routes>
-            <Search isSearch={isSearch} setIsSearch={setIsSearch} setKeySearch={setKeySearch}/>
-
+            <Search isSearch={isSearch} setIsSearch={setIsSearch} setKeySearch={setKeySearch} />
         </>
     );
 };

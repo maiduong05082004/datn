@@ -53,5 +53,9 @@ class ProductVariation extends Model
     {
         return $this->belongsTo(AttributeValue::class, 'attribute_value_id');
     }
-
+    public function images()
+    {
+        return $this->hasMany(ProductVariationImage::class, 'product_variation_id');
+    }
+    
 }

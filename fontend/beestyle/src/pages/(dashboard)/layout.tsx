@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import MyProfile from './dashboard/profile';
 import {
   BarChartOutlined,
   GiftOutlined,
@@ -17,7 +18,7 @@ import {
   Switch,
   MenuProps,
 } from 'antd';
-import { Outlet } from 'react-router-dom';
+import { Link, Outlet } from 'react-router-dom';
 import { NavLink } from 'react-router-dom'; // Import NavLink for navigation
 
 const { Header, Content, Sider } = Layout;
@@ -27,84 +28,87 @@ const items1: MenuProps['items'] = [
   {
     key: '1',
     icon: <UserOutlined />,
-    label: "Quản Lý Tài Khoản",
+    label: "Tài Khoản",
     children: [
       { key: 'sub1-1', label: <NavLink to="/admin/listUser">Danh sách tài Khoản</NavLink> },
       { key: 'sub1-2', label: <NavLink to="/admin/addUser">Thêm Tài Khoản</NavLink> },
-      { key: 'sub1-3', label: <NavLink to="/admin/updateUser">Cập nhật Tài Khoản</NavLink> },
-      { key: 'sub1-4', label: <NavLink to="/admin/delete-account">Xóa Tài Khoản</NavLink> },
     ],
   },
   {
     key: '2',
     icon: <UserOutlined />,
-    label: "Quản Lý Banners",
+    label: "Banners",
     children: [
-      { key: 'sub1-1', label: <NavLink to="/admin/listBanners">Danh sách Banners</NavLink> },
-      { key: 'sub1-2', label: <NavLink to="/admin/addBanners">Thêm Banners</NavLink> },
-      { key: 'sub1-3', label: <NavLink to="/admin/updateBanners">Cập nhật Banners</NavLink> },
-      { key: 'sub1-4', label: <NavLink to="/admin/delete-account">Xóa Tài Khoản</NavLink> },
+
+      { key: 'sub2-1', label: <NavLink to="/admin/listbanners">Danh sách Banners</NavLink> },
+      { key: 'sub2-2', label: <NavLink to="/admin/addbanners">Thêm Banners</NavLink> },
     ],
   },
   {
     key: 'sub3',
     icon: React.createElement(ShoppingCartOutlined),
-    label: 'Quản Lý Sản Phẩm',
+    label: 'Sản Phẩm',
     children: [
       { key: 'sub3-1', label: <NavLink to="/admin/listProducts">Danh sách sản phẩm</NavLink> },
       { key: 'sub3-2', label: <NavLink to="/admin/addProducts">Thêm Sản phẩm</NavLink> },
-      { key: 'sub3-3', label: <NavLink to="/admin/updateProducts">Cập nhật sản phẩm</NavLink> },
 
     ],
   },
   {
     key: 'sub4',
-    icon: React.createElement(LaptopOutlined),
-    label: 'Quản Lý Danh Mục',
+    icon: React.createElement(ShoppingCartOutlined),
+    label: 'Attributes',
     children: [
-      { key: 'sub4-1', label: <NavLink to="/admin/listCategories">Danh sách danh mục</NavLink> },
-      { key: 'sub4-2', label: <NavLink to="/admin/addCategories">Thêm mới danh mục</NavLink> },
-      { key: 'sub4-3', label: <NavLink to="/admin/updateCategories">Cập nhật danh mục</NavLink> },
+      { key: 'sub4-1', label: <NavLink to="/admin/listattribute_value">Danh sách Attribute</NavLink> },
+      { key: 'sub4-2', label: <NavLink to="/admin/addattribute_value">Thêm Attribute_values</NavLink> },
+      { key: 'sub4-4', label: <NavLink to="/admin/addattribute">Thêm Atrribute</NavLink> },
+
     ],
   },
   {
     key: 'sub5',
-    icon: React.createElement(ProductOutlined),
-    label: 'Quản Lý Đơn Hàng',
+    icon: React.createElement(LaptopOutlined),
+    label: 'Danh Mục',
     children: [
-      { key: 'sub5-1', label: <NavLink to="/admin/listBills">Danh sách đơn hàng</NavLink> },
-      { key: 'sub5-2', label: <NavLink to="/admin">Danh sách</NavLink> },
-      { key: 'sub5-3', label: 'Xóa Đơn Hàng' },
+      { key: 'sub5-1', label: <NavLink to="/admin/listCategories">Danh sách danh mục</NavLink> },
+      { key: 'sub5-2', label: <NavLink to="/admin/addCategories">Thêm mới danh mục</NavLink> },
     ],
   },
   {
     key: 'sub6',
-    icon: React.createElement(MessageOutlined),
-    label: 'Quản Lý Bình Luận',
+    icon: React.createElement(ProductOutlined),
+    label: 'Đơn Hàng',
     children: [
-      { key: 'sub6-1', label: <NavLink to="/admin/listComments">Danh sách bình luận</NavLink> },
-      { key: 'sub6-2', label: 'Phê Duyệt Bình Luận' },
-      { key: 'sub6-3', label: 'Xóa Bình Luận' },
+      { key: 'sub6-1', label: <NavLink to="/admin/listBills">Danh sách đơn hàng</NavLink> },
     ],
   },
   {
     key: 'sub7',
-    icon: React.createElement(GiftOutlined),
-    label: 'Quản Lý Khuyến Mại',
+    icon: React.createElement(MessageOutlined),
+    label: 'Bình Luận',
     children: [
-      { key: 'sub7-1', label: <NavLink to="/admin/listBanners">Danh sách</NavLink> },
-      { key: 'sub7-2', label: <NavLink to="/admin/addBanners">Thêm mới</NavLink> },
-      { key: 'sub7-3', label: <NavLink to="/admin/updateBanners">Cập nhật</NavLink> },
-      { key: 'sub7-4', label: 'Xóa Khuyến Mại' },
+      { key: 'sub7-1', label: <NavLink to="/admin/listComments">Danh sách bình luận</NavLink> },
+      { key: 'sub7-2', label: 'Phê Duyệt Bình Luận' },
+      { key: 'sub7-3', label: 'Xóa Bình Luận' },
     ],
   },
   {
     key: 'sub8',
+    icon: React.createElement(GiftOutlined),
+    label: 'Khuyến Mại',
+    children: [
+      { key: 'sub8-1', label: <NavLink to="/admin/listBanners">Danh sách</NavLink> },
+      { key: 'sub8-2', label: <NavLink to="/admin/addBanners">Thêm mới</NavLink> },
+      { key: 'sub8-4', label: 'Xóa Khuyến Mại' },
+    ],
+  },
+  {
+    key: 'sub9',
     icon: React.createElement(BarChartOutlined),
     label: 'Thống Kê',
     children: [
-      { key: 'sub8-1', label: 'Xem Thống Kê' },
-      { key: 'sub8-2', label: 'Tải Xuống Thống Kê' },
+      { key: 'sub9-1', label: 'Xem Thống Kê' },
+      { key: 'sub9-2', label: 'Tải Xuống Thống Kê' },
     ],
   },
 ];
@@ -200,7 +204,6 @@ const App: React.FC = () => {
               />
             </div>
 
-            {/* Notifications */}
             <Badge
               className="relative"
               style={{
@@ -212,7 +215,7 @@ const App: React.FC = () => {
               <button className={`bg-transparent bg-[#eef3fb] hover:bg-slate-500 p-2 rounded-full ${isDarkMode ? 'bg-[#313d4a]' : 'text-black'}`}>
                 <BellOutlined
                   className={`${isDarkMode ? 'text-white' : 'text-black'}`}
-                  style={{ fontSize: '24px' }} // Adjust the size to 34px
+                  style={{ fontSize: '24px' }}
                 />
               </button>
             </Badge>
@@ -264,10 +267,10 @@ const App: React.FC = () => {
               </div>
 
               {isOpen && (
-                <div className="absolute right-0 mt-2 w-[300px] rounded-lg shadow-lg bg-black min-w-[200px]">
+                <div className="absolute right-0 mt-2 w-[300px] rounded-lg shadow-lg bg-black min-w-[200px] z-50">
                   <div className="py-1" role="menu">
-                    <a
-                      href="#profile"
+                    <Link
+                      to="profile"
                       className="flex items-center px-4 py-2 text-sm text-white hover:bg-gray-700 hover:translate-x-1 transform transition-transform duration-300 ease-in-out"
                       role="menuitem"
                     >
@@ -286,7 +289,8 @@ const App: React.FC = () => {
                         />
                       </svg>
                       My Profile
-                    </a>
+                    </Link>
+
                     <a
                       href="#contacts"
                       className="flex items-center px-4 py-2 text-sm text-white hover:bg-gray-700 hover:translate-x-1 transform transition-transform duration-300 ease-in-out"
@@ -308,6 +312,7 @@ const App: React.FC = () => {
                       </svg>
                       My Contacts
                     </a>
+
                     <a
                       href="#settings"
                       className="flex items-center px-4 py-2 text-sm text-white hover:bg-gray-700 hover:translate-x-1 transform transition-transform duration-300 ease-in-out"
@@ -329,7 +334,9 @@ const App: React.FC = () => {
                       </svg>
                       Account Settings
                     </a>
+
                     <div className="border-t border-gray-600 my-1"></div>
+
                     <a
                       href="#logout"
                       className="flex items-center px-4 py-2 text-sm text-white hover:bg-gray-700 hover:translate-x-1 transform transition-transform duration-300 ease-in-out"
@@ -355,6 +362,7 @@ const App: React.FC = () => {
                 </div>
               )}
 
+
             </div>
 
           </div>
@@ -366,7 +374,7 @@ const App: React.FC = () => {
           </div>
         </div>
       </Layout>
-    </Layout>
+    </Layout >
   );
 };
 
