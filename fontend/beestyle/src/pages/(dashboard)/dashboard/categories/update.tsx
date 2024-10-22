@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import axios from 'axios';
-import { Button, Form, Input, Select, message, Spin, Checkbox, Image } from 'antd';
+import { Button, Form, Input, Select, message, Spin, Checkbox } from 'antd';
 import { useNavigate, useParams } from 'react-router-dom';
 
 interface Category {
@@ -9,85 +10,77 @@ interface Category {
   name: string;
   status: boolean;
   image: string | null;
+  children_recursive: Category[];
 }
 
 const UpdateCategories: React.FC = () => {
   const [form] = Form.useForm();
   const [messageApi, contextHolder] = message.useMessage();
   const navigate = useNavigate();
-  const { id } = useParams<{ id: string }>();
+  const { id } = useParams();
   const [file, setFile] = useState<File | null>(null);
-  const [categoryData, setCategoryData] = useState<Category | null>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [categories, setCategories] = useState<Category[]>([]);
 
-  useEffect(() => {
-    const fetchCategoryData = async () => {
-      try {
-        const response = await axios.get(`http://127.0.0.1:8000/api/admins/categories/${id}`);
-        setCategoryData(response.data);
-        form.setFieldsValue({
-          name: response.data.name,
-          parent_id: response.data.parent_id,
-          status: response.data.status,
-        });
-      } catch (error) {
-        message.error('Không thể tải dữ liệu danh mục.');
-      } finally {
-        setIsLoading(false);
-      }
-    };
+  const { data: categories, isLoading: isLoadingCategories } = useQuery<Category[]>({
+    queryKey: ['categories'],
+    queryFn: async () => {
+      const response = await axios.get('http://127.0.0.1:8000/api/admins/categories');
+      return response.data;
+    },
+  });
 
-    const fetchCategories = async () => {
-      try {
-        const response = await axios.get('http://127.0.0.1:8000/api/admins/categories');
-        setCategories(response.data);
-      } catch (error) {
-        message.error('Không thể tải danh sách danh mục cha.');
-      }
-    };
+  const { data: categoriesUpdate, isLoading: isLoadingCategory } = useQuery({
+    queryKey: ['categoriesUpdate', id],
+    queryFn: async () => {
+      const response = await axios.get(`http://127.0.0.1:8000/api/admins/categories/${id}`);
+      return response.data;
+    },
+  });
 
-    fetchCategoryData();
-    fetchCategories();
-  }, [id, form]);
-
-  const handleUpdateCategory = async (values: any) => {
-    try {
-      const formData = new FormData();
-      formData.append('name', values.name);
-      formData.append('status', values.status ? '1' : '0');
-
-      if (values.parent_id !== undefined && values.parent_id !== null) {
-        formData.append('parent_id', String(values.parent_id));
-      }
-
-      if (file) {
-        formData.append('image', file);
-      }
-
-      // Debug FormData để kiểm tra các giá trị
-      for (let pair of formData.entries()) {
-        console.log(pair[0], pair[1]);
-      }
-
-      // Sử dụng PUT để cập nhật toàn bộ dữ liệu
-      await axios.put(`http://127.0.0.1:8000/api/admins/categories/${id}`, formData, {
+  const { mutate } = useMutation({
+    mutationFn: async (categoryData: FormData) => {
+      return await axios.put(`http://127.0.0.1:8000/api/admins/categories/${id}`, categoryData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
-
+    },
+    onSuccess: () => {
       messageApi.success('Cập nhật danh mục thành công!');
+      form.resetFields();
+      setFile(null);
       navigate('/admin/listCategories');
-    } catch (error: any) {
-      const errorMessage = error.response?.data?.error || error.response?.data?.message || `Lỗi: ${error.message}`;
+    },
+    onError: (error: any) => {
+      const errorMessage = error.response?.data?.message || `Lỗi: ${error.message}`;
       messageApi.error(errorMessage);
-    }
-  };
+    },
+  });
 
   const onFinish = (values: any) => {
-    handleUpdateCategory(values);
+    const formData = new FormData();
+    formData.append('name', values.name);
+
+    if (!values.name) {
+      message.error('Tên danh mục là bắt buộc.');
+      return;
+    }
+
+    if (values.parent_id) {
+      if (file) {
+        message.error('Không được thêm ảnh khi có danh mục cha.');
+        return;
+      }
+    } else {
+      if (!file) {
+        message.error('Ảnh là bắt buộc nếu không có danh mục cha.');
+        return;
+      }
+      formData.append('image', file);
+    }
+
+    formData.append('status', values.status ? '1' : '0');
+    mutate(formData);
   };
 
-  if (isLoading) {
+  if (isLoadingCategories || isLoadingCategory) {
     return <Spin tip="Đang tải..." className="flex justify-center items-center h-screen" />;
   }
 
@@ -105,7 +98,10 @@ const UpdateCategories: React.FC = () => {
             layout="vertical"
             onFinish={onFinish}
             className="space-y-6"
-            initialValues={{ status: false }}
+            initialValues={{
+              ...categoriesUpdate,
+              status: !!categoriesUpdate?.status,
+            }}
           >
             <Form.Item
               label={<span className="font-medium text-gray-700">Tên danh mục</span>}
@@ -139,18 +135,6 @@ const UpdateCategories: React.FC = () => {
               label={<span className="font-medium text-gray-700">Ảnh</span>}
               name="image"
             >
-              {categoryData?.image && (
-                <Image
-                  width={200}
-                  src={
-                    categoryData.image.startsWith('http')
-                      ? categoryData.image
-                      : `http://127.0.0.1:8000/storage/${categoryData.image}`
-                  }
-                  alt="Category Image"
-                  className="mb-4"
-                />
-              )}
               <input
                 type="file"
                 onChange={(e) => {
@@ -160,7 +144,6 @@ const UpdateCategories: React.FC = () => {
                 }}
               />
             </Form.Item>
-
             <Form.Item
               label={<span className="font-medium text-gray-700">Trạng thái</span>}
               name="status"
@@ -177,7 +160,7 @@ const UpdateCategories: React.FC = () => {
                   size="large"
                   className="bg-indigo-600 hover:bg-indigo-700 text-white rounded-md px-6"
                 >
-                  Cập nhật
+                  Cập Nhật
                 </Button>
                 <Button
                   onClick={() => navigate('/admin/listCategories')}

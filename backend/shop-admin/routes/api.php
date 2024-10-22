@@ -77,7 +77,7 @@ Route::prefix('admins')
     ->as('admins.')
     ->group(function () {
         Route::post('/signin', [AdminAuthController::class, 'login'])->name('signin');
-        Route::middleware(['auth:admin', 'admin'])->group(function () {
+        // Route::middleware(['auth:admin', 'admin'])->group(function () {
          Route::apiResource('products', ProductController::class)
           ->names('products');
             Route::apiResource('attributes', AttributeController::class)
@@ -114,5 +114,5 @@ Route::prefix('admins')
                 Route::get('/user/{userId}/product/{productId}', [PromotionsController::class, 'getUserProductPromotions'])->name('promotions.user-product');
                 Route::get('/event/{eventName}', [PromotionsController::class, 'getEventPromotions'])->name('promotions.event');
             });
-        });
+        // });
     });
