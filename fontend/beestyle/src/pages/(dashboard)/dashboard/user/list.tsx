@@ -1,62 +1,155 @@
-import React, { useState } from 'react';
+import React from 'react';
+import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { Table, Spin, message, Button, Space } from 'antd';
+import { EditOutlined, PlusOutlined, EyeOutlined } from '@ant-design/icons';
+import dayjs from 'dayjs';
 
-type Props = {}
-
-const ListUser = (props: Props) => {
-
-    const [darkMode, setDarkMode] = useState(false); // Chế độ tối mặc định là false (chế độ sáng)
-
-    const toggleDarkMode = () => {
-        setDarkMode(!darkMode);
-    };
-
-    return (
-        <div className={`w-full mx-auto p-6 rounded-lg shadow-lg mt-10 ${darkMode ? 'bg-gray-800' : 'bg-white'}`}>
-            <h3 className={`text-2xl font-bold mb-6 text-center ${darkMode ? 'text-white' : 'text-black'}`}>
-                Danh sách tài khoản
-            </h3>
-            <div className={`bg-gray-100 ${darkMode ? 'dark:bg-gray-700' : 'bg-gray-100'} p-6 rounded-md mb-6`}>
-                <table className={`min-w-full rounded-lg shadow-md overflow-hidden ${darkMode ? 'bg-gray-800' : 'bg-white'}`}>
-                    <thead className="bg-gray-800 dark:bg-gray-900 text-white">
-                        <tr>
-                            <th className="py-3 px-4 text-left">ID</th>
-                            <th className="py-3 px-4 text-left">Tên</th>
-                            <th className="py-3 px-4 text-left">Ngày sinh</th>
-                            <th className="py-3 px-4 text-left">Giới tính</th>
-                            <th className="py-3 px-4 text-left">Email</th>
-                            <th className="py-3 px-4 text-left">Mật khẩu</th>
-                            <th className="py-3 px-4 text-left">Tên nhà cung cấp</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr className="border-b border-gray-200 dark:border-gray-700">
-                            <td className="py-3 px-4 text-black dark:text-white">1</td>
-                            <td className="py-3 px-4 text-black dark:text-white">Người dùng 1</td>
-                            <td className="py-3 px-4 text-black dark:text-white">1990-01-01</td>
-                            <td className="py-3 px-4 text-black dark:text-white">male</td>
-                            <td className="py-3 px-4 text-black dark:text-white">user1@example.com</td>
-                            <td className="py-3 px-4 text-black dark:text-white">
-                                <input type="password" value="password123" className="bg-transparent border-none focus:outline-none" readOnly />
-                            </td>
-                            <td className="py-3 px-4 text-black dark:text-white">Google</td>
-                        </tr>
-                        <tr className="border-b border-gray-200 dark:border-gray-700">
-                            <td className="py-3 px-4 text-black dark:text-white">2</td>
-                            <td className="py-3 px-4 text-black dark:text-white">Người dùng 2</td>
-                            <td className="py-3 px-4 text-black dark:text-white">1992-02-02</td>
-                            <td className="py-3 px-4 text-black dark:text-white">female</td>
-                            <td className="py-3 px-4 text-black dark:text-white">user2@example.com</td>
-                            <td className="py-3 px-4 text-black dark:text-white">
-                                <input type="password" value="password123" className="bg-transparent border-none focus:outline-none" readOnly />
-                            </td>
-                            <td className="py-3 px-4 text-black dark:text-white">Facebook</td>
-                        </tr>
-                        {/* Thêm người dùng khác ở đây */}
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    );
+interface User {
+  id: number;
+  name: string;
+  email: string;
+  phone: string;
+  address: string;
+  role: 'admin' | 'user' | 'moderator';
+  is_active: boolean;
+  date_of_birth: string | null;
+  sex: 'male' | 'female' | null;
+  created_at: string;
+  updated_at: string;
 }
 
-export default ListUser;
+const UserList: React.FC = () => {
+  const queryClient = useQueryClient();
+  const [messageApi, contextHolder] = message.useMessage();
+  const navigate = useNavigate();
+
+  const { data: userManager = [], isLoading } = useQuery<User[]>({
+    queryKey: ['userManager'],
+    queryFn: async () => {
+      const response = await axios.get('http://127.0.0.1:8000/api/admins/users');
+      return response.data;
+    },
+  });
+
+  if (isLoading) {
+    return <Spin tip="Đang tải dữ liệu..." className="flex justify-center items-center h-screen" />;
+  }
+
+  const dataSource = userManager.map((item: User, index: number) => ({
+    key: item.id,
+    index: index + 1,
+    id: item.id,
+    name: item.name,
+    email: item.email,
+    role: item.role,
+    isActive: item.is_active ? 'Active' : 'Inactive',
+    dateOfBirth: item.date_of_birth,
+    sex: item.sex === 'male' ? 'Nam' : 'Nữ',
+    createdAt: new Date(item.created_at).toLocaleString(),
+    updatedAt: new Date(item.updated_at).toLocaleString(),
+  }));
+
+  const columns = [
+    {
+      title: 'STT',
+      dataIndex: 'index',
+      key: 'index',
+      width: 50,
+    },
+    {
+      title: 'Tên',
+      dataIndex: 'name',
+      key: 'name',
+    },
+    {
+      title: 'Email',
+      dataIndex: 'email',
+      key: 'email',
+    },
+    {
+      title: 'Địa chỉ',
+      dataIndex: 'address',
+      key: 'address',
+    },
+    {
+      title: 'Vai trò',
+      dataIndex: 'role',
+      key: 'role',
+    },
+    {
+      title: 'Trạng thái',
+      dataIndex: 'isActive',
+      key: 'isActive',
+    },
+    {
+      title: 'Ngày sinh',
+      dataIndex: 'dateOfBirth',
+      key: 'dateOfBirth',
+    },
+    {
+      title: 'Giới tính',
+      dataIndex: 'sex',
+      key: 'sex',
+    },
+    {
+      title: 'Ngày tạo',
+      dataIndex: 'createdAt',
+      key: 'createdAt',
+    },
+    {
+      title: 'Ngày cập nhật',
+      dataIndex: 'updatedAt',
+      key: 'updatedAt',
+    },
+    {
+      title: 'Hành động',
+      key: 'actions',
+      width: 200,
+      render: (_: any, record: any) => (
+        <Space size="middle">
+          <Button
+            type="default"
+            icon={<EyeOutlined />}
+            onClick={() => navigate(`/admin/viewUser/${record.id}`)} // View details navigation
+          />
+          <Button
+            type="default"
+            icon={<EditOutlined />}
+            onClick={() => navigate(`/admin/updateUser/${record.id}`)} // Edit navigation
+          />
+        </Space>
+      ),
+    },
+  ];
+
+  return (
+    <>
+      {contextHolder}
+      <div className="w-full mx-auto px-6 py-8">
+        <div className="flex justify-between items-center mb-6">
+          <Button
+            type="primary"
+            icon={<PlusOutlined />}
+            onClick={() => navigate('/admin/addUser')}
+            className="bg-indigo-600 hover:bg-indigo-700 text-white"
+          >
+            Thêm mới
+          </Button>
+        </div>
+        <Table
+          columns={columns}
+          dataSource={dataSource}
+          rowKey="id"
+          pagination={{
+            pageSize: 7,
+            showTotal: (total) => `Tổng ${total} người dùng`,
+          }}
+        />
+      </div>
+    </>
+  );
+};
+
+export default UserList;

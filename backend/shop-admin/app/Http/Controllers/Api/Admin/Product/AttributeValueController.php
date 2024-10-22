@@ -12,39 +12,29 @@ use App\Http\Requests\AttributeValueRequest\UpdateAttributeValueRequest;
 
 class AttributeValueController extends Controller
 {
-    /**
-     * Lấy danh sách các giá trị thuộc tính.
-     */
     public function index()
     {
-        // Lấy danh sách các giá trị thuộc tính cùng với thuộc tính liên quan
         $attributeValues = AttributeValue::with('attribute')->get();
-        
-       $attributeValueData = $attributeValues->groupBy('attribute_id');
+    
 
-       $result = $attributeValueData->map(function($group){
-        return [
-            'attribute_id' => $group->first()->attribute_id,
-            'attribute_name' => $group->first()->attribute->name,
-            'attribute_type' => $group->first()->attribute->attribute_type,
-            'values' => $group->map(function ($item) {
-                return [
-                    'id' => $item->id,
-                    'value' => $item->value,
-                 
-                ];
-            })
-        ];
-    });
-
-
-        // Trả về dữ liệu dưới dạng JSON
-        return response()->json( $result, 200);
+        $groupedResult = $attributeValues->groupBy('attribute_id')->map(function ($group) {
+            return [
+                'attribute_id' => $group->first()->attribute_id,
+                'attribute_name' => $group->first()->attribute->name,
+                'attribute_type' => $group->first()->attribute->attribute_type,
+                'values' => $group->map(function ($item) {
+                    return [
+                        'value_id' => $item->id,
+                        'value' => $item->value,
+                    ];
+                })->values(), // Chuyển từ collection về dạng mảng
+            ];
+        })->values(); 
+    
+        return response()->json($groupedResult, 200);
     }
+    
 
-    /**
-     * Tạo giá trị thuộc tính mới.
-     */
     public function store(AttributeValueRequest $request)
     {
       
@@ -64,44 +54,37 @@ class AttributeValueController extends Controller
         ], 201);
     }
 
-    /**
-     * Hiển thị thông tin một giá trị thuộc tính cụ thể.
-     */
     public function show($attribute_id)
     {
-        // Tìm tất cả các giá trị dựa trên attribute_id
+
         $attributeValues = AttributeValue::with('attribute')
             ->where('attribute_id', $attribute_id)
             ->get();
     
-            $attributeValueData = $attributeValues->groupBy('attribute_id');
 
-       $result = $attributeValueData->map(function($group){
-        return [
-            'attribute_id' => $group->first()->attribute_id,
-            'attribute_name' => $group->first()->attribute->name,
-            'attribute_type' => $group->first()->attribute->attribute_type,
-            'values' => $group->map(function ($item) {
-                return [
-                    'id' => $item->id,
-                    'value' => $item->value,
-                 
-                ];
-            })
-        ];
-    });
-        // Nếu không có giá trị nào liên quan đến attribute_id, trả về thông báo lỗi
         if ($attributeValues->isEmpty()) {
             return response()->json([
                 'success' => false,
-                'message' => 'không tìm thấy attribute_id nào trong dữ liệu bạn tìm kiếm',
+                'message' => 'Không tìm thấy attribute_id trong dữ liệu bạn tìm kiếm',
             ], 404);
         }
-    
-        // Trả về dữ liệu JSON với các giá trị tìm thấy
-        return response()->json($result,200);
+
+        $groupedResult = $attributeValues->groupBy('attribute_id')->map(function ($group) {
+            return [
+                'attribute_id' => $group->first()->attribute_id,
+                'attribute_name' => $group->first()->attribute->name,
+                'attribute_type' => $group->first()->attribute->attribute_type,
+                'values' => $group->map(function ($item) {
+                    return [
+                        'value_id' => $item->id,
+                        'value' => $item->value,
+                    ];
+                })->values(), 
+            ];
+        })->first(); 
+
+        return response()->json($groupedResult, 200);
     }
-    
     
 
     public function update(UpdateAttributeValueRequest $request, $attributeId)
@@ -109,7 +92,6 @@ class AttributeValueController extends Controller
     {
         foreach ($request->values as $valueData) {
             if (isset($valueData['id']) && $valueData['id']) {
-                // Cập nhật giá trị đã tồn tại
                 $attributeValue = AttributeValue::where('id', $valueData['id'])
                     ->where('attribute_id', $attributeId)
                     ->first();
@@ -120,7 +102,6 @@ class AttributeValueController extends Controller
                     ]);
                 }
             } else {
-                // Tạo mới giá trị nếu chưa có ID
                 AttributeValue::create([
                     'attribute_id' => $attributeId,
                     'value' => $valueData['value']
@@ -136,21 +117,23 @@ class AttributeValueController extends Controller
     
     
     
-    public function destroy(DeleteAttributeValuesRequest $request, $attributeId)
+    public function destroy($id)
 {
-  
-    // Lấy danh sách các ID cần xóa
-    $valueIds = array_column($request->values, 'id');
-
-    // Xóa các giá trị thuộc tính tương ứng
-    AttributeValue::whereIn('id', $valueIds)
-        ->where('attribute_id', $attributeId)
-        ->delete();
-
+    $attribute_values = AttributeValue::find($id);
+    if (!$attribute_values) {
+        return response()->json([
+            'success' => false,
+            'message' => 'attribute_values not found.'
+        ], 404);
+    }
+    $attribute_values->delete();
     return response()->json([
         'success' => true,
-        'message' => 'Xóa giá trị thuộc tính thành công',
+        'message' => 'Xóa thánh công'
     ], 200);
+
 }
+
+
 
 }

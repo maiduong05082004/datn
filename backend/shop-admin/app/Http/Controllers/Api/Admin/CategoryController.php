@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Controllers\Api\Admin;
 
 use App\Http\Controllers\Controller;
@@ -19,17 +20,23 @@ class CategoryController extends Controller
 {
     $request->validate([
         'name' => 'required|string|max:255',
-        'status' => 'required|boolean',
+        'status' => 'required|in:0,1',
         'parent_id' => 'nullable|exists:categories,id',
-        'image' => 'nullable|string|max:2048', 
+        'image' => 'nullable|image|max:2048',
     ]);
 
     $data = $request->only('name', 'parent_id', 'status');
 
-    if ($request->hasFile('image')) {
-        $data['image'] = $request->file('image')->store('categories', 'public');
-    } elseif ($request->filled('image')) {
-        $data['image'] = $request->input('image');
+    if (is_null($request->parent_id)) {
+        if ($request->hasFile('image')) {
+            $data['image'] = $request->file('image')->store('categories', 'public');
+        } else {
+            return response()->json(['error' => 'Không có ảnh được tải lên.'], 400);
+        }
+    } else {
+        if ($request->hasFile('image')) {
+            return response()->json(['error' => 'Không được thêm ảnh khi có danh mục cha.'], 400);
+        }
     }
 
     $category = Category::create($data);
@@ -45,46 +52,58 @@ class CategoryController extends Controller
 
     public function update(Request $request, $id)
     {
+        $category = Category::findOrFail($id);
+    
         $request->validate([
             'name' => 'required|string|max:255',
             'status' => 'required|boolean',
             'parent_id' => 'nullable|exists:categories,id',
             'image' => 'nullable|image|max:2048',
         ]);
-
-        $category = Category::findOrFail($id);
+    
         $data = $request->only('name', 'parent_id', 'status');
-        
-        if ($request->hasFile('image')) {
-            // Xóa ảnh cũ (nếu có)
-            if ($category->image) {
-                Storage::disk('public')->delete($category->image);
+    
+        if (is_null($request->parent_id)) {
+            if ($request->hasFile('image')) {
+                if ($category->image && !filter_var($category->image, FILTER_VALIDATE_URL)) {
+                    Storage::disk('public')->delete($category->image);
+                }
+                $data['image'] = $request->file('image')->store('categories', 'public');
+            } else {
+                return response()->json(['error' => 'Không có ảnh được tải lên.'], 400);
             }
-            $data['image'] = $request->file('image')->store('categories', 'public');
+        } else {
+            if ($request->hasFile('image')) {
+                return response()->json(['error' => 'Không được thêm ảnh khi có danh mục cha.'], 400);
+            }
         }
-
+    
         $category->update($data);
         return response()->json($category, 200);
     }
 
+
     public function destroy($id)
     {
-        $category = Category::withTrashed()->findOrFail($id);
-        $subcategories = Category::where('parent_id', $category->id)->withTrashed()->get();
-    
-        foreach ($subcategories as $subcategory) {
-            Product::where('category_id', $subcategory->id)
-                ->update(['category_id' => 0]);
-            $subcategory->forceDelete();
+        $category = Category::findOrFail($id);
+
+        if ($category->children()->exists()) {
+            return response()->json([
+                'error' => 'Không thể xóa danh mục vì nó có danh mục con.'
+            ], 400);
         }
-    
-        Product::where('category_id', $category->id)
-            ->update(['category_id' => 0]);
-        $category->forceDelete();
-    
-        return response()->json(['message' => 'Category permanently deleted successfully'], 200);
+
+        if ($category->products()->exists()) {
+            return response()->json([
+                'error' => 'Không thể xóa danh mục vì nó có sản phẩm liên quan.'
+            ], 400);
+        }
+
+        $category->delete();
+
+        return response()->json(['message' => 'Danh mục đã được xóa thành công.'], 200);
     }
-    
+
 
     public function subcategories($id)
     {
@@ -97,16 +116,16 @@ class CategoryController extends Controller
     {
         $category = Category::withTrashed()->findOrFail($id);
         $category->restore();
-        return response()->json(['message' => 'Category restored successfully'], 200);
+        return response()->json(['message' => 'Danh mục đã được xóa thành công'], 200);
     }
-    
+
 
     public function trash()
     {
         $categories = Category::onlyTrashed()->get();
         if ($categories->isEmpty()) {
             return response()->json([
-                'message' => 'There are no categories in the trash.'
+                'message' => 'Không có danh mục trong thùng rác.'
             ], 200);
         }
         return response()->json($categories, 200);
@@ -115,8 +134,22 @@ class CategoryController extends Controller
     public function softDestroy($id)
     {
         $category = Category::findOrFail($id);
+
+        if ($category->children()->exists()) {
+            return response()->json([
+                'message' => 'Không thể xóa danh mục vì nó có danh mục con.'
+            ], 400);
+        }
+
+        if ($category->products()->exists()) {
+            return response()->json([
+                'message' => 'Không thể xóa danh mục vì nó có sản phẩm liên quan.'
+            ], 400);
+        }
+
         $category->delete();
-        return response()->json(['message' => 'Category deleted successfully',], 200);
+        return response()->json([
+            'message' => 'Danh mục đã được thêm vào thùng rác thành công.'
+        ], 200);
     }
-    
 }

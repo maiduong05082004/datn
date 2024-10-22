@@ -18,9 +18,16 @@ class AttributeController extends Controller
     public function index()
     {
         $attributes = Attribute::all();
+
+        $data = $attributes->map(function ($attribute){
+            return [
+                'id' => $attribute->id,
+                'name' => $attribute->name,
+            ];
+        }); 
         return response()->json([
             'success' => true,
-            'data' => $attributes
+            'data' => $data
         ], 200);
     }
 

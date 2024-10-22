@@ -1,39 +1,100 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Table, Button, Space, Popconfirm } from 'antd';
+import { EditOutlined, DeleteOutlined, PlusOutlined } from '@ant-design/icons';
 
-type Props = {}
+type Banner = {
+    id: number;
+    title: string;
+    image: string;
+    link: string;
+};
 
-const ListBanners = (props: Props) => {
+const ListBanners: React.FC = () => {
+    const navigate = useNavigate();
+
+    // Dữ liệu mẫu cho bảng banners
+    const banners: Banner[] = [
+        { id: 1, title: 'Banner 1', image: 'Ảnh 1', link: 'https://example.com/link1' },
+        { id: 2, title: 'Banner 2', image: 'Ảnh 2', link: 'https://example.com/link2' },
+    ];
+
+    // Định nghĩa các cột cho bảng
+    const columns = [
+        {
+            title: 'ID',
+            dataIndex: 'id',
+            key: 'id',
+            width: '10%',
+        },
+        {
+            title: 'Tiêu đề',
+            dataIndex: 'title',
+            key: 'title',
+            width: '30%',
+        },
+        {
+            title: 'Ảnh',
+            dataIndex: 'image',
+            key: 'image',
+            width: '30%',
+        },
+        {
+            title: 'Liên kết',
+            dataIndex: 'link',
+            key: 'link',
+            width: '30%',
+        },
+        {
+            title: 'Hành động',
+            key: 'action',
+            width: '20%',
+            render: (_: any, banner: Banner) => (
+                <Space size="middle" className="flex justify-around">
+                    <Button
+                        type="default"
+                        icon={<EditOutlined />}
+                        onClick={() => navigate(`/admin/updateBanners/${banner.id}`)}
+                    />
+                    <Popconfirm
+                        title="Xóa Banner"
+                        description="Bạn có chắc muốn xóa banner này không?"
+                        // Thêm logic xóa nếu cần
+                        okText="Có"
+                        cancelText="Không"
+                    >
+                        <Button type="primary" danger icon={<DeleteOutlined />} />
+                    </Popconfirm>
+                </Space>
+            ),
+        },
+    ];
+
     return (
-        <div className="w-full mx-auto p-6 bg-white dark:bg-gray-800 rounded-lg shadow-lg mt-10">
-            <h3 className="text-2xl font-bold mb-6 text-center text-black dark:text-white">Danh sách Banners</h3>
-            <div className="bg-gray-100 dark:bg-gray-700 p-6 rounded-md mb-6">
-                <table className="min-w-full bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden">
-                    <thead className="bg-gray-800 dark:bg-gray-900 text-white">
-                        <tr>
-                            <th className="py-3 px-4 text-left">ID</th>
-                            <th className="py-3 px-4 text-left">Tiêu đề</th>
-                            <th className="py-3 px-4 text-left">Đường dẫn hình ảnh</th>
-                            <th className="py-3 px-4 text-left">Liên kết</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr className="border-b border-gray-200 dark:border-gray-700">
-                            <td className="py-3 px-4 text-black dark:text-white">1</td>
-                            <td className="py-3 px-4 text-black dark:text-white">Banner 1</td>
-                            <td className="py-3 px-4 text-black dark:text-white">/images/banner1.jpg</td>
-                            <td className="py-3 px-4 text-black dark:text-white">https://example.com/link1</td>
-                        </tr>
-                        <tr className="border-b border-gray-200 dark:border-gray-700">
-                            <td className="py-3 px-4 text-black dark:text-white">2</td>
-                            <td className="py-3 px-4 text-black dark:text-white">Banner 2</td>
-                            <td className="py-3 px-4 text-black dark:text-white">/images/banner2.jpg</td>
-                            <td className="py-3 px-4 text-black dark:text-white">https://example.com/link2</td>
-                        </tr>
-                        {/* Thêm các banner khác ở đây */}
-                    </tbody>
-                </table>
+        <div className="w-full mx-auto items-center justify-center px-6 py-8">
+            <div className="flex justify-between items-center mb-6">
+                <Button
+                    type="primary"
+                    icon={<PlusOutlined />}
+                    onClick={() => navigate('/admin/addBanners')}
+                    className="bg-indigo-600 hover:bg-indigo-700 text-white"
+                >
+                    Thêm Banners
+                </Button>
             </div>
+            <Table
+                dataSource={banners}
+                columns={columns}
+                rowKey={(record) => record.id}
+                bordered
+                pagination={{
+                    pageSize: 7,
+                    // showTotal: (total) => `Tổng ${total} banner`,
+                }}
+                className="w-full"
+            />
         </div>
     );
-}
+};
+
 export default ListBanners;

@@ -1,69 +1,180 @@
 import React, { useState } from 'react';
+import { useMutation, useQuery } from '@tanstack/react-query';
+import axios from 'axios';
+import { Button, Form, Input, Select, message, Spin, Checkbox } from 'antd';
+import { useNavigate, useParams } from 'react-router-dom';
 
-const UpdateCategories = () => {
-  const [darkMode, setDarkMode] = useState(false); // false = Light Mode by default
+interface Category {
+  id: number;
+  parent_id: number | null;
+  name: string;
+  status: boolean;
+  image: string | null;
+  children_recursive: Category[];
+}
 
-  const toggleDarkMode = () => {
-    setDarkMode(!darkMode);
+const UpdateCategories: React.FC = () => {
+  const [form] = Form.useForm();
+  const [messageApi, contextHolder] = message.useMessage();
+  const navigate = useNavigate();
+  const { id } = useParams();
+  const [file, setFile] = useState<File | null>(null);
+
+  const { data: categories, isLoading: isLoadingCategories } = useQuery<Category[]>({
+    queryKey: ['categories'],
+    queryFn: async () => {
+      const response = await axios.get('http://127.0.0.1:8000/api/admins/categories');
+      return response.data;
+    },
+  });
+
+  const { data: categoriesUpdate, isLoading: isLoadingCategory } = useQuery({
+    queryKey: ['categoriesUpdate', id],
+    queryFn: async () => {
+      const response = await axios.get(`http://127.0.0.1:8000/api/admins/categories/${id}`);
+      return response.data;
+    },
+  });
+
+  const { mutate } = useMutation({
+    mutationFn: async (categoryData: FormData) => {
+      return await axios.put(`http://127.0.0.1:8000/api/admins/categories/${id}`, categoryData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+    },
+    onSuccess: () => {
+      messageApi.success('Cập nhật danh mục thành công!');
+      form.resetFields();
+      setFile(null);
+      navigate('/admin/listCategories');
+    },
+    onError: (error: any) => {
+      const errorMessage = error.response?.data?.message || `Lỗi: ${error.message}`;
+      messageApi.error(errorMessage);
+    },
+  });
+
+  const onFinish = (values: any) => {
+    const formData = new FormData();
+    formData.append('name', values.name);
+
+    if (!values.name) {
+      message.error('Tên danh mục là bắt buộc.');
+      return;
+    }
+
+    if (values.parent_id) {
+      if (file) {
+        message.error('Không được thêm ảnh khi có danh mục cha.');
+        return;
+      }
+    } else {
+      if (!file) {
+        message.error('Ảnh là bắt buộc nếu không có danh mục cha.');
+        return;
+      }
+      formData.append('image', file);
+    }
+
+    formData.append('status', values.status ? '1' : '0');
+    mutate(formData);
   };
 
+  if (isLoadingCategories || isLoadingCategory) {
+    return <Spin tip="Đang tải..." className="flex justify-center items-center h-screen" />;
+  }
+
   return (
-    <div className={`container mx-auto px-4 py-8 ${darkMode ? 'bg-gray-900' : 'bg-white'}`}>
-      <h1 className={`text-3xl font-bold mb-6 text-center ${darkMode ? 'text-white' : 'text-gray-800'}`}>
-        Cập nhật danh mục
-      </h1>
-      <form>
-        <div className={`shadow-lg rounded-lg mb-6 overflow-hidden ${darkMode ? 'bg-gray-700' : 'bg-white'}`}>
-          <div className={`p-4 rounded-t-lg ${darkMode ? 'bg-gray-700' : 'bg-blue-100'}`}>
-            <h4 className={`text-lg font-semibold ${darkMode ? 'text-white' : 'text-blue-800'}`}>Thông tin danh mục</h4>
-          </div>
-          <div className={`p-6 ${darkMode ? 'bg-gray-800' : 'bg-gray-50'}`}>
-            {/* Name */}
-            <div className="mb-4">
-              <label htmlFor="name" className={`block font-medium ${darkMode ? 'text-white' : 'text-gray-700'}`}>Tên danh mục</label>
-              <input
-                type="text"
-                name="name"
-                id="name"
-                className={`mt-1 block w-full border ${darkMode ? 'border-gray-600 bg-gray-700 text-white' : 'border-gray-300 bg-white text-gray-700'} rounded-md shadow-sm p-2 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500`}
-                required
+    <>
+      {contextHolder}
+      <div className="min-h-screen flex items-center justify-center p-8">
+        <div className="w-full max-w-7xl bg-white p-10 rounded-xl shadow-lg">
+          <h2 className="text-2xl font-semibold text-center mb-8 text-gray-800">
+            Cập Nhật Danh Mục
+          </h2>
+          <Form
+            form={form}
+            name="basic"
+            layout="vertical"
+            onFinish={onFinish}
+            className="space-y-6"
+            initialValues={{
+              ...categoriesUpdate,
+              status: !!categoriesUpdate?.status,
+            }}
+          >
+            <Form.Item
+              label={<span className="font-medium text-gray-700">Tên danh mục</span>}
+              name="name"
+              rules={[{ required: true, message: 'Tên danh mục là bắt buộc' }]}
+            >
+              <Input
+                placeholder="Nhập tên danh mục"
+                size="large"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400"
               />
-            </div>
+            </Form.Item>
 
-            {/* Parent ID */}
-            <div className="mb-4">
-              <label htmlFor="parent_id" className={`block font-medium ${darkMode ? 'text-white' : 'text-gray-700'}`}>Parent ID</label>
-              <input
-                type="number"
-                name="parent_id"
-                id="parent_id"
-                className={`mt-1 block w-full border ${darkMode ? 'border-gray-600 bg-gray-700 text-white' : 'border-gray-300 bg-white text-gray-700'} rounded-md shadow-sm p-2 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500`}
+            <Form.Item
+              label={<span className="font-medium text-gray-700">Danh mục cha</span>}
+              name="parent_id"
+            >
+              <Select
+                allowClear
+                placeholder="Chọn danh mục cha (nếu có)"
+                size="large"
+                className="w-full border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-400"
+                options={categories?.map((cat) => ({
+                  value: cat.id,
+                  label: cat.name,
+                }))}
               />
-            </div>
+            </Form.Item>
 
-            {/* Status */}
-            <div className="mb-4">
-              <label htmlFor="status" className={`block font-medium ${darkMode ? 'text-white' : 'text-gray-700'}`}>Trạng thái</label>
-              <select
-                id="status"
-                name="status"
-                className={`mt-1 block w-full border ${darkMode ? 'border-gray-600 bg-gray-700 text-white' : 'border-gray-300 bg-white text-gray-700'} rounded-md shadow-sm p-2 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500`}
-              >
-                <option value="0">Không hoạt động</option>
-                <option value="1">Hoạt động</option>
-              </select>
-            </div>
-          </div>
+            <Form.Item
+              label={<span className="font-medium text-gray-700">Ảnh</span>}
+              name="image"
+            >
+              <input
+                type="file"
+                onChange={(e) => {
+                  if (e.target.files && e.target.files[0]) {
+                    setFile(e.target.files[0]);
+                  }
+                }}
+              />
+            </Form.Item>
+            <Form.Item
+              label={<span className="font-medium text-gray-700">Trạng thái</span>}
+              name="status"
+              valuePropName="checked"
+            >
+              <Checkbox>Hoạt động</Checkbox>
+            </Form.Item>
+
+            <Form.Item>
+              <div className="flex justify-end space-x-4">
+                <Button
+                  type="primary"
+                  htmlType="submit"
+                  size="large"
+                  className="bg-indigo-600 hover:bg-indigo-700 text-white rounded-md px-6"
+                >
+                  Cập Nhật
+                </Button>
+                <Button
+                  onClick={() => navigate('/admin/listCategories')}
+                  size="large"
+                  className="bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-md px-6"
+                >
+                  Quay lại
+                </Button>
+              </div>
+            </Form.Item>
+          </Form>
         </div>
-
-        <button
-          type="submit"
-          className="mt-4 px-4 py-2 bg-green-500 text-white rounded-md shadow-lg hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500"
-        >
-          Cập nhật
-        </button>
-      </form>
-    </div>
+      </div>
+    </>
   );
 };
 
