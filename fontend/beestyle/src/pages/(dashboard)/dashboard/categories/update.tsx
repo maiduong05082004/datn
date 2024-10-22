@@ -1,7 +1,7 @@
-import React, { useEffect } from 'react';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import React, { useState } from 'react';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import axios from 'axios';
-import { Form, Input, Select, Button, message, Spin } from 'antd';
+import { Button, Form, Input, Select, message, Spin, Checkbox } from 'antd';
 import { useNavigate, useParams } from 'react-router-dom';
 
 interface Category {
@@ -17,21 +17,10 @@ const UpdateCategories: React.FC = () => {
   const [form] = Form.useForm();
   const [messageApi, contextHolder] = message.useMessage();
   const navigate = useNavigate();
-  const queryClient = useQueryClient();
-  const { id } = useParams<{ id: string }>();
+  const { id } = useParams();
+  const [file, setFile] = useState<File | null>(null);
 
-  // Query lấy dữ liệu danh mục hiện tại
-  const { data: category, isLoading: categoryLoading } = useQuery({
-    queryKey: ['category', id],
-    queryFn: async () => {
-      const response = await axios.get(`http://127.0.0.1:8000/api/admins/categories/${id}`);
-      return response.data;
-    },
-    enabled: !!id,
-  });
-
-  // Query lấy danh sách tất cả danh mục
-  const { data: categories, isLoading: categoriesLoading } = useQuery({
+  const { data: categories, isLoading: isLoadingCategories } = useQuery<Category[]>({
     queryKey: ['categories'],
     queryFn: async () => {
       const response = await axios.get('http://127.0.0.1:8000/api/admins/categories');
@@ -39,44 +28,60 @@ const UpdateCategories: React.FC = () => {
     },
   });
 
-  // Mutation cập nhật danh mục
-  const mutation = useMutation({
-    mutationFn: async (categoryData: Partial<Category>) => {
-      return await axios.put(`http://127.0.0.1:8000/api/admins/categories/${id}`, categoryData);
-    },
-    onSuccess: () => {
-      messageApi.success('Cập nhật danh mục thành công!');
-      queryClient.invalidateQueries({ queryKey: ['categories'] });
-      navigate('/admin/listCategories');
-    },
-    onError: (error: any) => {
-      messageApi.error(`Lỗi: ${error.message}`);
+  const { data: categoriesUpdate, isLoading: isLoadingCategory } = useQuery({
+    queryKey: ['categoriesUpdate', id],
+    queryFn: async () => {
+      const response = await axios.get(`http://127.0.0.1:8000/api/admins/categories/${id}`);
+      return response.data;
     },
   });
 
-  // Đổ dữ liệu vào form khi category được tải xong
-  useEffect(() => {
-    if (category) {
-      form.setFieldsValue({
-        name: category.name,
-        parent_id: category.parent_id,
-        image: category.image || '',
+  const { mutate } = useMutation({
+    mutationFn: async (categoryData: FormData) => {
+      return await axios.put(`http://127.0.0.1:8000/api/admins/categories/${id}`, categoryData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
       });
-    }
-  }, [category, form]);
+    },
+    onSuccess: () => {
+      messageApi.success('Cập nhật danh mục thành công!');
+      form.resetFields();
+      setFile(null);
+      navigate('/admin/listCategories');
+    },
+    onError: (error: any) => {
+      const errorMessage = error.response?.data?.message || `Lỗi: ${error.message}`;
+      messageApi.error(errorMessage);
+    },
+  });
 
   const onFinish = (values: any) => {
-    const payload = {
-      name: values.name,
-      status: true,
-      parent_id: values.parent_id || null,
-      image: values.image || null,
-    };
-    mutation.mutate(payload);
+    const formData = new FormData();
+    formData.append('name', values.name);
+
+    if (!values.name) {
+      message.error('Tên danh mục là bắt buộc.');
+      return;
+    }
+
+    if (values.parent_id) {
+      if (file) {
+        message.error('Không được thêm ảnh khi có danh mục cha.');
+        return;
+      }
+    } else {
+      if (!file) {
+        message.error('Ảnh là bắt buộc nếu không có danh mục cha.');
+        return;
+      }
+      formData.append('image', file);
+    }
+
+    formData.append('status', values.status ? '1' : '0');
+    mutate(formData);
   };
 
-  if (categoryLoading || categoriesLoading) {
-    return <Spin tip="Đang tải dữ liệu..." className="flex justify-center items-center h-screen" />;
+  if (isLoadingCategories || isLoadingCategory) {
+    return <Spin tip="Đang tải..." className="flex justify-center items-center h-screen" />;
   }
 
   return (
@@ -89,11 +94,14 @@ const UpdateCategories: React.FC = () => {
           </h2>
           <Form
             form={form}
-            name="updateCategory"
+            name="basic"
             layout="vertical"
             onFinish={onFinish}
             className="space-y-6"
-            initialValues={{...category}}
+            initialValues={{
+              ...categoriesUpdate,
+              status: !!categoriesUpdate?.status,
+            }}
           >
             <Form.Item
               label={<span className="font-medium text-gray-700">Tên danh mục</span>}
@@ -116,7 +124,7 @@ const UpdateCategories: React.FC = () => {
                 placeholder="Chọn danh mục cha (nếu có)"
                 size="large"
                 className="w-full border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-400"
-                options={categories.map((cat: Category) => ({
+                options={categories?.map((cat) => ({
                   value: cat.id,
                   label: cat.name,
                 }))}
@@ -124,14 +132,24 @@ const UpdateCategories: React.FC = () => {
             </Form.Item>
 
             <Form.Item
-              label={<span className="font-medium text-gray-700">Ảnh (URL)</span>}
+              label={<span className="font-medium text-gray-700">Ảnh</span>}
               name="image"
             >
-              <Input
-                placeholder="Nhập URL ảnh"
-                size="large"
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400"
+              <input
+                type="file"
+                onChange={(e) => {
+                  if (e.target.files && e.target.files[0]) {
+                    setFile(e.target.files[0]);
+                  }
+                }}
               />
+            </Form.Item>
+            <Form.Item
+              label={<span className="font-medium text-gray-700">Trạng thái</span>}
+              name="status"
+              valuePropName="checked"
+            >
+              <Checkbox>Hoạt động</Checkbox>
             </Form.Item>
 
             <Form.Item>
@@ -142,7 +160,7 @@ const UpdateCategories: React.FC = () => {
                   size="large"
                   className="bg-indigo-600 hover:bg-indigo-700 text-white rounded-md px-6"
                 >
-                  Cập nhật
+                  Cập Nhật
                 </Button>
                 <Button
                   onClick={() => navigate('/admin/listCategories')}

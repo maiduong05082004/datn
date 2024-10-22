@@ -3,7 +3,9 @@
 namespace App\Http\Controllers\Api\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Category;
 use App\Models\Event;
+use App\Models\Product;
 use App\Models\User;
 use App\Models\Promotion;
 use App\Models\Wishlist;
@@ -56,8 +58,44 @@ class PromotionsController extends Controller
         $promotions = Promotion::when($promotionType, function ($query, $promotionType) {
             return $query->where('promotion_type', $promotionType);
         })->get();
+        $categories = Category::whereIn('id', $promotions->pluck('category_ids')->flatten())->get(['id', 'name']);
+        $products = Product::whereIn('id', $promotions->pluck('product_ids')->flatten())->get(['id', 'name']);
 
-        return response()->json($promotions, 200);
+        $formattedPromotions = $promotions->map(function ($promotion) use ($categories, $products) {
+            $promotionCategories = $categories
+                ->whereIn('id', $promotion->category_ids)
+                ->map(fn($cat) => ['id' => $cat->id, 'name' => $cat->name])
+                ->values()
+                ->toArray();
+
+            $promotionProducts = $products
+                ->whereIn('id', $promotion->product_ids)
+                ->map(fn($prod) => ['id' => $prod->id, 'name' => $prod->name])
+                ->values()
+                ->toArray();
+
+            return [
+                'id' => $promotion->id,
+                'code' => $promotion->code,
+                'description' => $promotion->description,
+                'start_date' => $promotion->start_date,
+                'end_date' => $promotion->end_date,
+                'discount_amount' => $promotion->discount_amount,
+                'discount_type' => $promotion->discount_type,
+                'max_discount_amount' => $promotion->max_discount_amount,
+                'usage_limit' => $promotion->usage_limit,
+                'min_order_value' => $promotion->min_order_value,
+                'promotion_type' => $promotion->promotion_type,
+                'is_active' => $promotion->is_active,
+                'status' => $promotion->status,
+                'created_at' => $promotion->created_at,
+                'updated_at' => $promotion->updated_at,
+                'categories' => $promotionCategories,
+                'products' => $promotionProducts,
+            ];
+        });
+
+        return response()->json(['data' => $formattedPromotions], 200);
     }
 
     public function store(Request $request)
@@ -68,25 +106,69 @@ class PromotionsController extends Controller
             'start_date' => 'required|date',
             'end_date' => 'required|date|after_or_equal:start_date',
             'discount_amount' => 'required|numeric|min:0',
+            'discount_type' => 'required|in:amount,percent',
+            'max_discount_amount' => 'nullable|required_if:discount_type,percent|numeric|min:0',
             'promotion_type' => 'required|in:shipping,product_discount,voucher_discount,first_order',
-            'category_id' => 'nullable|exists:categories,id',
-            'product_id' => 'nullable|exists:products,id',
+            'category_ids' => 'array|nullable',
+            'category_ids.*' => 'exists:categories,id',
+            'product_ids' => 'array|nullable',
+            'product_ids.*' => 'exists:products,id',
             'usage_limit' => 'nullable|integer|min:1',
             'status' => 'required',
         ]);
 
-        $promotion = Promotion::create($request->all());
+        $promotion = new Promotion($request->all());
+        $promotion->category_ids = $request->category_ids;
+        $promotion->product_ids = $request->product_ids;
+        $promotion->save();
+
         return response()->json($promotion, 201);
     }
 
     public function show($id)
     {
         $promotion = Promotion::find($id);
+
         if (!$promotion) {
             return response()->json(['message' => 'Khuyến mãi không tồn tại.'], 404);
         }
-        return response()->json($promotion, 200);
+
+        $categories = Category::whereIn('id', $promotion->category_ids)->get(['id', 'name']);
+        $products = Product::whereIn('id', $promotion->product_ids)->get(['id', 'name']);
+
+        $promotionCategories = $categories->map(fn($cat) => [
+            'id' => $cat->id,
+            'name' => $cat->name,
+        ])->values()->toArray();
+
+        $promotionProducts = $products->map(fn($prod) => [
+            'id' => $prod->id,
+            'name' => $prod->name,
+        ])->values()->toArray();
+
+        $formattedPromotion = [
+            'id' => $promotion->id,
+            'code' => $promotion->code,
+            'description' => $promotion->description,
+            'start_date' => $promotion->start_date,
+            'end_date' => $promotion->end_date,
+            'discount_amount' => $promotion->discount_amount,
+            'discount_type' => $promotion->discount_type,
+            'max_discount_amount' => $promotion->max_discount_amount,
+            'usage_limit' => $promotion->usage_limit,
+            'min_order_value' => $promotion->min_order_value,
+            'promotion_type' => $promotion->promotion_type,
+            'is_active' => $promotion->is_active,
+            'status' => $promotion->status,
+            'created_at' => $promotion->created_at,
+            'updated_at' => $promotion->updated_at,
+            'categories' => $promotionCategories,
+            'products' => $promotionProducts,
+        ];
+
+        return response()->json($formattedPromotion, 200);
     }
+
 
     public function update(Request $request, $id)
     {
@@ -94,20 +176,29 @@ class PromotionsController extends Controller
         if (!$promotion) {
             return response()->json(['message' => 'Khuyến mãi không tồn tại.'], 404);
         }
+
         $request->validate([
             'code' => 'required|unique:promotions,code,' . $id,
             'description' => 'required',
             'start_date' => 'required|date',
             'end_date' => 'required|date|after_or_equal:start_date',
             'discount_amount' => 'required|numeric|min:0',
+            'discount_type' => 'required|in:amount,percent',
+            'max_discount_amount' => 'nullable|required_if:discount_type,percent|numeric|min:0',
             'promotion_type' => 'required|in:shipping,product_discount,order_discount,first_order,free_gift',
+            'category_ids' => 'array|nullable',
+            'category_ids.*' => 'exists:categories,id',
+            'product_ids' => 'array|nullable',
+            'product_ids.*' => 'exists:products,id',
             'usage_limit' => 'nullable|integer|min:1',
-            'category_id' => 'nullable|exists:categories,id',
-            'product_id' => 'nullable|exists:products,id',
             'status' => 'required'
         ]);
 
-        $promotion->update($request->all());
+        $promotion->update($request->except(['category_ids', 'product_ids']));
+        $promotion->category_ids = $request->category_ids;
+        $promotion->product_ids = $request->product_ids;
+        $promotion->save();
+
         return response()->json($promotion, 200);
     }
 

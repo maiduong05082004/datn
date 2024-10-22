@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import axios from 'axios';
-import { Button, Form, Input, Select, message, Spin } from 'antd';
+import { Button, Form, Input, Select, message, Spin, Checkbox } from 'antd';
 import { useNavigate } from 'react-router-dom';
 
 interface Category {
@@ -17,8 +17,7 @@ const AddCategories: React.FC = () => {
   const [form] = Form.useForm();
   const [messageApi, contextHolder] = message.useMessage();
   const navigate = useNavigate();
-  const [fileUrl, setFileUrl] = useState<string | null>(null);
-
+  const [file, setFile] = useState<File | null>(null);
   const { data: categories, isLoading } = useQuery<Category[]>({
     queryKey: ['categories'],
     queryFn: async () => {
@@ -36,7 +35,7 @@ const AddCategories: React.FC = () => {
     onSuccess: () => {
       messageApi.success('Thêm danh mục thành công!');
       form.resetFields();
-      setFileUrl(null);
+      setFile(null);
       navigate('/admin/listCategories');
     },
     onError: (error: any) => {
@@ -48,9 +47,27 @@ const AddCategories: React.FC = () => {
   const onFinish = (values: any) => {
     const formData = new FormData();
     formData.append('name', values.name);
-    if (values.parent_id) formData.append('parent_id', String(values.parent_id));
-    if (fileUrl) formData.append('image_url', fileUrl);
+    
+    if (!values.name) {
+        message.error('Tên danh mục là bắt buộc.');
+        return;
+    }
 
+    if (values.parent_id) {
+        if (file) {
+            message.error('Không được thêm ảnh khi có danh mục cha.');
+            return;
+        }
+    } else {
+        if (!file) {
+            message.error('Ảnh là bắt buộc nếu không có danh mục cha.');
+            return;
+        }
+        formData.append('image', file);
+    }
+
+    formData.append('status', values.status ? '1' : '0');
+    
     mutate(formData);
   };
 
@@ -72,6 +89,7 @@ const AddCategories: React.FC = () => {
             layout="vertical"
             onFinish={onFinish}
             className="space-y-6"
+            initialValues={{ status: false }}
           >
             <Form.Item
               label={<span className="font-medium text-gray-700">Tên danh mục</span>}
@@ -104,9 +122,23 @@ const AddCategories: React.FC = () => {
             <Form.Item
               label={<span className="font-medium text-gray-700">Ảnh</span>}
               name="image"
-              rules={[{ required: true, message: 'Ảnh là bắt buộc' }]}
             >
-              <input type="file"/>
+              <input 
+                type="file" 
+                onChange={(e) => {
+                  if (e.target.files && e.target.files[0]) {
+                    setFile(e.target.files[0]);
+                  }
+                }} 
+              />
+            </Form.Item>
+
+            <Form.Item
+              label={<span className="font-medium text-gray-700">Trạng thái</span>}
+              name="status"
+              valuePropName="checked"
+            >
+              <Checkbox>Hoạt động</Checkbox>
             </Form.Item>
 
             <Form.Item>

@@ -25,15 +25,15 @@ const Header = ({isSearch, setIsSearch}: Props) => {
     const token = localStorage.getItem("token")
     // console.log(token);
 
-    const { data: user } = useQuery({
-        queryKey: ['user', token],
-        queryFn: () => {
-            if (!token) return null;
-            return axios.get(`http://127.0.0.1:8000/api/client/auth/profile` , {
-                headers: { Authorization: `Bearer ${token}` }
-            })
-        }
-    })
+    // const { data: user } = useQuery({
+    //     queryKey: ['user', token],
+    //     queryFn: () => {
+    //         if (!token) return null;
+    //         return axios.get(`http://127.0.0.1:8000/api/client/auth/profile` , {
+    //             headers: { Authorization: `Bearer ${token}` }
+    //         })
+    //     }
+    // })
     // console.log(user);
     
     
@@ -41,9 +41,16 @@ const Header = ({isSearch, setIsSearch}: Props) => {
     const { data: carts } = useQuery({
         queryKey: ['carts', token],
         queryFn: () => {
-            return axios.get(`http://127.0.0.1:8000/api/client/categories`)
+            return axios.get(`http://127.0.0.1:8000/api/client/cart`, {
+                headers: {
+                    Authorization: `Bearer ${token}`, // Truyền token vào header
+                  }
+            })
         }
     })
+
+    console.log();
+    
     
     
     return (
@@ -236,7 +243,7 @@ const Header = ({isSearch, setIsSearch}: Props) => {
                                 className='w-[40px] h-[40px] flex justify-center items-center text-center'>
                                 <img className=" ls-is-cached lazyloaded" src="https://file.hstatic.net/200000642007/file/icon-cart_d075fce117f74a07ae7f149d8943fc33.svg" data-src="https://file.hstatic.net/200000642007/file/icon-cart_d075fce117f74a07ae7f149d8943fc33.svg" alt="Icon cart" width={24} height={24} />
                             </div>
-                            <div className={`absolute w-[13px] h-[13px] text-[9px] rounded-[100%] top-[10px] right-[5px] bg-black text-white flex items-center justify-center`}></div>
+                            <div className={`absolute w-[13px] h-[13px] text-[9px] rounded-[100%] top-[10px] right-[5px] bg-black text-white flex items-center justify-center`}>{carts?.data.cart_items.length > 0 ? carts?.data.cart_items.length : 0}</div>
                         </Link>
                         <Link to={`/account/wishlist`} className="items-center hidden lg:flex col-start-2 row-start-1 lg:col-start-3">
                             <a href="" className='w-[40px] h-[40px] flex justify-center items-center text-center'>

@@ -71,13 +71,19 @@ const DetailPage = () => {
 
     const [messageApi, contextHolder] = message.useMessage()
 
+    const token = localStorage.getItem("token")    
+
     const { mutate } = useMutation({
         mutationFn: async (cart: any) => {
             try {
                 
                 console.log(cart);
                 
-                // await axios.post(`http://127.0.0.1:8000/api/client/cart/add`, cart)
+                await axios.post(`http://127.0.0.1:8000/api/client/cart/add`, cart , {
+                    headers: {
+                        Authorization: `Bearer ${token}`, // Truyền token vào header
+                      },
+                })
             } catch (error) {
                 throw new Error("Add to cart Error!!")
             }
@@ -96,13 +102,15 @@ const DetailPage = () => {
         },
     })
 
-    const handleSubmitCart = async (id: string) => {
+    const handleSubmitCart = async (id: string | undefined) => {
         if (!variationValues) {
             messageApi.error("Vui lòng chọn size")
         } if (!variations) {
             messageApi.error("Vui lòng chọn màu sắc")
         }
-        mutate({products_id: parseInt(id), product_variation_value_id: variationValues.id, quantity: quantity})
+        if(id) {
+            mutate({product_id: parseInt(id), product_variation_value_id: variationValues.id, quantity: quantity})
+        }
     }
 
 

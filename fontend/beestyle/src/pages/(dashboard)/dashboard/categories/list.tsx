@@ -19,7 +19,6 @@ const ListCategories: React.FC = () => {
   const queryClient = useQueryClient();
   const [messageApi, contextHolder] = message.useMessage();
 
-  // Fetch all categories
   const { data: categories = [], isLoading } = useQuery<Category[]>({
     queryKey: ['categories'],
     queryFn: async () => {
@@ -64,6 +63,13 @@ const ListCategories: React.FC = () => {
     }));
   };
 
+  const getImageSource = (image: string | null) => {
+    if (!image) return undefined;
+    return image.startsWith('http')
+      ? image
+      : `http://127.0.0.1:8000/storage/${image}`;
+  };
+
   const columns = [
     {
       title: 'Tên danh mục',
@@ -91,7 +97,7 @@ const ListCategories: React.FC = () => {
           <Image
             width={90}
             height={90}
-            src={image}
+            src={getImageSource(image)}
             alt="Category Image"
             style={{ objectFit: 'cover', borderRadius: '8px' }}
           />

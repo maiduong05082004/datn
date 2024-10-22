@@ -97,8 +97,8 @@ const items1: MenuProps['items'] = [
     icon: React.createElement(GiftOutlined),
     label: 'Khuyến Mại',
     children: [
-      { key: 'sub8-1', label: <NavLink to="/admin/listBanners">Danh sách</NavLink> },
-      { key: 'sub8-2', label: <NavLink to="/admin/addBanners">Thêm mới</NavLink> },
+      { key: 'sub8-1', label: <NavLink to="/admin/listPromotions">Danh sách</NavLink> },
+      { key: 'sub8-2', label: <NavLink to="/admin/addPromotions">Thêm mới</NavLink> },
       { key: 'sub8-4', label: 'Xóa Khuyến Mại' },
     ],
   },

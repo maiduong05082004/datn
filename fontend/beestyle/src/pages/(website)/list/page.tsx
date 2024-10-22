@@ -23,7 +23,7 @@ const ListPage = (props: Props) => {
     const [color, setColor] = useState<string[]>([]);
     const [priceCheck, setPiceCheck] = useState<string>("");
 
-    console.log(color);
+    console.log(priceCheck);
 
 
     const { data: products, isLoading } = useQuery({

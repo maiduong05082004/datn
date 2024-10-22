@@ -1,5 +1,8 @@
 import MyProfile from "@/pages/(dashboard)/dashboard/profile";
 import AddAttribute from "@/pages/(dashboard)/dashboard/attribute_values/add";
+import ListPromotions from "@/pages/(dashboard)/dashboard/promotions/list";
+import AddPromotion from "@/pages/(dashboard)/dashboard/promotions/add";
+import UpdatePromotion from "@/pages/(dashboard)/dashboard/promotions/update";
 
 
 // Website pages
@@ -39,6 +42,7 @@ import ListPage from "@/pages/(website)/list/page";
 import SearchPage from "@/pages/(website)/search/page";
 import { useState } from "react";
 import { Route, Routes } from "react-router-dom";
+import CartPage from "@/pages/(website)/cart/page";
 
 const Router = () => {
 
@@ -53,6 +57,7 @@ const Router = () => {
                     <Route path="categories/:id" element={<ListPage />} />
                     <Route path="products/:id" element={<DetailPage />} />
                     <Route path="checkout" element={<CheckOutPage />} />
+                    <Route path="carts" element={<CartPage />} />
                     <Route path="signin" element={<PageSignin />} />
                     <Route path="signup" element={<PageSignup />} />
                     <Route path="search" element={<SearchPage isKeySearch={isKeySearch} />} />
@@ -89,6 +94,10 @@ const Router = () => {
                     <Route path="listCategories" element={<ListCategories />} />
                     <Route path="addCategories" element={<AddCategories />} />
                     <Route path="updateCategories/:id" element={<UpdateCategories />} />
+                    {/* promotions */}
+                    <Route path="listPromotions" element={<ListPromotions />} />
+                    <Route path="addPromotions" element={<AddPromotion />} />
+                    <Route path="updatePromotions/:id" element={<UpdatePromotion />} />
                 </Route>
             </Routes>
             <Search isSearch={isSearch} setIsSearch={setIsSearch} setKeySearch={setKeySearch} />
