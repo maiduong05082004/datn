@@ -70,9 +70,6 @@ const AddUser: React.FC = () => {
     mutation.mutate(payload);
   };
 
-
-
-
   return (
     <>
       {contextHolder}
@@ -85,7 +82,6 @@ const AddUser: React.FC = () => {
             onFinish={onFinish}
             className="space-y-6"
           >
-            {/* Name */}
             <Form.Item
               label="Tên Người Dùng"
               name="name"
@@ -97,7 +93,6 @@ const AddUser: React.FC = () => {
               <Input placeholder="Nhập tên người dùng" size="large" />
             </Form.Item>
 
-            {/* Email */}
             <Form.Item
               label="Email"
               name="email"

@@ -24,7 +24,6 @@ const AddAttribute: React.FC = () => {
         },
     });
 
-    // Xử lý submit form
     const onFinish = (values: { name: string; attribute_type: number }) => {
         mutate(values);
     };
@@ -58,7 +57,7 @@ const AddAttribute: React.FC = () => {
                             </Select>
                         </Form.Item>
                         <Form.Item>
-                            <Button type="primary" htmlType="submit">
+                            <Button className='bg-indigo-600 hover:bg-indigo-700 text-white rounded-md px-6' type="primary" htmlType="submit">
                                 Thêm thuộc tính
                             </Button>
                         </Form.Item>

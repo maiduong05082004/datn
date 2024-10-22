@@ -6,6 +6,7 @@ import FilterComponent from "@/pages/research/research";
 import ListPromotions from "@/pages/(dashboard)/dashboard/promotions/list";
 import AddPromotion from "@/pages/(dashboard)/dashboard/promotions/add";
 import UpdatePromotion from "@/pages/(dashboard)/dashboard/promotions/update";
+import Variant from "@/pages/(dashboard)/dashboard/products/test";
 
 // Website pages (Lazy loading)
 const HomePage = lazy(() => import("@/pages/(website)/home/page"));
@@ -69,6 +70,7 @@ const Router = () => {
                     <Route path="listUser" element={<ListUser />} />
                     {/* products */}
                     <Route path="listProducts" element={<ListProducts />} />
+                    <Route path="variant" element={<Variant />} />
                     <Route path="addProducts" element={<AddProduct />} />
                     <Route path="updateProducts/:id" element={<UpdateProduct />} />
                     <Route path="detailProducts/:id" element={<DetailProducts />} />

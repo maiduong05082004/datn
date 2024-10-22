@@ -1,16 +1,16 @@
-
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { CKEditor } from '@ckeditor/ckeditor5-react';
 import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import axios from 'axios';
-import { Form, Input, Button, Checkbox, InputNumber, Upload, Row, Col, DatePicker, Spin } from 'antd';
-import { MinusCircleOutlined, UploadOutlined } from '@ant-design/icons';
-import { FormProps } from 'react-hook-form';
+import { Form, Input, Button, Checkbox, InputNumber, Upload, Row, Col, DatePicker, Spin, Select, Table, Switch } from 'antd';
+import { MinusCircleOutlined, PlusOutlined, UploadOutlined } from '@ant-design/icons';
 
-interface variantProduct {
+const { Option } = Select;
+
+interface VariantProduct {
   id: number | string;
   name: string;
   slug: string;
@@ -23,17 +23,17 @@ interface variantProduct {
   is_collection: boolean;
   is_hot: boolean;
   is_new: boolean;
-  group: variantProductGroup;
-  variations: variantProductVariation[];
+  group: VariantProductGroup;
+  variations: VariantProductVariation[];
   images: string[];
 }
 
-interface variantProductGroup {
+interface VariantProductGroup {
   id: number;
   name: string;
 }
 
-interface variantProductVariation {
+interface VariantProductVariation {
   id: number;
   stock: number;
   attribute_value_image_variant: AttributeValueImageVariant;
@@ -56,18 +56,17 @@ interface VariationValue {
   discount: number;
 }
 
-const AddProduct = () => {
+const AddProduct: React.FC = () => {
   const [form] = Form.useForm();
   const [content, setContent] = useState<string>('');
-  const [selectedVariantGroup, setSelectedVariantGroup] = useState<any>(null);
-  const [selectedColor, setSelectedColor] = useState<string>('');
-  const [availableSizes, setAvailableSizes] = useState<any[]>([]);
-  const [sizeData, setSizeData] = useState<any[]>([]);
+  const [selectedVariantGroup, setSelectedVariantGroup] = useState<VariantProductGroup | null>(null);
+  const [attributes, setAttributes] = useState<any[]>([]);
+  const [variants, setVariants] = useState<any[]>([]);
   const [fileList, setFileList] = useState<any[]>([]);
+  const [stock, setStock] = useState<number | null>(null);
   const [albumList, setAlbumList] = useState<any[]>([]);
-  const [customColor, setCustomColor] = useState<string>('');
-  const [customColors, setCustomColors] = useState<string[]>([]);
   const [showVariantForm, setShowVariantForm] = useState<boolean>(true);
+
 
   const { data: variantgroup, isLoading: isLoadingVariantGroup } = useQuery({
     queryKey: ['variantgroup'],
@@ -77,6 +76,8 @@ const AddProduct = () => {
     },
   });
 
+
+
   const { data: categories, isLoading: isLoadingCategories } = useQuery({
     queryKey: ['categories'],
     queryFn: async () => {
@@ -84,23 +85,21 @@ const AddProduct = () => {
       return response?.data;
     },
   });
+
   const { mutate } = useMutation({
-    mutationFn: async (data: variantProduct) => {
+    mutationFn: async (data: VariantProduct) => {
       const response = await axios.post('http://localhost:8000/api/admins/products', data);
       return response.data;
     },
     onSuccess: () => {
       toast.success('Thêm sản phẩm thành công!');
-      form.resetFields(); // Reset form sau khi thành công
+      form.resetFields();
       setContent('');
       setSelectedVariantGroup(null);
-      setSelectedColor('');
-      setAvailableSizes([]);
-      setSizeData([]);
+      setAttributes([]);
+      setVariants([]);
       setFileList([]);
       setAlbumList([]);
-      setCustomColors([]);
-      setShowVariantForm(true);
     },
     onError: (error) => {
       console.error('Lỗi khi thêm sản phẩm:', error);
@@ -108,119 +107,244 @@ const AddProduct = () => {
     },
   });
 
-  const handleVariantGroupChange = (e: any) => {
-    const groupId = e.target.value;
-    const selectedGroup = variantgroup.find(
-      (group: any) => group.group_id === parseInt(groupId)
-    );
-    setSelectedVariantGroup(selectedGroup);
-    setSelectedColor('');
-    setAvailableSizes([]);
+  useEffect(() => {
+    if (selectedVariantGroup && variantgroup) {
+      const selectedGroup = variantgroup.find((group: any) => group.group_id === selectedVariantGroup);
+      if (selectedGroup) {
+        setAttributes(selectedGroup.attributes.map((attribute: any) => ({ ...attribute, values: [] })));
+      }
+    }
+  }, [selectedVariantGroup, variantgroup]);
+
+
+  const handleAttributeValueChange = (index: number, selectedIds: number[]) => {
+    const updatedAttributes = [...attributes];
+    updatedAttributes[index].selectedValues = selectedIds;
+    setAttributes(updatedAttributes);
   };
 
-
-  const handleColorChange = (e: any) => {
-    const color = e.target.value;
-    setSelectedColor(color);
-
-    const sizeAttribute = selectedVariantGroup?.attributes.find(
-      (attribute: any) =>
-        attribute.name.toLowerCase().includes('kích thước') ||
-        attribute.name.toLowerCase().includes('size')
-    );
-
-
-    if (sizeAttribute) {
-      setAvailableSizes(sizeAttribute.attribute_values);
-      const initialSizeData = sizeAttribute.attribute_values.map((size: any) => ({
-        sizeId: size.id,
-        sizeValue: size.value,
+  const generateVariants = () => {
+    const colorAttribute = attributes.find(attr => attr.name.toLowerCase().includes('màu sắc'));
+    const sizeAttribute = attributes.find(attr => attr.name.toLowerCase().includes('kích thước'));
+  
+    if (!colorAttribute || !sizeAttribute) {
+      toast.error('Thiếu thuộc tính Màu Sắc hoặc Kích Thước');
+      return;
+    }
+  
+    const newVariants = colorAttribute.selectedValues.map((color: any) => ({
+      colorId: color.id,
+      colorName: color.value,
+      sizes: sizeAttribute.selectedValues.map((size: any) => ({
+        sizeId: size.id,  
+        size: size.value,
         stock: 0,
         discount: 0,
-      }));
-      setSizeData(initialSizeData);
+      })),
+      colorImage: [],
+      albumImages: [],
+    }));
+  
+    setVariants(newVariants);
+  };
+  
+
+
+  const handleVariantChange = (colorId: number, key: string, index: number, subKey: string, value: any) => {
+    const updatedVariants = [...variants];
+    const variant = updatedVariants.find((v) => v.colorId === colorId);
+    if (variant) {
+      variant[key][index][subKey] = value;
     }
+    setVariants(updatedVariants);
   };
 
-  const handleStockChange = (sizeId: number, value: number) => {
-    const newSizeData = sizeData.map((data) =>
-      data.sizeId === sizeId ? { ...data, stock: value } : data
-    );
-    setSizeData(newSizeData);
+
+  const handleStockChange = (value: number | null) => {
+    setStock(value);
+    form.setFieldsValue({ stock: value });
   };
 
-  const handleDiscountChange = (sizeId: number, value: number) => {
-    const newSizeData = sizeData.map((data) =>
-      data.sizeId === sizeId ? { ...data, discount: value } : data
-    );
-    setSizeData(newSizeData);
+
+  // const handleAlbumChange = ({ fileList }: any) => {
+  //   setAlbumList(fileList);
+  // };
+  const handleAlbumChange2 = ({ fileList }: any) => {
+    setAlbumList(fileList.map((item: any) => item.name));
   };
+
+  const handleUploadChangeForVariant = (index: number, key: string, { fileList }: any) => {
+    const updatedVariants = [...variants];
+    updatedVariants[index][key] = fileList;
+    setVariants(updatedVariants);
+  };
+  // ẩn hiện
   const toggleVariantForm = () => {
     setShowVariantForm(!showVariantForm);
   };
-  const handleUploadChange = ({ fileList }: any) => {
-    setFileList(fileList);
-  };
 
-  const handleAlbumChange = ({ fileList }: any) => {
-    setAlbumList(fileList);
+  const columns = [
+    {
+      title: 'Màu Sắc',
+      dataIndex: 'colorName',
+      key: 'colorName',
+    },
+    {
+      title: 'Kích Thước',
+      dataIndex: 'sizes',
+      key: 'sizes',
+      render: (sizes: any[], record: any) => (
+        sizes.map((size, index) => (
+          <div key={index} className="flex items-center gap-3 mb-3">
+            <span className="font-semibold w-20">{size.size}</span>
+            <InputNumber
+              onChange={(value) => handleVariantChange(record.colorId, 'sizes', index, 'stock', value)}
+              className="w-full border border-gray-300 rounded-md p-2"
+              placeholder="Số Lượng"
+            />
+            <InputNumber
+              max={100}
+              onChange={(value) => handleVariantChange(record.colorId, 'sizes', index, 'discount', value)}
+              className="w-full border border-gray-300 rounded-md p-2"
+              placeholder="Giảm Giá (%)"
+            />
+          </div>
+        ))
+      ),
+    }
+    ,
+    {
+      title: 'Ảnh Màu',
+      dataIndex: 'colorImage',
+      key: 'colorImage',
+      render: (_: any, record: any, index: any) => (
+        <Upload
+          listType="picture"
+          fileList={record.colorImage || []}
+          onChange={(info) => handleUploadChangeForVariant(index, 'colorImage', info)}
+          beforeUpload={() => false}
+        >
+          <Button icon={<UploadOutlined />}>Tải lên ảnh màu</Button>
+        </Upload>
+      ),
+    },
+    {
+      title: 'Album Ảnh',
+      dataIndex: 'albumImages',
+      key: 'albumImages',
+      render: (_: any, record: any, index: any) => (
+        <Upload
+          listType="picture"
+          multiple
+          fileList={record.albumImages || []}
+          onChange={(info) => handleUploadChangeForVariant(index, 'albumImages', info)}
+          beforeUpload={() => false}
+        >
+          <Button icon={<UploadOutlined />}>Tải lên album ảnh</Button>
+        </Upload>
+      ),
+    },
+  ];
 
-  };
 
   const onFinish = (values: any) => {
-    const variationsData = sizeData.reduce((acc: any, curr: any) => {
-      const { sizeId, stock, discount } = curr;
-      if (!acc[selectedColor]) {
-        acc[selectedColor] = {};
+    const formattedDate = values.input_day ? values.input_day.format('YYYY-MM-DD') : null;
+  
+    if (!showVariantForm) {
+      const imageFields = {
+        variation_album_images: albumList, // Đã là mảng tên file sau khi xử lý đúng
+      };
+      const simpleProductPayload = {
+        ...values,
+        stock: stock,
+        input_day: formattedDate,
+        content: content || '',
+        group_id: null, 
+        variations: '[]', 
+        is_collection: values.is_collection || false,
+        is_hot: values.is_hot || false,
+        is_new: values.is_new || false,
+        ...imageFields
+      };
+  
+      console.log('Simple Product Payload:', simpleProductPayload); 
+  
+      mutate(simpleProductPayload);
+      return;
+    }
+  
+    // Xử lý sản phẩm có biến thể
+    if (!selectedVariantGroup) {
+      toast.error('Vui lòng chọn nhóm biến thể!');
+      return;
+    }
+  
+    if (variants.length === 0) {
+      toast.error('Vui lòng tạo ít nhất một biến thể!');
+      return;
+    }
+  
+    // Chuẩn bị dữ liệu biến thể
+    const variationsData = variants.reduce((acc, variant) => {
+      const colorId = variant.colorId;
+      const sizeData = variant.sizes.reduce((sizeAcc: any, size: any) => {
+        sizeAcc[size.sizeId] = {
+          stock: size.stock ?? 0,
+          discount: size.discount ?? 0,
+        };
+        return sizeAcc;
+      }, {});
+  
+      if (Object.keys(sizeData).length > 0) {
+        acc[colorId] = sizeData;
       }
-      acc[selectedColor][sizeId] = { stock, discount };
       return acc;
     }, {});
-
-    const imageFields = {
-      [`color_image_${selectedColor}`]: fileList[0].name,
-      [`album_images_${selectedColor}`]: albumList[0].name,
-    };
-    const formattedDate = values.input_day ? values.input_day.format('YYYY-MM-DD') : null;
-    const finalData = {
+  
+    console.log('Variations Data:', variationsData); // Debug dữ liệu biến thể
+  
+    const imageFields = variants.reduce((acc: any, variant: any) => {
+      const colorId = variant.colorId || variant.id;
+      acc[`color_image_${colorId}`] = variant.colorImage?.[0]?.name || null;
+      acc[`album_images_${colorId}`] = variant.albumImages?.map((file: any) => file.name) || [];
+      return acc;
+    }, {});
+  
+    const productWithVariantsPayload = {
       ...values,
       input_day: formattedDate,
-      content,
+      content: content || '',
+      group_id: selectedVariantGroup,
       variations: JSON.stringify(variationsData),
-      group_id: selectedVariantGroup?.group_id,
       ...imageFields,
-
+      is_collection: values.is_collection || false,
+      is_hot: values.is_hot || false,
+      is_new: values.is_new || false,
     };
-    console.log(imageFields);
-
-    mutate(finalData);
+  
+    console.log('Product with Variants Payload:', productWithVariantsPayload); // Debug dữ liệu
+  
+    // Gọi API với payload sản phẩm có biến thể
+    mutate(productWithVariantsPayload);
   };
-
-
-  // if (isLoading) return <Spin tip="Loading..." className="flex justify-center items-center h-screen" />;
-
+  
+  if (isLoadingVariantGroup || isLoadingCategories) {
+    return <Spin tip="Loading..." className="flex justify-center items-center h-screen" />;
+  }
 
   return (
     <>
-      <div className="container mx-auto">
+      <div className="w-full px-6 py-8">
         <ToastContainer />
-        <h2 className="text-4xl font-bold mb-6 ">Thêm sản phẩm</h2>
-
-        <Form
-          form={form}
-          name="basic"
-          layout="vertical"
-          onFinish={onFinish}
-          initialValues={{ is_collection: false, is_hot: false, is_new: false }}
-        >
+        <h2 className="text-4xl font-bold mb-6">Thêm sản phẩm</h2>
+        <Form form={form} layout="vertical" onFinish={onFinish}>
           <Form.Item
             label="Tên sản phẩm"
             name="name"
-            rules={[{ required: true, message: "Tên sản phẩm bắt buộc phải điền" }]}
+            rules={[{ required: true, message: 'Tên sản phẩm bắt buộc' }]}
           >
             <Input />
           </Form.Item>
-
           <Form.Item
             label="Giá sản phẩm"
             name="price"
@@ -265,12 +389,12 @@ const AddProduct = () => {
             name="category_id"
             rules={[{ required: true, message: "Danh mục sản phẩm bắt buộc phải chọn" }]}
           >
-            <select id="category" className="border rounded-lg p-2">
-              <option value="">--Chọn danh mục--</option>
+            <select id="category" className="border border-gray-300 rounded-md p-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-400 font-normal">
+              <option value="" className="text-gray-500">--Chọn danh mục--</option>
               {categories?.map((category: any) => (
-                <optgroup key={category.id} label={category.name}>
+                <optgroup key={category.id} label={category.name} className="text-gray-600 font-medium">
                   {category.children_recursive?.map((child: any) => (
-                    <option key={child.id} value={child.id}>
+                    <option key={child.id} value={child.id} className="text-gray-700 font-normal">
                       {child.name}
                     </option>
                   ))}
@@ -279,161 +403,122 @@ const AddProduct = () => {
             </select>
           </Form.Item>
 
-          <Form.Item name="is_collection" valuePropName="checked">
-            <Checkbox>Bộ sưu tập</Checkbox>
-          </Form.Item>
 
-          <Form.Item name="is_hot" valuePropName="checked">
-            <Checkbox>Nổi bật</Checkbox>
-          </Form.Item>
 
-          <Form.Item name="is_new" valuePropName="checked">
-            <Checkbox>Sản phẩm mới</Checkbox>
-          </Form.Item>
+          <div className='flex gap-5'>
+            <Form.Item name="is_collection" valuePropName="checked">
+              <Checkbox>Bộ sưu tập</Checkbox>
+            </Form.Item>
 
-          <div className="bg-slate-100 p-6 rounded-lg mb-8 shadow-md mt-7">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-2xl font-bold text-green-800">Biến thể sản phẩm</h3>
-              <Button onClick={toggleVariantForm} type="default">
-                {showVariantForm ? 'Ẩn Biến Thể' : 'Hiện Biến Thể'}
-              </Button>
-            </div>
+            <Form.Item name="is_hot" valuePropName="checked">
+              <Checkbox>Nổi bật</Checkbox>
+            </Form.Item>
 
-            {showVariantForm && (
-              <>
-                <div className="mt-4">
-                  <label className="font-bold block mb-2 text-gray-700">Chọn nhóm biến thể</label>
-                  <select
-                    name="group_id"
-                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:outline-none focus:border-green-600 focus:ring-1 focus:ring-green-600"
-                    onChange={handleVariantGroupChange}
-                  >
-                    <option value="">Chọn nhóm biến thể</option>
-                    {variantgroup?.map((group: any) => (
-                      <option key={group.group_id} value={group.group_id}>
-                        {group.group_name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                {selectedVariantGroup && (
-                  <div className="mt-4">
-                    <label className="font-bold block mb-2 text-gray-700">Chọn Màu Sắc</label>
-                    <select className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:border-green-600 focus:ring-1 focus:ring-green-600" onChange={handleColorChange}>
-                      <option value="">Chọn Màu Sắc</option>
-                      {selectedVariantGroup.attributes
-                        .filter((attribute: any) => attribute.name === 'Màu Sắc')
-                        .flatMap((attribute: any) =>
-                          attribute.attribute_values.map((color: any) => (
-                            <option key={color.id} value={color.id}>
-                              {color.value}
-                            </option>
-                          ))
-                        )}
-                      {customColors.map((color, index) => (
-                        <option key={index} value={color}>
-                          {color}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                )}
-
-                {selectedColor && availableSizes.length > 0 && (
-                  <div className="mt-4">
-                    <label className="font-bold block mb-2 text-gray-700">Kích thước, Số lượng, Giảm giá</label>
-                    {availableSizes.map((size: any) => (
-                      <div key={size.id} className="flex justify-between items-center space-x-4 mb-4">
-                        <label htmlFor="Kích Thước" className="text-gray-600">Kích Thước</label>
-                        <Checkbox>{size.value}</Checkbox>
-                        <InputNumber
-                          placeholder="Số lượng"
-                          min={0}
-                          className="w-24 border border-gray-300 rounded-md p-1"
-                          onChange={(value: any) => handleStockChange(size.id, value)}
-                        />
-                        <InputNumber
-                          placeholder="Giảm giá (%)"
-                          min={0}
-                          max={100}
-                          className="w-24 border border-gray-300 rounded-md p-1"
-                          onChange={(value: any) => handleDiscountChange(size.id, value)}
-                        />
-                        {/* <Button type="primary" icon={<MinusCircleOutlined />} className="bg-red-500 hover:bg-red-600">
-                              Xóa
-                            </Button> */}
-                      </div>
-                    ))}
-
-                    <div className="flex items-center justify-between space-x-4 mt-4">
-                      <div>
-                        <label className="font-bold block mb-2 text-gray-700">Ảnh Màu</label>
-                        <Upload
-                          listType="picture"
-                          fileList={fileList}
-                          onChange={handleUploadChange}
-                          beforeUpload={() => false}
-                        >
-                          <Button icon={<UploadOutlined />} className="bg-blue-500 hover:bg-blue-600">Tải lên ảnh màu</Button>
-                        </Upload>
-                      </div>
-                      <div>
-                        <label className="font-bold block mb-2 text-gray-700">Album ảnh</label>
-                        <Upload
-                          listType="picture"
-                          multiple
-                          fileList={albumList}
-                          onChange={handleAlbumChange}
-                          beforeUpload={() => false}
-                        >
-                          <Button icon={<UploadOutlined />} className="bg-blue-500 hover:bg-blue-600">Tải lên album ảnh</Button>
-                        </Upload>
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </>
-            )}
-
-            {!showVariantForm && (
-              <>
-                <div className="mt-4">
-                  <Form.Item
-                    label="Nhập số lượng sản phẩm"
-                    name="stock"
-                    rules={[{ required: true, message: 'Số lượng sản phẩm là bắt buộc' }]}
-                  >
-                    <InputNumber
-                      placeholder="Số lượng"
-                      min={0}
-                      className="w-24 border border-gray-300 rounded-md p-1"
-                    />
-                  </Form.Item>
-                </div>
-
-                <div className="mt-4">
-                  <Form.Item
-                    label="Tải lên album ảnh"
-                    name="variation_album_images"
-                  >
-                    <Upload
-                      listType="picture"
-                      multiple
-                      fileList={albumList}
-                      onChange={handleAlbumChange}
-                      beforeUpload={() => false}
-                    >
-                      <Button icon={<UploadOutlined />} className="bg-blue-500 hover:bg-blue-600">Tải lên album ảnh</Button>
-                    </Upload>
-                  </Form.Item>
-                </div>
-              </>
-            )}
+            <Form.Item name="is_new" valuePropName="checked">
+              <Checkbox>Sản phẩm mới</Checkbox>
+            </Form.Item>
           </div>
+          <Button onClick={toggleVariantForm} type="default">
+            {showVariantForm ? 'Ẩn Biến Thể' : 'Hiện Biến Thể'}
+          </Button>
+          {showVariantForm && (
+            <>
+              <Form.Item
+                label="Chọn nhóm biến thể"
+                name="variant_group"
+                rules={[{ required: true, message: 'Vui lòng chọn nhóm biến thể' }]}
+              >
+                <Select placeholder="Chọn nhóm biến thể" onChange={setSelectedVariantGroup}>
+                  {variantgroup?.map((group: any) => (
+                    <Option key={group.group_id} value={group.group_id}>
+                      {group.group_name}
+                    </Option>
+                  ))}
+                </Select>
+              </Form.Item>
 
+              {attributes
+                .sort((a, b) => {
+                  if (a.name.toLowerCase().includes('màu sắc')) return -1;
+                  if (b.name.toLowerCase().includes('màu sắc')) return 1;
+                  return 0;
+                })
+                .map((attribute, index) => (
+                  <Form.Item key={attribute.id} label={`Thuộc Tính (${attribute.name})`}>
+                    <Select
+                      mode="tags"
+                      style={{ width: '100%' }}
+                      placeholder="Nhập giá trị cho Màu Sắc"
+                      onChange={(values) =>
+                        handleAttributeValueChange(index, values.map((value: any) => ({ id: value.key, value: value.label })))
+                      }
+                      labelInValue
+                    >
+                      {attribute.attribute_values.map((val: any) => (
+                        <Option key={val.id} value={val.value}>
+                          {val.value}
+                        </Option>
+                      ))}
+                    </Select>
+
+                  </Form.Item>
+                ))}
+
+
+              <Button type="default" className='mb-5' onClick={generateVariants} icon={<PlusOutlined />}>
+                Tạo Biến Thể
+              </Button>
+
+              <Table
+                dataSource={variants}
+                columns={columns}
+                rowKey={(_, index: any) => index.toString()}
+                pagination={false}
+                className="w-full border-collapse border border-gray-300"
+              />
+            </>
+          )}
+
+          {!showVariantForm && (
+            <>
+              <div className="mt-4">
+                <Form.Item
+                  label="Nhập số lượng sản phẩm"
+                  name="stock"
+                  rules={[{ required: true, message: 'Số lượng sản phẩm là bắt buộc' }]}
+                >
+                  <InputNumber
+                    placeholder="Số lượng"
+                    value={stock}
+                    className="w-full border border-gray-300 rounded-md p-2"
+                    onChange={handleStockChange}
+                    min={0}
+                  />
+                </Form.Item>
+              </div>
+              <div className="mt-4">
+                <Form.Item
+                  label="Tải lên album ảnh"
+                  name="variation_album_images"
+                >
+                  <Upload
+                    listType="picture"
+                    multiple
+                    fileList={albumList}
+                    onChange={handleAlbumChange2}
+                    beforeUpload={() => false}
+                  >
+                    <Button icon={<UploadOutlined />} className="bg-green-500 hover:bg-green-600 text-white">
+                      Tải lên album ảnh
+                    </Button>
+                  </Upload>
+                </Form.Item>
+              </div>
+
+            </>
+          )}
           <Form.Item>
-            <Button type="primary" className='bg-black' htmlType="submit">
+            <Button type="primary" htmlType="submit" className="bg-indigo-600 hover:bg-indigo-700 text-white mt-5">
               Thêm sản phẩm
             </Button>
           </Form.Item>

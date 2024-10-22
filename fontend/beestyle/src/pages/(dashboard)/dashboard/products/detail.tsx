@@ -1,31 +1,33 @@
 import { useQuery } from '@tanstack/react-query';
-import { Image, Typography, Button, Badge, Divider } from 'antd';
+import { Image, Typography, Button, Badge, Divider, message } from 'antd';
 import axios from 'axios';
 import React, { useState } from 'react';
+import { useParams } from 'react-router-dom';
 
 const { Title, Text, Paragraph } = Typography;
 
 const DetailProduct = () => {
+  const { id } = useParams(); // Lấy ID sản phẩm từ URL
+  const [selectedVariantIndex, setSelectedVariantIndex] = useState(0); // Chọn biến thể
+  const [selectedImageIndex, setSelectedImageIndex] = useState(0); // Chọn ảnh trong album
+
   const { data, isLoading, isError } = useQuery({
-    queryKey: ['detailProducts'],
+    queryKey: ['detailProduct', id],
     queryFn: async () => {
-      const response = await axios.get('http://localhost:8000/api/admins/products');
-      return response?.data?.data || [];
+      const response = await axios.get(`http://localhost:8000/api/admins/products/${id}`);
+      return response?.data?.data || {};
     },
   });
-
-  const [selectedVariantIndex, setSelectedVariantIndex] = useState(0); // Theo dõi biến thể được chọn
-  const [selectedImageIndex, setSelectedImageIndex] = useState(0); // Theo dõi ảnh được chọn
 
   if (isLoading) {
     return <div className="flex items-center justify-center h-screen">Đang tải...</div>;
   }
 
-  if (isError || data.length === 0) {
+  if (isError || !data) {
     return <div className="text-center text-red-500">Không tìm thấy sản phẩm!</div>;
   }
 
-  const product = data[0];
+  const product = data;
   const {
     name,
     price,
@@ -39,22 +41,23 @@ const DetailProduct = () => {
     is_new,
     group,
     variations,
+    slug,
+    images,
   } = product;
 
-  const selectedVariation = variations[selectedVariantIndex]; // Biến thể hiện tại
+  const selectedVariation = variations[selectedVariantIndex] || {};
 
   return (
     <div className="container mx-auto px-8 py-12">
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Album ảnh của biến thể */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
         <div className="col-span-1 flex gap-4">
-          {/* Ảnh nhỏ theo chiều dọc */}
-          <div className="flex flex-col gap-2">
-            {selectedVariation.variation_album_images.map((img: string, index: number) => (
+          {/* Album ảnh của biến thể */}
+          <div className="flex flex-col gap-4">
+            {selectedVariation.variation_album_images?.map((img: string, index: number) => (
               <div
                 key={index}
-                className={`w-20 h-20 overflow-hidden rounded-md border cursor-pointer ${
-                  index === selectedImageIndex ? 'border-black' : 'border-gray-300'
+                className={`w-20 h-20 overflow-hidden rounded-lg border cursor-pointer transition duration-300 ease-in-out transform hover:scale-105 ${
+                  index === selectedImageIndex ? 'border-blue-600 shadow-lg' : 'border-gray-300'
                 }`}
                 onClick={() => setSelectedImageIndex(index)}
               >
@@ -64,9 +67,9 @@ const DetailProduct = () => {
           </div>
 
           {/* Ảnh lớn */}
-          <div className="h-96 w-full overflow-hidden rounded-lg">
+          <div className="h-80 w-full overflow-hidden rounded-xl shadow-lg border border-gray-300">
             <Image
-              src={selectedVariation.variation_album_images[selectedImageIndex]}
+              src={selectedVariation.variation_album_images?.[selectedImageIndex]}
               className="object-cover w-full h-full"
             />
           </div>
@@ -74,52 +77,59 @@ const DetailProduct = () => {
 
         {/* Thông tin sản phẩm */}
         <div className="lg:col-span-2">
-          <Title level={2}>{name}</Title>
-          <Text className="text-gray-600">Danh mục: {category_name}</Text>
-          <Text className="text-gray-600 block">Ngày nhập: {input_day}</Text>
+          <Title level={2} className="text-3xl font-bold text-gray-800 mb-4">{name}</Title>
+          <Text className="text-base text-gray-600 block mb-2">Danh mục: {category_name}</Text>
+          <Text className="text-base text-gray-600 block mb-4">Ngày nhập: {input_day}</Text>
+          <Text className="text-base text-gray-600 block mb-4">Slug: {slug}</Text>
 
-          <Text className="text-2xl font-bold text-red-600 mt-2">
+          <Text className="text-2xl font-bold text-red-600 mb-6">
             {parseFloat(price).toLocaleString()} VND
           </Text>
 
-          {/* Thẻ đánh dấu */}
-          <div className="flex gap-2 mt-2">
+          <div className="flex gap-4 mb-6">
             {is_new && <Badge.Ribbon text="Sản phẩm mới" color="green" />}
             {is_hot && <Badge.Ribbon text="Hot" color="red" />}
             {is_collection && <Badge.Ribbon text="Bộ sưu tập" color="blue" />}
           </div>
 
-          <Divider />
+          <Divider className="my-8" />
 
-          {/* Nội dung chi tiết */}
-          <Paragraph className="text-lg">{description}</Paragraph>
-          <Paragraph className="text-gray-600">{content}</Paragraph>
+          {/* Thông tin biến thể */}
+          {group && (
+            <div className="bg-gray-50 p-6 rounded-xl border border-gray-300 mb-8">
+              <h4 className="text-lg font-semibold text-gray-800 mb-2">Nhóm biến thể</h4>
+              <Text className="text-gray-700 text-base">{group.name}</Text>
+            </div>
+          )}
 
-          {/* Tùy chọn màu sắc */}
-          <div className="mt-6">
-            <h4 className="font-semibold text-lg">Màu sắc</h4>
-            <div className="flex gap-2 mt-2">
+          <div className="mb-8">
+            <h4 className="text-lg font-semibold text-gray-800 mb-4">Màu sắc</h4>
+            <div className="flex flex-wrap gap-3">
               {variations.map((variation: any, index: number) => (
-                <button
+                <div
                   key={index}
-                  className={`w-8 h-8 rounded-full border-2 ${
-                    index === selectedVariantIndex ? 'border-black' : 'border-gray-300'
-                  }`}
-                  style={{ backgroundColor: variation.attribute_value_image_variant.value }}
+                  className={`relative p-0.5 rounded-full border-2 ${
+                    index === selectedVariantIndex ? 'border-blue-500 shadow-md' : 'border-gray-300'
+                  } cursor-pointer transition-transform duration-300 hover:scale-105`}
                   onClick={() => setSelectedVariantIndex(index)}
-                />
+                >
+                  <img
+                    src={variation.attribute_value_image_variant.image_path}
+                    alt={variation.attribute_value_image_variant.value}
+                    className="w-12 h-12 rounded-full object-cover"
+                  />
+                </div>
               ))}
             </div>
           </div>
 
-          {/* Tùy chọn kích thước */}
-          <div className="mt-6">
-            <h4 className="font-semibold text-lg">Kích thước</h4>
-            <div className="flex gap-2 mt-2">
-              {selectedVariation.variation_values.map((value: any, index: number) => (
+          <div className="mb-8">
+            <h4 className="text-lg font-semibold text-gray-800 mb-4">Kích thước</h4>
+            <div className="flex flex-wrap gap-3">
+              {selectedVariation.variation_values?.map((value: any, index: number) => (
                 <button
                   key={index}
-                  className="px-4 py-2 border rounded-md text-gray-700 hover:border-black"
+                  className="w-20 h-10 border border-gray-300 rounded-lg text-gray-700 font-medium transition-all duration-300 hover:border-blue-500 hover:shadow-md"
                 >
                   {value.value}
                 </button>
@@ -127,25 +137,28 @@ const DetailProduct = () => {
             </div>
           </div>
 
-          <Divider />
-
-          {/* Thông tin tồn kho */}
-          <Text className="block text-lg">
-            Tồn kho: {stock} sản phẩm (Biến thể: {selectedVariation.stock})
-          </Text>
-
-          {/* Nút hành động */}
-          <div className="flex gap-4 mt-8">
-            <Button type="primary" className="w-full py-3 text-lg bg-black text-white">
-              Thêm vào giỏ
-            </Button>
-            <Button className="w-full py-3 text-lg bg-red-600 text-white">Mua ngay</Button>
+          <div className="mb-6">
+            <Text className="text-lg text-gray-800">
+              Tồn kho: <span className="font-semibold">{stock}</span> sản phẩm (Biến thể:
+              <span className="font-semibold"> {selectedVariation.stock}</span>)
+            </Text>
           </div>
 
-          {/* Nhóm biến thể */}
-          <div className="mt-6 bg-gray-100 p-4 rounded-md">
-            <h4 className="font-semibold">Nhóm biến thể</h4>
-            <Text>{group.name}</Text>
+          {/* Mô tả và nội dung sản phẩm */}
+          <div className="mt-8 p-8 bg-white shadow-xl rounded-lg border border-gray-300">
+            <h2 className="text-2xl font-semibold text-gray-800 border-b-2 border-gray-300 pb-4 mb-6">
+              Mô tả
+            </h2>
+            <Paragraph className="text-base leading-relaxed text-gray-700 mb-8">
+              {description}
+            </Paragraph>
+
+            <h2 className="text-2xl font-semibold text-gray-800 border-b-2 border-gray-300 pb-4 mb-6">
+              Nội dung
+            </h2>
+            <Paragraph className="text-base leading-relaxed text-gray-600">
+              {content}
+            </Paragraph>
           </div>
         </div>
       </div>
