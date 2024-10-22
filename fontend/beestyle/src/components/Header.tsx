@@ -11,6 +11,8 @@ type Props = {
 
 const Header = ({isSearch, setIsSearch}: Props) => {
 
+    const [openCategories, setOpenCategories] = useState<boolean>(false);
+
     const { data: categorires } = useQuery({
         queryKey: ['categories'],
         queryFn: () => {
@@ -23,15 +25,15 @@ const Header = ({isSearch, setIsSearch}: Props) => {
     const token = localStorage.getItem("token")
     // console.log(token);
 
-    const { data: user } = useQuery({
-        queryKey: ['user', token],
-        queryFn: () => {
-            if (!token) return null;
-            return axios.get(`http://127.0.0.1:8000/api/client/auth/profile` , {
-                headers: { Authorization: `Bearer ${token}` }
-            })
-        }
-    })
+    // const { data: user } = useQuery({
+    //     queryKey: ['user', token],
+    //     queryFn: () => {
+    //         if (!token) return null;
+    //         return axios.get(`http://127.0.0.1:8000/api/client/auth/profile` , {
+    //             headers: { Authorization: `Bearer ${token}` }
+    //         })
+    //     }
+    // })
     // console.log(user);
     
     
@@ -39,9 +41,16 @@ const Header = ({isSearch, setIsSearch}: Props) => {
     const { data: carts } = useQuery({
         queryKey: ['carts', token],
         queryFn: () => {
-            return axios.get(`http://127.0.0.1:8000/api/client/categories`)
+            return axios.get(`http://127.0.0.1:8000/api/client/cart`, {
+                headers: {
+                    Authorization: `Bearer ${token}`, // Truyền token vào header
+                  }
+            })
         }
     })
+
+    console.log();
+    
     
     
     return (
@@ -52,7 +61,7 @@ const Header = ({isSearch, setIsSearch}: Props) => {
             <header className='py-[8px] h-[57px] sticky top-0 z-10 bg-white lg:h-[64px] mt-[0.1px]'>
                 <div className="flex text-center justify-center h-[100%] px-[15px] pc:px-[48px]">
                     <div className="flex">
-                        <div className="flex items-center lg:hidden">
+                        <div onClick={() => setOpenCategories(!openCategories)} className="flex items-center lg:hidden">
                             <div className='w-[40px] h-[40px] flex justify-center items-center'>
                                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"> <rect x="10" y="4" width="12" height="1" rx="0.5" fill="#000"></rect> <rect x="6" y="11" width="12" height="1" rx="0.5" fill="#000"></rect> <rect x="2" y="18" width="12" height="1" rx="0.5" fill="#000"></rect> </svg>
                             </div>
@@ -67,8 +76,8 @@ const Header = ({isSearch, setIsSearch}: Props) => {
                         </div>
                     </div>
 
-                    <div className={`hidden fixed top-0 left-0 bg-white w-[100%] h-[100%] z-20 lg:static lg:items-center lg:ml-[30px]`}>
-                        <div className="lg:hidden p-[19px_20px]">
+                    <div className={`${openCategories ? "" : "hidden lg:block"} fixed top-0 left-0 bg-white w-[100%] h-[100%] z-20 lg:static lg:items-center lg:ml-[30px]`}>
+                        <div onClick={() => setOpenCategories(!openCategories)} className="lg:hidden p-[19px_20px]">
                             <svg xmlns="http://www.w3.org/2000/svg" width="19" height="20" viewBox="0 0 19 20" fill="none"><path d="M3 10L18.1667 10" stroke="black" stroke-width="1.2" stroke-linecap="square"></path><path d="M10 1.83325L1.83334 9.99992L10 18.1666" stroke="black" stroke-width="1.2" stroke-linecap="square"></path></svg>
                         </div>
                         <nav className="overflow-y-auto h-full lg:h-auto lg:overflow-hidden">
@@ -76,7 +85,7 @@ const Header = ({isSearch, setIsSearch}: Props) => {
                                 {categorires?.data.map((item: any) => (
                                     <li className="group mb-[10px] lg:m-0">
                                         <h4 className="flex justify-between items-center w-[100%] py-[10px] lg:py-0">
-                                            <Link to={`categories/${item.id}`} className="w-full flex h-full lg:h-auto hover:text-[#BB9244] lg:hover:border-b-[1px] lg:hover:border-b-black lg:py-[15px] lg:px-[18px]">{item.name}</Link>
+                                            <Link onClick={() => setOpenCategories(!openCategories)} to={`categories/${item.id}`} className="w-full flex h-full lg:h-auto hover:text-[#BB9244] lg:hover:border-b-[1px] lg:hover:border-b-black lg:py-[15px] lg:px-[18px]">{item.name}</Link>
                                             <span className="lg:hidden">
                                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-4">
                                                     <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
@@ -234,7 +243,7 @@ const Header = ({isSearch, setIsSearch}: Props) => {
                                 className='w-[40px] h-[40px] flex justify-center items-center text-center'>
                                 <img className=" ls-is-cached lazyloaded" src="https://file.hstatic.net/200000642007/file/icon-cart_d075fce117f74a07ae7f149d8943fc33.svg" data-src="https://file.hstatic.net/200000642007/file/icon-cart_d075fce117f74a07ae7f149d8943fc33.svg" alt="Icon cart" width={24} height={24} />
                             </div>
-                            <div className={`absolute w-[13px] h-[13px] text-[9px] rounded-[100%] top-[10px] right-[5px] bg-black text-white flex items-center justify-center`}></div>
+                            <div className={`absolute w-[13px] h-[13px] text-[9px] rounded-[100%] top-[10px] right-[5px] bg-black text-white flex items-center justify-center`}>{carts?.data.cart_items.length > 0 ? carts?.data.cart_items.length : 0}</div>
                         </Link>
                         <Link to={`/account/wishlist`} className="items-center hidden lg:flex col-start-2 row-start-1 lg:col-start-3">
                             <a href="" className='w-[40px] h-[40px] flex justify-center items-center text-center'>

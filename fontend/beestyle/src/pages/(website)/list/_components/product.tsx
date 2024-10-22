@@ -1,28 +1,15 @@
-import { getAllProducts } from '@/services/product'
-import { useQuery } from '@tanstack/react-query'
-import React, { useEffect, useState } from 'react'
-import { Link, useParams } from 'react-router-dom'
-import ErrorPage from '../../404/page'
-import axios from 'axios'
+import React, { useEffect } from 'react'
+import { Link } from 'react-router-dom'
 
 type Props = {}
 
-const ProductsList = (props: Props) => {
+const ProductsList = ({products} : any) => {
 
     useEffect(() => {
         window.scrollTo(0, 0);
       }, []);
 
-    const { id } = useParams()
-
-    const { data: products } = useQuery({
-        queryKey: ['products', id],
-        queryFn: () => {
-            return axios.get(`http://127.0.0.1:8000/api/client/categories/${id}`)
-        }
-    })
-
-    console.log(products?.data?.products.map((item: any) => item));
+      if(products?.data?.length === 0) return (<div>DEO CO SAN PHAM NAO</div>)
 
     return (
         <div className="grid grid-cols-4 lg:grid-cols-12 lg:px-[15px] lg:gap-2 pc:px-[48px]">
@@ -40,7 +27,7 @@ const ProductsList = (props: Props) => {
                         <div className="bg-[#FF0000] rounded-[3px] text-white text-[12px] font-[500] p-[3px_5px]">{item?.variations[0]?.variation_values[0]?.discount} %</div>
                         <div className="leading-5 bg-white text-black text-[12px] font-[500] p-[3px_10px] mt-[5px]">Hết hàng</div>
                     </div>
-                    <Link to={`/products/${item.id}/${item.slug}`} className="">
+                    <Link to={`/products/${item.id}`} className="">
                         <picture>
                             <div className="pt-[124%] bg-cover bg-center bg-no-repeat cursor-pointer" style={{ backgroundImage: `url(${item?.variations[0].variation_album_images[0]})` }} ></div>
                         </picture>
