@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import axios from 'axios';
-import { Button, Form, Input, Select, message, Spin } from 'antd';
+import { Button, Form, Input, Select, message, Spin, Checkbox } from 'antd';
 import { useNavigate } from 'react-router-dom';
 
+// Interface cho danh mục (Category)
 interface Category {
   id: number;
   parent_id: number | null;
@@ -17,8 +18,9 @@ const AddCategories: React.FC = () => {
   const [form] = Form.useForm();
   const [messageApi, contextHolder] = message.useMessage();
   const navigate = useNavigate();
-  const [fileUrl, setFileUrl] = useState<string | null>(null);
+  const [file, setFile] = useState<File | null>(null); // State để lưu trữ file hình ảnh
 
+  // Fetch danh sách các danh mục để làm danh mục cha
   const { data: categories, isLoading } = useQuery<Category[]>({
     queryKey: ['categories'],
     queryFn: async () => {
@@ -27,6 +29,7 @@ const AddCategories: React.FC = () => {
     },
   });
 
+  // Mutation để thêm danh mục mới
   const { mutate } = useMutation({
     mutationFn: async (categoryData: FormData) => {
       return await axios.post('http://127.0.0.1:8000/api/admins/categories', categoryData, {
@@ -34,26 +37,46 @@ const AddCategories: React.FC = () => {
       });
     },
     onSuccess: () => {
+      // Khi thành công, hiển thị thông báo và reset form
       messageApi.success('Thêm danh mục thành công!');
       form.resetFields();
-      setFileUrl(null);
+      setFile(null);
       navigate('/admin/listCategories');
     },
     onError: (error: any) => {
+      // Khi có lỗi, hiển thị thông báo lỗi
       const errorMessage = error.response?.data?.message || `Lỗi: ${error.message}`;
       messageApi.error(errorMessage);
     },
   });
 
+  // Hàm xử lý khi nhấn nút "Submit" của form
   const onFinish = (values: any) => {
-    const formData = new FormData();
+    const formData = new FormData(); // Sử dụng FormData để gửi dữ liệu dạng multipart
     formData.append('name', values.name);
-    if (values.parent_id) formData.append('parent_id', String(values.parent_id));
-    if (fileUrl) formData.append('image_url', fileUrl);
-
+    
+    // Nếu có danh mục cha, thêm parent_id vào formData
+    if (values.parent_id) {
+      formData.append('parent_id', String(values.parent_id));
+    } else {
+      // Nếu không có danh mục cha, kiểm tra xem đã chọn ảnh chưa
+      if (!file) {
+        // Nếu chưa chọn ảnh, hiện thông báo lỗi và kết thúc hàm
+        message.error('Ảnh là bắt buộc nếu không có danh mục cha');
+        return;
+      }
+      // Nếu đã chọn ảnh, thêm ảnh vào formData
+      formData.append('image', file);
+    }
+    
+    // Nếu trạng thái không được cung cấp, đặt mặc định là '0' (tương ứng với không hoạt động)
+    formData.append('status', values.status ? '1' : '0');
+    
+    // Gửi dữ liệu đi bằng hàm mutate
     mutate(formData);
   };
 
+  // Hiển thị trạng thái tải dữ liệu danh mục cha
   if (isLoading) {
     return <Spin tip="Đang tải..." className="flex justify-center items-center h-screen" />;
   }
@@ -72,7 +95,9 @@ const AddCategories: React.FC = () => {
             layout="vertical"
             onFinish={onFinish}
             className="space-y-6"
+            initialValues={{ status: false }} // Đặt giá trị mặc định cho trạng thái là "false"
           >
+            {/* Input cho tên danh mục */}
             <Form.Item
               label={<span className="font-medium text-gray-700">Tên danh mục</span>}
               name="name"
@@ -85,6 +110,7 @@ const AddCategories: React.FC = () => {
               />
             </Form.Item>
 
+            {/* Select cho danh mục cha (có thể không chọn) */}
             <Form.Item
               label={<span className="font-medium text-gray-700">Danh mục cha</span>}
               name="parent_id"
@@ -101,14 +127,31 @@ const AddCategories: React.FC = () => {
               />
             </Form.Item>
 
+            {/* Input cho file hình ảnh */}
             <Form.Item
               label={<span className="font-medium text-gray-700">Ảnh</span>}
               name="image"
-              rules={[{ required: true, message: 'Ảnh là bắt buộc' }]}
             >
-              <input type="file"/>
+              <input 
+                type="file" 
+                onChange={(e) => {
+                  if (e.target.files && e.target.files[0]) {
+                    setFile(e.target.files[0]);
+                  }
+                }} 
+              />
             </Form.Item>
 
+            {/* Checkbox cho trạng thái của danh mục */}
+            <Form.Item
+              label={<span className="font-medium text-gray-700">Trạng thái</span>}
+              name="status"
+              valuePropName="checked" // Sử dụng valuePropName để làm việc với checkbox
+            >
+              <Checkbox>Hoạt động</Checkbox>
+            </Form.Item>
+
+            {/* Các nút "Thêm mới" và "Quay lại" */}
             <Form.Item>
               <div className="flex justify-end space-x-4">
                 <Button

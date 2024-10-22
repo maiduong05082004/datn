@@ -17,27 +17,32 @@ class CategoryController extends Controller
     }
 
     public function store(Request $request)
-    {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'status' => 'required|in:0,1',
-            'parent_id' => 'nullable|exists:categories,id',
-            'image' => 'nullable|image|max:2048',
-        ]);
+{
+    $request->validate([
+        'name' => 'required|string|max:255',
+        'status' => 'required|in:0,1',
+        'parent_id' => 'nullable|exists:categories,id',
+        'image' => 'nullable|image|max:2048',
+    ]);
 
-        $data = $request->only('name', 'parent_id', 'status');
+    $data = $request->only('name', 'parent_id', 'status');
 
-        // Xử lý ảnh từ file hoặc URL
+    if (is_null($request->parent_id)) {
         if ($request->hasFile('image')) {
             $data['image'] = $request->file('image')->store('categories', 'public');
         } else {
             return response()->json(['error' => 'Không có ảnh được tải lên.'], 400);
         }
-
-        $category = Category::create($data);
-
-        return response()->json($category, 201);
+    } else {
+        if ($request->hasFile('image')) {
+            return response()->json(['error' => 'Không được thêm ảnh khi có danh mục cha.'], 400);
+        }
     }
+
+    $category = Category::create($data);
+
+    return response()->json($category, 201);
+}
 
     public function show($id)
     {
@@ -48,27 +53,31 @@ class CategoryController extends Controller
     public function update(Request $request, $id)
     {
         $category = Category::findOrFail($id);
-
+    
         $request->validate([
             'name' => 'required|string|max:255',
             'status' => 'required|boolean',
             'parent_id' => 'nullable|exists:categories,id',
             'image' => 'nullable|image|max:2048',
         ]);
-
+    
         $data = $request->only('name', 'parent_id', 'status');
-
-        // Xử lý ảnh mới từ file hoặc URL
-        if ($request->hasFile('image')) {
-            if ($category->image && !filter_var($category->image, FILTER_VALIDATE_URL)) {
-                Storage::disk('public')->delete($category->image);
+    
+        if (is_null($request->parent_id)) {
+            if ($request->hasFile('image')) {
+                if ($category->image && !filter_var($category->image, FILTER_VALIDATE_URL)) {
+                    Storage::disk('public')->delete($category->image);
+                }
+                $data['image'] = $request->file('image')->store('categories', 'public');
+            } else {
+                return response()->json(['error' => 'Không có ảnh được tải lên.'], 400);
             }
-            $data['image'] = $request->file('image')->store('categories', 'public');
         } else {
-            return response()->json(['error' => 'Không có ảnh được tải lên.'], 400);
+            if ($request->hasFile('image')) {
+                return response()->json(['error' => 'Không được thêm ảnh khi có danh mục cha.'], 400);
+            }
         }
-
-
+    
         $category->update($data);
         return response()->json($category, 200);
     }
