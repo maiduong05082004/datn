@@ -13,15 +13,13 @@ const UpdateAttribute: React.FC = () => {
   const { id } = useParams();
   const navigate = useNavigate();
 
-  // Fetch the attribute to update
-  const { data: attribute, isLoading, isError } = useQuery({
+  const { data: attribute, isLoading } = useQuery({
     queryKey: ['attribute', id],
     queryFn: async () => {
       const response = await axios.get(`http://127.0.0.1:8000/api/admins/attributes/${id}`);
       return response.data;
     },
   });
-  console.log(attribute);
   
   
   const updateAttributeMutation = useMutation({
@@ -80,7 +78,7 @@ const UpdateAttribute: React.FC = () => {
               </Select>
             </Form.Item>
             <Form.Item>
-              <Button type="primary" htmlType="submit">
+              <Button className='bg-indigo-600 hover:bg-indigo-700 text-white rounded-md px-6' type="primary" htmlType="submit">
                 Cập nhật thuộc tính
               </Button>
             </Form.Item>

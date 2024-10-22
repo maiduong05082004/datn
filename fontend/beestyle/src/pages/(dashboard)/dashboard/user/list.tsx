@@ -112,12 +112,12 @@ const UserList: React.FC = () => {
           <Button
             type="default"
             icon={<EyeOutlined />}
-            onClick={() => navigate(`/admin/viewUser/${record.id}`)} // View details navigation
+            onClick={() => navigate(`/admin/viewUser/${record.id}`)} 
           />
           <Button
             type="default"
             icon={<EditOutlined />}
-            onClick={() => navigate(`/admin/updateUser/${record.id}`)} // Edit navigation
+            onClick={() => navigate(`/admin/updateUser/${record.id}`)} 
           />
         </Space>
       ),

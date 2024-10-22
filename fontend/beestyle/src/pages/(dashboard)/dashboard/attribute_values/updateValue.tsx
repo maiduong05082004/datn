@@ -2,7 +2,7 @@ import React from 'react';
 import axios from 'axios';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Form, Input, Button, Row, Col, Typography, Card, message, Spin } from 'antd';
+import { Form, Input, Button, Row, Col, Typography, Card, message, Spin, Select } from 'antd';
 import { MinusCircleOutlined, PlusOutlined } from '@ant-design/icons';
 
 const { Title } = Typography;
@@ -19,35 +19,32 @@ type Attribute = {
     values: AttributeValue[];
 };
 
-const AddAttributeValues: React.FC = () => {
+const UpdateAttributeValues: React.FC = () => {
     const [form] = Form.useForm();
     const [messageApi, contextHolder] = message.useMessage();
     const queryClient = useQueryClient();
     const { id } = useParams();
     const navigate = useNavigate();
 
-    // Fetch attributes with their values
     const { data: attributeList, isLoading, error } = useQuery({
-        queryKey: ['attributes'],
+        queryKey: ['attributes', id],
         queryFn: async () => {
-            const response = await axios.get('http://127.0.0.1:8000/api/admins/attribute_values');
-            return response.data;
+            const response = await axios.get(`http://127.0.0.1:8000/api/admins/attribute_values/${id}`);
+            return response?.data?.data;
         },
     });
+    console.log(attributeList);
 
-    const selectedAttribute = attributeList?.find(
-        (attribute: Attribute) => attribute.attribute_id === Number(id)
-    );
 
     const { mutate } = useMutation({
-        mutationFn: async (data: { attribute_id: number; values: string[] }) => {
+        mutationFn: async (data: { attribute_id: number; values: AttributeValue[] }) => {
             return await axios.put(`http://127.0.0.1:8000/api/admins/attribute_values/${id}`, data);
         },
         onSuccess: () => {
             messageApi.success('Cập nhật giá trị thuộc tính thành công!');
             queryClient.invalidateQueries({
                 queryKey: ['attributes'],
-            })
+            });
             form.resetFields();
         },
         onError: (error: any) => {
@@ -58,7 +55,10 @@ const AddAttributeValues: React.FC = () => {
     const onFinish = (values: any) => {
         const payload = {
             attribute_id: Number(id),
-            values: values.values.map((item: { value: string }) => item.value.trim()),
+            values: values.values.map((item: { value_id?: number; value: string }) => ({
+                value_id: item.value_id,
+                value: item.value.trim(),
+            })),
         };
         mutate(payload);
     };
@@ -81,22 +81,27 @@ const AddAttributeValues: React.FC = () => {
                             layout="vertical"
                             onFinish={onFinish}
                             className="space-y-6"
-                            initialValues={{ values: selectedAttribute?.values || [] }}
+                            initialValues={{ values: attributeList?.[0]?.values }}
                         >
-                            <Form.Item label={<span className="text-gray-700">Thuộc tính</span>}>
-                                <Input
-                                    value={selectedAttribute?.attribute_name || ''}
-                                    disabled
-                                    size="large"
-                                    className="rounded-md"
-                                />
+                            <Form.Item
+                                label={<span className="text-gray-700">Chọn thuộc tính</span>}
+                                name="attribute_id"
+                                initialValue={attributeList?.[0]?.attribute_id}
+                            >
+                                <Select size="large" disabled>
+                                    {attributeList?.map((attribute: Attribute) => (
+                                        <Select.Option key={attribute.attribute_id} value={attribute.attribute_id}>
+                                            {attribute.attribute_name}
+                                        </Select.Option>
+                                    ))}
+                                </Select>
                             </Form.Item>
 
                             <Form.List name="values">
                                 {(fields, { add, remove }) => (
                                     <>
                                         {fields.map((field) => (
-                                            <Row key={field.key} gutter={16} className="items-center">
+                                            <Row gutter={16} key={field.key} className="items-center">
                                                 <Col span={20}>
                                                     <Form.Item
                                                         {...field}
@@ -163,4 +168,4 @@ const AddAttributeValues: React.FC = () => {
     );
 };
 
-export default AddAttributeValues;
+export default UpdateAttributeValues;

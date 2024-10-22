@@ -26,8 +26,8 @@ const AddAttributeValues: React.FC = () => {
             return response.data.data;
         },
     });
+    
 
-    // Mutation để thêm giá trị thuộc tính
     const { mutate } = useMutation({
         mutationFn: async (data: { attribute_id: number; values: string[] }) => {
             return await axios.post('http://127.0.0.1:8000/api/admins/attribute_values', data);
@@ -35,7 +35,7 @@ const AddAttributeValues: React.FC = () => {
         onSuccess: () => {
             messageApi.success('Thêm giá trị thuộc tính thành công');
             queryClient.invalidateQueries({ queryKey: ['attributes'] });
-            form.resetFields(); // Reset form sau khi thành công
+            form.resetFields(); 
         },
         onError: (error: any) => {
             messageApi.error(`Lỗi: ${error.response?.data?.message || error.message}`);

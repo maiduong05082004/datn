@@ -17,6 +17,11 @@ type AttributeWithValues = {
     values: AttributeValue[];
 };
 
+type Attribute = {
+    id: number;
+    name: string;
+};
+
 const ListAttribute: React.FC = () => {
     const [messageApi, contextHolder] = message.useMessage();
     const queryClient = useQueryClient();
@@ -24,20 +29,21 @@ const ListAttribute: React.FC = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedAttribute, setSelectedAttribute] = useState<AttributeWithValues | null>(null);
 
-    // Fetch attributes and their 
-    const { data: attribute = []} = useQuery({
-        queryKey: ['attributesWithValues'],
+    // Lấy danh sách các thuộc tính
+    const { data: attributes = [], isLoading, error } = useQuery({
+        queryKey: ['attributes'],
         queryFn: async () => {
-            const response = await axios.get('http://127.0.0.1:8000/api/admins/attribute_values');
-            return response.data;
+            const response = await axios.get('http://127.0.0.1:8000/api/admins/attributes');
+            return response.data.data || [];
         },
     });
-    
-    const { data: attributes_value = [], isLoading, error } = useQuery({
-        queryKey: ['attributesWithValues'],
+
+    // Lấy danh sách các giá trị của thuộc tính
+    const { data: attributeValues = [] } = useQuery({
+        queryKey: ['attributesvalue'],
         queryFn: async () => {
             const response = await axios.get('http://127.0.0.1:8000/api/admins/attribute_values');
-            return response.data;
+            return response.data || [];
         },
     });
 
@@ -48,7 +54,7 @@ const ListAttribute: React.FC = () => {
         onSuccess: () => {
             messageApi.success('Xóa thuộc tính thành công');
             queryClient.invalidateQueries({
-                queryKey: ['attributesWithValues'],
+                queryKey: ['attributes'],
             })
         },
         onError: (error: any) => {
@@ -57,8 +63,8 @@ const ListAttribute: React.FC = () => {
     });
 
     const deleteAttributeValueMutation = useMutation({
-        mutationFn: async (id: number) => {
-            await axios.delete(`http://127.0.0.1:8000/api/admins/attribute_values/${id}`);
+        mutationFn: async (valueId: number) => {
+            await axios.delete(`http://127.0.0.1:8000/api/admins/attribute_values/${valueId}`);
         },
         onSuccess: () => {
             messageApi.success('Xóa giá trị thành công');
@@ -71,8 +77,12 @@ const ListAttribute: React.FC = () => {
         },
     });
 
-    const handleViewDetails = (attribute: AttributeWithValues) => {
-        setSelectedAttribute(attribute);
+    // Xử lý sự kiện "Xem chi tiết"
+    const handleViewDetails = (attribute: Attribute) => {
+        const attributeDetail = attributeValues.find(
+            (attr: AttributeWithValues) => attr.attribute_id === attribute.id
+        );
+        setSelectedAttribute(attributeDetail || null);
         setIsModalOpen(true);
     };
 
@@ -91,14 +101,14 @@ const ListAttribute: React.FC = () => {
         },
         {
             title: 'Tên thuộc tính',
-            dataIndex: 'attribute_name',
-            key: 'attribute_name',
+            dataIndex: 'name',
+            key: 'name',
         },
         {
             title: 'Action',
             key: 'action',
             width: 200,
-            render: (attribute: AttributeWithValues) => (
+            render: (attribute: Attribute) => (
                 <div className="flex space-x-2">
                     <Button
                         icon={<EyeOutlined />}
@@ -108,12 +118,12 @@ const ListAttribute: React.FC = () => {
                     <Button
                         type="default"
                         icon={<EditOutlined />}
-                        onClick={() => navigate(`/admin/updateattribute/${attribute.attribute_id}`)}
+                        onClick={() => navigate(`/admin/updateattribute/${attribute.id}`)}
                     />
                     <Popconfirm
                         title="Xóa thuộc tính"
                         description="Bạn có chắc muốn xóa thuộc tính này không?"
-                        onConfirm={() => deleteAttributeMutation.mutate(attribute.attribute_id)}
+                        onConfirm={() => deleteAttributeMutation.mutate(attribute.id)}
                         okText="Yes"
                         cancelText="No"
                         icon={<DeleteOutlined style={{ color: 'red' }} />}
@@ -138,19 +148,26 @@ const ListAttribute: React.FC = () => {
             {contextHolder}
             <div className="w-full mx-auto px-6 py-8">
                 <div className="flex gap-5 items-center mb-6">
-                    <Button className="bg-indigo-600 hover:bg-indigo-700 text-white" type="primary" icon={<PlusCircleFilled />}>
+                    <Button
+                        className="bg-indigo-600 hover:bg-indigo-700 text-white"
+                        type="primary"
+                        icon={<PlusCircleFilled />}
+                    >
                         <Link to={`/admin/addattribute`}>Thêm Attribute</Link>
                     </Button>
-                    <Button className="bg-indigo-600 hover:bg-indigo-700 text-white" type="primary" icon={<PlusCircleFilled />}>
-                        <Link to={`/admin/addattribute_value`}>Thêm giá trị</Link>
+                    <Button
+                        className="bg-indigo-600 hover:bg-indigo-700 text-white"
+                        type="primary"
+                        icon={<PlusCircleFilled />}
+                    >
+                        <Link to={`/admin/addattribute_value`}>Thêm Giá Trị Attribute</Link>
                     </Button>
-
                 </div>
 
                 <Table
                     columns={columns}
-                    dataSource={attributes_value}
-                    rowKey="attribute_id"
+                    dataSource={attributes}
+                    rowKey="id"
                     bordered
                     pagination={{
                         pageSize: 7,
@@ -170,22 +187,26 @@ const ListAttribute: React.FC = () => {
                 ]}
             >
                 {selectedAttribute && (
-                    <div className="p-6 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 rounded-lg shadow-lg text-white mb-6">
-                        <h2 className="text-xl font-bold mb-2">Thông tin Thuộc Tính</h2>
-                        <h3 className="font-semibold text-lg mt-4">Giá trị:</h3>
-                        <div className="grid grid-cols-2 gap-4 mt-2">
+                    <div className="p-8 bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 rounded-2xl shadow-xl text-white mb-8">
+                        <h2 className="text-3xl font-bold mb-6 border-b border-white/30 pb-3">
+                            Thông tin Thuộc Tính
+                        </h2>
+                        <h3 className="text-xl font-semibold mt-6">Giá trị:</h3>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 mt-6">
                             {selectedAttribute.values.map((value) => (
                                 <div
                                     key={value.value_id}
-                                    className="border rounded-lg p-3 bg-white text-black shadow-sm hover:shadow-md transition relative"
+                                    className="relative border border-gray-100 bg-white text-gray-900 rounded-xl p-6 shadow-lg hover:shadow-2xl transition-transform duration-300 hover:scale-105"
                                 >
-                                    <p className="text-gray-900">{value.value}</p>
-                                    <div className="flex justify-center space-x-4 mt-4">
+                                    <p className="text-xl font-semibold text-gray-800">{value.value}</p>
+
+                                    <div className="flex justify-between items-center mt-6">
                                         <Button
-                                            type="link"
+                                            type="default"
                                             icon={<EditOutlined />}
+                                            className="text-blue-500 hover:text-blue-600 transition-colors"
                                             onClick={() => navigate(`/admin/updateattribute_value/${value.value_id}`)}
-                                            className="text-blue-500 hover:text-blue-700 hover:underline focus:outline-none"
                                         />
                                         <Popconfirm
                                             title="Xóa giá trị"
@@ -195,10 +216,10 @@ const ListAttribute: React.FC = () => {
                                             cancelText="No"
                                         >
                                             <Button
-                                                type="text"
+                                                type="default"
                                                 danger
                                                 icon={<DeleteOutlined />}
-                                                className="text-red-500 hover:text-red-700 transition-all duration-300 focus:outline-none"
+                                                className="text-red-500 hover:text-red-600 transition-colors"
                                             />
                                         </Popconfirm>
                                     </div>
@@ -206,6 +227,7 @@ const ListAttribute: React.FC = () => {
                             ))}
                         </div>
                     </div>
+
                 )}
             </Modal>
         </>

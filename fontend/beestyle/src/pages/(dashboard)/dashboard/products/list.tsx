@@ -43,7 +43,7 @@ const ListProducts = () => {
   const queryClient = useQueryClient();
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
-  const [selectedDescription, setSelectedDescription] = useState<string | null>(null); // State cho phần mô tả
+  const [selectedDescription, setSelectedDescription] = useState<string | null>(null); 
   const navigate = useNavigate();
 
   const { data: productsData, isLoading } = useQuery({
@@ -131,13 +131,32 @@ const ListProducts = () => {
       ),
     },
     {
+      title: 'Nội dung',
+      dataIndex: 'content',
+      key: 'content',
+      render: (text: string) => (
+        <div style={{ maxWidth: '150px' }}>
+          {text.length > 20 ? (
+            <>
+              {text.slice(0, 20)}...
+              <Button type="link" onClick={() => showDescriptionModal(text)}>Xem chi tiết</Button>
+
+            </>
+          ) : (
+            text
+          )}
+        </div>
+      ),
+    }
+    ,
+    {
       title: 'Ngày nhập',
       dataIndex: 'input_day',
       key: 'input_day',
       render: (date: string) => <span>{format(new Date(date), 'dd/MM/yyyy')}</span>,
     },
     {
-      title: 'Danh mục', // Cột danh mục sản phẩm
+      title: 'Danh mục', 
       dataIndex: 'category_name',
       key: 'category_name',
       filters: productsData?.data?.map((product: Product) => ({
@@ -147,14 +166,14 @@ const ListProducts = () => {
       onFilter: (value: string, record: Product) => record.category_name === value,
       render: (text: string) => <span>{text}</span>,
     },
-    {
-      title: 'Biến thể',
-      key: 'variations',
-      render: (product: Product) => (
-        <Button className="bg-black" type="primary" icon={<EyeOutlined />} onClick={() => showModal(product)}>
-        </Button>
-      ),
-    },
+    // {
+    //   title: 'Biến thể',
+    //   key: 'variations',
+    //   render: (product: Product) => (
+    //     <Button className="bg-black" type="primary" icon={<EyeOutlined />} onClick={() => showModal(product)}>
+    //     </Button>
+    //   ),
+    // },
     {
       title: 'Action',
       key: 'action',
@@ -166,13 +185,13 @@ const ListProducts = () => {
               type="link"
               icon={<EyeOutlined />}
               className="bg-blue-500 text-white hover:bg-blue-700"
-              onClick={() => navigate(`admin/detailProducts/${product.id}`)}
+              onClick={() => navigate(`/admin/detailProducts/${product.id}`)}
             >
             </Button>
             <Button
               type="default"
               icon={<EditOutlined />}
-              onClick={() => navigate(`/admin/products/${product.id}`)}
+              onClick={() => navigate(`/admin/updateProducts/${product.id}`)}
             />
             <Popconfirm
               title="Xóa sản phẩm"
@@ -263,7 +282,7 @@ const ListProducts = () => {
       {contextHolder}
       <div className="w-full mx-auto px-6 py-8">
         <div className="flex justify-between items-center mb-6">
-          <Button className='bg-indigo-600 hover:bg-indigo-700 text-white' icon={<PlusOutlined />} type="primary" onClick={() => navigate('admin/addProducts')} >
+          <Button className='bg-indigo-600 hover:bg-indigo-700 text-white' icon={<PlusOutlined />} type="primary" onClick={() => navigate('/admin/addProducts')} >
             Thêm mới
           </Button>
         </div>
