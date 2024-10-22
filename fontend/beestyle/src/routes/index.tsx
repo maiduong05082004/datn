@@ -1,56 +1,69 @@
-import { Route, Routes } from "react-router-dom";
-import { lazy, Suspense } from "react";
 import MyProfile from "@/pages/(dashboard)/dashboard/profile";
 import AddAttribute from "@/pages/(dashboard)/dashboard/attribute_values/add";
-import FilterComponent from "@/pages/research/research";
 import ListPromotions from "@/pages/(dashboard)/dashboard/promotions/list";
 import AddPromotion from "@/pages/(dashboard)/dashboard/promotions/add";
 import UpdatePromotion from "@/pages/(dashboard)/dashboard/promotions/update";
 import Variant from "@/pages/(dashboard)/dashboard/products/test";
 
-// Website pages (Lazy loading)
-const HomePage = lazy(() => import("@/pages/(website)/home/page"));
-const LayoutWebsite = lazy(() => import("@/pages/(website)/layout"));
-const PayPage = lazy(() => import("@/pages/(website)/home/_components/PayPage"));
-const CartPage = lazy(() => import("@/pages/(website)/home/_components/CartPage"));
-const Signin = lazy(() => import("@/pages/signin/signin"));
-const Signup = lazy(() => import("@/pages/signup/signup"));
-const GoogleCallback = lazy(() => import("@/pages/GoogleCallback/GoogleCallback"));
-const LayoutAdmin = lazy(() => import("@/pages/(dashboard)/layout"));
-const DashboardPage = lazy(() => import("@/pages/(dashboard)/dashboard/page"));
-const AddUser = lazy(() => import("@/pages/(dashboard)/dashboard/user/add"));
-const UpdateUser = lazy(() => import("@/pages/(dashboard)/dashboard/user/update"));
-const ListUser = lazy(() => import("@/pages/(dashboard)/dashboard/user/list"));
-const ListProducts = lazy(() => import("@/pages/(dashboard)/dashboard/products/list"));
-const AddProduct = lazy(() => import("@/pages/(dashboard)/dashboard/products/add"));
-const UpdateProduct = lazy(() => import("@/pages/(dashboard)/dashboard/products/update"));
-const ListCategories = lazy(() => import("@/pages/(dashboard)/dashboard/categories/list"));
-const AddCategories = lazy(() => import("@/pages/(dashboard)/dashboard/categories/add"));
-const UpdateCategories = lazy(() => import("@/pages/(dashboard)/dashboard/categories/update"));
-const ListBanners = lazy(() => import("@/pages/(dashboard)/dashboard/banners/list"));
-const AddBanners = lazy(() => import("@/pages/(dashboard)/dashboard/banners/add"));
-const UpdateBanners = lazy(() => import("@/pages/(dashboard)/dashboard/banners/update"));
-const AddAttributeValues = lazy(() => import("@/pages/(dashboard)/dashboard/attribute_values/addValue"));
-const ListAttributeValues = lazy(() => import("@/pages/(dashboard)/dashboard/attribute_values/list"));
-const UpdateAttributeValues = lazy(() => import("@/pages/(dashboard)/dashboard/attribute_values/updateValue"));
-const UpdateAttribute = lazy(() => import("@/pages/(dashboard)/dashboard/attribute_values/update"));
-const ListComments = lazy(() => import("@/pages/(dashboard)/dashboard/comments/list"));
-const ListBills = lazy(() => import("@/pages/(dashboard)/dashboard/bills/list"));
-const DetailProducts = lazy(() => import("@/pages/(dashboard)/dashboard/products/detail"));
+
+// Website pages
+import LayoutAdmin from "@/pages/(dashboard)/layout";
+import DashboardPage from "@/pages/(dashboard)/dashboard/page";
+import AddUser from "@/pages/(dashboard)/dashboard/user/add";
+import UpdateUser from "@/pages/(dashboard)/dashboard/user/update";
+import ListUser from "@/pages/(dashboard)/dashboard/user/list";
+import ListCategories from "@/pages/(dashboard)/dashboard/categories/list";
+import AddCategories from "@/pages/(dashboard)/dashboard/categories/add";
+import UpdateCategories from "@/pages/(dashboard)/dashboard/categories/update";
+import ListBanners from "@/pages/(dashboard)/dashboard/banners/list";
+import AddBanners from "@/pages/(dashboard)/dashboard/banners/add";
+import UpdateBanners from "@/pages/(dashboard)/dashboard/banners/update";
+import AddAttributeValues from "@/pages/(dashboard)/dashboard/attribute_values/addValue";
+import ListAttributeValues from "@/pages/(dashboard)/dashboard/attribute_values/list";
+import UpdateAttributeValues from "@/pages/(dashboard)/dashboard/attribute_values/updateValue";
+import UpdateAttribute from "@/pages/(dashboard)/dashboard/attribute_values/update";
+import ListComments from "@/pages/(dashboard)/dashboard/comments/list";
+import ListBills from "@/pages/(dashboard)/dashboard/bills/list";
+import { Route, Routes } from "react-router-dom";
+import ListProducts from "@/pages/(dashboard)/products/list";
+import AddProduct from "@/pages/(dashboard)/products/add";
+import UpdateProduct from "@/pages/(dashboard)/products/update";
+import DetailProduct from "@/pages/(dashboard)/products/detail";
+
+
+// Client
+// import ErrorPage from "@/pages/(website)/404/page";
+// import Search from "@/pages/(website)/_components/Search";
+// import PageSignin from "@/pages/(website)/auth/signin/page";
+// import PageSignup from "@/pages/(website)/auth/signup/page";
+// import CheckOutPage from "@/pages/(website)/checkout/page";
+// import DetailPage from "@/pages/(website)/detail/page";
+// import HomePage from "@/pages/(website)/home/page";
+// import LayoutWebsite from "@/pages/(website)/layout";
+// import ListPage from "@/pages/(website)/list/page";
+// import SearchPage from "@/pages/(website)/search/page";
+// import { useState } from "react";
+// import { Route, Routes } from "react-router-dom";
+// import CartPage from "@/pages/(website)/cart/page";
+
 const Router = () => {
+
+    // const [isSearch, setIsSearch] = useState<boolean>(false)
+    // const [isKeySearch, setKeySearch] = useState<string>("")
     return (
-        <Suspense fallback={<div>Loading...</div>}>
+        <>
             <Routes>
                 {/* Website Routes */}
-                <Route path="/" element={<LayoutWebsite />}>
+                {/* <Route path="/" element={<LayoutWebsite isSearch={isSearch} setIsSearch={setIsSearch} />}>
                     <Route index element={<HomePage />} />
-                    <Route path="signin" element={<Signin />} />
-                    <Route path="signup" element={<Signup />} />
-                    <Route path="auth/google/callback" element={<GoogleCallback />} />
-                    <Route path="pay" element={<PayPage />} />
-                    <Route path="cart" element={<CartPage />} />
-                    <Route path="research" element={<FilterComponent selectedCategory="1" />} />
-                </Route>
+                    <Route path="categories/:id" element={<ListPage />} />
+                    <Route path="products/:id" element={<DetailPage />} />
+                    <Route path="checkout" element={<CheckOutPage />} />
+                    <Route path="carts" element={<CartPage />} />
+                    <Route path="signin" element={<PageSignin />} />
+                    <Route path="signup" element={<PageSignup />} />
+                    <Route path="search" element={<SearchPage isKeySearch={isKeySearch} />} />
+                </Route> */}
 
                 {/* Admin Routes */}
                 <Route path="admin" element={<LayoutAdmin />}>
@@ -60,7 +73,7 @@ const Router = () => {
                     <Route path="listbills" element={<ListBills />} />
                     {/* comments */}
                     <Route path="listComments" element={<ListComments />} />
-                    {/* bills */}
+                    {/* banners */}
                     <Route path="addbanner" element={<AddBanners />} />
                     <Route path="listbanner" element={<ListBanners />} />
                     <Route path="updatebanner/:id" element={<UpdateBanners />} />
@@ -73,19 +86,14 @@ const Router = () => {
                     <Route path="variant" element={<Variant />} />
                     <Route path="addProducts" element={<AddProduct />} />
                     <Route path="updateProducts/:id" element={<UpdateProduct />} />
-                    <Route path="detailProducts/:id" element={<DetailProducts />} />
-                    {/* banner */}
-                    <Route path="listBanners" element={<ListBanners />} />
-                    <Route path="addBanners" element={<AddBanners />} />
-                    <Route path="updateBanners" element={<UpdateBanners />} />
-                    {/*giá trị attribute */}
+                    <Route path="detailProducts/:id" element={<DetailProduct />} />
+                    {/* attribute values */}
                     <Route path="addattribute_value" element={<AddAttributeValues />} />
                     <Route path="listattribute_value" element={<ListAttributeValues />} />
                     <Route path="updateattribute_value/:id" element={<UpdateAttributeValues />} />
-                    <Route path="listattribute_value" element={<ListAttributeValues />} />
                     <Route path="addattribute" element={<AddAttribute />} />
-                    <Route path="updateattribute/:id" element={< UpdateAttribute />} />
-                    {/* Danh Mục */}
+                    <Route path="updateattribute/:id" element={<UpdateAttribute />} />
+                    {/* categories */}
                     <Route path="listCategories" element={<ListCategories />} />
                     <Route path="addCategories" element={<AddCategories />} />
                     <Route path="updateCategories/:id" element={<UpdateCategories />} />
@@ -94,9 +102,9 @@ const Router = () => {
                     <Route path="addPromotions" element={<AddPromotion />} />
                     <Route path="updatePromotions/:id" element={<UpdatePromotion />} />
                 </Route>
-
             </Routes>
-        </Suspense>
+            {/* <Search isSearch={isSearch} setIsSearch={setIsSearch} setKeySearch={setKeySearch} /> */}
+        </>
     );
 };
 
