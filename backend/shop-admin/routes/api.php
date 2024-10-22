@@ -79,6 +79,7 @@ Route::prefix('admins')
             });
             Route::apiResource('categories', AdminCategoryController::class);
             Route::prefix('users')->group(function () {
+                Route::post('/wishlist/add/', [WishlistController::class, 'addToWishlist'])->name('wishlist.add');
                 Route::get('/wishlist', [WishlistController::class, 'index'])->name('wishlist.index');
                 Route::get('/', [UserController::class, 'index']);
                 Route::post('/store', [UserController::class, 'store']);
@@ -90,16 +91,7 @@ Route::prefix('admins')
                 Route::get('/{id}/block', [UserController::class, 'blockUser']);
 
                 Route::put('/{id}/unblock', [UserController::class, 'unblockUser']);
-                Route::post('/wishlist/add/{id}', [WishlistController::class, 'addToWishlist'])->name('wishlist.add');
                 Route::delete('/wishlist/remove/{id}', [WishlistController::class, 'destroy'])->name('wishlist.remove');
-            });
-
-
-            // Api cart item
-            Route::prefix('cart')->group(function () {
-                Route::get('/', [CartController::class, 'index'])->name('cart.index');
-                Route::post('/add/{productId}', [CartController::class, 'add'])->name('cart.add');
-                Route::delete('/remove/{productId}', [CartController::class, 'destroy'])->name('cart.destroy');
             });
         });
     });
