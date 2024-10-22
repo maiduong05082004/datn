@@ -5,14 +5,21 @@ import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import ErrorPage from '../404/page';
 import LoadingPage from '../loading/page';
+import { number } from 'joi';
 
 type Props = {
     //   onClicks: () => void;
 }
+interface Product {
+    products_id: number;
+    product_variation_value_id: number;
+    quantity: number;
+  }
 const DetailPage = () => {
 
     const [variations, setVariations] = useState<any>("")
     const [variationValues, setVariatonValues] = useState<any>("")
+    
     const [quantity, setQuantity] = useState<number>(1)
 
     const { id } = useParams();
@@ -53,15 +60,51 @@ const DetailPage = () => {
     const [currentIndex, setCurrentIndex] = useState<number>(0);
     const handleThumbnailClick = (index: any) => {
         setCurrentIndex(index);
-      };
+    };
 
-      const handleNext = () => {
+    const handleNext = () => {
         setCurrentIndex((currentIndex + 1) % products?.data?.product.variations[0].variation_album_images.length);
-      };
-      const handlePrev = () => {
+    };
+    const handlePrev = () => {
         setCurrentIndex((currentIndex - 1 + products?.data?.product.variations[0].variation_album_images.length) % products?.data?.product.variations[0].variation_album_images.length);
-      };
-    
+    };
+
+    const [messageApi, contextHolder] = message.useMessage()
+
+    const { mutate } = useMutation({
+        mutationFn: async (cart: any) => {
+            try {
+                
+                console.log(cart);
+                
+                // await axios.post(`http://127.0.0.1:8000/api/client/cart/add`, cart)
+            } catch (error) {
+                throw new Error("Add to cart Error!!")
+            }
+        },
+        onSuccess: () => {
+            messageApi.open({
+                type: 'success',
+                content: "Thêm vào gio hàng thành công"
+            })
+        },
+        onError: (error) => {
+            messageApi.open({
+                type: 'error',
+                content: error.message
+            })
+        },
+    })
+
+    const handleSubmitCart = async (id: string) => {
+        if (!variationValues) {
+            messageApi.error("Vui lòng chọn size")
+        } if (!variations) {
+            messageApi.error("Vui lòng chọn màu sắc")
+        }
+        mutate({products_id: parseInt(id), product_variation_value_id: variationValues.id, quantity: quantity})
+    }
+
 
     if (isLoading) return (<LoadingPage />)
     if (isError) return (<>{error}</>)
@@ -69,6 +112,7 @@ const DetailPage = () => {
 
     return (
         <>
+            {contextHolder}
             <main >
                 <div className="lg:mt-[34px]">
                     <div className="pc:px-[48px] lg:flex lg:flex-wrap">
@@ -76,7 +120,7 @@ const DetailPage = () => {
                             <div className="relative lg:w-[86%] lg:order-2">
                                 <div className="">
                                     <div className="w-[100%] relative">
-                
+
                                         <div className={``}>
 
                                             {variations && variations.variation_album_images.map((item: any, index: any) => (
@@ -269,7 +313,7 @@ const DetailPage = () => {
                                 </div>
 
                                 <div className="*:h-[56px] *:w-[50%] flex fixed bottom-0 w-[100%] left-0 z-10 lg:static">
-                                    <button className='text-white bg-black'>THÊM VÀO GIỎ</button>
+                                    <button onClick={() => handleSubmitCart(id)} className='text-white bg-black'>THÊM VÀO GIỎ HÀNG</button>
                                     <button className='text-white bg-[#b01722]'>MUA NGAY</button>
                                 </div>
 
