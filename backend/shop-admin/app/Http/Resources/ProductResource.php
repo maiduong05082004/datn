@@ -29,7 +29,7 @@ class ProductResource extends JsonResource
             'is_new' => $this->is_new,
             'group' => $group ? new GroupResource($group) : null,
             'variations' => $this->variations->isNotEmpty() ? VariationResource::collection($this->variations) : [],
-            'images' => ProductImageResource::collection($this->images), // Sử dụng ProductImageResource để hiển thị danh sách ảnh
+            'images' => $this->images->where('image_type', 'album')->pluck('image_path'),
             
         ];
     }
