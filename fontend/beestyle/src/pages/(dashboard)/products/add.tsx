@@ -259,15 +259,15 @@ const AddProduct: React.FC = () => {
         stock: stock,
         input_day: formattedDate,
         content: content || '',
-        group_id: null, 
-        variations: '[]', 
+        group_id: null,
+        variations: '[]',
         is_collection: values.is_collection || false,
         is_hot: values.is_hot || false,
         is_new: values.is_new || false,
-        ...imageFields
+        ...imageFields,
       };
   
-      console.log('Simple Product Payload:', simpleProductPayload); 
+      console.log('Simple Product Payload:', simpleProductPayload);
   
       mutate(simpleProductPayload);
       return;
@@ -284,8 +284,31 @@ const AddProduct: React.FC = () => {
       return;
     }
   
+    // Lọc những biến thể có đủ thông tin kích thước trước khi chuẩn bị payload
+    const validVariants = variants.map((variant) => {
+      // Chỉ giữ lại các size đã điền stock (hoặc các trường cần thiết khác)
+      const validSizes = variant.sizes.filter(
+        (size : any) => size.stock !== undefined && size.stock > 0
+      );
+  
+      // Nếu biến thể không có size hợp lệ thì loại bỏ biến thể
+      if (validSizes.length === 0) {
+        return null;
+      }
+  
+      return {
+        ...variant,
+        sizes: validSizes,
+      };
+    }).filter(Boolean); // Loại bỏ những biến thể null (không hợp lệ)
+  
+    if (validVariants.length === 0) {
+      toast.error('Vui lòng điền đầy đủ thông tin cho ít nhất một biến thể và kích thước!');
+      return;
+    }
+  
     // Chuẩn bị dữ liệu biến thể
-    const variationsData = variants.reduce((acc, variant) => {
+    const variationsData = validVariants.reduce((acc, variant) => {
       const colorId = variant.colorId;
       const sizeData = variant.sizes.reduce((sizeAcc: any, size: any) => {
         sizeAcc[size.sizeId] = {
@@ -303,7 +326,7 @@ const AddProduct: React.FC = () => {
   
     console.log('Variations Data:', variationsData); // Debug dữ liệu biến thể
   
-    const imageFields = variants.reduce((acc: any, variant: any) => {
+    const imageFields = validVariants.reduce((acc: any, variant: any) => {
       const colorId = variant.colorId || variant.id;
       acc[`color_image_${colorId}`] = variant.colorImage?.[0]?.name || null;
       acc[`album_images_${colorId}`] = variant.albumImages?.map((file: any) => file.name) || [];
@@ -327,6 +350,7 @@ const AddProduct: React.FC = () => {
     // Gọi API với payload sản phẩm có biến thể
     mutate(productWithVariantsPayload);
   };
+  
   
   if (isLoadingVariantGroup || isLoadingCategories) {
     return <Spin tip="Loading..." className="flex justify-center items-center h-screen" />;
