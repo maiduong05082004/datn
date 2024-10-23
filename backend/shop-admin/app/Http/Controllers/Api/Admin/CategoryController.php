@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Category;
 use App\Models\Product;
+use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -29,13 +30,18 @@ class CategoryController extends Controller
 
     if (is_null($request->parent_id)) {
         if ($request->hasFile('image')) {
-            $data['image'] = $request->file('image')->store('categories', 'public');
+            $imageFile = $request->file('image');
+            $cloudinaryResponse = Cloudinary::upload($imageFile->getRealPath(), [
+                'folder' => 'categories',
+            ]);
+            $secureUrl = $cloudinaryResponse->getSecurePath();
+            $data['image'] = $secureUrl;
         } else {
             return response()->json(['error' => 'Không có ảnh được tải lên.'], 400);
         }
     } else {
         if ($request->hasFile('image')) {
-            return response()->json(['error' => 'Không được thêm ảnh khi có danh mục cha.'], 400);
+            $data['image'] = $request->file('image')->store('categories', 'public');
         }
     }
 
@@ -68,13 +74,17 @@ class CategoryController extends Controller
                 if ($category->image && !filter_var($category->image, FILTER_VALIDATE_URL)) {
                     Storage::disk('public')->delete($category->image);
                 }
-                $data['image'] = $request->file('image')->store('categories', 'public');
+                $imageFile = $request->file('image');
+                $cloudinaryResponse = Cloudinary::upload($imageFile->getRealPath(), [
+                    'folder' => 'categories',
+                ]);
+                $data['image'] = $cloudinaryResponse->getSecurePath();
             } else {
                 return response()->json(['error' => 'Không có ảnh được tải lên.'], 400);
             }
         } else {
             if ($request->hasFile('image')) {
-                return response()->json(['error' => 'Không được thêm ảnh khi có danh mục cha.'], 400);
+                $data['image'] = $request->file('image')->store('categories', 'public');
             }
         }
     

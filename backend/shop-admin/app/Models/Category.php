@@ -43,11 +43,8 @@ class Category extends Model
         return $this->children()->with('childrenRecursive');
     }
 
-
-
     public function banners()
-{
-    return $this->hasMany(Banner::class);
-}
-
+    {
+        return $this->hasMany(Banner::class);
+    }
 }
