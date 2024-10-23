@@ -76,7 +76,6 @@ const ListProducts = () => {
     setIsModalVisible(true);
   };
 
-
   const handleCancel = () => {
     setIsModalVisible(false);
     setSelectedProduct(null);
@@ -166,20 +165,11 @@ const ListProducts = () => {
       onFilter: (value: string, record: Product) => record.category_name === value,
       render: (text: string) => <span>{text}</span>,
     },
-    // {
-    //   title: 'Biến thể',
-    //   key: 'variations',
-    //   render: (product: Product) => (
-    //     <Button className="bg-black" type="primary" icon={<EyeOutlined />} onClick={() => showModal(product)}>
-    //     </Button>
-    //   ),
-    // },
     {
       title: 'Action',
       key: 'action',
       render: (product: Product) => (
         <>
-
           <div className='flex justify-between'>
             <Button
               type="link"
@@ -209,7 +199,6 @@ const ListProducts = () => {
     },
   ];
 
-
   const renderVariationDetails = () => {
     if (!selectedProduct) return null;
     return selectedProduct.variations.map((variant, index) => (
@@ -220,7 +209,6 @@ const ListProducts = () => {
         <h4 className="font-semibold text-indigo-700">
           Tên màu biến thể: {variant.attribute_value_image_variant.value}
         </h4>
-
 
         <Image
           width={50}
@@ -246,7 +234,6 @@ const ListProducts = () => {
           </div>
         ))}
 
-        {/* Hiển thị album ảnh cho biến thể */}
         <div className="mt-4">
           <h2 className="font-bold">Album ảnh:</h2>
           <div className="flex space-x-2 mt-2">
@@ -265,7 +252,6 @@ const ListProducts = () => {
       </div>
     ));
   };
-
 
   const renderDescriptionDetails = () => {
     if (!selectedDescription) return null;
