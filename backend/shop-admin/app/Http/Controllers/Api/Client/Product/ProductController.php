@@ -160,6 +160,123 @@ class ProductController extends Controller
 //     }
 // }
 
+// public function purchase(Request $request)
+// {
+//     $validated = $request->validate([
+//         '*.product_id' => 'required|exists:products,id',
+//         '*.email_receiver' => 'required|email',
+//         '*.note' => 'nullable|string',
+//         '*.payment_type' => 'required|in:' . Bill::PAYMENT_TYPE_ONLINE . ',' . Bill::PAYMENT_TYPE_COD,
+//         '*.shipping_address_id' => 'required|exists:shipping_addresses,id',
+//         '*.promotion_id' => 'nullable|exists:promotions,id',
+//         '*.variations' => 'required|array|min:1',
+//         '*.variations.*.product_variation_value_id' => 'required|exists:product_variation_values,id',
+//         '*.variations.*.quantity' => 'required|integer|min:1',
+//     ]);
+
+//     DB::beginTransaction();
+
+//     try {
+//         // Sinh mã đơn hàng duy nhất
+//         do {
+//             $codeOrders = 'ORDER-' . strtoupper(uniqid());
+//         } while (Bill::where('code_orders', $codeOrders)->exists());
+
+//         // Khởi tạo hóa đơn
+//         $bill = Bill::create([
+//             'user_id' => $request->user()->id,
+//             'code_orders' => $codeOrders,
+//             'email_receiver' => $validated[0]['email_receiver'], // Lấy email từ sản phẩm đầu tiên
+//             'note' => $validated[0]['note'],
+//             'status_bill' => Bill::STATUS_PENDING,
+//             'payment_type' => $validated[0]['payment_type'],
+//             'subtotal' => 0,
+//             'total' => 0,
+//             'promotion_id' => $validated[0]['promotion_id'] ?? null,
+//             'shipping_address_id' => $validated[0]['shipping_address_id'],
+//             'canceled_at' => null,
+//         ]);
+
+//         $subtotal = 0;
+//         $totalQuantity = 0;
+
+//         // Duyệt qua từng sản phẩm trong request
+//         foreach ($validated as $order) {
+//             foreach ($order['variations'] as $variation) {
+//                 $variationValue = ProductVariationValue::findOrFail($variation['product_variation_value_id']);
+
+//                 // Kiểm tra tồn kho
+//                 if ($variationValue->stock < $variation['quantity']) {
+//                     DB::rollBack();
+//                     return response()->json([
+//                         'message' => 'Biến thể ' . $variationValue->id . ' không đủ số lượng trong kho',
+//                         'số lượng hiện tại' => $variationValue->stock,
+//                         'sô lượng bạn nhập' => $variation['quantity']
+//                     ], 400);
+//                 }
+
+//                 // Tính tổng tiền của biến thể
+//                 $totalAmount = $variationValue->price * $variation['quantity'];
+//                 $subtotal += $totalAmount;
+
+//                 // Tạo chi tiết hóa đơn
+//                 BillDentail::create([
+//                     'bill_id' => $bill->id,
+//                     'product_id' => $order['product_id'],
+//                     'product_variation_value_id' => $variation['product_variation_value_id'],
+//                     'don_gia' => $variationValue->price,
+//                     'quantity' => $variation['quantity'],
+//                     'total_amount' => $totalAmount,
+//                 ]);
+
+//                 // Giảm tồn kho
+//                 $variationValue->decrement('stock', $variation['quantity']);
+//                 $variationValue->productVariation->decrement('stock', $variation['quantity']);
+
+//                 $totalQuantity += $variation['quantity'];
+//             }
+
+//             // Giảm tồn kho của sản phẩm chính
+//             $product = Product::findOrFail($order['product_id']);
+//             if ($product->stock < $totalQuantity) {
+//                 DB::rollBack();
+//                 return response()->json([
+//                     'message' => 'Sản phẩm không đủ số lượng trong kho',
+//                     'sô lượng hiện tại' => $product->stock,
+//                     'số lượng bạn oder' => $totalQuantity
+//                 ], 400);
+//             }
+//             $product->decrement('stock', $totalQuantity);
+//         }
+
+
+//         $bill->update([
+//             'subtotal' => $subtotal,
+//             'total' => $subtotal, 
+//         ]);
+
+//         DB::commit();
+
+//         return response()->json([
+//             'message' => 'Đặt hàng thành công',
+//             'bill' => $bill
+//         ], 201);
+
+//     } catch (ModelNotFoundException $e) {
+//         DB::rollBack();
+//         return response()->json([
+//             'message' => 'Không tìm thấy sản phẩm hoặc biến thể'
+//         ], 404);
+//     } catch (\Exception $e) {
+//         DB::rollBack();
+//         return response()->json([
+//             'message' => 'Đã xảy ra lỗi trong quá trình đặt hàng',
+//             'error' => $e->getMessage()
+//         ], 500);
+//     }
+// }
+
+
 public function purchase(Request $request)
 {
     $validated = $request->validate([
@@ -178,15 +295,13 @@ public function purchase(Request $request)
 
     try {
         // Sinh mã đơn hàng duy nhất
-        do {
-            $codeOrders = 'ORDER-' . strtoupper(uniqid());
-        } while (Bill::where('code_orders', $codeOrders)->exists());
+        $codeOrders = $this->generateUniqueOrderCode();
 
         // Khởi tạo hóa đơn
         $bill = Bill::create([
             'user_id' => $request->user()->id,
             'code_orders' => $codeOrders,
-            'email_receiver' => $validated[0]['email_receiver'], // Lấy email từ sản phẩm đầu tiên
+            'email_receiver' => $validated[0]['email_receiver'],
             'note' => $validated[0]['note'],
             'status_bill' => Bill::STATUS_PENDING,
             'payment_type' => $validated[0]['payment_type'],
@@ -198,61 +313,16 @@ public function purchase(Request $request)
         ]);
 
         $subtotal = 0;
-        $totalQuantity = 0;
 
         // Duyệt qua từng sản phẩm trong request
         foreach ($validated as $order) {
-            foreach ($order['variations'] as $variation) {
-                $variationValue = ProductVariationValue::findOrFail($variation['product_variation_value_id']);
-
-                // Kiểm tra tồn kho
-                if ($variationValue->stock < $variation['quantity']) {
-                    DB::rollBack();
-                    return response()->json([
-                        'message' => 'Biến thể ' . $variationValue->id . ' không đủ số lượng trong kho',
-                        'số lượng hiện tại' => $variationValue->stock,
-                        'sô lượng bạn nhập' => $variation['quantity']
-                    ], 400);
-                }
-
-                // Tính tổng tiền của biến thể
-                $totalAmount = $variationValue->price * $variation['quantity'];
-                $subtotal += $totalAmount;
-
-                // Tạo chi tiết hóa đơn
-                BillDentail::create([
-                    'bill_id' => $bill->id,
-                    'product_id' => $order['product_id'],
-                    'product_variation_value_id' => $variation['product_variation_value_id'],
-                    'don_gia' => $variationValue->price,
-                    'quantity' => $variation['quantity'],
-                    'total_amount' => $totalAmount,
-                ]);
-
-                // Giảm tồn kho
-                $variationValue->decrement('stock', $variation['quantity']);
-                $variationValue->productVariation->decrement('stock', $variation['quantity']);
-
-                $totalQuantity += $variation['quantity'];
-            }
-
-            // Giảm tồn kho của sản phẩm chính
-            $product = Product::findOrFail($order['product_id']);
-            if ($product->stock < $totalQuantity) {
-                DB::rollBack();
-                return response()->json([
-                    'message' => 'Sản phẩm không đủ số lượng trong kho',
-                    'sô lượng hiện tại' => $product->stock,
-                    'số lượng bạn oder' => $totalQuantity
-                ], 400);
-            }
-            $product->decrement('stock', $totalQuantity);
+            $this->processOrderItems($order, $bill, $subtotal);
         }
 
-
+        // Cập nhật tổng tiền và hoàn thành giao dịch
         $bill->update([
             'subtotal' => $subtotal,
-            'total' => $subtotal, 
+            'total' => $subtotal,
         ]);
 
         DB::commit();
@@ -276,9 +346,56 @@ public function purchase(Request $request)
     }
 }
 
+private function generateUniqueOrderCode()
+{
+    do {
+        $codeOrders = 'ORDER-' . strtoupper(uniqid());
+    } while (Bill::where('code_orders', $codeOrders)->exists());
 
+    return $codeOrders;
+}
 
+private function processOrderItems($order, $bill, &$subtotal)
+{
+    $totalQuantity = 0;
 
+    foreach ($order['variations'] as $variation) {
+        $variationValue = ProductVariationValue::findOrFail($variation['product_variation_value_id']);
+
+        // Kiểm tra tồn kho
+        if ($variationValue->stock < $variation['quantity']) {
+            throw new \Exception("Biến thể {$variationValue->id} không đủ số lượng trong kho.");
+        }
+
+        // Tính tổng tiền của biến thể
+        $totalAmount = $variationValue->price * $variation['quantity'];
+        $subtotal += $totalAmount;
+
+        // Tạo chi tiết hóa đơn
+        BillDentail::create([
+            'bill_id' => $bill->id,
+            'product_id' => $order['product_id'],
+            'product_variation_value_id' => $variation['product_variation_value_id'],
+            'don_gia' => $variationValue->price,
+            'quantity' => $variation['quantity'],
+            'total_amount' => $totalAmount,
+        ]);
+
+        // Giảm tồn kho
+        $variationValue->decrement('stock', $variation['quantity']);
+        $variationValue->productVariation->decrement('stock', $variation['quantity']);
+
+        $totalQuantity += $variation['quantity'];
+    }
+
+    // Giảm tồn kho sản phẩm chính
+    $product = Product::findOrFail($order['product_id']);
+    if ($product->stock < $totalQuantity) {
+        throw new \Exception("Sản phẩm không đủ số lượng trong kho.");
+    }
+
+    $product->decrement('stock', $totalQuantity);
+}
 
 
 // public function index(Request $request)
