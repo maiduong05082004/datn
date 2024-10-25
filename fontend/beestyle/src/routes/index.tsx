@@ -21,9 +21,6 @@ import AddCategories from "@/pages/(dashboard)/dashboard/categories/add";
 import ListCategories from "@/pages/(dashboard)/dashboard/categories/list";
 import UpdateCategories from "@/pages/(dashboard)/dashboard/categories/update";
 import ListComments from "@/pages/(dashboard)/dashboard/comments/list";
-import AddProduct from "@/pages/(dashboard)/dashboard/products/add";
-import ListProducts from "@/pages/(dashboard)/dashboard/products/list";
-import UpdateProduct from "@/pages/(dashboard)/dashboard/products/update";
 import ListUser from "@/pages/(dashboard)/dashboard/user/list";
 import Search from "@/pages/(website)/_components/Search";
 import PageSignin from "@/pages/(website)/auth/signin/page";
@@ -40,6 +37,9 @@ import ViewAccount from "@/pages/(website)/account/_components/view";
 import InfoPage from "@/pages/(website)/account/_components/info";
 import RecentlyPage from "@/pages/(website)/account/_components/recently";
 import AddressesPage from "@/pages/(website)/account/_components/addresses";
+import UpdateProduct from "@/pages/(dashboard)/dashboard/products/update";
+import ListProducts from "@/pages/(dashboard)/dashboard/bills/list";
+import AddProduct from "@/pages/(dashboard)/dashboard/products/add";
 
 const Router = () => {
 
