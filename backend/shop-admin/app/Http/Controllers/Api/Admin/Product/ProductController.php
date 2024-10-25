@@ -57,9 +57,9 @@ class ProductController extends Controller
                 'content' => $request->content,
                 'input_day' => $request->input_day,
                 'category_id' => $request->category_id,
-                'is_collection' => $request->has('is_collection') ? 1 : 0, 
-                'is_hot' => $request->has('is_hot') ? 1 : 0,               
-                'is_new' => $request->has('is_new') ? 1 : 0,              
+                'is_collection' => $request->is_collection ? 1 : 0,
+                'is_hot' => $request->is_hot ? 1 : 0,
+                'is_new' => $request->is_new ? 1 : 0,         
             ]);
     
 
@@ -288,9 +288,9 @@ public function update(UpdateProductRequest $request, $id)
             'content' => $request->content,
             'input_day' => $request->input_day,
             'category_id' => $request->category_id,
-            'is_collection' => $request->has('is_collection') ? 1 : 0,
-            'is_hot' => $request->has('is_hot') ? 1 : 0,
-            'is_new' => $request->has('is_new') ? 1 : 0,
+            'is_collection' => $request->is_collection ? 1 : 0,
+            'is_hot' => $request->is_hot ? 1 : 0,
+            'is_new' => $request->is_new ? 1 : 0,
         ]);
 
         // Xử lý xóa ảnh nếu có yêu cầu
