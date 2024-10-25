@@ -52,6 +52,7 @@ const UpdateProduct: React.FC = () => {
     },
   });
 
+
   const { data: categories, isLoading: isLoadingCategories } = useQuery({
     queryKey: ['categories'],
     queryFn: async () => {
@@ -79,6 +80,7 @@ const UpdateProduct: React.FC = () => {
         const formattedAttributes = group.attributes.map((attribute: any) => {
           const selectedValues: any[] = [];
 
+          // Xử lý giá trị của biến thể (variation)
           UpdateVariant.variations.forEach((variation: any) => {
             if (attribute.attribute_type === 0 && variation.attribute_value_image_variant) {
               const attrValue = attribute.attribute_values.find(
@@ -132,14 +134,14 @@ const UpdateProduct: React.FC = () => {
         })),
         colorImage: variation.attribute_value_image_variant.image_path
           ? [
-              {
-                name: variation.attribute_value_image_variant.image_path,
-                uid: variation.attribute_value_image_variant.image_path,
-                status: 'done',
-                url: `path_to_image/${variation.attribute_value_image_variant.image_path}`,
-                isExisting: true,
-              },
-            ]
+            {
+              name: variation.attribute_value_image_variant.image_path,
+              uid: variation.attribute_value_image_variant.image_path,
+              status: 'done',
+              url: `path_to_image/${variation.attribute_value_image_variant.image_path}`,
+              isExisting: true,
+            },
+          ]
           : [],
         albumImages: variation.variation_album_images.map((image: string) => ({
           name: image,
@@ -175,6 +177,19 @@ const UpdateProduct: React.FC = () => {
     setStock(value);
     form.setFieldsValue({ stock: value });
   };
+  const handleResetImage = (index: number, field: string) => {
+    const updatedVariants = [...variants];
+
+    if (field === 'colorImage') {
+      updatedVariants[index].colorImage = [];
+    } else if (field === 'albumImages') {
+      updatedVariants[index].albumImages = [];
+    }
+
+    setVariants(updatedVariants);
+  };
+
+
 
   const handleAttributeValueChange = (attributeId: number, selectedValues: any[]) => {
     const updatedAttributes = attributes.map((attr) => {
@@ -209,18 +224,30 @@ const UpdateProduct: React.FC = () => {
       toast.error('Chưa có thuộc tính để tạo biến thể.');
       return;
     }
-
+  
     const colorAttribute = attributes.find((attr) => attr.attribute_type === 0);
     const sizeAttribute = attributes.find((attr) => attr.attribute_type === 1);
-
+  
+    // Kiểm tra nếu thuộc tính không tồn tại hoặc không có selectedValues
     if (!colorAttribute || !sizeAttribute) {
       toast.error('Thiếu thuộc tính Màu Sắc hoặc Kích Thước');
       return;
     }
-
+  
+    if (!colorAttribute.selectedValues || colorAttribute.selectedValues.length === 0) {
+      toast.error('Bạn chưa chọn Màu Sắc cho sản phẩm.');
+      return;
+    }
+  
+    if (!sizeAttribute.selectedValues || sizeAttribute.selectedValues.length === 0) {
+      toast.error('Bạn chưa chọn Kích Thước cho sản phẩm.');
+      return;
+    }
+  
     const selectedColors = colorAttribute.selectedValues || [];
     const selectedSizes = sizeAttribute.selectedValues || [];
-
+  
+    // Tạo biến thể mới với màu sắc và kích thước
     const newVariants = selectedColors.map((color: any) => ({
       colorId: color.key,
       colorName: color.label,
@@ -233,9 +260,11 @@ const UpdateProduct: React.FC = () => {
       colorImage: [],
       albumImages: [],
     }));
-
-    setVariants(newVariants);
+  
+    setVariants(newVariants);  // Cập nhật biến thể với size
   };
+  
+  
 
   const handleUploadChangeForVariant = (index: number, key: string, info: any) => {
     const updatedVariants = [...variants];
@@ -254,16 +283,15 @@ const UpdateProduct: React.FC = () => {
     setVariants(updatedVariants);
   };
 
-  const handleRemoveFile = (index: number, key: string, file: any) => {
-    const updatedVariants = [...variants];
-    const variant = updatedVariants[index];
-    if (variant) {
-      variant[key] = variant[key].filter((item: any) => item.uid !== file.uid);
-      // Nếu bạn muốn gửi yêu cầu xóa ảnh trên server, bạn có thể thêm axios POST ở đây
-    }
-    setVariants(updatedVariants);
-  };
-  
+  // const handleRemoveFile = (index: number, key: string, file: any) => {
+  //   const updatedVariants = [...variants];
+  //   const variant = updatedVariants[index];
+  //   if (variant) {
+  //     variant[key] = variant[key].filter((item: any) => item.uid !== file.uid);
+  //   }
+  //   setVariants(updatedVariants);
+  // };
+
 
   const columns = [
     {
@@ -298,60 +326,82 @@ const UpdateProduct: React.FC = () => {
         )),
     },
     {
-      title: 'Ảnh Đại Diện',
+      title: 'Ảnh Màu',
       dataIndex: 'colorImage',
       key: 'colorImage',
       render: (_: any, record: any, index: any) => (
-        <div>
-          {record.colorImage.length > 0 && (
-            <img
-              src={record.colorImage[0].url}
-              alt="Color Image"
-              style={{ width: '50px', height: '50px', objectFit: 'cover' }}
-            />
-          )}
+        <div className="flex flex-col items-center gap-3 p-4 border border-gray-200 rounded-md shadow-sm">
           <Upload
-            listType="picture"
+            listType="picture-card"
             fileList={record.colorImage || []}
             onChange={(info) => handleUploadChangeForVariant(index, 'colorImage', info)}
             beforeUpload={() => false}
-            onRemove={(file) => handleRemoveFile(index, 'colorImage', file)}
+            className="upload-inline"
           >
-            <Button icon={<UploadOutlined />}>Tải lên ảnh Đại Diện</Button>
+            {record.colorImage?.length < 1 && (
+              <div className="w-20 h-20 border border-dashed border-gray-300 rounded-md flex items-center justify-center cursor-pointer">
+                <UploadOutlined className="text-blue-500 text-xl" />
+              </div>
+            )}
           </Upload>
+          <Button
+            type="dashed"
+            danger
+            className="mt-2"
+            onClick={() => handleResetImage(index, 'colorImage')}
+          >
+            Reset Ảnh Màu
+          </Button>
         </div>
       ),
     },
-    
     {
       title: 'Album Ảnh',
       dataIndex: 'albumImages',
       key: 'albumImages',
       render: (_: any, record: any, index: any) => (
-        <Upload
-          listType="picture"
-          multiple
-          fileList={record.albumImages || []}
-          onChange={(info) => handleUploadChangeForVariant(index, 'albumImages', info)}
-          beforeUpload={() => false}
-          onRemove={(file) => handleRemoveFile(index, 'albumImages', file)}
-        >
-          <Button icon={<UploadOutlined />}>Tải lên album ảnh</Button>
-        </Upload>
+        <div className="flex flex-col items-center gap-3 p-4 border border-gray-200 rounded-md shadow-sm">
+          <Upload
+            listType="picture-card"
+            multiple
+            fileList={record.albumImages || []}
+            onChange={(info) => handleUploadChangeForVariant(index, 'albumImages', info)}
+            beforeUpload={() => false}
+            className="upload-inline"
+          >
+            {record.albumImages?.length < 4 && (
+              <div className="w-20 h-20 border border-dashed border-gray-300 rounded-md flex items-center justify-center cursor-pointer">
+                <UploadOutlined className="text-green-500 text-xl" />
+              </div>
+            )}
+          </Upload>
+          <Button
+            type="dashed"
+            danger
+            className="mt-2"
+            onClick={() => handleResetImage(index, 'albumImages')}
+          >
+            Reset Album Ảnh
+          </Button>
+        </div>
       ),
-    },
+    }
+
   ];
 
   const onFinish = (values: any) => {
-    const formattedDate = values.input_day ? values.input_day.format('YYYY-MM-DD') : null;
+    const formattedDate = values.input_day ? moment(values.input_day).format('YYYY-MM-DD') : null;
+    if (!formattedDate) {
+      toast.error('Ngày nhập không hợp lệ. Vui lòng chọn một ngày!');
+      return;
+    }
 
     const formData = new FormData();
-
     formData.append('name', values.name);
     formData.append('price', values.price);
     formData.append('description', values.description);
     formData.append('content', content || '');
-    formData.append('input_day', formattedDate);
+    formData.append('input_day', formattedDate); 
     formData.append('category_id', values.category_id);
     formData.append('is_collection', values.is_collection ? '1' : '0');
     formData.append('is_hot', values.is_hot ? '1' : '0');
@@ -364,7 +414,7 @@ const UpdateProduct: React.FC = () => {
       const colorId = variant.colorId;
       const sizesData: any = {};
 
-      variant.sizes.forEach((size : any) => {
+      variant.sizes.forEach((size: any) => {
         sizesData[size.sizeId] = {
           stock: size.stock,
           discount: size.discount,
@@ -379,10 +429,9 @@ const UpdateProduct: React.FC = () => {
     variants.forEach((variant) => {
       if (variant.colorImage && variant.colorImage.length > 0) {
         const colorImage = variant.colorImage[0];
+
         if (!colorImage.isExisting && colorImage.originFileObj) {
           formData.append(`color_image_${variant.colorId}`, colorImage.originFileObj, colorImage.name);
-        } else if (colorImage.isExisting) {
-          formData.append(`color_image_${variant.colorId}`, colorImage.name);
         }
       }
 
@@ -390,8 +439,6 @@ const UpdateProduct: React.FC = () => {
         variant.albumImages.forEach((fileObj: any) => {
           if (!fileObj.isExisting && fileObj.originFileObj) {
             formData.append(`album_images_${variant.colorId}[]`, fileObj.originFileObj, fileObj.name);
-          } else if (fileObj.isExisting) {
-            formData.append(`album_images_${variant.colorId}[]`, fileObj.name);
           }
         });
       }
@@ -400,11 +447,15 @@ const UpdateProduct: React.FC = () => {
     updateProduct(formData);
   };
 
+
+
   const handleGroupChange = (groupId: number) => {
     const group = variantgroup?.find((g: any) => g.group_id === groupId);
     setSelectedGroup(group);
-
+  
     if (group && group.attributes) {
+      setVariants([]);
+  
       const formattedAttributes = group.attributes.map((attribute: any) => ({
         ...attribute,
         selectedValues: [],
@@ -412,6 +463,7 @@ const UpdateProduct: React.FC = () => {
       setAttributes(formattedAttributes);
     }
   };
+  
 
   useEffect(() => {
     if (selectedGroup) {
@@ -437,7 +489,7 @@ const UpdateProduct: React.FC = () => {
           name="name"
           rules={[{ required: true, message: 'Tên sản phẩm bắt buộc' }]}
         >
-          <Input />
+          <Input className="border border-gray-300 rounded-md" />
         </Form.Item>
 
         <Form.Item
@@ -445,7 +497,7 @@ const UpdateProduct: React.FC = () => {
           name="price"
           rules={[{ required: true, message: 'Giá sản phẩm bắt buộc phải điền' }]}
         >
-          <InputNumber min={0} style={{ width: '100%' }} />
+          <InputNumber min={0} style={{ width: '100%' }} className="border border-gray-300 rounded-md" />
         </Form.Item>
 
         <Form.Item
@@ -453,7 +505,7 @@ const UpdateProduct: React.FC = () => {
           name="description"
           rules={[{ required: true, message: 'Mô tả sản phẩm bắt buộc phải điền' }]}
         >
-          <Input.TextArea rows={4} placeholder="Nhập mô tả sản phẩm ngắn gọn" />
+          <Input.TextArea rows={4} placeholder="Nhập mô tả sản phẩm ngắn gọn" className="border border-gray-300 rounded-md" />
         </Form.Item>
 
         <Form.Item
@@ -470,21 +522,39 @@ const UpdateProduct: React.FC = () => {
             }}
           />
         </Form.Item>
-
         <Form.Item
           label="Ngày nhập"
           name="input_day"
-          rules={[{ required: true, message: 'Ngày nhập sản phẩm bắt buộc phải điền' }]}
+          rules={[{ required: true, message: "Ngày nhập sản phẩm bắt buộc phải điền" }]}
         >
           <DatePicker format="YYYY-MM-DD" style={{ width: '100%' }} />
-        </Form.Item>
 
+        </Form.Item>
         <Form.Item
           label="Danh mục"
           name="category_id"
           rules={[{ required: true, message: 'Danh mục sản phẩm bắt buộc phải chọn' }]}
+          style={{ display: 'none' }} // Ẩn trường này vì chúng ta chỉ cần lưu id
         >
-          <Select placeholder="Chọn danh mục">
+          <Input />
+        </Form.Item>
+
+        <Form.Item
+          label="Danh mục"
+          name="category_name"
+          rules={[{ required: true, message: 'Danh mục sản phẩm bắt buộc phải chọn' }]}
+        >
+          <Select
+            placeholder="Chọn danh mục"
+            className="border border-gray-300 rounded-md"
+            onChange={(value) => {
+              const selectedCategory = categories.find((category: any) => category.id === value);
+              form.setFieldsValue({
+                category_id: selectedCategory?.id,
+                category_name: selectedCategory?.name,
+              });
+            }}
+          >
             {categories?.map((category: any) => (
               <Option key={category.id} value={category.id}>
                 {category.name}
@@ -493,9 +563,11 @@ const UpdateProduct: React.FC = () => {
           </Select>
         </Form.Item>
 
+
+
         <div className="flex gap-5">
           <Form.Item name="is_collection" valuePropName="checked">
-            <Checkbox>Bộ sưu tập</Checkbox> 
+            <Checkbox>Bộ sưu tập</Checkbox>
           </Form.Item>
 
           <Form.Item name="is_hot" valuePropName="checked">
@@ -518,7 +590,7 @@ const UpdateProduct: React.FC = () => {
               name="variant_group"
               rules={[{ required: true, message: 'Vui lòng chọn nhóm biến thể' }]}
             >
-              <Select placeholder="Chọn nhóm biến thể" onChange={handleGroupChange}>
+              <Select placeholder="Chọn nhóm biến thể" onChange={handleGroupChange} className="border border-gray-300 rounded-md">
                 {variantgroup?.map((group: any) => (
                   <Option key={group.group_id} value={group.group_id}>
                     {group.group_name}
@@ -553,11 +625,12 @@ const UpdateProduct: React.FC = () => {
                     ))}
                   </Select>
                 </Form.Item>
+
               ))}
 
             <Button
               type="default"
-              className="mb-5"
+              className="mb-5 bg-blue-500 text-white hover:bg-blue-700"
               onClick={generateVariants}
               icon={<PlusOutlined />}
             >

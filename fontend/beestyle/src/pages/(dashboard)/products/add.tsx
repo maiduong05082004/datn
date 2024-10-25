@@ -133,7 +133,7 @@ const AddProduct: React.FC = () => {
       setVariants(updatedVariants);
     }
   };
-  
+
   // tạo biến thể từ thuộc tính "Màu Sắc" và "Kích Thước"
   const generateVariants = () => {
     const colorAttribute = attributes.find(attr => attr.name.toLowerCase().includes('màu sắc'));
@@ -174,23 +174,20 @@ const AddProduct: React.FC = () => {
     updatedVariants[index][key] = fileList;
     setVariants(updatedVariants);
   };
-  // ảnh biến thể 
   // Hàm xử lý thay đổi album ảnh
-const handleAlbumChange2 = ({ fileList }: any) => {
-  // Lấy URL của ảnh từ phản hồi của server
-  const updatedAlbumList = fileList.map((file : any) => {
-    if (file.response && file.response.url) {
-      // Nếu có phản hồi từ server sau khi upload thành công
-      return {
-        ...file,
-        url: file.response.url,  // Lưu URL từ phản hồi của server
-      };
-    }
-    return file;
-  });
+  const handleAlbumChange2 = ({ fileList }: any) => {
+    const updatedAlbumList = fileList.map((file: any) => {
+      if (file.response && file.response.url) {
+        return {
+          ...file,
+          url: file.response.url,
+        };
+      }
+      return file;
+    });
 
-  setAlbumList(updatedAlbumList);
-};
+    setAlbumList(updatedAlbumList);
+  };
 
   // Hàm ẩn/hiện form biến thể
   const toggleVariantForm = () => {
@@ -297,117 +294,117 @@ const handleAlbumChange2 = ({ fileList }: any) => {
       ),
     },
   ];
-  
+
 
 
   //  xử lý khi submit form
   const onFinish = (values: any) => {
-  const formattedDate = values.input_day ? values.input_day.format('YYYY-MM-DD') : null;
+    const formattedDate = values.input_day ? values.input_day.format('YYYY-MM-DD') : null;
 
-  if (!showVariantForm) {
-    // Chuẩn bị album images URLs
-    const albumImagesUrls = albumList.map((file: any) => {
-      if (file.response && file.response.url) {
-        return file.response.url;
-      } else if (file.url) {
-        return file.url;
-      } else {
-        return file.name;
-      }
-    });
+    if (!showVariantForm) {
+      // Chuẩn bị album images URLs
+      const albumImagesUrls = albumList.map((file: any) => {
+        if (file.response && file.response.url) {
+          return file.response.url;
+        } else if (file.url) {
+          return file.url;
+        } else {
+          return file.name;
+        }
+      });
 
-    const simpleProductPayload = {
-      ...values,
-      stock: stock || 0, 
-      input_day: formattedDate,
-      content: content || '',  
-      group_id: null, 
-      is_collection: values.is_collection || false,
-      is_hot: values.is_hot || false,
-      is_new: values.is_new || false,
-      album_images: albumImagesUrls,
-    };
-
-    console.log('Payload cho sản phẩm đơn giản:', simpleProductPayload);
-    mutate(simpleProductPayload);
-    return;
-  }
-
-  // Xử lý cho sản phẩm có biến thể
-  if (showVariantForm) {
-    if (!selectedVariantGroup) {
-      toast.error('Vui lòng chọn nhóm biến thể!');
-      return;
-    }
-
-    if (variants.length === 0) {
-      toast.error('Vui lòng tạo ít nhất một biến thể!');
-      return;
-    }
-
-    // Chuẩn bị payload cho sản phẩm có biến thể
-    const validVariants = variants.map((variant) => {
-      const validSizes = variant.sizes.filter(
-        (size: any) => size.stock !== undefined && size.stock > 0
-      );
-
-      if (validSizes.length === 0) {
-        return null;
-      }
-
-      return {
-        ...variant,
-        sizes: validSizes,
+      const simpleProductPayload = {
+        ...values,
+        stock: stock || 0,
+        input_day: formattedDate,
+        content: content || '',
+        group_id: null,
+        is_collection: values.is_collection || false,
+        is_hot: values.is_hot || false,
+        is_new: values.is_new || false,
+        album_images: albumImagesUrls,
       };
-    }).filter(Boolean);
 
-    if (validVariants.length === 0) {
-      toast.error('Vui lòng điền đầy đủ thông tin cho ít nhất một biến thể và kích thước!');
+      console.log('Payload cho sản phẩm đơn giản:', simpleProductPayload);
+      mutate(simpleProductPayload);
       return;
     }
 
-    const variationsData = validVariants.reduce((acc, variant) => {
-      const colorId = variant.colorId;
-      const sizeData = variant.sizes.reduce((sizeAcc: any, size: any) => {
-        sizeAcc[size.sizeId] = {
-          stock: size.stock ?? 0,
-          discount: size.discount ?? 0,
+    // Xử lý cho sản phẩm có biến thể
+    if (showVariantForm) {
+      if (!selectedVariantGroup) {
+        toast.error('Vui lòng chọn nhóm biến thể!');
+        return;
+      }
+
+      if (variants.length === 0) {
+        toast.error('Vui lòng tạo ít nhất một biến thể!');
+        return;
+      }
+
+      // Chuẩn bị payload cho sản phẩm có biến thể
+      const validVariants = variants.map((variant) => {
+        const validSizes = variant.sizes.filter(
+          (size: any) => size.stock !== undefined && size.stock > 0
+        );
+
+        if (validSizes.length === 0) {
+          return null;
+        }
+
+        return {
+          ...variant,
+          sizes: validSizes,
         };
-        return sizeAcc;
+      }).filter(Boolean);
+
+      if (validVariants.length === 0) {
+        toast.error('Vui lòng điền đầy đủ thông tin cho ít nhất một biến thể và kích thước!');
+        return;
+      }
+
+      const variationsData = validVariants.reduce((acc, variant) => {
+        const colorId = variant.colorId;
+        const sizeData = variant.sizes.reduce((sizeAcc: any, size: any) => {
+          sizeAcc[size.sizeId] = {
+            stock: size.stock ?? 0,
+            discount: size.discount ?? 0,
+          };
+          return sizeAcc;
+        }, {});
+
+        if (Object.keys(sizeData).length > 0) {
+          acc[colorId] = sizeData;
+        }
+        return acc;
       }, {});
 
-      if (Object.keys(sizeData).length > 0) {
-        acc[colorId] = sizeData;
-      }
-      return acc;
-    }, {});
+      const imageFields = validVariants.reduce((acc: any, variant: any) => {
+        const colorId = variant.colorId || variant.id;
+        acc[`color_image_${colorId}`] = variant.colorImage?.[0]?.name || null;
+        acc[`album_images_${colorId}`] = variant.albumImages?.map((file: any) => file.name) || [];
+        return acc;
+      }, {});
 
-    const imageFields = validVariants.reduce((acc: any, variant: any) => {
-      const colorId = variant.colorId || variant.id;
-      acc[`color_image_${colorId}`] = variant.colorImage?.[0]?.name || null;
-      acc[`album_images_${colorId}`] = variant.albumImages?.map((file: any) => file.name) || [];
-      return acc;
-    }, {});
+      const productWithVariantsPayload = {
+        ...values,
+        input_day: formattedDate,
+        content: content || '',
+        group_id: selectedVariantGroup,
+        variations: JSON.stringify(variationsData),
+        ...imageFields,
+        is_collection: values.is_collection || false,
+        is_hot: values.is_hot || false,
+        is_new: values.is_new || false,
+      };
 
-    const productWithVariantsPayload = {
-      ...values,
-      input_day: formattedDate,
-      content: content || '',
-      group_id: selectedVariantGroup,
-      variations: JSON.stringify(variationsData),
-      ...imageFields,
-      is_collection: values.is_collection || false,
-      is_hot: values.is_hot || false,
-      is_new: values.is_new || false,
-    };
+      console.log('Payload cho sản phẩm có biến thể:', productWithVariantsPayload);
 
-    console.log('Payload cho sản phẩm có biến thể:', productWithVariantsPayload);
+      mutate(productWithVariantsPayload);
+    }
+  };
 
-    mutate(productWithVariantsPayload);
-  }
-};
 
-  
 
 
 
@@ -425,14 +422,26 @@ const handleAlbumChange2 = ({ fileList }: any) => {
           <Form.Item
             label="Tên sản phẩm"
             name="name"
-            rules={[{ required: true, message: 'Tên sản phẩm bắt buộc' }]}
+            rules={[
+              { required: true, message: 'Tên sản phẩm bắt buộc' },
+              { min: 5, message: 'Tên sản phẩm phải có ít nhất 5 ký tự' },
+              { max: 50, message: 'Tên sản phẩm không được quá 50 ký tự' },
+              {
+                pattern: /^[A-Za-z0-9\s]+$/,
+                message: 'Tên sản phẩm chỉ được chứa ký tự chữ và số',
+              },
+            ]}
           >
             <Input />
           </Form.Item>
           <Form.Item
             label="Giá sản phẩm"
             name="price"
-            rules={[{ required: true, message: "Giá sản phẩm bắt buộc phải điền" }]}
+            rules={[
+              { required: true, message: 'Giá sản phẩm bắt buộc phải điền' },
+              { type: 'number', min: 1, message: 'Giá phải lớn hơn 0' },
+              { type: 'number', max: 1000000, message: 'Giá không được vượt quá 1,000,000' },
+            ]}
           >
             <InputNumber min={0} style={{ width: '100%' }} />
           </Form.Item>
@@ -440,7 +449,10 @@ const handleAlbumChange2 = ({ fileList }: any) => {
           <Form.Item
             label="Mô tả sản phẩm"
             name="description"
-            rules={[{ required: true, message: "Mô tả sản phẩm bắt buộc phải điền" }]}
+            rules={[
+              { required: true, message: 'Mô tả sản phẩm bắt buộc' },
+              { min: 20, message: 'Mô tả sản phẩm phải có ít nhất 20 ký tự' },
+            ]}
           >
             <Input.TextArea rows={4} placeholder="Nhập mô tả sản phẩm ngắn gọn" />
           </Form.Item>
@@ -587,11 +599,11 @@ const handleAlbumChange2 = ({ fileList }: any) => {
                 >
                   <InputNumber
                     placeholder="Số lượng"
-                    value={stock}  
+                    value={stock}
                     className="w-full border border-gray-300 rounded-md p-2"
                     onChange={(value) => {
-                      setStock(value); 
-                      form.setFieldsValue({ stock: value });  
+                      setStock(value);
+                      form.setFieldsValue({ stock: value });
                     }}
                     min={0}
                   />
@@ -606,10 +618,10 @@ const handleAlbumChange2 = ({ fileList }: any) => {
                   <Upload
                     listType="picture"
                     multiple
-                    fileList={albumList}  
+                    fileList={albumList}
                     onChange={handleAlbumChange2}
 
-                    beforeUpload={() => false}  
+                    beforeUpload={() => false}
                   >
                     <Button icon={<UploadOutlined />} className="bg-green-500 hover:bg-green-600 text-white">
                       Tải lên album ảnh
