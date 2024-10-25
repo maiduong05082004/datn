@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
 
 class ProductController extends Controller
 {
@@ -136,6 +137,8 @@ class ProductController extends Controller
     }
     
 
+    
+    
     private function saveImages($model, $request, $isVariation = false, $attributeValueId = null)
     {
         if ($isVariation) {
@@ -144,7 +147,13 @@ class ProductController extends Controller
             // Xử lý ảnh variant (màu sắc)
             $colorImageInput = "color_image_$attributeValueId";
             if ($request->hasFile($colorImageInput)) {
-                $colorImagePath = $request->file($colorImageInput)->store("uploads/color_images/{$model->product_id}/{$model->id}", 'public');
+                // Upload lên Cloudinary
+                $imageFile = $request->file($colorImageInput);
+                $cloudinaryResponse = Cloudinary::upload($imageFile->getRealPath(), [
+                    'folder' => "products/{$model->product_id}/variations/{$model->id}",
+                    'public_id' => 'variant_image_' . $attributeValueId
+                ]);
+                $colorImagePath = $cloudinaryResponse->getSecurePath();
             } elseif (isset($request[$colorImageInput])) {
                 $colorImagePath = $request[$colorImageInput];
             }
@@ -169,7 +178,13 @@ class ProductController extends Controller
             $albumInput = "album_images_$attributeValueId";
             if ($request->hasFile($albumInput)) {
                 foreach ($request->file($albumInput) as $albumImage) {
-                    $albumPath = $albumImage->store("uploads/album/{$model->product_id}/{$model->id}", 'public');
+                    // Upload từng ảnh lên Cloudinary
+                    $cloudinaryResponse = Cloudinary::upload($albumImage->getRealPath(), [
+                        'folder' => "products/{$model->product_id}/variations/{$model->id}",
+                        'public_id' => 'album_image_' . uniqid()
+                    ]);
+                    $albumPath = $cloudinaryResponse->getSecurePath();
+    
                     ProductVariationImage::create([
                         $modelType => $model->id,
                         'image_path' => $albumPath,
@@ -192,7 +207,13 @@ class ProductController extends Controller
             $albumInput = 'album_images';
             if ($request->hasFile($albumInput)) {
                 foreach ($request->file($albumInput) as $albumImage) {
-                    $albumPath = $albumImage->store('uploads/products/albums', 'public');
+                    // Upload từng ảnh lên Cloudinary
+                    $cloudinaryResponse = Cloudinary::upload($albumImage->getRealPath(), [
+                        'folder' => "products/{$model->id}/albums",
+                        'public_id' => 'album_image_' . uniqid()
+                    ]);
+                    $albumPath = $cloudinaryResponse->getSecurePath();
+    
                     ProductImage::create([
                         $modelType => $model->id,
                         'image_path' => $albumPath,
@@ -211,7 +232,6 @@ class ProductController extends Controller
         }
     }
     
-
 
     private function isValidAttributeForGroup($groupId, $attributeValueId)
     {
@@ -250,6 +270,8 @@ class ProductController extends Controller
 
 
 
+
+
 public function update(UpdateProductRequest $request, $id)
 {
     DB::beginTransaction();
@@ -257,68 +279,55 @@ public function update(UpdateProductRequest $request, $id)
     try {
         $product = Product::findOrFail($id);
 
+        // Cập nhật sản phẩm
         $product->update([
             'name' => $request->name,
-            'slug' => $request->slug ?? $product->slug,  
+            'slug' => $request->slug ?? $product->slug,
             'price' => $request->price,
-            'description' => $request->description,  
-            'content' => $request->content,         
-            'input_day' => $request->input_day,    
-            'category_id' => $request->category_id,  
-            'is_collection' => $request->has('is_collection') ? 1 : 0,  
-            'is_hot' => $request->has('is_hot') ? 1 : 0,              
-            'is_new' => $request->has('is_new') ? 1 : 0,               
+            'description' => $request->description,
+            'content' => $request->content,
+            'input_day' => $request->input_day,
+            'category_id' => $request->category_id,
+            'is_collection' => $request->has('is_collection') ? 1 : 0,
+            'is_hot' => $request->has('is_hot') ? 1 : 0,
+            'is_new' => $request->has('is_new') ? 1 : 0,
         ]);
 
-        
+        // Xử lý xóa ảnh nếu có yêu cầu
         if ($request->has('delete_images')) {
-            $this->deleteSelectedImages($request->input('delete_images'), false); 
+            $this->deleteSelectedImages($request->input('delete_images'), false); // false vì đây là ảnh sản phẩm
         }
 
-        
-        $hasVariations = $request->has('variations') && !empty($request->variations);
+        // Cập nhật hình ảnh sản phẩm
+        $this->saveImagesUpdate($product, $request); // Gọi hàm cập nhật hình ảnh
+
+        // Giải mã JSON phần `variations` để chuyển từ chuỗi JSON thành mảng
         $variations = json_decode($request->input('variations'), true);
 
-        // Xử lý cập nhật sản phẩm nếu không có biến thể
-        if (!$hasVariations || !is_array($variations)) {
-            $product->update(['stock' => $request->stock]);
-            $this->saveImages($product, $request); // Lưu ảnh sản phẩm
-        }
-
-        // Xử lý cập nhật sản phẩm và biến thể nếu có
-        if ($hasVariations && is_array($variations)) {
+        // Xử lý cập nhật các biến thể
+        if (is_array($variations)) {
             $totalProductStock = 0;
 
-            // Lấy danh sách tất cả attribute_value_id từ các biến thể
-            $attributeValueIds = array_keys($variations);
-
-            // Kiểm tra tính hợp lệ của tất cả các attribute_value_id với group_id
-            if (!$this->isValidAttributeForGroup_Update($request->group_id, $attributeValueIds)) {
-                throw new \Exception("Có giá trị thuộc tính không hợp lệ trong nhóm đã chọn.");
-            }
-
-            // Lặp qua từng biến thể và cập nhật
             foreach ($variations as $attributeValueId => $sizes) {
-                // Tìm hoặc tạo biến thể chính (ví dụ: màu sắc)
+                // Tạo hoặc cập nhật biến thể
                 $productVariation = ProductVariation::updateOrCreate(
                     ['product_id' => $product->id, 'attribute_value_id' => $attributeValueId],
                     ['group_id' => $request->group_id]
                 );
 
-                // Xử lý việc xóa ảnh cũ của biến thể (nếu có yêu cầu)
-                if ($request->has('delete_images')) {
-                    $this->deleteSelectedImages($request->input('delete_images'), true); // true vì đây là biến thể
+                // Xử lý xóa ảnh của biến thể nếu có yêu cầu
+                if ($request->has('delete_images_variation')) {
+                    $this->deleteSelectedImages($request->input('delete_images_variation'), true); // true vì đây là biến thể
                 }
 
-                // Lưu ảnh mới cho biến thể (nếu có)
-                $this->saveImages($productVariation, $request, true, $attributeValueId);
+                // Cập nhật hình ảnh biến thể
+                $this->saveImagesUpdate($productVariation, $request, true, $attributeValueId);
 
-                // Xử lý cập nhật các size (kích thước) của biến thể
+                // Cập nhật size và tồn kho
                 $totalVariationStock = 0;
                 foreach ($sizes as $sizeId => $details) {
                     if (!empty($details['stock']) && isset($details['discount'])) {
-                        // Tìm hoặc tạo giá trị biến thể (size)
-                        $productVariationValue = ProductVariationValue::updateOrCreate(
+                        ProductVariationValue::updateOrCreate(
                             ['product_variation_id' => $productVariation->id, 'attribute_value_id' => $sizeId],
                             [
                                 'sku' => $this->generateVariationSku(),
@@ -335,6 +344,8 @@ public function update(UpdateProductRequest $request, $id)
                 $productVariation->update(['stock' => $totalVariationStock]);
                 $totalProductStock += $totalVariationStock;
             }
+
+            // Cập nhật tổng tồn kho sản phẩm
             $product->update(['stock' => $totalProductStock]);
         }
 
@@ -355,33 +366,107 @@ public function update(UpdateProductRequest $request, $id)
 }
 
 
-    private function isValidAttributeForGroup_Update($groupId, $attributeValueIds)
-    {
 
-        $validAttributes = DB::table('attribute_groups')
-            ->where('group_id', $groupId)
-            ->pluck('attribute_id')  
-            ->toArray();  
 
-        if (empty($validAttributes)) {
-            return false;
-        }
+private function saveImagesUpdate($model, $request, $isVariation = false, $attributeValueId = null)
+{
+    if ($isVariation) {
+        $modelType = 'product_variation_id';
 
-      
-        $validAttributeValues = DB::table('attribute_values')
-            ->whereIn('attribute_id', $validAttributes)
-            ->pluck('id')  
-            ->toArray();
+        // Xử lý ảnh màu (color image)
+        $colorImageInput = "color_image_$attributeValueId";
+        if ($request->has($colorImageInput)) {
+            $colorImagePath = $request->input($colorImageInput);
 
-     
-        foreach ($attributeValueIds as $attributeValueId) {
-            if (!in_array($attributeValueId, $validAttributeValues)) {
-                return false;
+            // Kiểm tra xem ảnh đã tồn tại trong cơ sở dữ liệu chưa
+            $existingVariantImage = ProductVariationImage::where($modelType, $model->id)
+                ->where('image_type', 'variant')
+                ->where('image_path', $colorImagePath)
+                ->first();
+
+            if (!$existingVariantImage) {
+                // Nếu chưa tồn tại, thêm mới
+                ProductVariationImage::create([
+                    $modelType => $model->id,
+                    'image_path' => $colorImagePath,
+                    'image_type' => 'variant',
+                ]);
             }
         }
 
-        return true;
+        // Xử lý album ảnh (album images)
+        $albumInput = "album_images_$attributeValueId";
+        if ($request->has($albumInput)) {
+            foreach ($request->input($albumInput) as $albumImage) {
+                // Kiểm tra xem ảnh đã tồn tại trong cơ sở dữ liệu chưa
+                $existingAlbumImage = ProductVariationImage::where($modelType, $model->id)
+                    ->where('image_type', 'album')
+                    ->where('image_path', $albumImage)
+                    ->first();
+
+                if (!$existingAlbumImage) {
+                    // Nếu chưa tồn tại, thêm mới
+                    ProductVariationImage::create([
+                        $modelType => $model->id,
+                        'image_path' => $albumImage,
+                        'image_type' => 'album',
+                    ]);
+                }
+            }
+        }
+    } else {
+        // Xử lý hình ảnh cho sản phẩm (không phải biến thể)
+        $modelType = 'product_id';
+
+        // Xử lý album ảnh (album images)
+        $albumInput = 'album_images';
+        if ($request->hasFile($albumInput)) {
+            foreach ($request->file($albumInput) as $albumImage) {
+                // Upload từng ảnh lên Cloudinary
+                $cloudinaryResponse = Cloudinary::upload($albumImage->getRealPath(), [
+                    'folder' => "products/{$model->id}/albums",
+                    'public_id' => 'album_image_' . uniqid()
+                ]);
+                $albumPath = $cloudinaryResponse->getSecurePath();
+
+                // Kiểm tra xem ảnh đã tồn tại trong cơ sở dữ liệu chưa
+                $existingAlbumImage = ProductImage::where($modelType, $model->id)
+                    ->where('image_type', 'album')
+                    ->where('image_path', $albumPath)
+                    ->first();
+
+                if (!$existingAlbumImage) {
+                    // Nếu chưa tồn tại, thêm mới
+                    ProductImage::create([
+                        $modelType => $model->id,
+                        'image_path' => $albumPath,
+                        'image_type' => 'album',
+                    ]);
+                }
+            }
+        } elseif ($request->has($albumInput)) {
+            // Trường hợp lưu ảnh từ URL
+            foreach ($request->input($albumInput) as $albumImage) {
+                // Kiểm tra xem ảnh đã tồn tại trong cơ sở dữ liệu chưa
+                $existingAlbumImage = ProductImage::where($modelType, $model->id)
+                    ->where('image_type', 'album')
+                    ->where('image_path', $albumImage)
+                    ->first();
+
+                if (!$existingAlbumImage) {
+                    // Nếu chưa tồn tại, thêm mới
+                    ProductImage::create([
+                        $modelType => $model->id,
+                        'image_path' => $albumImage,
+                        'image_type' => 'album',
+                    ]);
+                }
+            }
+        }
     }
+}
+
+
 
 
     private function deleteSelectedImages($imageIds, $isVariation = false)
