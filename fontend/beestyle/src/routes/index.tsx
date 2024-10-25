@@ -21,9 +21,6 @@ import AddCategories from "@/pages/(dashboard)/dashboard/categories/add";
 import ListCategories from "@/pages/(dashboard)/dashboard/categories/list";
 import UpdateCategories from "@/pages/(dashboard)/dashboard/categories/update";
 import ListComments from "@/pages/(dashboard)/dashboard/comments/list";
-import AddProduct from "@/pages/(dashboard)/dashboard/products/add";
-import ListProducts from "@/pages/(dashboard)/dashboard/products/list";
-import UpdateProduct from "@/pages/(dashboard)/dashboard/products/update";
 import ListUser from "@/pages/(dashboard)/dashboard/user/list";
 import Search from "@/pages/(website)/_components/Search";
 import PageSignin from "@/pages/(website)/auth/signin/page";
@@ -34,6 +31,10 @@ import ListPage from "@/pages/(website)/list/page";
 import SearchPage from "@/pages/(website)/search/page";
 import { useState } from "react";
 import CartPage from "@/pages/(website)/cart/page";
+import UpdateProduct from "@/pages/(dashboard)/dashboard/Products/update";
+import ListProducts from "@/pages/(dashboard)/dashboard/bills/list";
+import AddProduct from "@/pages/(dashboard)/dashboard/Products/add";
+
 const Router = () => {
 
     const [isSearch, setIsSearch] = useState<boolean>(false)
