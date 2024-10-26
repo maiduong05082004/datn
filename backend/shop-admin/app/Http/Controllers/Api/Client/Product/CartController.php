@@ -45,8 +45,9 @@ public function getCartItems()
                     'quantity' => $cartItem->quantity,
                     'product' => $productResource, // Đưa vào ProductResource để hiển thị sản phẩm
                     'variation_id' => $selectedVariationValue->product_variation_id ?? null,
-                    
-
+                    'album_images' => $selectedVariationValue->productVariation->variationImages
+    ->where('image_type', 'album')  
+    ->pluck('image_path'),
                     'variation_values' => [
                         'id' => $selectedVariationValue->id,
                         'attribute_value_id' => $selectedVariationValue->attribute_value_id,

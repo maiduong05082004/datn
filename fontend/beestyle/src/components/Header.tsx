@@ -82,8 +82,8 @@ const Header = ({isSearch, setIsSearch}: Props) => {
                         </div>
                         <nav className="overflow-y-auto h-full lg:h-auto lg:overflow-hidden">
                             <ul className="px-[20px] lg:flex text-[14px] font-[500] lg:text-[17px] lg:font-[700]">
-                                {categorires?.data.map((item: any) => (
-                                    <li className="group mb-[10px] lg:m-0">
+                                {categorires?.data.map((item: any, index: any) => (
+                                    <li key={index + 1} className="group mb-[10px] lg:m-0">
                                         <h4 className="flex justify-between items-center w-[100%] py-[10px] lg:py-0">
                                             <Link onClick={() => setOpenCategories(!openCategories)} to={`categories/${item.id}`} className="w-full flex h-full lg:h-auto hover:text-[#BB9244] lg:hover:border-b-[1px] lg:hover:border-b-black lg:py-[15px] lg:px-[18px]">{item.name}</Link>
                                             <span className="lg:hidden">
@@ -99,7 +99,7 @@ const Header = ({isSearch, setIsSearch}: Props) => {
                                             <div className="lg:flex lg:justify-center lg:max-w-[1200px] lg:m-[0_auto]">
                                                 <ul className={` p-[15px_0px_15px_15px] ml-[15px] mt-[15px] lg:p-0 lg:m-0 lg:flex lg:min-w-[700px] lg:*:text-[14px]`}>
                                                     {item.children_recursive.map((value: any, index: any) => (
-                                                        <li className={`${index == 0 ? "" : "pl-[40px]"} lg:block lg:text-left`}>
+                                                        <li key={index + 1} className={`${index == 0 ? "" : "pl-[40px]"} lg:block lg:text-left`}>
                                                             <h4 className="flex justify-between items-center w-[100%] py-[10px] lg:py-0">
                                                                 <Link to={`categories/${value.id}`} className="w-full flex lg:mb-[12px]">
                                                                     {value.name}
@@ -112,8 +112,8 @@ const Header = ({isSearch, setIsSearch}: Props) => {
                                                             </h4>
                                                             <ul className={` p-[15px_0px_15px_15px] ml-[15px] mt-[15px] lg:p-0 lg:m-0 lg:block lg:*:font-[500] lg:*:text-[#787878]`}>
 
-                                                            {value.children_recursive.map((values: any) => (
-                                                                <li className="flex py-[10px] lg:p-0 lg:mt-[4px]">
+                                                            {value.children_recursive.map((values: any, index: any) => (
+                                                                <li key={index + 1} className="flex py-[10px] lg:p-0 lg:mt-[4px]">
                                                                     <Link  to={`categories/${values.id}`} className="w-full flex">
                                                                     {values.name}
                                                                     </Link>
@@ -243,7 +243,7 @@ const Header = ({isSearch, setIsSearch}: Props) => {
                                 className='w-[40px] h-[40px] flex justify-center items-center text-center'>
                                 <img className=" ls-is-cached lazyloaded" src="https://file.hstatic.net/200000642007/file/icon-cart_d075fce117f74a07ae7f149d8943fc33.svg" data-src="https://file.hstatic.net/200000642007/file/icon-cart_d075fce117f74a07ae7f149d8943fc33.svg" alt="Icon cart" width={24} height={24} />
                             </div>
-                            <div className={`absolute w-[13px] h-[13px] text-[9px] rounded-[100%] top-[10px] right-[5px] bg-black text-white flex items-center justify-center`}>{carts?.data.cart_items.length > 0 ? carts?.data.cart_items.length : 0}</div>
+                            <div className={`absolute w-[13px] h-[13px] text-[9px] rounded-[100%] top-[10px] right-[5px] bg-black text-white flex items-center justify-center`}>1</div>
                         </Link>
                         <Link to={`/account/wishlist`} className="items-center hidden lg:flex col-start-2 row-start-1 lg:col-start-3">
                             <a href="" className='w-[40px] h-[40px] flex justify-center items-center text-center'>

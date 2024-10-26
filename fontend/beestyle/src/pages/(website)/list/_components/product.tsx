@@ -50,7 +50,7 @@ const ProductsList = ({products} : any) => {
                                 <React.Fragment >
                                     <input
                                         className='hidden'
-                                        type="radio"
+                                        // type="radio"
                                         id={``}
                                         name={`options-`}
                                         value="1"

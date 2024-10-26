@@ -257,7 +257,7 @@ const DetailPage = () => {
                                         <>
                                             <input
                                                 className='hidden'
-                                                type="radio"
+                                                // type="radio"
                                                 id={item?.attribute_value_image_variant?.id}
                                                 name="options"
                                                 value="1"
@@ -292,7 +292,7 @@ const DetailPage = () => {
                                                 <>
                                                     <input
                                                         className='hidden'
-                                                        type="radio"
+                                                        // type="radio"
                                                         id={value?.id}
                                                         name="options1"
                                                         value="1"
