@@ -3,8 +3,8 @@ import { Table, message, Button, Image, Tag, Modal, Popconfirm, Spin } from 'ant
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import axios from 'axios';
 import { format } from 'date-fns';
-import { Link, useNavigate } from 'react-router-dom';
 import { DeleteOutlined, EditOutlined, EyeOutlined, PlusOutlined } from '@ant-design/icons';
+import { useNavigate } from 'react-router-dom';
 
 interface Product {
   id: number;
@@ -41,9 +41,6 @@ interface VariationValue {
 const ListProducts = () => {
   const [messageApi, contextHolder] = message.useMessage();
   const queryClient = useQueryClient();
-  const [isModalVisible, setIsModalVisible] = useState(false);
-  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
-  const [selectedDescription, setSelectedDescription] = useState<string | null>(null); 
   const navigate = useNavigate();
 
   const { data: productsData, isLoading } = useQuery({
@@ -53,6 +50,7 @@ const ListProducts = () => {
       return response.data;
     }
   });
+
   const mutation = useMutation({
     mutationFn: async (id: number) => {
       await axios.delete(`http://localhost:8000/api/admins/products/${id}`);
@@ -66,20 +64,45 @@ const ListProducts = () => {
     },
   });
 
-  const showModal = (product: Product) => {
-    setSelectedProduct(product);
-    setIsModalVisible(true);
-  };
+  // Hàm mở rộng để render danh sách các biến thể
+  const expandedRowRender = (record: Product) => {
+    return (
+      <div className="space-y-4 bg-gray-50 p-4 rounded-lg shadow-lg">
+        {record.variations.map((variant, index) => (
+          <div key={index} className="bg-white p-4 rounded-lg shadow-md">
+            <h4 className="font-semibold text-indigo-600">Màu: {variant.attribute_value_image_variant.value}</h4>
+            <Image
+              className="rounded-lg mb-2"
+              width={100}
+              src={variant.attribute_value_image_variant.image_path}
+              alt={variant.attribute_value_image_variant.value}
+            />
+            <h4 className="font-semibold text-gray-700">Số lượng tồn kho: {variant.stock}</h4>
 
-  const showDescriptionModal = (description: string) => {
-    setSelectedDescription(description);
-    setIsModalVisible(true);
-  };
+            {variant.variation_values.map((value) => (
+              <div key={value.attribute_value_id} className="ml-4 mt-2">
+                <p>Size: {value.value}</p>
+                <p>Giá: {parseFloat(value.price).toLocaleString()} VND</p>
+                {value.discount > 0 && <Tag color="red" className="mt-2">Giảm giá: {value.discount}%</Tag>}
+              </div>
+            ))}
 
-  const handleCancel = () => {
-    setIsModalVisible(false);
-    setSelectedProduct(null);
-    setSelectedDescription(null);
+            <h4 className="font-semibold text-gray-700 mt-4">Album ảnh:</h4>
+            <div className="flex space-x-2 mt-2">
+              {variant.variation_album_images.map((image, imgIndex) => (
+                <Image
+                  key={imgIndex}
+                  width={100}
+                  className="rounded-lg"
+                  src={image}
+                  alt={`Album image ${imgIndex + 1}`}
+                />
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+    );
   };
 
   const columns: Array<any> = [
@@ -97,14 +120,13 @@ const ListProducts = () => {
         text: product.name,
         value: product.name,
       })),
-      onFilter: (value: string, record: Product) => record.name.indexOf(value) === 0,
+      onFilter: (value: string, record: Product) => record.name.includes(value),
     },
     {
       title: 'Giá',
       dataIndex: 'price',
       key: 'price',
       sorter: (a: Product, b: Product) => parseFloat(a.price) - parseFloat(b.price),
-      sortDirections: ['ascend', 'descend'],
       render: (text: string) => <span>{parseFloat(text).toLocaleString()} VND</span>,
     },
     {
@@ -117,11 +139,11 @@ const ListProducts = () => {
       dataIndex: 'description',
       key: 'description',
       render: (text: string) => (
-        <div style={{ maxWidth: '150px' }}>
+        <div className="truncate max-w-xs">
           {text.length > 20 ? (
             <>
               {text.slice(0, 20)}...
-              <Button type="link" onClick={() => showDescriptionModal(text)}>Xem chi tiết</Button>
+              <Button type="link" onClick={() => messageApi.info(text)}>Xem chi tiết</Button>
             </>
           ) : (
             text
@@ -129,25 +151,6 @@ const ListProducts = () => {
         </div>
       ),
     },
-    {
-      title: 'Nội dung',
-      dataIndex: 'content',
-      key: 'content',
-      render: (text: string) => (
-        <div style={{ maxWidth: '150px' }}>
-          {text.length > 20 ? (
-            <>
-              {text.slice(0, 20)}...
-              <Button type="link" onClick={() => showDescriptionModal(text)}>Xem chi tiết</Button>
-
-            </>
-          ) : (
-            text
-          )}
-        </div>
-      ),
-    }
-    ,
     {
       title: 'Ngày nhập',
       dataIndex: 'input_day',
@@ -155,7 +158,7 @@ const ListProducts = () => {
       render: (date: string) => <span>{format(new Date(date), 'dd/MM/yyyy')}</span>,
     },
     {
-      title: 'Danh mục', 
+      title: 'Danh mục',
       dataIndex: 'category_name',
       key: 'category_name',
       filters: productsData?.data?.map((product: Product) => ({
@@ -169,106 +172,46 @@ const ListProducts = () => {
       title: 'Action',
       key: 'action',
       render: (product: Product) => (
-        <>
-          <div className='flex justify-between'>
-            <Button
-              type="link"
-              icon={<EyeOutlined />}
-              className="bg-blue-500 text-white hover:bg-blue-700"
-              onClick={() => navigate(`/admin/detailProducts/${product.id}`)}
-            >
-            </Button>
-            <Button
-              type="default"
-              icon={<EditOutlined />}
-              onClick={() => navigate(`/admin/updateProducts/${product.id}`)}
-            />
-            <Popconfirm
-              title="Xóa sản phẩm"
-              description="Bạn có chắc muốn xóa sản phẩm này không?"
-              onConfirm={() => mutation.mutate(product.id)}
-              okText="Yes"
-              cancelText="No"
-            >
-              <Button icon={<DeleteOutlined />} type="primary" danger>
-              </Button>
-            </Popconfirm>
-          </div>
-        </>
+        <div className="flex space-x-2">
+          <Button
+            type="link"
+            icon={<EyeOutlined />}
+            className="text-white bg-blue-500 hover:bg-blue-600"
+            onClick={() => navigate(`/admin/detailProducts/${product.id}`)}
+          />
+          <Button
+            type="default"
+            icon={<EditOutlined />}
+            className="bg-yellow-500 text-white hover:bg-yellow-600"
+            onClick={() => navigate(`/admin/updateProducts/${product.id}`)}
+          />
+          <Popconfirm
+            title="Xóa sản phẩm"
+            description="Bạn có chắc muốn xóa sản phẩm này không?"
+            onConfirm={() => mutation.mutate(product.id)}
+            okText="Yes"
+            cancelText="No"
+          >
+            <Button icon={<DeleteOutlined />} type="primary" danger className="bg-red-500 text-white hover:bg-red-600" />
+          </Popconfirm>
+        </div>
       ),
     },
   ];
 
-  const renderVariationDetails = () => {
-    if (!selectedProduct) return null;
-    return selectedProduct.variations.map((variant, index) => (
-      <div key={index} className="mb-4 p-2 bg-gray-50 rounded-lg">
-        <h4 className="font-semibold text-indigo-700">
-          Tên biến thể: {selectedProduct?.group?.name}
-        </h4>
-        <h4 className="font-semibold text-indigo-700">
-          Tên màu biến thể: {variant.attribute_value_image_variant.value}
-        </h4>
-
-        <Image
-          width={50}
-          height={50}
-          src={variant.attribute_value_image_variant.image_path}
-          alt={variant.attribute_value_image_variant.value}
-        />
-        {variant.variation_values.map((value: any) => (
-          <div key={value.attribute_value_id} className="mt-2 p-2 bg-gray-50 rounded-lg border">
-            <div className="flex justify-between items-center">
-              <h2 className="font-semibold">Size: {value.value}</h2>
-              <div className="flex space-x-2 items-center">
-                <span className="text-lg font-bold">{parseFloat(value.price).toLocaleString()} VND</span>
-                {value.discount > 0 && <Tag color="red" className="ml-2">-{value.discount}%</Tag>}
-              </div>
-            </div>
-            <div className="flex justify-between items-center mt-2">
-              <h2 className="font-semibold">Số Lượng:</h2>
-              <h2 className="border border-[#ffa39e] rounded-sm bg-[#fff1f0] text-[#cf1322] mt-2 w-[44px] flex justify-center">
-                {value.stock}
-              </h2>
-            </div>
-          </div>
-        ))}
-
-        <div className="mt-4">
-          <h2 className="font-bold">Album ảnh:</h2>
-          <div className="flex space-x-2 mt-2">
-            {variant.variation_album_images.map((image, index) => (
-              <Image
-                key={index}
-                src={image}
-                alt={`Album image ${index + 1}`}
-                width={200}
-                height={200}
-                className="rounded border"
-              />
-            ))}
-          </div>
-        </div>
-      </div>
-    ));
-  };
-
-  const renderDescriptionDetails = () => {
-    if (!selectedDescription) return null;
-    return (
-      <div>
-        <p>{selectedDescription}</p>
-      </div>
-    );
-  };
-
   if (isLoading) return <Spin tip="Loading..." className="flex justify-center items-center h-screen" />;
+  
   return (
     <>
       {contextHolder}
       <div className="w-full mx-auto px-6 py-8">
         <div className="flex justify-between items-center mb-6">
-          <Button className='bg-indigo-600 hover:bg-indigo-700 text-white' icon={<PlusOutlined />} type="primary" onClick={() => navigate('/admin/addProducts')} >
+          <Button
+            className="bg-indigo-600 hover:bg-indigo-700 text-white"
+            icon={<PlusOutlined />}
+            type="primary"
+            onClick={() => navigate('/admin/addProducts')}
+          >
             Thêm mới
           </Button>
         </div>
@@ -277,21 +220,15 @@ const ListProducts = () => {
           dataSource={productsData?.data}
           bordered
           rowKey="id"
+          expandable={{
+            expandedRowRender: expandedRowRender, // Hiển thị danh sách biến thể dưới mỗi sản phẩm
+          }}
           pagination={{
             pageSize: 7,
-            showTotal: (total) => `Tổng ${total} danh mục`,
+            showTotal: (total) => `Tổng ${total} sản phẩm`,
           }}
         />
       </div>
-
-      <Modal
-        title={selectedProduct ? `Chi tiết biến thể sản phẩm: ${selectedProduct?.name}` : 'Chi tiết mô tả'}
-        visible={isModalVisible}
-        onCancel={handleCancel}
-        footer={null}
-      >
-        {selectedProduct ? renderVariationDetails() : renderDescriptionDetails()}
-      </Modal>
     </>
   );
 };

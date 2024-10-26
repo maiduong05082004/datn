@@ -1,4 +1,3 @@
-import AddAttribute from "@/pages/(dashboard)/dashboard/attribute_values/add";
 import DashboardPage from "@/pages/(dashboard)/dashboard/page";
 import MyProfile from "@/pages/(dashboard)/dashboard/profile";
 import AddPromotion from "@/pages/(dashboard)/dashboard/promotions/add";
@@ -10,9 +9,6 @@ import LayoutAdmin from "@/pages/(dashboard)/layout";
 import HomePage from "@/pages/(website)/home/page";
 import LayoutWebsite from "@/pages/(website)/layout";
 import { Route, Routes } from "react-router-dom";
-
-import AddAttributeValues from "@/pages/(dashboard)/dashboard/attribute_values/addValue";
-import UpdateAttribute from "@/pages/(dashboard)/dashboard/attribute_values/update";
 import AddBanners from "@/pages/(dashboard)/dashboard/banners/add";
 import ListBanners from "@/pages/(dashboard)/dashboard/banners/list";
 import UpdateBanners from "@/pages/(dashboard)/dashboard/banners/update";
@@ -30,10 +26,16 @@ import DetailPage from "@/pages/(website)/detail/page";
 import ListPage from "@/pages/(website)/list/page";
 import SearchPage from "@/pages/(website)/search/page";
 import { useState } from "react";
+import ListAttribute from "@/pages/(dashboard)/dashboard/attribute_values/list";
+import AddAttribute from "@/pages/(dashboard)/dashboard/attribute_values/add";
+import UpdateAttribute from "@/pages/(dashboard)/dashboard/attribute_values/update";
+import AddAttributeValues from "@/pages/(dashboard)/dashboard/attribute_values/addValue";
+import UpdateAttributeValues from "@/pages/(dashboard)/dashboard/attribute_values/updateValue";
 import CartPage from "@/pages/(website)/cart/page";
-import UpdateProduct from "@/pages/(dashboard)/dashboard/Products/update";
-import ListProducts from "@/pages/(dashboard)/dashboard/bills/list";
+import ListProducts from "@/pages/(dashboard)/dashboard/Products/list";
 import AddProduct from "@/pages/(dashboard)/dashboard/Products/add";
+import UpdateProduct from "@/pages/(dashboard)/dashboard/Products/update";
+import DetailProduct from "@/pages/(dashboard)/dashboard/Products/detail";
 
 const Router = () => {
 
@@ -74,15 +76,17 @@ const Router = () => {
                     <Route path="listProducts" element={<ListProducts />} />
                     <Route path="addProducts" element={<AddProduct />} />
                     <Route path="updateProducts/:id" element={<UpdateProduct />} />
+                    <Route path="detailProducts/:id" element={<DetailProduct />} />
                     {/* banner */}
                     <Route path="listBanners" element={<ListBanners />} />
                     <Route path="addBanners" element={<AddBanners />} />
                     <Route path="updateBanners" element={<UpdateBanners />} />
                     {/*giá trị attribute */}
                     <Route path="addattribute_value" element={<AddAttributeValues />} />
-
                     <Route path="addattribute" element={<AddAttribute />} />
+                    <Route path="listattribute_value" element={<ListAttribute />} />
                     <Route path="updateattribute/:id" element={< UpdateAttribute />} />
+                    <Route path="updateattribute_value/:id" element={< UpdateAttributeValues />} />
                     {/* Danh Mục */}
                     <Route path="listCategories" element={<ListCategories />} />
                     <Route path="addCategories" element={<AddCategories />} />
