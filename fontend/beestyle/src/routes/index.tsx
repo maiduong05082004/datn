@@ -35,13 +35,15 @@ import DetailPage from "@/pages/(website)/detail/page";
 import ListPage from "@/pages/(website)/list/page";
 import SearchPage from "@/pages/(website)/search/page";
 import { useState } from "react";
+import CartPage from "@/pages/(website)/cart/page";
 
 const Router = () => {
 
     const [isSearch, setIsSearch] = useState<boolean>(false)
     const [isKeySearch, setKeySearch] = useState<string>("")
     return (
-        <Suspense fallback={<div>Loading...</div>}>
+
+        <>
             <Routes>
                 <Route path="/" element={<LayoutWebsite isSearch={isSearch} setIsSearch={setIsSearch} />}>
                     <Route index element={<HomePage />} />
@@ -51,7 +53,7 @@ const Router = () => {
                     <Route path="signin" element={<PageSignin />} />
                     <Route path="signup" element={<PageSignup />} />
                     <Route path="search" element={<SearchPage isKeySearch={isKeySearch}/>} />
-
+                    <Route path="carts" element={<CartPage />} />
                 </Route>
 
                 {/* Admin Routes */}
@@ -95,8 +97,7 @@ const Router = () => {
 
             </Routes>
             <Search isSearch={isSearch} setIsSearch={setIsSearch} setKeySearch={setKeySearch}/>
-
-        </Suspense>
+        </>
     );
 };
 

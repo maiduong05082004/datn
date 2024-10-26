@@ -3,13 +3,13 @@ import { Link } from 'react-router-dom'
 
 type Props = {}
 
-const ProductsList = ({products} : any) => {
+const ProductsList = ({ products }: any) => {
 
     useEffect(() => {
         window.scrollTo(0, 0);
-      }, []);
+    }, []);
 
-      if(products?.data?.length === 0) return (<div>DEO CO SAN PHAM NAO</div>)
+    if (products?.data?.length === 0) return (<div>Hiện nhóm sản phẩm chưa cập nhật sản phẩm</div>)
 
     return (
         <div className="grid grid-cols-4 lg:grid-cols-12 lg:px-[15px] lg:gap-2 pc:px-[48px]">
