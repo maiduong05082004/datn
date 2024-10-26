@@ -19,6 +19,7 @@ use App\Http\Controllers\Api\Client\Product\CartController as ProductCartControl
 use App\Http\Controllers\Api\Client\Product\ShippingController;
 use App\Http\Controllers\Api\Client\PromotionController;
 use App\Http\Controllers\CartController;
+use App\Http\Controllers\PaymentController;
 
 Route::prefix('client')->as('client.')->group(function () {
     Route::prefix('auth')
@@ -69,7 +70,11 @@ Route::prefix('client')->as('client.')->group(function () {
         Route::put('/update/{id}', [ProductCartController::class, 'updateCartItem'])->name('update');
         Route::delete('/{id}', [ProductCartController::class, 'removeCartItem'])->name('remove');
     });
-    
+    Route::prefix('wishlist')->as('wishlist.')->middleware('auth:sanctum')->group(function () {
+        Route::post('/add', [WishlistController::class, 'addToWishlist'])->name('wishlist.add');
+        Route::get('/', [WishlistController::class, 'index'])->name('wishlist.index');
+        Route::delete('/remove/{id}', [WishlistController::class, 'destroy'])->name('wishlist.remove');
+    });
 });
 
 
@@ -93,8 +98,6 @@ Route::prefix('admins')
             });
             Route::apiResource('categories', AdminCategoryController::class);
             Route::prefix('users')->group(function () {
-                Route::post('/wishlist/add/', [WishlistController::class, 'addToWishlist'])->name('wishlist.add');
-                Route::get('/wishlist', [WishlistController::class, 'index'])->name('wishlist.index');
                 Route::get('/', [UserController::class, 'index']);
                 Route::post('/', [UserController::class, 'store']);
                 Route::get('/{id}', [UserController::class, 'show']);
@@ -102,9 +105,6 @@ Route::prefix('admins')
                 Route::apiResource('users', UserController::class);
                 Route::get('/{id}/block', [UserController::class, 'blockUser']);
                 Route::put('/{id}/unblock', [UserController::class, 'unblockUser']);
-                Route::get('/wishlist', [WishlistController::class, 'index'])->name('wishlist.index');
-                Route::post('/wishlist/add/{id}', [WishlistController::class, 'addToWishlist'])->name('wishlist.add');
-                Route::delete('/wishlist/remove/{id}', [WishlistController::class, 'removeFromWishlist'])->name('wishlist.remove');
             });
             Route::prefix('promotions')->group(function () {
                 Route::get('/new-users', [PromotionsController::class, 'getNewUserPromotions'])->name('promotions.new-users');
@@ -118,3 +118,4 @@ Route::prefix('admins')
             });
         });
     });
+    // });
