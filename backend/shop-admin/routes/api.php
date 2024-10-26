@@ -20,6 +20,7 @@ use App\Http\Controllers\Api\Client\Product\ProductController as ProductProductC
 use App\Http\Controllers\Api\Client\Product\CartController as ProductCartController;
 use App\Http\Controllers\Api\Client\Product\ShippingController;
 use App\Http\Controllers\Api\Client\PromotionController;
+use App\Http\Controllers\PaymentController;
 
 Route::prefix('client')->as('client.')->group(function () {
     Route::prefix('auth')
@@ -70,50 +71,58 @@ Route::prefix('client')->as('client.')->group(function () {
         Route::put('/update/{id}', [ProductCartController::class, 'updateCartItem'])->name('update');
         Route::delete('/{id}', [ProductCartController::class, 'removeCartItem'])->name('remove');
     });
+    Route::prefix('wishlist')->as('wishlist.')->middleware('auth:sanctum')->group(function () {
+        Route::post('/add', [WishlistController::class, 'addToWishlist'])->name('wishlist.add');
+        Route::get('/', [WishlistController::class, 'index'])->name('wishlist.index');
+        Route::delete('/remove/{id}', [WishlistController::class, 'destroy'])->name('wishlist.remove');
+    });
 });
 Route::prefix('admins')
     ->as('admins.')
     ->group(function () {
         Route::post('/signin', [AdminAuthController::class, 'login'])->name('signin');
-        Route::middleware(['auth:admin', 'admin'])->group(function () {
-            Route::apiResource('products', ProductController::class)
-                ->names('products');
-            Route::apiResource('attributes', AttributeController::class)
-                ->names('attributes');
-            Route::apiResource('attribute_groups', AttributeGroupController::class)
-                ->names('attribute_groups');
-            Route::apiResource('attribute_values', AttributeValueController::class)
-                ->names('attribute_values');
-            Route::prefix('categories')->group(function () {
-                Route::post('{id}/soft-delete', [AdminCategoryController::class, 'softDestroy'])->name('categories.soft-delete');
-                Route::post('{id}/restore', [AdminCategoryController::class, 'restore'])->name('categories.restore');
-                Route::get('trash', [AdminCategoryController::class, 'trash']);
-            });
-            Route::apiResource('categories', AdminCategoryController::class);
-            Route::prefix('users')->group(function () {
-                Route::post('/wishlist/add/', [WishlistController::class, 'addToWishlist'])->name('wishlist.add');
-                Route::get('/wishlist', [WishlistController::class, 'index'])->name('wishlist.index');
-                Route::get('/', [UserController::class, 'index']);
-                Route::post('/store', [UserController::class, 'store']);
-                Route::get('/{id}', [UserController::class, 'show']);
-                Route::put('/{id}', [UserController::class, 'update']);
+        // Route::middleware(['auth:admin', 'admin'])->group(function () {
+        Route::apiResource('products', ProductController::class)
+            ->names('products');
+        Route::apiResource('attributes', AttributeController::class)
+            ->names('attributes');
+        Route::apiResource('attribute_groups', AttributeGroupController::class)
+            ->names('attribute_groups');
+        Route::apiResource('attribute_values', AttributeValueController::class)
+            ->names('attribute_values');
+        Route::prefix('categories')->group(function () {
+            Route::post('{id}/soft-delete', [AdminCategoryController::class, 'softDestroy'])->name('categories.soft-delete');
+            Route::post('{id}/restore', [AdminCategoryController::class, 'restore'])->name('categories.restore');
+            Route::get('trash', [AdminCategoryController::class, 'trash']);
+        });
+        Route::apiResource('categories', AdminCategoryController::class);
+        Route::prefix('users')->group(function () {
 
-                Route::apiResource('users', UserController::class);
+            Route::get('/', [UserController::class, 'index']);
+            Route::post('/store', [UserController::class, 'store']);
+            Route::get('/{id}', [UserController::class, 'show']);
+            Route::put('/{id}', [UserController::class, 'update']);
 
-                Route::get('/{id}/block', [UserController::class, 'blockUser']);
+            Route::apiResource('users', UserController::class);
 
-                Route::put('/{id}/unblock', [UserController::class, 'unblockUser']);
-                Route::delete('/wishlist/remove/{id}', [WishlistController::class, 'destroy'])->name('wishlist.remove');
-            });
-            Route::prefix('promotions')->group(function () {
-                Route::get('/new-users', [PromotionsController::class, 'getNewUserPromotions'])->name('promotions.new-users');
-                Route::get('/', [PromotionsController::class, 'index'])->name('promotions.index');
-                Route::post('/', [PromotionsController::class, 'store'])->name('promotions.store');
-                Route::get('/{id}', [PromotionsController::class, 'show'])->name('promotions.show');
-                Route::put('/{id}', [PromotionsController::class, 'update'])->name('promotions.update');
-                Route::delete('/{id}', [PromotionsController::class, 'destroy'])->name('promotions.destroy');
-                Route::get('/user/{userId}/product/{productId}', [PromotionsController::class, 'getUserProductPromotions'])->name('promotions.user-product');
-                Route::get('/event/{eventName}', [PromotionsController::class, 'getEventPromotions'])->name('promotions.event');
-            });
+            Route::get('/{id}/block', [UserController::class, 'blockUser']);
+
+            Route::put('/{id}/unblock', [UserController::class, 'unblockUser']);
+        });
+        Route::prefix('promotions')->group(function () {
+            Route::get('/new-users', [PromotionsController::class, 'getNewUserPromotions'])->name('promotions.new-users');
+            Route::get('/', [PromotionsController::class, 'index'])->name('promotions.index');
+            Route::post('/', [PromotionsController::class, 'store'])->name('promotions.store');
+            Route::get('/{id}', [PromotionsController::class, 'show'])->name('promotions.show');
+            Route::put('/{id}', [PromotionsController::class, 'update'])->name('promotions.update');
+            Route::delete('/{id}', [PromotionsController::class, 'destroy'])->name('promotions.destroy');
+            Route::get('/user/{userId}/product/{productId}', [PromotionsController::class, 'getUserProductPromotions'])->name('promotions.user-product');
+            Route::get('/event/{eventName}', [PromotionsController::class, 'getEventPromotions'])->name('promotions.event');
+        });
+        Route::prefix('payments')->group(function () {
+            Route::get('/listpm', [PaymentController::class, 'showPaymentForm']);
+            // Route::post('/payment/vnpay', [PaymentController::class, 'vnPayPayment']);
+            Route::get('/return', [PaymentController::class, 'paymentReturn'])->name('payments.return');
         });
     });
+    // });
