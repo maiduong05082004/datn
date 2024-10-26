@@ -84,25 +84,26 @@ const AddProduct: React.FC = () => {
   });
 
   const { mutate } = useMutation({
-    mutationFn: async (data: VariantProduct) => {
-      const response = await axios.post('http://localhost:8000/api/admins/products', data);
-      return response.data;
+    mutationFn: async (data: FormData) => {
+      try {
+        const response = await axios.post('http://localhost:8000/api/admins/products', data, {
+          headers: { 'Content-Type': 'multipart/form-data' },
+        });
+        console.log('Response từ server:', response);
+        return response.data;
+      } catch (error) {
+        throw new Error('Không thể thêm sản phẩm');
+      }
     },
     onSuccess: () => {
       toast.success('Thêm sản phẩm thành công!');
-      form.resetFields();
-      setContent('');
-      setSelectedVariantGroup(null);
-      setAttributes([]);
-      setVariants([]);
-      setFileList([]);
-      setAlbumList([]);
     },
     onError: (error) => {
       console.error('Lỗi khi thêm sản phẩm:', error);
       toast.error('Thêm sản phẩm thất bại!');
     },
   });
+  
   // Xử lý khi chọn nhóm biến thể
   useEffect(() => {
     if (selectedVariantGroup && variantgroup) {
@@ -297,15 +298,14 @@ const AddProduct: React.FC = () => {
 
 
 
-
-
+  //  xử lý khi submit form
   const onFinish = (values: any) => {
     const formData = new FormData(); // Tạo FormData để gửi dữ liệu
     const formattedDate = values.input_day ? values.input_day.format('YYYY-MM-DD') : null;
-  
+
     console.log("Values nhận được:", values); // Kiểm tra dữ liệu form
     console.log("Album list:", albumList); // Kiểm tra album list
-  
+
     // Nếu không có biến thể
     if (!showVariantForm) {
       // Xử lý album ảnh
@@ -315,7 +315,6 @@ const AddProduct: React.FC = () => {
           formData.append(`album_images[${index}]`, file.originFileObj);
         }
       });
-  
       // Thêm các trường khác vào formData
       formData.append('name', values.name);
       formData.append('price', values.price);
@@ -327,7 +326,6 @@ const AddProduct: React.FC = () => {
       formData.append('is_collection', values.is_collection ? '1' : '0');
       formData.append('is_hot', values.is_hot ? '1' : '0');
       formData.append('is_new', values.is_new ? '1' : '0');
-  
       // Gọi mutate với FormData
       console.log("FormData sản phẩm đơn giản:", formData);
       mutate(formData as any);
@@ -337,7 +335,6 @@ const AddProduct: React.FC = () => {
     // Xử lý cho sản phẩm có biến thể
     if (showVariantForm) {
       console.log("Biến thể trước khi xử lý:", variants); // Kiểm tra biến thể
-  
       if (!selectedVariantGroup) {
         toast.error('Vui lòng chọn nhóm biến thể!');
         return;
@@ -354,18 +351,17 @@ const AddProduct: React.FC = () => {
           const validSizes = variant.sizes.filter(
             (size: any) => size.stock !== undefined && size.stock > 0
           );
-  
+
           if (validSizes.length === 0) {
             return null;
           }
-  
+
           return {
             ...variant,
             sizes: validSizes,
           };
         })
         .filter(Boolean);
-  
       if (validVariants.length === 0) {
         toast.error('Vui lòng điền đầy đủ thông tin cho ít nhất một biến thể và kích thước!');
         return;
@@ -386,7 +382,6 @@ const AddProduct: React.FC = () => {
         }
         return acc;
       }, {});
-  
       // Thêm ảnh biến thể vào formData
       validVariants.forEach((variant: any, index: number) => {
         const colorId = variant.colorId || variant.id;
@@ -399,7 +394,6 @@ const AddProduct: React.FC = () => {
           }
         });
       });
-  
       // Thêm các trường khác vào formData
       formData.append('name', values.name);
       formData.append('price', values.price);
@@ -412,9 +406,9 @@ const AddProduct: React.FC = () => {
       formData.append('is_collection', values.is_collection ? '1' : '0');
       formData.append('is_hot', values.is_hot ? '1' : '0');
       formData.append('is_new', values.is_new ? '1' : '0');
-  
+
       console.log("FormData sản phẩm có biến thể:", formData);
-      
+
       // Gọi mutate với FormData
       mutate(formData as any);
     }
@@ -440,11 +434,6 @@ const AddProduct: React.FC = () => {
             rules={[
               { required: true, message: 'Tên sản phẩm bắt buộc' },
               { min: 5, message: 'Tên sản phẩm phải có ít nhất 5 ký tự' },
-              { max: 50, message: 'Tên sản phẩm không được quá 50 ký tự' },
-              {
-                pattern: /^[A-Za-z0-9\s]+$/,
-                message: 'Tên sản phẩm chỉ được chứa ký tự chữ và số',
-              },
             ]}
           >
             <Input />
@@ -455,7 +444,6 @@ const AddProduct: React.FC = () => {
             rules={[
               { required: true, message: 'Giá sản phẩm bắt buộc phải điền' },
               { type: 'number', min: 1, message: 'Giá phải lớn hơn 0' },
-              { type: 'number', max: 1000000, message: 'Giá không được vượt quá 1,000,000' },
             ]}
           >
             <InputNumber min={0} style={{ width: '100%' }} />
