@@ -70,7 +70,6 @@ const UpdateProduct: React.FC = () => {
         variant_group: UpdateVariant.group?.id,
       });
       setContent(UpdateVariant.content || '');
-
       setProductData(UpdateVariant);
 
       const group = variantgroup.find((g: any) => g.group_id === UpdateVariant.group?.id);
@@ -79,14 +78,11 @@ const UpdateProduct: React.FC = () => {
       if (group && group.attributes) {
         const formattedAttributes = group.attributes.map((attribute: any) => {
           const selectedValues: any[] = [];
-
-          // Xử lý giá trị của biến thể (variation)
           UpdateVariant.variations.forEach((variation: any) => {
             if (attribute.attribute_type === 0 && variation.attribute_value_image_variant) {
               const attrValue = attribute.attribute_values.find(
                 (av: any) => av.id === variation.attribute_value_image_variant.id
               );
-
               if (attrValue) {
                 selectedValues.push({
                   key: attrValue.id,
@@ -94,13 +90,11 @@ const UpdateProduct: React.FC = () => {
                 });
               }
             }
-
             if (attribute.attribute_type === 1) {
               variation.variation_values.forEach((value: any) => {
                 const attrValue = attribute.attribute_values.find(
                   (av: any) => av.id === value.attribute_value_id
                 );
-
                 if (attrValue) {
                   selectedValues.push({
                     key: attrValue.id,
@@ -110,11 +104,9 @@ const UpdateProduct: React.FC = () => {
               });
             }
           });
-
           const uniqueSelectedValues = selectedValues.filter(
             (v, i, a) => a.findIndex((t) => t.key === v.key) === i
           );
-
           return {
             ...attribute,
             selectedValues: uniqueSelectedValues,
@@ -138,7 +130,7 @@ const UpdateProduct: React.FC = () => {
               name: variation.attribute_value_image_variant.image_path,
               uid: variation.attribute_value_image_variant.image_path,
               status: 'done',
-              url: `path_to_image/${variation.attribute_value_image_variant.image_path}`,
+              url: variation.attribute_value_image_variant.image_path,
               isExisting: true,
             },
           ]
@@ -147,13 +139,14 @@ const UpdateProduct: React.FC = () => {
           name: image,
           uid: image,
           status: 'done',
-          url: `path_to_image/${image}`,
+          url: image,
           isExisting: true,
         })),
       }));
       setVariants(formattedVariants);
     }
   }, [UpdateVariant, form, variantgroup]);
+
 
   const { mutate: updateProduct } = useMutation({
     mutationFn: async (formData: any) => {
@@ -224,29 +217,29 @@ const UpdateProduct: React.FC = () => {
       toast.error('Chưa có thuộc tính để tạo biến thể.');
       return;
     }
-  
+
     const colorAttribute = attributes.find((attr) => attr.attribute_type === 0);
     const sizeAttribute = attributes.find((attr) => attr.attribute_type === 1);
-  
+
     // Kiểm tra nếu thuộc tính không tồn tại hoặc không có selectedValues
     if (!colorAttribute || !sizeAttribute) {
       toast.error('Thiếu thuộc tính Màu Sắc hoặc Kích Thước');
       return;
     }
-  
+
     if (!colorAttribute.selectedValues || colorAttribute.selectedValues.length === 0) {
       toast.error('Bạn chưa chọn Màu Sắc cho sản phẩm.');
       return;
     }
-  
+
     if (!sizeAttribute.selectedValues || sizeAttribute.selectedValues.length === 0) {
       toast.error('Bạn chưa chọn Kích Thước cho sản phẩm.');
       return;
     }
-  
+
     const selectedColors = colorAttribute.selectedValues || [];
     const selectedSizes = sizeAttribute.selectedValues || [];
-  
+
     // Tạo biến thể mới với màu sắc và kích thước
     const newVariants = selectedColors.map((color: any) => ({
       colorId: color.key,
@@ -260,37 +253,33 @@ const UpdateProduct: React.FC = () => {
       colorImage: [],
       albumImages: [],
     }));
-  
+
     setVariants(newVariants);  // Cập nhật biến thể với size
   };
-  
-  
 
+
+
+  // Kiểm tra response khi upload ảnh
   const handleUploadChangeForVariant = (index: number, key: string, info: any) => {
     const updatedVariants = [...variants];
     const variant = updatedVariants[index];
+
     if (variant) {
       variant[key] = info.fileList.map((file: any) => {
+        console.log(file); // Kiểm tra dữ liệu ảnh sau khi tải lên
         if (file.response) {
+          console.log(file.response.url); // Kiểm tra URL trả về từ server
           return {
             ...file,
-            url: file.response.url,
+            url: file.response.url, // URL ảnh trả về từ server
           };
         }
         return file;
       });
     }
+
     setVariants(updatedVariants);
   };
-
-  // const handleRemoveFile = (index: number, key: string, file: any) => {
-  //   const updatedVariants = [...variants];
-  //   const variant = updatedVariants[index];
-  //   if (variant) {
-  //     variant[key] = variant[key].filter((item: any) => item.uid !== file.uid);
-  //   }
-  //   setVariants(updatedVariants);
-  // };
 
 
   const columns = [
@@ -335,15 +324,18 @@ const UpdateProduct: React.FC = () => {
             listType="picture-card"
             fileList={record.colorImage || []}
             onChange={(info) => handleUploadChangeForVariant(index, 'colorImage', info)}
-            beforeUpload={() => false}
+            action="/path_to_upload_endpoint" // Cần thay thế
+            name="file"
             className="upload-inline"
           >
+
             {record.colorImage?.length < 1 && (
               <div className="w-20 h-20 border border-dashed border-gray-300 rounded-md flex items-center justify-center cursor-pointer">
                 <UploadOutlined className="text-blue-500 text-xl" />
               </div>
             )}
           </Upload>
+
           <Button
             type="dashed"
             danger
@@ -366,7 +358,8 @@ const UpdateProduct: React.FC = () => {
             multiple
             fileList={record.albumImages || []}
             onChange={(info) => handleUploadChangeForVariant(index, 'albumImages', info)}
-            beforeUpload={() => false}
+            action="/path_to_upload_endpoint"
+            name="file"
             className="upload-inline"
           >
             {record.albumImages?.length < 4 && (
@@ -391,6 +384,7 @@ const UpdateProduct: React.FC = () => {
 
   const onFinish = (values: any) => {
     const formattedDate = values.input_day ? moment(values.input_day).format('YYYY-MM-DD') : null;
+
     if (!formattedDate) {
       toast.error('Ngày nhập không hợp lệ. Vui lòng chọn một ngày!');
       return;
@@ -401,61 +395,56 @@ const UpdateProduct: React.FC = () => {
     formData.append('price', values.price);
     formData.append('description', values.description);
     formData.append('content', content || '');
-    formData.append('input_day', formattedDate); 
+    formData.append('input_day', formattedDate);
     formData.append('category_id', values.category_id);
     formData.append('is_collection', values.is_collection ? '1' : '0');
     formData.append('is_hot', values.is_hot ? '1' : '0');
     formData.append('is_new', values.is_new ? '1' : '0');
     formData.append('group_id', selectedVariantGroup ? selectedVariantGroup.toString() : '');
 
-    const variationsData: any = {};
+    // Xử lý biến thể và thêm vào FormData
+    const variations = variants.map((variant, index) => {
+      const colorImage = variant.colorImage?.[0]?.originFileObj ? null : variant.colorImage?.[0]?.url;
+      const albumImages = variant.albumImages?.map((file: any) =>
+        file.originFileObj ? null : file.url
+      );
 
-    variants.forEach((variant) => {
-      const colorId = variant.colorId;
-      const sizesData: any = {};
-
-      variant.sizes.forEach((size: any) => {
-        sizesData[size.sizeId] = {
+      return {
+        color_image_url: colorImage,
+        album_images_urls: albumImages,
+        sizes: variant.sizes.map((size: any) => ({
+          sizeId: size.sizeId,
           stock: size.stock,
           discount: size.discount,
-        };
-      });
-
-      variationsData[colorId] = sizesData;
+        })),
+      };
     });
 
-    formData.append('variations', JSON.stringify(variationsData));
+    formData.append('variations', JSON.stringify(variations));
 
-    variants.forEach((variant) => {
-      if (variant.colorImage && variant.colorImage.length > 0) {
-        const colorImage = variant.colorImage[0];
-
-        if (!colorImage.isExisting && colorImage.originFileObj) {
-          formData.append(`color_image_${variant.colorId}`, colorImage.originFileObj, colorImage.name);
+    // Thêm ảnh mới vào FormData cho các file ảnh
+    variants.forEach((variant, index) => {
+      const colorImage = variant.colorImage?.[0];
+      if (colorImage?.originFileObj) {
+        formData.append(`color_image_${index}`, colorImage.originFileObj);
+      }
+      variant.albumImages?.forEach((file: any, albumIndex: any) => {
+        if (file.originFileObj) {
+          formData.append(`album_images_${index}[${albumIndex}]`, file.originFileObj);
         }
-      }
-
-      if (variant.albumImages && variant.albumImages.length > 0) {
-        variant.albumImages.forEach((fileObj: any) => {
-          if (!fileObj.isExisting && fileObj.originFileObj) {
-            formData.append(`album_images_${variant.colorId}[]`, fileObj.originFileObj, fileObj.name);
-          }
-        });
-      }
+      });
     });
 
     updateProduct(formData);
   };
 
-
-
   const handleGroupChange = (groupId: number) => {
     const group = variantgroup?.find((g: any) => g.group_id === groupId);
     setSelectedGroup(group);
-  
+
     if (group && group.attributes) {
       setVariants([]);
-  
+
       const formattedAttributes = group.attributes.map((attribute: any) => ({
         ...attribute,
         selectedValues: [],
@@ -463,7 +452,7 @@ const UpdateProduct: React.FC = () => {
       setAttributes(formattedAttributes);
     }
   };
-  
+
 
   useEffect(() => {
     if (selectedGroup) {
