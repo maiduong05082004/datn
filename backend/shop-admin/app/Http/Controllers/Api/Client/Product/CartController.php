@@ -14,58 +14,58 @@ use Illuminate\Support\Facades\Auth;
 class CartController extends Controller
 {
 
+public function getCartItems()
+{
+    $user = Auth::user();
 
-    public function getCartItems()
-    {
-        $user = Auth::user();
-
-        $cartItems = CartItem::with([
-            'product.category',
-            'product.variations.group',
-            'product.variations.attributeValue',
-            'product.variations.variationValues',
-            'product.variations.variationImages',
-            'product.images',
-            'productVariationValue'
-        ])->where('user_id', $user->id)->get();
-
-        $groupedData = $cartItems->groupBy('user_id')->map(function ($items, $userId) {
-            return [
-                'user_id' => $userId,
-                'cart_items' => $items->map(function ($cartItem) {
-                    $productResource = new ProductResource($cartItem->product); // Sử dụng ProductResource
-                    $selectedVariationValue = $cartItem->productVariationValue;
-
-                    return [
-                        'cart_item_id' => $cartItem->id,
-                        'quantity' => $cartItem->quantity,
-                        'product' => $productResource, // Đưa vào ProductResource để hiển thị sản phẩm
-                        'variation_id' => $selectedVariationValue->product_variation_id ?? null,
-                        'album_images' => $selectedVariationValue->productVariation->variationImages
-                            ->where('image_type', 'album')
-                            ->pluck('image_path'),
-
-                        'variation_values' => [
-                            'id' => $selectedVariationValue->id,
-                            'attribute_value_id' => $selectedVariationValue->attribute_value_id,
-                            'value' => $selectedVariationValue->attributeValue->value ?? null,
-                            'sku' => $selectedVariationValue->sku,
-                            'stock' => $selectedVariationValue->stock,
-                            'price' => (float) $selectedVariationValue->price,
-                            'discount' => $selectedVariationValue->discount,
-                        ],
-                    ];
-                }),
-            ];
-        });
+    $cartItems = CartItem::with([
+        'product.category',
+        'product.variations.group',
+        'product.variations.attributeValue',
+        'product.variations.variationValues',
+        'product.variations.variationImages',
+        'product.images',
+        'productVariationValue'
+    ])->where('user_id', $user->id)->get();
 
 
-        $result = $groupedData->first();
-        return response()->json($result, 200);
-    }
+    $groupedData = $cartItems->groupBy('user_id')->map(function ($items, $userId) {
+        return [
+            'user_id' => $userId,
+            'cart_items' => $items->map(function ($cartItem) {
+                $productResource = new ProductResource($cartItem->product); // Sử dụng ProductResource
+                $selectedVariationValue = $cartItem->productVariationValue;
+
+                return [
+                    'cart_item_id' => $cartItem->id,
+                    'quantity' => $cartItem->quantity,
+                    'product' => $productResource, // Đưa vào ProductResource để hiển thị sản phẩm
+                    'variation_id' => $selectedVariationValue->product_variation_id ?? null,
+                    'album_images' => $selectedVariationValue->productVariation->variationImages
+    ->where('image_type', 'album')  
+    ->pluck('image_path'),
+                    'variation_values' => [
+                        'id' => $selectedVariationValue->id,
+                        'attribute_value_id' => $selectedVariationValue->attribute_value_id,
+                        'value' => $selectedVariationValue->attributeValue->value ?? null,
+                        'sku' => $selectedVariationValue->sku,
+                        'stock' => $selectedVariationValue->stock,
+                        'price' => (float) $selectedVariationValue->price,
+                        'discount' => $selectedVariationValue->discount,
+                    ],
+                ];
+            }),
+        ];
+    });
 
 
+    $result = $groupedData->first();
 
+    return response()->json($result, 200);
+}
+
+
+ 
     public function addToCart(Request $request)
     {
         $validated = $request->validate([
