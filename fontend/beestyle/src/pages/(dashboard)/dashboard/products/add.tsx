@@ -297,72 +297,80 @@ const AddProduct: React.FC = () => {
 
 
 
-  //  xử lý khi submit form
-  const onFinish = (values: any) => {
-    const formattedDate = values.input_day ? values.input_day.format('YYYY-MM-DD') : null;
 
+
+  const onFinish = (values: any) => {
+    const formData = new FormData(); // Tạo FormData để gửi dữ liệu
+    const formattedDate = values.input_day ? values.input_day.format('YYYY-MM-DD') : null;
+  
+    console.log("Values nhận được:", values); // Kiểm tra dữ liệu form
+    console.log("Album list:", albumList); // Kiểm tra album list
+  
+    // Nếu không có biến thể
     if (!showVariantForm) {
-      // Chuẩn bị album images URLs
-      const albumImagesUrls = albumList.map((file: any) => {
-        if (file.response && file.response.url) {
-          return file.response.url;
-        } else if (file.url) {
-          return file.url;
-        } else {
-          return file.name;
+      // Xử lý album ảnh
+      albumList.forEach((file: any, index: number) => {
+        if (file.originFileObj) {
+          // Thêm file vào formData
+          formData.append(`album_images[${index}]`, file.originFileObj);
         }
       });
-
-      const simpleProductPayload = {
-        ...values,
-        stock: stock || 0,
-        input_day: formattedDate,
-        content: content || '',
-        group_id: null,
-        is_collection: values.is_collection || false,
-        is_hot: values.is_hot || false,
-        is_new: values.is_new || false,
-        album_images: albumImagesUrls,
-      };
-
-      console.log('Payload cho sản phẩm đơn giản:', simpleProductPayload);
-      mutate(simpleProductPayload);
+  
+      // Thêm các trường khác vào formData
+      formData.append('name', values.name);
+      formData.append('price', values.price);
+      formData.append('description', values.description);
+      formData.append('content', content || '');
+      formData.append('input_day', formattedDate);
+      formData.append('category_id', values.category_id);
+      formData.append('stock', stock?.toString() || '0');
+      formData.append('is_collection', values.is_collection ? '1' : '0');
+      formData.append('is_hot', values.is_hot ? '1' : '0');
+      formData.append('is_new', values.is_new ? '1' : '0');
+  
+      // Gọi mutate với FormData
+      console.log("FormData sản phẩm đơn giản:", formData);
+      mutate(formData as any);
       return;
     }
-
+  
     // Xử lý cho sản phẩm có biến thể
     if (showVariantForm) {
+      console.log("Biến thể trước khi xử lý:", variants); // Kiểm tra biến thể
+  
       if (!selectedVariantGroup) {
         toast.error('Vui lòng chọn nhóm biến thể!');
         return;
       }
-
+  
       if (variants.length === 0) {
         toast.error('Vui lòng tạo ít nhất một biến thể!');
         return;
       }
-
+  
       // Chuẩn bị payload cho sản phẩm có biến thể
-      const validVariants = variants.map((variant) => {
-        const validSizes = variant.sizes.filter(
-          (size: any) => size.stock !== undefined && size.stock > 0
-        );
-
-        if (validSizes.length === 0) {
-          return null;
-        }
-
-        return {
-          ...variant,
-          sizes: validSizes,
-        };
-      }).filter(Boolean);
-
+      const validVariants = variants
+        .map((variant) => {
+          const validSizes = variant.sizes.filter(
+            (size: any) => size.stock !== undefined && size.stock > 0
+          );
+  
+          if (validSizes.length === 0) {
+            return null;
+          }
+  
+          return {
+            ...variant,
+            sizes: validSizes,
+          };
+        })
+        .filter(Boolean);
+  
       if (validVariants.length === 0) {
         toast.error('Vui lòng điền đầy đủ thông tin cho ít nhất một biến thể và kích thước!');
         return;
       }
-
+  
       const variationsData = validVariants.reduce((acc, variant) => {
         const colorId = variant.colorId;
         const sizeData = variant.sizes.reduce((sizeAcc: any, size: any) => {
@@ -372,39 +380,46 @@ const AddProduct: React.FC = () => {
           };
           return sizeAcc;
         }, {});
-
+  
         if (Object.keys(sizeData).length > 0) {
           acc[colorId] = sizeData;
         }
         return acc;
       }, {});
-
-      const imageFields = validVariants.reduce((acc: any, variant: any) => {
+  
+      // Thêm ảnh biến thể vào formData
+      validVariants.forEach((variant: any, index: number) => {
         const colorId = variant.colorId || variant.id;
-        acc[`color_image_${colorId}`] = variant.colorImage?.[0]?.name || null;
-        acc[`album_images_${colorId}`] = variant.albumImages?.map((file: any) => file.name) || [];
-        return acc;
-      }, {});
-
-      const productWithVariantsPayload = {
-        ...values,
-        input_day: formattedDate,
-        content: content || '',
-        group_id: selectedVariantGroup,
-        variations: JSON.stringify(variationsData),
-        ...imageFields,
-        is_collection: values.is_collection || false,
-        is_hot: values.is_hot || false,
-        is_new: values.is_new || false,
-      };
-
-      console.log('Payload cho sản phẩm có biến thể:', productWithVariantsPayload);
-
-      mutate(productWithVariantsPayload);
+        if (variant.colorImage?.[0]?.originFileObj) {
+          formData.append(`color_image_${colorId}`, variant.colorImage[0].originFileObj);
+        }
+        variant.albumImages?.forEach((file: any, albumIndex: number) => {
+          if (file.originFileObj) {
+            formData.append(`album_images_${colorId}[${albumIndex}]`, file.originFileObj);
+          }
+        });
+      });
+  
+      // Thêm các trường khác vào formData
+      formData.append('name', values.name);
+      formData.append('price', values.price);
+      formData.append('description', values.description);
+      formData.append('content', content || '');
+      formData.append('input_day', formattedDate);
+      formData.append('category_id', values.category_id);
+      formData.append('group_id', selectedVariantGroup?.toString() || '');
+      formData.append('variations', JSON.stringify(variationsData));
+      formData.append('is_collection', values.is_collection ? '1' : '0');
+      formData.append('is_hot', values.is_hot ? '1' : '0');
+      formData.append('is_new', values.is_new ? '1' : '0');
+  
+      console.log("FormData sản phẩm có biến thể:", formData);
+      
+      // Gọi mutate với FormData
+      mutate(formData as any);
     }
   };
-
-
+  
 
 
 
@@ -485,7 +500,7 @@ const AddProduct: React.FC = () => {
             name="category_id"
             rules={[{ required: true, message: "Danh mục sản phẩm bắt buộc phải chọn" }]}
           >
-            <select id="category" className="border border-gray-300 rounded-md p-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-400 font-normal">
+            <Select id="category" className="border border-gray-300 rounded-md p-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-400 font-normal">
               <option value="" className="text-gray-500">--Chọn danh mục--</option>
               {categories?.map((category: any) => (
                 <optgroup key={category.id} label={category.name} className="text-gray-600 font-medium">
@@ -496,7 +511,7 @@ const AddProduct: React.FC = () => {
                   ))}
                 </optgroup>
               ))}
-            </select>
+            </Select>
           </Form.Item>
 
           <div className='flex gap-5'>

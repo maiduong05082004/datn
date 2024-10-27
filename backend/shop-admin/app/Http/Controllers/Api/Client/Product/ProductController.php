@@ -83,7 +83,6 @@ public function purchase(Request $request)
             'payment_type' => $validated[0]['payment_type'],
             'subtotal' => 0,
             'total' => 0,
-            'promotion_id' => $validated[0]['promotion_id'] ?? null,
             'shipping_address_id' => $validated[0]['shipping_address_id'],
             'canceled_at' => null,
         ]);
@@ -173,25 +172,25 @@ private function processOrderItems($order, $bill, &$subtotal)
 }
 
 
-// public function index(Request $request)
-// {
-//     // Lấy danh sách hóa đơn cùng với thông tin liên quan
-//     $bills = Bill::with([
-//         'user', // Thông tin người dùng
-//         'promotion', // Khuyến mãi nếu có
-//         'shippingAddress', // Địa chỉ giao hàng
-//         'BillDetail.product', // Sản phẩm
-//         'BillDetail.productVariationValue.attributeValue' // Biến thể và giá trị thuộc tính
-//     ])
-//     ->orderBy('created_at', 'desc') // Sắp xếp theo ngày tạo
-//     ->paginate(10); // Phân trang 10 đơn mỗi trang
+public function index(Request $request)
+{
+    // Lấy danh sách hóa đơn cùng với thông tin liên quan
+    $bills = Bill::with([
+        'user', // Thông tin người dùng
+        'promotion', // Khuyến mãi nếu có
+        'shippingAddress', // Địa chỉ giao hàng
+        'billDentail.product', // Sản phẩm
+        'billDentail.productVariationValue.attributeValue' // Biến thể và giá trị thuộc tính
+    ])
+    ->orderBy('created_at', 'desc') // Sắp xếp theo ngày tạo
+    ->paginate(10); // Phân trang 10 đơn mỗi trang
 
-//     // Trả về JSON chứa danh sách hóa đơn
-//     return response()->json([
-//         'message' => 'Danh sách đơn hàng',
-//         'data' => $bills,
-//     ], 200);
-// }
+    // Trả về JSON chứa danh sách hóa đơn
+    return response()->json([
+        'message' => 'Danh sách đơn hàng',
+        'data' => $bills,
+    ], 200);
+}
 
 
 
