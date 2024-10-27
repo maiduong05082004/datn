@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Api\Client\Product;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\ProductResource;
 use App\Models\Bill;
-use App\Models\BillDentail;
+use App\Models\BillDetail;
 use App\Models\Product;
 use App\Models\ProductVariationValue;
 use App\Models\Promotion;
@@ -147,7 +147,7 @@ private function processOrderItems($order, $bill, &$subtotal)
         $totalAmount = $variationValue->price * $variation['quantity'];
         $subtotal += $totalAmount;
 
-        BillDentail::create([
+        BillDetail::create([
             'bill_id' => $bill->id,
             'product_id' => $order['product_id'],
             'product_variation_value_id' => $variation['product_variation_value_id'],
@@ -180,8 +180,8 @@ private function processOrderItems($order, $bill, &$subtotal)
 //         'user', // Thông tin người dùng
 //         'promotion', // Khuyến mãi nếu có
 //         'shippingAddress', // Địa chỉ giao hàng
-//         'billDentail.product', // Sản phẩm
-//         'billDentail.productVariationValue.attributeValue' // Biến thể và giá trị thuộc tính
+//         'BillDetail.product', // Sản phẩm
+//         'BillDetail.productVariationValue.attributeValue' // Biến thể và giá trị thuộc tính
 //     ])
 //     ->orderBy('created_at', 'desc') // Sắp xếp theo ngày tạo
 //     ->paginate(10); // Phân trang 10 đơn mỗi trang

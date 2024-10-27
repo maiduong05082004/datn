@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateBillDentailsTable extends Migration
+class CreateBillDetailsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,8 +13,8 @@ class CreateBillDentailsTable extends Migration
      */
     public function up()
     {
-        // Tạo bảng bill_dentails
-        Schema::create('bill_dentails', function (Blueprint $table) {
+        // Tạo bảng Bill_detail
+        Schema::create('Bill_detail', function (Blueprint $table) {
             // ID của chi tiết hóa đơn
             $table->id();
 
@@ -51,7 +51,7 @@ class CreateBillDentailsTable extends Migration
      */
     public function down()
     {
-        // Xóa bảng bill_dentails
-        Schema::dropIfExists('bill_dentails');
+        // Xóa bảng Bill_detail
+        Schema::dropIfExists('Bill_detail');
     }
 }

@@ -15,6 +15,7 @@ use App\Http\Controllers\Api\Admin\PromotionsController;
 use App\Http\Controllers\Api\Client\HomeController;
 use App\Http\Controllers\Api\Client\Product\ProductController as ProductProductController;
 use App\Http\Controllers\Api\Admin\WishlistController;
+use App\Http\Controllers\Api\Client\CheckoutController;
 use App\Http\Controllers\Api\Client\Product\CartController as ProductCartController;
 use App\Http\Controllers\Api\Client\Product\ShippingController;
 use App\Http\Controllers\Api\Client\PromotionController;
@@ -50,7 +51,6 @@ Route::prefix('client')->as('client.')->group(function () {
         Route::get('/history', [PromotionController::class, 'getPromotionHistory']);
         Route::post('/check', [PromotionController::class, 'checkPromotion']);
         Route::get('/product/{productId}', [PromotionController::class, 'getProductPromotions']);
-
     });
     Route::prefix('home')->as('home.')->group(function () {
         Route::get('/', [HomeController::class, 'index'])->name('index');
@@ -63,7 +63,6 @@ Route::prefix('client')->as('client.')->group(function () {
         Route::post('/purchase',[ProductProductController::class, 'purchase'])->name('purchase');
         Route::get('/',[ProductProductController::class, 'index'])->name('index');
     });
-
     Route::prefix('cart')->as('cart.')->middleware('auth:sanctum')->group(function () {
         Route::get('/', [ProductCartController::class, 'getCartItems'])->name('index');
         Route::post('/add', [ProductCartController::class, 'addToCart'])->name('add');
@@ -74,6 +73,11 @@ Route::prefix('client')->as('client.')->group(function () {
         Route::post('/add', [WishlistController::class, 'addToWishlist'])->name('wishlist.add');
         Route::get('/', [WishlistController::class, 'index'])->name('wishlist.index');
         Route::delete('/remove/{id}', [WishlistController::class, 'destroy'])->name('wishlist.remove');
+    });
+    Route::prefix('checkout')->as('checkout.')->middleware('auth:sanctum')->group(function () {
+        Route::post('/submit', [CheckoutController::class, 'submit'])->name('submit');
+        Route::get('/success', [CheckoutController::class, 'success'])->name('success');
+        Route::get('/cancel', [CheckoutController::class, 'cancel'])->name('cancel');
     });
 });
 
@@ -118,4 +122,3 @@ Route::prefix('admins')
             });
         });
     });
-    // });

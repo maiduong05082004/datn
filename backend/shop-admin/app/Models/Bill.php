@@ -42,10 +42,10 @@ class Bill extends Model
         return $this->belongsTo(User::class);
     }
 
-    // Quan hệ với bảng bill_dentails (BillDentail)
-    public function billDentail()
+    // Quan hệ với bảng Bill_detail (BillDetail)
+    public function BillDetail()
     {
-        return $this->hasMany(BillDentail::class);
+        return $this->hasMany(BillDetail::class);
     }
 
     // Quan hệ với bảng promotions

@@ -59,7 +59,7 @@ class Product extends Model
     // Quan hệ với BillDetail
     public function billDetails()
     {
-        return $this->hasMany(BillDentail::class, 'product_id');
+        return $this->hasMany(BillDetail::class, 'product_id');
     }
     protected $dates = ['deleted_at'];
 
