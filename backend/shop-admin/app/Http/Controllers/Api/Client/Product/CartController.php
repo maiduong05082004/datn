@@ -28,22 +28,28 @@ public function getCartItems()
         'productVariationValue'
     ])->where('user_id', $user->id)->get();
 
-
+    if ($cartItems->isEmpty()) {
+        return response()->json([
+            'user_id' => $user->id,
+            'total_quantity' => 0,
+            'cart_items' => []
+        ], 200);
+    }
     $groupedData = $cartItems->groupBy('user_id')->map(function ($items, $userId) {
         return [
             'user_id' => $userId,
+            'total_quantity' => $items->sum('quantity'),
             'cart_items' => $items->map(function ($cartItem) {
                 $productResource = new ProductResource($cartItem->product); // Sử dụng ProductResource
                 $selectedVariationValue = $cartItem->productVariationValue;
-
                 return [
                     'cart_item_id' => $cartItem->id,
                     'quantity' => $cartItem->quantity,
                     'product' => $productResource, // Đưa vào ProductResource để hiển thị sản phẩm
                     'variation_id' => $selectedVariationValue->product_variation_id ?? null,
                     'album_images' => $selectedVariationValue->productVariation->variationImages
-    ->where('image_type', 'album')  
-    ->pluck('image_path'),
+                ->where('image_type', 'album')  
+                ->pluck('image_path'),
                     'variation_values' => [
                         'id' => $selectedVariationValue->id,
                         'attribute_value_id' => $selectedVariationValue->attribute_value_id,
@@ -63,6 +69,7 @@ public function getCartItems()
 
     return response()->json($result, 200);
 }
+
 
 
  
