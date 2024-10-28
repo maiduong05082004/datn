@@ -4,6 +4,7 @@ namespace App\Services;
 
 use Illuminate\Support\Facades\Cache;
 use GuzzleHttp\Client;
+use Log;
 
 class ExchangeRateService
 {
@@ -23,20 +24,15 @@ class ExchangeRateService
      */
     public function getVndToUsdRate()
     {
-        // Kiểm tra cache trước
         return Cache::remember('vnd_to_usd_rate', 3600, function () {
             $response = $this->client->get("https://v6.exchangerate-api.com/v6/{$this->apiKey}/latest/VND");
-
-            if ($response->getStatusCode() !== 200) {
-                throw new \Exception('Không thể lấy tỷ giá hối đoái.');
-            }
-
             $data = json_decode($response->getBody(), true);
-
-            if ($data['result'] !== 'success') {
-                throw new \Exception('Lỗi khi lấy dữ liệu tỷ giá hối đoái.');
+            Log::info("Exchange rate API response: " . json_encode($data)); // Log toàn bộ dữ liệu
+    
+            if ($data['result'] !== 'success' || !isset($data['conversion_rates']['USD'])) {
+                throw new \Exception('Invalid exchange rate data.');
             }
-
+    
             return $data['conversion_rates']['USD'];
         });
     }
@@ -50,6 +46,11 @@ class ExchangeRateService
     public function convertVndToUsd($amountVnd)
     {
         $rate = $this->getVndToUsdRate();
-        return round($amountVnd / $rate, 2);
+        if ($rate <= 0 || !is_numeric($rate)) {
+            Log::error("Invalid exchange rate fetched: $rate");
+            throw new \Exception('Tỷ giá không hợp lệ.');
+        }
+        Log::info('Current VND to USD rate: ' . $rate);
+        return round($amountVnd * $rate, 2); // Chỉnh lại công thức tính 
     }
 }
