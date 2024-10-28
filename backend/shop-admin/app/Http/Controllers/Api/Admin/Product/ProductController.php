@@ -368,101 +368,259 @@ public function update(UpdateProductRequest $request, $id)
 
 
 
+// private function saveImagesUpdate($model, $request, $isVariation = false, $attributeValueId = null)
+// {
+//     if ($isVariation) {
+//         $modelType = 'product_variation_id';
+
+//         // Xử lý ảnh màu (color image)
+//         $colorImageInput = "color_image_$attributeValueId";
+//         if ($request->has($colorImageInput)) {
+//             $colorImagePath = $request->input($colorImageInput);
+
+//             // Kiểm tra xem ảnh đã tồn tại trong cơ sở dữ liệu chưa
+//             $existingVariantImage = ProductVariationImage::where($modelType, $model->id)
+//                 ->where('image_type', 'variant')
+//                 ->where('image_path', $colorImagePath)
+//                 ->first();
+
+//             if (!$existingVariantImage) {
+//                 // Nếu chưa tồn tại, thêm mới
+//                 ProductVariationImage::create([
+//                     $modelType => $model->id,
+//                     'image_path' => $colorImagePath,
+//                     'image_type' => 'variant',
+//                 ]);
+//             }
+//         }
+
+//         // Xử lý album ảnh (album images)
+//         $albumInput = "album_images_$attributeValueId";
+//         if ($request->has($albumInput)) {
+//             foreach ($request->input($albumInput) as $albumImage) {
+//                 // Kiểm tra xem ảnh đã tồn tại trong cơ sở dữ liệu chưa
+//                 $existingAlbumImage = ProductVariationImage::where($modelType, $model->id)
+//                     ->where('image_type', 'album')
+//                     ->where('image_path', $albumImage)
+//                     ->first();
+
+//                 if (!$existingAlbumImage) {
+//                     // Nếu chưa tồn tại, thêm mới
+//                     ProductVariationImage::create([
+//                         $modelType => $model->id,
+//                         'image_path' => $albumImage,
+//                         'image_type' => 'album',
+//                     ]);
+//                 }
+//             }
+//         }
+//     } else {
+//         // Xử lý hình ảnh cho sản phẩm (không phải biến thể)
+//         $modelType = 'product_id';
+
+//         // Xử lý album ảnh (album images)
+//         $albumInput = 'album_images';
+//         if ($request->hasFile($albumInput)) {
+//             foreach ($request->file($albumInput) as $albumImage) {
+//                 // Upload từng ảnh lên Cloudinary
+//                 $cloudinaryResponse = Cloudinary::upload($albumImage->getRealPath(), [
+//                     'folder' => "products/{$model->id}/albums",
+//                     'public_id' => 'album_image_' . uniqid()
+//                 ]);
+//                 $albumPath = $cloudinaryResponse->getSecurePath();
+
+//                 // Kiểm tra xem ảnh đã tồn tại trong cơ sở dữ liệu chưa
+//                 $existingAlbumImage = ProductImage::where($modelType, $model->id)
+//                     ->where('image_type', 'album')
+//                     ->where('image_path', $albumPath)
+//                     ->first();
+
+//                 if (!$existingAlbumImage) {
+//                     // Nếu chưa tồn tại, thêm mới
+//                     ProductImage::create([
+//                         $modelType => $model->id,
+//                         'image_path' => $albumPath,
+//                         'image_type' => 'album',
+//                     ]);
+//                 }
+//             }
+//         } elseif ($request->has($albumInput)) {
+//             // Trường hợp lưu ảnh từ URL
+//             foreach ($request->input($albumInput) as $albumImage) {
+//                 // Kiểm tra xem ảnh đã tồn tại trong cơ sở dữ liệu chưa
+//                 $existingAlbumImage = ProductImage::where($modelType, $model->id)
+//                     ->where('image_type', 'album')
+//                     ->where('image_path', $albumImage)
+//                     ->first();
+
+//                 if (!$existingAlbumImage) {
+//                     // Nếu chưa tồn tại, thêm mới
+//                     ProductImage::create([
+//                         $modelType => $model->id,
+//                         'image_path' => $albumImage,
+//                         'image_type' => 'album',
+//                     ]);
+//                 }
+//             }
+//         }
+//     }
+// }
+
+// private function saveImagesUpdate($model, $request, $isVariation = false, $attributeValueId = null)
+// {
+//     $modelType = $isVariation ? 'product_variation_id' : 'product_id';
+//     $albumInput = $isVariation ? "album_images_$attributeValueId" : 'album_images';
+//     $colorImageInput = $isVariation ? "color_image_$attributeValueId" : null;
+
+//     // Xử lý ảnh màu cho biến thể
+//     if ($isVariation && $colorImageInput && $request->has($colorImageInput)) {
+//         $this->processSingleImage($model, $colorImageInput, $request->input($colorImageInput), 'variant', $modelType);
+//     }
+
+//     // Xử lý album ảnh
+//     if ($request->hasFile($albumInput)) {
+//         foreach ($request->file($albumInput) as $file) {
+//             $this->processFileImage($model, $file, 'album', $modelType, $isVariation);
+//         }
+//     } elseif ($request->has($albumInput) && is_array($request->input($albumInput))) {
+//         foreach ($request->input($albumInput) as $url) {
+//             $this->processSingleImage($model, $albumInput, $url, 'album', $modelType);
+//         }
+//     }
+// }
+
+// // Hàm xử lý ảnh từ file và upload lên Cloudinary
+// private function processFileImage($model, $file, $type, $modelType, $isVariation)
+// {
+//     try {
+//         Log::info("Uploading new $type image for {$modelType} ID {$model->id}");
+
+//         $folder = $isVariation ? "products/{$model->product_id}/variations/{$model->id}" : "products/{$model->id}/albums";
+//         $cloudinaryResponse = Cloudinary::upload($file->getRealPath(), [
+//             'folder' => $folder,
+//             'public_id' => "{$type}_image_" . uniqid()
+//         ]);
+//         $imagePath = $cloudinaryResponse->getSecurePath();
+
+//         $this->saveImageRecord($model, $imagePath, $type, $modelType);
+//     } catch (\Exception $e) {
+//         Log::error("Failed to upload $type image for {$modelType} ID {$model->id}: " . $e->getMessage());
+//     }
+// }
+
+// // Hàm xử lý ảnh từ URL hoặc đường dẫn cục bộ
+// private function processSingleImage($model, $inputName, $imagePath, $type, $modelType)
+// {
+//     try {
+//         Log::info("Processing $type image for {$modelType} ID {$model->id} with path: $imagePath");
+
+//         if (!empty($imagePath)) {
+//             $this->saveImageRecord($model, $imagePath, $type, $modelType);
+//         } else {
+//             Log::warning("No valid $type image provided for {$modelType} ID {$model->id}.");
+//         }
+//     } catch (\Exception $e) {
+//         Log::error("Failed to process $type image for {$modelType} ID {$model->id}: " . $e->getMessage());
+//     }
+// }
+
+// // Hàm lưu bản ghi ảnh vào cơ sở dữ liệu, kiểm tra ảnh đã tồn tại hay chưa
+// private function saveImageRecord($model, $imagePath, $type, $modelType)
+// {
+//     // Kiểm tra xem ảnh đã tồn tại trong cơ sở dữ liệu chưa dựa trên `modelType`, `model->id` và `image_path`
+//     $existingImage = ProductVariationImage::where($modelType, $model->id)
+//         ->where('image_type', $type)
+//         ->where('image_path', $imagePath)
+//         ->exists();
+
+//     if (!$existingImage) {
+//         ProductVariationImage::create([
+//             $modelType => $model->id,
+//             'image_path' => $imagePath,
+//             'image_type' => $type,
+//         ]);
+//         Log::info("Saved $type image for {$modelType} ID {$model->id}.");
+//     } else {
+//         Log::info("Skipped saving duplicate $type image for {$modelType} ID {$model->id}.");
+//     }
+// }
+
+
 private function saveImagesUpdate($model, $request, $isVariation = false, $attributeValueId = null)
 {
-    if ($isVariation) {
-        $modelType = 'product_variation_id';
+    $modelType = $isVariation ? 'product_variation_id' : 'product_id';
+    $albumInput = $isVariation ? "album_images_$attributeValueId" : 'album_images';
+    $colorImageInput = $isVariation ? "color_image_$attributeValueId" : null;
 
-        // Xử lý ảnh màu (color image)
-        $colorImageInput = "color_image_$attributeValueId";
-        if ($request->has($colorImageInput)) {
-            $colorImagePath = $request->input($colorImageInput);
+    // Xử lý ảnh màu cho biến thể
+    if ($isVariation && $colorImageInput && $request->hasFile($colorImageInput)) {
+        $this->processFileImage($model, $request->file($colorImageInput), 'variant', $modelType, $isVariation);
+    }
 
-            // Kiểm tra xem ảnh đã tồn tại trong cơ sở dữ liệu chưa
-            $existingVariantImage = ProductVariationImage::where($modelType, $model->id)
-                ->where('image_type', 'variant')
-                ->where('image_path', $colorImagePath)
-                ->first();
-
-            if (!$existingVariantImage) {
-                // Nếu chưa tồn tại, thêm mới
-                ProductVariationImage::create([
-                    $modelType => $model->id,
-                    'image_path' => $colorImagePath,
-                    'image_type' => 'variant',
-                ]);
-            }
+    // Xử lý album ảnh
+    if ($request->hasFile($albumInput)) {
+        foreach ($request->file($albumInput) as $file) {
+            $this->processFileImage($model, $file, 'album', $modelType, $isVariation);
         }
-
-        // Xử lý album ảnh (album images)
-        $albumInput = "album_images_$attributeValueId";
-        if ($request->has($albumInput)) {
-            foreach ($request->input($albumInput) as $albumImage) {
-                // Kiểm tra xem ảnh đã tồn tại trong cơ sở dữ liệu chưa
-                $existingAlbumImage = ProductVariationImage::where($modelType, $model->id)
-                    ->where('image_type', 'album')
-                    ->where('image_path', $albumImage)
-                    ->first();
-
-                if (!$existingAlbumImage) {
-                    // Nếu chưa tồn tại, thêm mới
-                    ProductVariationImage::create([
-                        $modelType => $model->id,
-                        'image_path' => $albumImage,
-                        'image_type' => 'album',
-                    ]);
-                }
-            }
+    } elseif ($request->has($albumInput) && is_array($request->input($albumInput))) {
+        foreach ($request->input($albumInput) as $url) {
+            $this->processSingleImage($model, $albumInput, $url, 'album', $modelType);
         }
+    }
+}
+
+// Hàm xử lý ảnh từ file và upload lên Cloudinary
+private function processFileImage($model, $file, $type, $modelType, $isVariation)
+{
+    try {
+        Log::info("Uploading new $type image for {$modelType} ID {$model->id}");
+
+        $folder = $isVariation ? "products/{$model->product_id}/variations/{$model->id}" : "products/{$model->id}/albums";
+        $cloudinaryResponse = Cloudinary::upload($file->getRealPath(), [
+            'folder' => $folder,
+            'public_id' => "{$type}_image_" . uniqid()
+        ]);
+        $imagePath = $cloudinaryResponse->getSecurePath();
+
+        $this->saveImageRecord($model, $imagePath, $type, $modelType);
+    } catch (\Exception $e) {
+        Log::error("Failed to upload $type image for {$modelType} ID {$model->id}: " . $e->getMessage());
+    }
+}
+
+// Hàm xử lý ảnh từ URL hoặc đường dẫn cục bộ
+private function processSingleImage($model, $inputName, $imagePath, $type, $modelType)
+{
+    try {
+        Log::info("Processing $type image for {$modelType} ID {$model->id} with path: $imagePath");
+
+        if (!empty($imagePath)) {
+            $this->saveImageRecord($model, $imagePath, $type, $modelType);
+        } else {
+            Log::warning("No valid $type image provided for {$modelType} ID {$model->id}.");
+        }
+    } catch (\Exception $e) {
+        Log::error("Failed to process $type image for {$modelType} ID {$model->id}: " . $e->getMessage());
+    }
+}
+
+private function saveImageRecord($model, $imagePath, $type, $modelType)
+{
+    // Kiểm tra xem ảnh đã tồn tại trong cơ sở dữ liệu chưa dựa trên `modelType`, `model->id` và `image_path`
+    $existingImage = ProductVariationImage::where($modelType, $model->id)
+        ->where('image_type', $type)
+        ->where('image_path', $imagePath)
+        ->exists();
+
+    if (!$existingImage) {
+        ProductVariationImage::create([
+            $modelType => $model->id,
+            'image_path' => $imagePath,
+            'image_type' => $type,
+        ]);
+        Log::info("Saved $type image for {$modelType} ID {$model->id}.");
     } else {
-        // Xử lý hình ảnh cho sản phẩm (không phải biến thể)
-        $modelType = 'product_id';
-
-        // Xử lý album ảnh (album images)
-        $albumInput = 'album_images';
-        if ($request->hasFile($albumInput)) {
-            foreach ($request->file($albumInput) as $albumImage) {
-                // Upload từng ảnh lên Cloudinary
-                $cloudinaryResponse = Cloudinary::upload($albumImage->getRealPath(), [
-                    'folder' => "products/{$model->id}/albums",
-                    'public_id' => 'album_image_' . uniqid()
-                ]);
-                $albumPath = $cloudinaryResponse->getSecurePath();
-
-                // Kiểm tra xem ảnh đã tồn tại trong cơ sở dữ liệu chưa
-                $existingAlbumImage = ProductImage::where($modelType, $model->id)
-                    ->where('image_type', 'album')
-                    ->where('image_path', $albumPath)
-                    ->first();
-
-                if (!$existingAlbumImage) {
-                    // Nếu chưa tồn tại, thêm mới
-                    ProductImage::create([
-                        $modelType => $model->id,
-                        'image_path' => $albumPath,
-                        'image_type' => 'album',
-                    ]);
-                }
-            }
-        } elseif ($request->has($albumInput)) {
-            // Trường hợp lưu ảnh từ URL
-            foreach ($request->input($albumInput) as $albumImage) {
-                // Kiểm tra xem ảnh đã tồn tại trong cơ sở dữ liệu chưa
-                $existingAlbumImage = ProductImage::where($modelType, $model->id)
-                    ->where('image_type', 'album')
-                    ->where('image_path', $albumImage)
-                    ->first();
-
-                if (!$existingAlbumImage) {
-                    // Nếu chưa tồn tại, thêm mới
-                    ProductImage::create([
-                        $modelType => $model->id,
-                        'image_path' => $albumImage,
-                        'image_type' => 'album',
-                    ]);
-                }
-            }
-        }
+        Log::info("Skipped saving duplicate $type image for {$modelType} ID {$model->id}.");
     }
 }
 

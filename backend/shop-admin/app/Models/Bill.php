@@ -30,7 +30,6 @@ class Bill extends Model
         'status_bill',
         'subtotal',
         'total',
-        'promotion_id',
         'canceled_at',
         'payment_type',
         'shipping_address_id',
@@ -48,11 +47,7 @@ class Bill extends Model
         return $this->hasMany(BillDetail::class);
     }
 
-    // Quan hệ với bảng promotions
-    public function promotion()
-    {
-        return $this->belongsTo(Promotion::class);
-    }
+  
 
     // Quan hệ với bảng payments để quản lý các giao dịch thanh toán
     public function payments()
