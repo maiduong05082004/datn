@@ -10,10 +10,56 @@ import { PlusOutlined, UploadOutlined } from '@ant-design/icons';
 
 const { Option } = Select;
 
+interface VariantProduct {
+  id: number | string;
+  name: string;
+  slug: string;
+  price: number;
+  stock: number;
+  description: string;
+  content: string;
+  input_day: string;
+  category_id: number;
+  is_collection: boolean;
+  is_hot: boolean;
+  is_new: boolean;
+  group: VariantProductGroup;
+  variations: VariantProductVariation[];
+  images: string[];
+}
+
+interface VariantProductGroup {
+  id: number;
+  name: string;
+}
+
+interface VariantProductVariation {
+  id: number;
+  stock: number;
+  attribute_value_image_variant: AttributeValueImageVariant;
+  variation_values: VariationValue[];
+  variation_album_images: string[];
+}
+
+interface AttributeValueImageVariant {
+  id: number;
+  value: string;
+  image_path: string;
+}
+
+interface VariationValue {
+  attribute_value_id: number;
+  value: string;
+  sku: string;
+  stock: number;
+  price: number;
+  discount: number;
+}
+
 const AddProduct: React.FC = () => {
   const [form] = Form.useForm();
   const [content, setContent] = useState<string>('');
-  const [selectedVariantGroup, setSelectedVariantGroup] = useState<any | null>(null);
+  const [selectedVariantGroup, setSelectedVariantGroup] = useState<number | null>(null);
   const [attributes, setAttributes] = useState<any[]>([]);
   const [variants, setVariants] = useState<any[]>([]);
   const [fileList, setFileList] = useState<any[]>([]);
@@ -43,6 +89,7 @@ const AddProduct: React.FC = () => {
         const response = await axios.post('http://localhost:8000/api/admins/products', data, {
           headers: { 'Content-Type': 'multipart/form-data' },
         });
+        console.log('Response từ server:', response);
         return response.data;
       } catch (error) {
         throw new Error('Không thể thêm sản phẩm');
@@ -52,28 +99,28 @@ const AddProduct: React.FC = () => {
       toast.success('Thêm sản phẩm thành công!');
     },
     onError: (error) => {
+      console.error('Lỗi khi thêm sản phẩm:', error);
       toast.error('Thêm sản phẩm thất bại!');
     },
   });
-
+  
   // Xử lý khi chọn nhóm biến thể
   useEffect(() => {
     if (selectedVariantGroup && variantgroup) {
       const selectedGroup = variantgroup.find((group: any) => group.group_id === selectedVariantGroup);
       if (selectedGroup) {
-        setAttributes(selectedGroup.attributes.map((attribute: any) => ({ ...attribute, values: [] })));
-      } else {
-        toast.error("Nhóm biến thể không hợp lệ.");
+        setAttributes(selectedGroup.attributes.map((attribute: any) => ({ ...attribute, selectedValues: [] })));
       }
     }
   }, [selectedVariantGroup, variantgroup]);
 
   // xử lý thay đổi giá trị thuộc tính
-  const handleAttributeValueChange = (index: number, selectedIds: number[]) => {
+  const handleAttributeValueChange = (index: number, selectedValues: any[]) => {
     const updatedAttributes = [...attributes];
-    updatedAttributes[index].selectedValues = selectedIds;
+    updatedAttributes[index].selectedValues = selectedValues;
     setAttributes(updatedAttributes);
   };
+  
   // reset ảnh 
   const handleResetImage = (index: number, field: string) => {
     if (field === 'colorImage') {
@@ -89,46 +136,48 @@ const AddProduct: React.FC = () => {
     }
   };
 
-  // Tạo biến thể từ tất cả thuộc tính đã chọn
+  // tạo biến thể từ thuộc tính
   const generateVariants = () => {
-    const selectedAttributes = attributes.filter(attr => attr.selectedValues && attr.selectedValues.length > 0);
-    if (selectedAttributes.length === 0) {
-      toast.error('Vui lòng chọn ít nhất một giá trị thuộc tính để tạo biến thể');
+    if (attributes.length === 0) {
+      toast.error('Vui lòng chọn ít nhất một thuộc tính để tạo biến thể!');
       return;
     }
 
-    const variantsCombinations = generateCombinations(selectedAttributes.map(attr => attr.selectedValues));
-    const newVariants = variantsCombinations.map((combination: any, index: number) => ({
-      id: index,
-      attributes: combination,
-      stock: 0,
-      discount: 0,
-      colorImage: [],
-      albumImages: [],
-    }));
+    const selectedAttributes = attributes.filter(attr => attr.selectedValues && attr.selectedValues.length > 0);
+
+    if (selectedAttributes.length === 0) {
+      toast.error('Vui lòng chọn giá trị cho ít nhất một thuộc tính!');
+      return;
+    }
+
+    const newVariants = selectedAttributes.reduce((variants, attribute) => {
+      if (variants.length === 0) {
+        return attribute.selectedValues.map((value : any) => ({
+          attributeName: `${attribute.name}: ${value.label}`,
+          [attribute.name]: value.value,
+          stock: 0,
+          discount: 0,
+          colorImage: [],
+          albumImages: [],
+        }));
+      }
+
+      return variants.flatMap((variant : any) =>
+        attribute.selectedValues.map((value : any) => ({
+          ...variant,
+          attributeName: `${variant.attributeName}, ${attribute.name}: ${value.label}`,
+          [attribute.name]: value.value,
+        }))
+      );
+    }, []);
 
     setVariants(newVariants);
   };
 
-  const generateCombinations = (arrays: any[]) => {
-    if (arrays.length === 0) return [];
-    if (arrays.length === 1) return arrays[0].map((value: any) => [value]);
-
-    const result: any[] = [];
-    const allCasesOfRest = generateCombinations(arrays.slice(1));
-    arrays[0].forEach((value: any) => {
-      allCasesOfRest.forEach((combination: any) => {
-        result.push([value, ...combination]);
-      });
-    });
-    return result;
-  };
-
   // thay đổi giá trị biến thể (số lượng, giảm giá, ảnh)
-  const handleVariantChange = (variantId: number, key: string, value: any) => {
-    const updatedVariants = variants.map((variant) =>
-      variant.id === variantId ? { ...variant, [key]: value } : variant
-    );
+  const handleVariantChange = (index: number, key: string, value: any) => {
+    const updatedVariants = [...variants];
+    updatedVariants[index][key] = value;
     setVariants(updatedVariants);
   };
   // xử lý khi tải lên ảnh biến thể
@@ -148,6 +197,7 @@ const AddProduct: React.FC = () => {
       }
       return file;
     });
+
     setAlbumList(updatedAlbumList);
   };
 
@@ -159,128 +209,58 @@ const AddProduct: React.FC = () => {
   const columns = [
     {
       title: 'Thuộc tính',
-      dataIndex: 'attributes',
-      key: 'attributes',
-      render: (attributes: any[]) => (
-        <div>
-          {attributes.map(attr => (
-            <span key={attr.id} className="block font-semibold text-gray-700">
-              {attr.value}
-            </span>
-          ))}
-        </div>
+      dataIndex: 'attributeName',
+      key: 'attributeName',
+      render: (attributeName: string) => (
+        <span className="text-lg font-semibold text-gray-700">{attributeName}</span>
       ),
     },
     {
-      title: 'Số lượng',
+      title: 'Số Lượng',
       dataIndex: 'stock',
       key: 'stock',
-      render: (stock: number, record: any) => (
+      render: (stock: number, record: any, index: number) => (
         <InputNumber
           min={0}
           value={stock}
-          onChange={(value) => handleVariantChange(record.id, 'stock', value)}
+          onChange={(value) => handleVariantChange(index, 'stock', value)}
           className="border border-gray-300 rounded-md p-1 w-28"
           placeholder="Số Lượng"
         />
       ),
     },
     {
-      title: 'Giảm giá (%)',
+      title: 'Giảm Giá (%)',
       dataIndex: 'discount',
       key: 'discount',
-      render: (discount: number, record: any) => (
+      render: (discount: number, record: any, index: number) => (
         <InputNumber
           min={0}
           max={100}
           value={discount}
-          onChange={(value) => handleVariantChange(record.id, 'discount', value)}
+          onChange={(value) => handleVariantChange(index, 'discount', value)}
           className="border border-gray-300 rounded-md p-1 w-28"
           placeholder="Giảm Giá (%)"
         />
       ),
     },
-    {
-      title: 'Ảnh Màu',
-      dataIndex: 'colorImage',
-      key: 'colorImage',
-      render: (_: any, record: any, index: any) => (
-        <div className="flex flex-col items-center justify-center gap-2 p-4 border border-gray-300 rounded-md shadow-sm bg-white">
-          <Upload
-            listType="picture-card"
-            fileList={record.colorImage || []}
-            onChange={(info) => handleUploadChangeForVariant(index, 'colorImage', info)}
-            beforeUpload={() => false}
-            showUploadList={{ showPreviewIcon: true, showRemoveIcon: true, showDownloadIcon: false }}
-            className="upload-inline"
-          >
-            {record.colorImage?.length < 1 && (
-              <div className="w-20 h-20 border border-dashed border-gray-300 rounded-md flex items-center justify-center cursor-pointer">
-                <UploadOutlined className="text-blue-500 text-xl" />
-              </div>
-            )}
-          </Upload>
-          <Button
-            type="dashed"
-            danger
-            className="mt-2 w-full"
-            onClick={() => handleResetImage(index, 'colorImage')}
-          >
-            Reset Ảnh Màu
-          </Button>
-        </div>
-      ),
-    },
-    {
-      title: 'Album Ảnh',
-      dataIndex: 'albumImages',
-      key: 'albumImages',
-      render: (_: any, record: any, index: any) => (
-        <div className="flex flex-col items-center justify-center gap-2 p-4 border border-gray-300 rounded-md shadow-sm bg-white">
-          <Upload
-            listType="picture-card"
-            multiple
-            fileList={record.albumImages || []}
-            onChange={(info) => handleUploadChangeForVariant(index, 'albumImages', info)}
-            beforeUpload={() => false}
-            showUploadList={{ showPreviewIcon: true, showRemoveIcon: true, showDownloadIcon: false }}
-            className="upload-inline"
-          >
-            {record.albumImages?.length < 3 && (
-              <div className="w-20 h-20 border border-dashed border-gray-300 rounded-md flex items-center justify-center cursor-pointer">
-                <UploadOutlined className="text-green-500 text-xl" />
-              </div>
-            )}
-          </Upload>
-          <Button
-            type="dashed"
-            danger
-            className="mt-2 w-full"
-            onClick={() => handleResetImage(index, 'albumImages')}
-          >
-            Reset Album Ảnh
-          </Button>
-        </div>
-      ),
-    },
   ];
 
+  //  xử lý khi submit form
   const onFinish = (values: any) => {
     const formData = new FormData(); // Tạo FormData để gửi dữ liệu
     const formattedDate = values.input_day ? values.input_day.format('YYYY-MM-DD') : null;
 
     console.log("Values nhận được:", values); // Kiểm tra dữ liệu form
+    console.log("Album list:", albumList); // Kiểm tra album list
 
-    // Nếu không có biến thể
     if (!showVariantForm) {
-      // Xử lý album ảnh
       albumList.forEach((file: any, index: number) => {
         if (file.originFileObj) {
-          // Thêm file vào formData
           formData.append(`album_images[${index}]`, file.originFileObj);
         }
       });
-      // Thêm các trường khác vào formData
+
       formData.append('name', values.name);
       formData.append('price', values.price);
       formData.append('description', values.description);
@@ -291,79 +271,40 @@ const AddProduct: React.FC = () => {
       formData.append('is_collection', values.is_collection ? '1' : '0');
       formData.append('is_hot', values.is_hot ? '1' : '0');
       formData.append('is_new', values.is_new ? '1' : '0');
-      // Gọi mutate với FormData
+
       console.log("FormData sản phẩm đơn giản:", formData);
       mutate(formData as any);
       return;
     }
-  
-    // Xử lý cho sản phẩm có biến thể
+
     if (showVariantForm) {
       console.log("Biến thể trước khi xử lý:", variants); // Kiểm tra biến thể
+
       if (!selectedVariantGroup) {
         toast.error('Vui lòng chọn nhóm biến thể!');
         return;
       }
-  
+
       if (variants.length === 0) {
         toast.error('Vui lòng tạo ít nhất một biến thể!');
         return;
       }
-  
-      // Chuẩn bị payload cho sản phẩm có biến thể
-      // Chuẩn bị payload cho sản phẩm có biến thể
+
       const validVariants = variants
-        .map((variant) => {
-          // Kiểm tra nếu variant.sizes tồn tại và là một mảng
-          const validSizes = Array.isArray(variant.sizes)
-            ? variant.sizes.filter((size: any) => size.stock !== undefined && size.stock > 0)
-            : [];
-
-          if (validSizes.length === 0) {
-            return null; // Nếu không có size hợp lệ, bỏ qua biến thể này
-          }
-
-          return {
-            ...variant,
-            sizes: validSizes,
-          };
-        })
-        .filter(Boolean); // Lọc ra các biến thể hợp lệ
-
+        .filter(variant => variant.stock > 0)
+        .map(variant => ({
+          ...variant,
+        }));
 
       if (validVariants.length === 0) {
-        toast.error('Vui lòng điền đầy đủ thông tin cho ít nhất một biến thể và kích thước!');
+        toast.error('Vui lòng điền đầy đủ thông tin cho ít nhất một biến thể!');
         return;
       }
-  
-      const variationsData = validVariants.reduce((acc, variant) => {
-        const colorId = variant.colorId;
-        const sizeData = variant.sizes.reduce((sizeAcc: any, size: any) => {
-          sizeAcc[size.sizeId] = {
-            stock: size.stock ?? 0,
-            discount: size.discount ?? 0,
-          };
-          return sizeAcc;
-        }, {});
-  
-        if (Object.keys(sizeData).length > 0) {
-          acc[colorId] = sizeData;
-        }
-        return acc;
-      }, {});
-      // Thêm ảnh biến thể vào formData
+
       validVariants.forEach((variant: any, index: number) => {
-        const colorId = variant.colorId || variant.id;
-        if (variant.colorImage?.[0]?.originFileObj) {
-          formData.append(`color_image_${colorId}`, variant.colorImage[0].originFileObj);
-        }
-        variant.albumImages?.forEach((file: any, albumIndex: number) => {
-          if (file.originFileObj) {
-            formData.append(`album_images_${colorId}[${albumIndex}]`, file.originFileObj);
-          }
-        });
+        formData.append(`variations[${index}]`, JSON.stringify(variant));
       });
-      // Thêm các trường khác vào formData
+
       formData.append('name', values.name);
       formData.append('price', values.price);
       formData.append('description', values.description);
@@ -371,18 +312,15 @@ const AddProduct: React.FC = () => {
       formData.append('input_day', formattedDate);
       formData.append('category_id', values.category_id);
       formData.append('group_id', selectedVariantGroup?.toString() || '');
-      formData.append('variations', JSON.stringify(variationsData));
       formData.append('is_collection', values.is_collection ? '1' : '0');
       formData.append('is_hot', values.is_hot ? '1' : '0');
       formData.append('is_new', values.is_new ? '1' : '0');
 
       console.log("FormData sản phẩm có biến thể:", formData);
 
-      // Gọi mutate với FormData
       mutate(formData as any);
     }
   };
-  
 
   if (isLoadingVariantGroup || isLoadingCategories) {
     return <Spin tip="Loading..." className="flex justify-center items-center h-screen" />;
@@ -454,7 +392,7 @@ const AddProduct: React.FC = () => {
             name="category_id"
             rules={[{ required: true, message: "Danh mục sản phẩm bắt buộc phải chọn" }]}
           >
-            <Select id="category" className="border border-gray-300 rounded-md p-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-400 font-normal">
+            <select id="category" className="border border-gray-300 rounded-md p-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-400 font-normal">
               <option value="" className="text-gray-500">--Chọn danh mục--</option>
               {categories?.map((category: any) => (
                 <optgroup key={category.id} label={category.name} className="text-gray-600 font-medium">
@@ -465,7 +403,7 @@ const AddProduct: React.FC = () => {
                   ))}
                 </optgroup>
               ))}
-            </Select>
+            </select>
           </Form.Item>
 
           <div className='flex gap-5'>
@@ -506,29 +444,35 @@ const AddProduct: React.FC = () => {
               </Form.Item>
 
               {/* Attributes Mapping */}
-              {attributes.map((attribute, index) => (
-                <Form.Item
-                  key={attribute.id}
-                  label={<span className="font-semibold text-gray-700">Thuộc Tính ({attribute.name})</span>}
-                >
-                  <Select
-                    mode="tags"
-                    style={{ width: '100%' }}
-                    placeholder={`Nhập giá trị cho ${attribute.name}`}
-                    onChange={(values) =>
-                      handleAttributeValueChange(index, values.map((value: any) => ({ id: value.key, value: value.label })))
-                    }
-                    labelInValue
-                    className="rounded-md border border-gray-300 hover:border-gray-400 focus:border-blue-500"
+              {attributes
+                .sort((a, b) => {
+                  if (a.name.toLowerCase().includes('màu sắc')) return -1;
+                  if (b.name.toLowerCase().includes('màu sắc')) return 1;
+                  return 0;
+                })
+                .map((attribute, index) => (
+                  <Form.Item
+                    key={attribute.id}
+                    label={<span className="font-semibold text-gray-700">Thuộc Tính ({attribute.name})</span>}
                   >
-                    {attribute.attribute_values.map((val: any) => (
-                      <Option key={val.id} value={val.value}>
-                        {val.value}
-                      </Option>
-                    ))}
-                  </Select>
-                </Form.Item>
-              ))}
+                    <Select
+                      mode="tags"
+                      style={{ width: '100%' }}
+                      placeholder={`Nhập giá trị cho ${attribute.name}`}
+                      onChange={(values) =>
+                        handleAttributeValueChange(index, values.map((value: any) => ({ key: value.key, label: value.label })))
+                      }
+                      labelInValue
+                      className="rounded-md border border-gray-300 hover:border-gray-400 focus:border-blue-500"
+                    >
+                      {attribute.attribute_values.map((val: any) => (
+                        <Option key={val.id} value={val.value}>
+                          {val.value}
+                        </Option>
+                      ))}
+                    </Select>
+                  </Form.Item>
+                ))}
 
               {/* Generate Variants Button */}
               <Button
@@ -551,6 +495,7 @@ const AddProduct: React.FC = () => {
             </div>
           )}
 
+
           {!showVariantForm && (
             <>
               <div className="mt-4">
@@ -570,6 +515,7 @@ const AddProduct: React.FC = () => {
                     min={0}
                   />
                 </Form.Item>
+
               </div>
               <div className="mt-4">
                 <Form.Item
@@ -581,6 +527,7 @@ const AddProduct: React.FC = () => {
                     multiple
                     fileList={albumList}
                     onChange={handleAlbumChange2}
+
                     beforeUpload={() => false}
                   >
                     <Button icon={<UploadOutlined />} className="bg-green-500 hover:bg-green-600 text-white">
@@ -588,6 +535,7 @@ const AddProduct: React.FC = () => {
                     </Button>
                   </Upload>
                 </Form.Item>
+
               </div>
             </>
           )}

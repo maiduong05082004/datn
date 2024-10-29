@@ -38,7 +38,7 @@ interface VariationValue {
   discount: number;
 }
 
-const ListProducts = () => {
+const ListBill = () => {
   const [messageApi, contextHolder] = message.useMessage();
   const queryClient = useQueryClient();
   const [isModalVisible, setIsModalVisible] = useState(false);
@@ -166,13 +166,13 @@ const ListProducts = () => {
               type="link"
               icon={<EyeOutlined />}
               className="bg-blue-500 text-white hover:bg-blue-700"
-              onClick={() => navigate(`admin/detailProducts/${product.id}`)}
+              onClick={() => navigate(`admin/bill/detail/${product.id}`)}
             >
             </Button>
             <Button
               type="default"
               icon={<EditOutlined />}
-              onClick={() => navigate(`/admin/products/${product.id}`)}
+              onClick={() => navigate(`/admin/bill/update/${product.id}`)}
             />
             <Popconfirm
               title="Xóa sản phẩm"
@@ -289,4 +289,4 @@ const ListProducts = () => {
   );
 };
 
-export default ListProducts;
+export default ListBill;

@@ -163,7 +163,7 @@ const UpdateCategories: React.FC = () => {
                   Cập Nhật
                 </Button>
                 <Button
-                  onClick={() => navigate('/admin/listCategories')}
+                  onClick={() => navigate('/admin/category/list')}
                   size="large"
                   className="bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-md px-6"
                 >

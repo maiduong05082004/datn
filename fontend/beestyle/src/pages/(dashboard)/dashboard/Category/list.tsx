@@ -120,7 +120,7 @@ const ListCategories: React.FC = () => {
           <Button
             type="default"
             icon={<EditOutlined />}
-            onClick={() => navigate(`/admin/updateCategories/${category.id}`)}
+            onClick={() => navigate(`/admin/category/update/${category.id}`)}
           />
         </Space>
       ),
@@ -139,7 +139,7 @@ const ListCategories: React.FC = () => {
           <Button
             type="primary"
             icon={<PlusOutlined />}
-            onClick={() => navigate('/admin/addCategories')}
+            onClick={() => navigate('/admin/category/add')}
             className="bg-indigo-600 hover:bg-indigo-700 text-white"
           >
             Thêm danh mục
