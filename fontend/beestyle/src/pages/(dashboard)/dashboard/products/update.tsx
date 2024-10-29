@@ -282,6 +282,16 @@ const UpdateProduct: React.FC = () => {
   };
 
 
+  // const handleRemoveFile = (index: number, key: string, file: any) => {
+  //   const updatedVariants = [...variants];
+  //   const variant = updatedVariants[index];
+  //   if (variant) {
+  //     variant[key] = variant[key].filter((item: any) => item.uid !== file.uid);
+  //   }
+  //   setVariants(updatedVariants);
+  // };
+
+
   const columns = [
     {
       title: 'Màu Sắc',

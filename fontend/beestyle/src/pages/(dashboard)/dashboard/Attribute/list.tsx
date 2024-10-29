@@ -118,7 +118,7 @@ const ListAttribute: React.FC = () => {
                     <Button
                         type="default"
                         icon={<EditOutlined />}
-                        onClick={() => navigate(`/admin/updateattribute/${attribute.id}`)}
+                        onClick={() => navigate(`/admin/attribute/update/${attribute.id}`)}
                     />
                     <Popconfirm
                         title="Xóa thuộc tính"
@@ -153,14 +153,14 @@ const ListAttribute: React.FC = () => {
                         type="primary"
                         icon={<PlusCircleFilled />}
                     >
-                        <Link to={`/admin/addattribute`}>Thêm Attribute</Link>
+                        <Link to={`/admin/attribute/add`}>Thêm Attribute</Link>
                     </Button>
                     <Button
                         className="bg-indigo-600 hover:bg-indigo-700 text-white"
                         type="primary"
                         icon={<PlusCircleFilled />}
                     >
-                        <Link to={`/admin/addattribute_value`}>Thêm Giá Trị Attribute</Link>
+                        <Link to={`/admin/attribute_value/add`}>Thêm Giá Trị Attribute</Link>
                     </Button>
                 </div>
 
@@ -206,7 +206,7 @@ const ListAttribute: React.FC = () => {
                                             type="default"
                                             icon={<EditOutlined />}
                                             className="text-blue-500 hover:text-blue-600 transition-colors"
-                                            onClick={() => navigate(`/admin/updateattribute_value/${value.value_id}`)}
+                                            onClick={() => navigate(`attribute_value/update/${value.value_id}`)}
                                         />
                                         <Popconfirm
                                             title="Xóa giá trị"

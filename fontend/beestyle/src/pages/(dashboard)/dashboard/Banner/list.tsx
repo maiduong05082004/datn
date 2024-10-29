@@ -54,7 +54,7 @@ const ListBanners: React.FC = () => {
                     <Button
                         type="default"
                         icon={<EditOutlined />}
-                        onClick={() => navigate(`/admin/updateBanners/${banner.id}`)}
+                        onClick={() => navigate(`/admin/banner/update/${banner.id}`)}
                     />
                     <Popconfirm
                         title="Xóa Banner"
@@ -76,7 +76,7 @@ const ListBanners: React.FC = () => {
                 <Button
                     type="primary"
                     icon={<PlusOutlined />}
-                    onClick={() => navigate('/admin/addBanners')}
+                    onClick={() => navigate('/admin/banner/add')}
                     className="bg-indigo-600 hover:bg-indigo-700 text-white"
                 >
                     Thêm Banners
