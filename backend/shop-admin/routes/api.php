@@ -62,6 +62,7 @@ Route::prefix('client')->as('client.')->group(function () {
         Route::get('/showDetail/{id}',[ProductProductController::class, 'showDetail'])->name('showDetail');
         Route::post('/purchase',[ProductProductController::class, 'purchase'])->name('purchase')->middleware('auth:sanctum');
         Route::get('/',[ProductProductController::class, 'index'])->name('index');
+        Route::get('/showDetailOrder/{oderId}',[ProductProductController::class, 'showDetailOrder'])->name('showDetailOrder');
     });
     Route::prefix('cart')->as('cart.')->middleware('auth:sanctum')->group(function () {
         Route::get('/', [ProductCartController::class, 'getCartItems'])->name('index');
