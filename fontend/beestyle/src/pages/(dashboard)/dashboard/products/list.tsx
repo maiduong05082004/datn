@@ -177,13 +177,13 @@ const ListProducts = () => {
             type="link"
             icon={<EyeOutlined />}
             className="text-white bg-blue-500 hover:bg-blue-600"
-            onClick={() => navigate(`/admin/detailProducts/${product.id}`)}
+            onClick={() => navigate(`/admin/products/detail/${product.id}`)}
           />
           <Button
             type="default"
             icon={<EditOutlined />}
             className="bg-yellow-500 text-white hover:bg-yellow-600"
-            onClick={() => navigate(`/admin/updateProducts/${product.id}`)}
+            onClick={() => navigate(`/admin/products/update/${product.id}`)}
           />
           <Popconfirm
             title="Xóa sản phẩm"
@@ -210,7 +210,7 @@ const ListProducts = () => {
             className="bg-indigo-600 hover:bg-indigo-700 text-white"
             icon={<PlusOutlined />}
             type="primary"
-            onClick={() => navigate('/admin/addProducts')}
+            onClick={() => navigate('/admin/products/add')}
           >
             Thêm mới
           </Button>

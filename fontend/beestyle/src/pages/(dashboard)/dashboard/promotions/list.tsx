@@ -90,7 +90,7 @@ const ListPromotions: React.FC = () => {
                     <Button
                         type="default"
                         icon={<EditOutlined />}
-                        onClick={() => navigate(`/admin/updatePromotions/${record.id}`)}
+                        onClick={() => navigate(`/admin/promotions/update/${record.id}`)}
                     />
                     <Popconfirm
                         title="Xóa khuyến mãi?"
@@ -116,7 +116,7 @@ const ListPromotions: React.FC = () => {
                     type="default"
                     className="bg-black hover:bg-slate-300 text-white"
                     icon={<PlusOutlined />}
-                    onClick={() => navigate('/admin/addPromotions')}
+                    onClick={() => navigate('/admin/promotions/add')}
                 >
                     Thêm Khuyến Mãi
                 </Button>

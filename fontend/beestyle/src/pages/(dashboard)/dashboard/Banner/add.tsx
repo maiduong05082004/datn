@@ -76,7 +76,7 @@ const AddBanners: React.FC = () => {
                   Thêm mới
                 </Button>
                 <Button
-                  onClick={() => navigate('/admin/listBanners')}
+                  onClick={() => navigate('/admin/banner/list')}
                   size="large"
                   className="bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-md px-6"
                 >
