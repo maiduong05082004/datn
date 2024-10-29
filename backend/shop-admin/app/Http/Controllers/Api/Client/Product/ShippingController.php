@@ -51,7 +51,9 @@ class ShippingController extends Controller
             'ward' => 'required|string|max:255',
             'phone_number' => 'required|string|max:15',
             'is_default' => 'boolean',
+            'full_name' => 'required|string|max:255', // Thêm validation cho full_name
         ]);
+        
     
         if ($user->shippingAddresses()->count() >= 5) {
             return response()->json([

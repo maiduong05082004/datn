@@ -60,7 +60,7 @@ Route::prefix('client')->as('client.')->group(function () {
         ->names('shippingaddress');
     Route::prefix('products')->as('products.')->group(function () {
         Route::get('/showDetail/{id}',[ProductProductController::class, 'showDetail'])->name('showDetail');
-        Route::post('/purchase',[ProductProductController::class, 'purchase'])->name('purchase');
+        Route::post('/purchase',[ProductProductController::class, 'purchase'])->name('purchase')->middleware('auth:sanctum');
         Route::get('/',[ProductProductController::class, 'index'])->name('index');
     });
     Route::prefix('cart')->as('cart.')->middleware('auth:sanctum')->group(function () {
@@ -87,8 +87,9 @@ Route::prefix('admins')
     ->group(function () {
         Route::post('/signin', [AdminAuthController::class, 'login'])->name('signin');
         Route::middleware(['auth:admin', 'admin'])->group(function () {
-         Route::apiResource('products', ProductController::class)
-          ->names('products');
+            Route::apiResource('products', ProductController::class)
+            ->names('products');
+            Route::delete('images/{type}/{encodedPath}', [ProductController::class, 'deleteImageByPath'])->name('images.deleteByPath');
             Route::apiResource('attributes', AttributeController::class)
                 ->names('attributes');
             Route::apiResource('attribute_groups', AttributeGroupController::class)

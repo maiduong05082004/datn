@@ -11,7 +11,8 @@ class ShippingAddress extends Model
 
     // Các trường có thể được gán giá trị thông qua mass assignment
     protected $fillable = [
-        'user_id',          
+        'user_id', 
+        'full_name',         
         'address_line',     // Địa chỉ chi tiết (ví dụ: số nhà, tên đường)
         'city',             // Thành phố hoặc tỉnh
         'district',         // Quận hoặc huyện
