@@ -36,7 +36,7 @@ const AddBanners: React.FC = () => {
     <>
       {contextHolder}
       <div className="min-h-screen flex items-center justify-center p-8">
-        <div className={`container mx-auto px-4 py-8 ${darkMode ? 'bg-gray-900' : 'bg-white'} transition-colors duration-300`}>
+        <div className="w-full max-w-7xl bg-white p-10 rounded-xl shadow-lg">
           <h1 className={`text-3xl font-bold mb-6 text-center ${darkMode ? 'text-white' : 'text-gray-800'} transition-colors duration-300`}>
             Thêm mới banners
           </h1>

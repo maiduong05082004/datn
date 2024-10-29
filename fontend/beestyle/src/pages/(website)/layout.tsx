@@ -21,110 +21,25 @@ import {
 import { Outlet } from 'react-router-dom';
 import { NavLink } from 'react-router-dom'; // Import NavLink for navigation
 
-const { Header, Content, Sider } = Layout;
-
-// Sidebar items
-const items1: MenuProps['items'] = [
-    {
-        key: '1',
-        icon: <UserOutlined />,
-        label: "Quản Lý Tài Khoản",
-        children: [
-            { key: 'sub1-1', label: <NavLink to="/admin/listUser">Danh sách tài Khoản</NavLink> },
-            { key: 'sub1-2', label: <NavLink to="/admin/addUser">Thêm Tài Khoản</NavLink> },
-            { key: 'sub1-3', label: <NavLink to="/admin/updateUser">Cập nhật Tài Khoản</NavLink> },
-            { key: 'sub1-4', label: <NavLink to="/admin/blockUser">Tài khoản chặn</NavLink> },
-        ],
-    },
-    {
-        key: '2',
-        icon: <FileImageOutlined />,
-        label: "Quản Lý Banners",
-        children: [
-            { key: 'sub2-1', label: <NavLink to="/admin/listBanners">Danh sách Banners</NavLink> },
-            { key: 'sub2-2', label: <NavLink to="/admin/addBanners">Thêm Banners</NavLink> },
-            { key: 'sub2-3', label: <NavLink to="/admin/updateBanners">Cập nhật Banners</NavLink> },
-            // { key: 'sub1-4', label: <NavLink to="/admin/delete-account">Xóa Tài Khoản</NavLink> },
-        ],
-    },
-    {
-        key: 'sub3',
-        icon: React.createElement(ShoppingCartOutlined),
-        label: 'Quản Lý Sản Phẩm',
-        children: [
-            { key: 'sub3-1', label: <NavLink to="/admin/listProducts">Danh sách sản phẩm</NavLink> },
-            { key: 'sub3-2', label: <NavLink to="/admin/addProducts">Thêm Sản phẩm</NavLink> },
-            { key: 'sub3-3', label: <NavLink to="/admin/updateProducts">Cập nhật sản phẩm</NavLink> },
-
-        ],
-    },
-    {
-        key: 'sub4',
-        icon: React.createElement(LaptopOutlined),
-        label: 'Quản Lý Danh Mục',
-        children: [
-            { key: 'sub4-1', label: <NavLink to="/admin/listCategories">Danh sách danh mục</NavLink> },
-            { key: 'sub4-2', label: <NavLink to="/admin/addCategories">Thêm mới danh mục</NavLink> },
-            { key: 'sub4-3', label: <NavLink to="/admin/updateCategories">Cập nhật danh mục</NavLink> },
-        ],
-    },
-    {
-        key: 'sub5',
-        icon: React.createElement(ProductOutlined),
-        label: 'Quản Lý Đơn Hàng',
-        children: [
-            { key: 'sub5-1', label: <NavLink to="/admin/listBills">Danh sách đơn hàng</NavLink> },
-            { key: 'sub5-2', label: <NavLink to="/admin">Danh sách</NavLink> },
-            { key: 'sub5-3', label: 'Xóa Đơn Hàng' },
-        ],
-    },
-    {
-        key: 'sub6',
-        icon: React.createElement(MessageOutlined),
-        label: 'Quản Lý Bình Luận',
-        children: [
-            { key: 'sub6-1', label: <NavLink to="/admin/listComments">Danh sách bình luận</NavLink> },
-            { key: 'sub6-2', label: 'Phê Duyệt Bình Luận' },
-            { key: 'sub6-3', label: 'Xóa Bình Luận' },
-        ],
-    },
-    {
-        key: 'sub7',
-        icon: React.createElement(GiftOutlined),
-        label: 'Quản Lý Khuyến Mại',
-        children: [
-            { key: 'sub7-1', label: <NavLink to="/admin">Danh sách</NavLink> },
-            { key: 'sub7-2', label: <NavLink to="/admin">Thêm mới</NavLink> },
-            { key: 'sub7-3', label: <NavLink to="/admin">Cập nhật</NavLink> },
-            { key: 'sub7-4', label: 'Xóa Khuyến Mại' },
-        ],
-    },
-    {
-        key: 'sub8',
-        icon: React.createElement(BarChartOutlined),
-        label: 'Thống Kê',
-        children: [
-            { key: 'sub8-1', label: 'Xem Thống Kê' },
-            { key: 'sub8-2', label: 'Tải Xuống Thống Kê' },
-        ],
-    },
-];
-
-const DashboardPage: React.FC<{ isDarkMode: boolean }> = ({ isDarkMode }) => {
+import Footer from '@/components/Footer'
+import Header from '@/components/Header'
+import { Dispatch, SetStateAction } from 'react'
+import { Outlet } from 'react-router-dom'
+type Props = {
+    isSearch: boolean
+    // closes: boolean;
+    // onClicks: () => void;
+    setIsSearch: Dispatch<SetStateAction<boolean>>;
+  }
+const Layout = ({ isSearch ,setIsSearch}: Props) => {
     return (
-        <Content
-            style={{
-                padding: '24px',
-                minHeight: '100vh',
-                backgroundColor: isDarkMode ? '#001529' : '#fff', // Dashboard background color
-                color: isDarkMode ? '#fff' : '#000', // Dashboard text color
-            }}
-        >
-            <h1>Dashboard Content</h1>
-            <p>This is the content of the dashboard in {isDarkMode ? 'Dark Mode' : 'Light Mode'}.</p>
-        </Content>
-    );
-};
+        <>
+            <Header isSearch={isSearch} setIsSearch={setIsSearch}/>
+            <Outlet />
+            <Footer />
+        </>
+    )
+}
 
 const App: React.FC = () => {
     const [collapsed, setCollapsed] = React.useState(false);

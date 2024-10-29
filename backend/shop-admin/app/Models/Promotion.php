@@ -9,66 +9,48 @@ class Promotion extends Model
 {
     use HasFactory;
 
-    // Các hằng số trạng thái khuyến mãi
-    const STATUS_ACTIVE = 'active';
-    const STATUS_EXPIRED = 'expired';
-    const STATUS_UPCOMING = 'upcoming';
-    const STATUS_DISABLED = 'disabled';
-
-    // Các trường có thể điền hàng loạt (fillable)
     protected $fillable = [
-        'code', 
-        'description', 
-        'start_date', 
-        'end_date', 
-        'discount_amount', 
+        'code',
+        'description',
+        'start_date',
+        'end_date',
+        'discount_amount',
+        'max_discount_amount',
+        'discount_type',
+        'usage_limit',
+        'min_order_value',
+        'promotion_type',
         'is_active',
-        'status', // Trạng thái của khuyến mãi
+        'category_id',
+        'product_id',
+        'status',
     ];
 
-    // Quan hệ với bảng users (thông qua bảng trung gian user_promotions)
-    public function users()
+    public function getCategoryIdsAttribute()
     {
-        return $this->belongsToMany(User::class, 'user_promotions');
+        return $this->category_id ? explode(',', $this->category_id) : [];
     }
 
-    // Quan hệ với bảng bills
-    public function bills()
+    public function getProductIdsAttribute()
     {
-        return $this->hasMany(Bill::class);
+        return $this->product_id ? explode(',', $this->product_id) : [];
     }
 
-    // Các phương thức tiện ích để kiểm tra trạng thái khuyến mãi
-    public function isActive()
+    public function setCategoryIdsAttribute($value)
     {
-        return $this->status === self::STATUS_ACTIVE;
+        $this->attributes['category_id'] = is_array($value) ? implode(',', $value) : null;
     }
 
-    public function isExpired()
+    public function setProductIdsAttribute($value)
     {
-        return $this->status === self::STATUS_EXPIRED;
+        $this->attributes['product_id'] = is_array($value) ? implode(',', $value) : null;
     }
-
-    public function isUpcoming()
+    public function userPromotions()
     {
-        return $this->status === self::STATUS_UPCOMING;
+        return $this->hasMany(UserPromotion::class, 'promotion_id');
     }
-
-    public function isDisabled()
+    public function category()
     {
-        return $this->status === self::STATUS_DISABLED;
-    }
-
-    // Phương thức tiện ích để lấy mô tả trạng thái khuyến mãi bằng tiếng Việt
-    public function getTrangThaiKhuyenMai()
-    {
-        $statuses = [
-            self::STATUS_ACTIVE => 'Đang diễn ra',
-            self::STATUS_EXPIRED => 'Đã kết thúc',
-            self::STATUS_UPCOMING => 'Sắp diễn ra',
-            self::STATUS_DISABLED => 'Đã bị vô hiệu hóa',
-        ];
-
-        return $statuses[$this->status] ?? 'Không xác định';
+        return $this->belongsTo(Category::class, 'category_id');
     }
 }

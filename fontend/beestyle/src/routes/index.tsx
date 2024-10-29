@@ -1,76 +1,91 @@
+import { Route, Routes } from "react-router-dom";
 import DashboardPage from "@/pages/(dashboard)/dashboard/page";
-import LayoutAdmin from "@/pages/(dashboard)/layout";
-import ErrorPage from "@/pages/(website)/404/page";
-import HomePage from "@/pages/(website)/home/page";
-import LayoutWebsite from "@/pages/(website)/layout";
+import MyProfile from "@/pages/(dashboard)/dashboard/profile";
+import AddPromotion from "@/pages/(dashboard)/dashboard/promotions/add";
+import ListPromotions from "@/pages/(dashboard)/dashboard/promotions/list";
+import UpdatePromotion from "@/pages/(dashboard)/dashboard/promotions/update";
 import AddUser from "@/pages/(dashboard)/dashboard/user/add";
 import UpdateUser from "@/pages/(dashboard)/dashboard/user/update";
-
-import { Route, Routes } from "react-router-dom";
-import Sanphambt from "@/pages/(website)/home/_components/sanphambt";
+import LayoutAdmin from "@/pages/(dashboard)/layout";
+import HomePage from "@/pages/(website)/home/page";
+import LayoutWebsite from "@/pages/(website)/layout";
+import Signin from "@/pages/signin/signin";
+import Signup from "@/pages/signup/signup";
+import GoogleCallback from "@/pages/GoogleCallback/GoogleCallback";
+import AddUser from "@/pages/(dashboard)/dashboard/user/add";
+import UpdateUser from "@/pages/(dashboard)/dashboard/user/update";
 import PayPage from "@/pages/(website)/home/_components/PayPage";
 import CartPage from "@/pages/(website)/home/_components/CartPage";
 import AddCategories from "@/pages/(dashboard)/dashboard/categories/add";
+import ListCategories from "@/pages/(dashboard)/dashboard/categories/list";
 import UpdateCategories from "@/pages/(dashboard)/dashboard/categories/update";
-import AddBanners from "@/pages/(dashboard)/dashboard/banners/add";
-import UpdateBanners from "@/pages/(dashboard)/dashboard/banners/update";
-import ListUser from "@/pages/(dashboard)/dashboard/user/list";
+import ListComments from "@/pages/(dashboard)/dashboard/comments/list";
+import AddProduct from "@/pages/(dashboard)/dashboard/products/add";
 import ListProducts from "@/pages/(dashboard)/dashboard/products/list";
-import Addproduct from "@/pages/(dashboard)/dashboard/products/add";
 import UpdateProduct from "@/pages/(dashboard)/dashboard/products/update";
 import ListComments from "@/pages/(dashboard)/dashboard/comments/list";
 import ListCategories from "@/pages/(dashboard)/dashboard/categories/list";
 import ListBills from "@/pages/(dashboard)/dashboard/bills/list";
 import ListBanners from "@/pages/(dashboard)/dashboard/banners/list";
-import BlockUser from "@/pages/(dashboard)/dashboard/user/block";
-import SubCategories from "@/pages/(dashboard)/dashboard/categories/sub";
-import AddSub from "@/pages/(dashboard)/dashboard/categories/addSub";
-import ListAttributeValues from "@/pages/(dashboard)/dashboard/attribute_values/list";
-import AddAttributeValues from "@/pages/(dashboard)/dashboard/attribute_values/add";
-import UpdateAttributeValues from "@/pages/(dashboard)/dashboard/attribute_values/update";
-import DetailAttributeValues from "@/pages/(dashboard)/dashboard/attribute_values/detail";
-import DetailBill from "@/pages/(dashboard)/dashboard/bills/detail";
-
-
+import VariantProduct from "@/pages/(dashboard)/dashboard/products/variant";
+import AddBanners from "@/pages/(dashboard)/dashboard/banners/add";
+import UpdateBanners from "@/pages/(dashboard)/dashboard/banners/update";
+import ErrorPage from "@/pages/(website)/404/page";
+import Search from "@/pages/(website)/_components/Search";
+import ListUsers from "@/pages/(dashboard)/dashboard/user/list";
 
 const Router = () => {
+
+    const [isSearch, setIsSearch] = useState<boolean>(false)
+    const [isKeySearch, setKeySearch] = useState<string>("")
     return (
+
         <>
             <Routes>
-                <Route path="/" element={<LayoutWebsite />}>
+                <Route path="/" element={<LayoutWebsite isSearch={isSearch} setIsSearch={setIsSearch} />}>
                     <Route index element={<HomePage />} />
-                    <Route path="spbt" element={<Sanphambt />} />
+                    <Route path="signin" element={<Signin />} />
+                    <Route path="signup" element={<Signup />} />
+                    <Route path="auth/google/callback" element={<GoogleCallback />} />
+                    {/* <Route path="spbt" element={<Sanphambt />} /> */}
                     <Route path="pay" element={<PayPage />} />
                     <Route path="cart" element={<CartPage />} />
                 </Route>
+
+                {/* Admin Routes */}
                 <Route path="admin" element={<LayoutAdmin />}>
+                    <Route path="profile" element={<MyProfile />} />
                     <Route index element={<DashboardPage />} />
+                    {/* bills */}
+                    <Route path="listbills" element={<ListBills />} />
+                    {/* comments */}
+                    <Route path="listComments" element={<ListComments />} />
+                    {/* bills */}
+                    <Route path="addbanner" element={<AddBanners />} />
+                    <Route path="listbanner" element={<ListBanners />} />
+                    <Route path="updatebanner/:id" element={<UpdateBanners />} />
+                    {/* users */}
                     <Route path="addUser" element={<AddUser />} />
-                    <Route path="blockUser" element={<BlockUser />} />
-                    <Route path="updateUser/:id" element={<UpdateUser />} />
-                    <Route path="listUser" element={<ListUser />} />
+                    <Route path="updateUser" element={<UpdateUser />} />
+                    <Route path="listUser" element={<ListUsers />} />
+                    {/* products */}
                     <Route path="listProducts" element={<ListProducts />} />
-                    <Route path="addProducts" element={<Addproduct />} />
+                    <Route path="addProducts" element={<AddProduct />} />
                     <Route path="updateProducts" element={<UpdateProduct />} />
+                    <Route path="variantProducts" element={<VariantProduct />} />
                     <Route path="listComments" element={<ListComments />} />
                     <Route path="listCategories" element={<ListCategories />} />
                     <Route path="addCategories" element={<AddCategories />} />
-                    <Route path="subCategories" element={<SubCategories />} />
-                    {/* <Route path="trashCategories" element={<TrashCategories />} /> */}
-                    <Route path="addSub" element={<AddSub />} />
                     <Route path="updateCategories" element={<UpdateCategories />} />
                     <Route path="listBills" element={<ListBills />} />
-                    <Route path="detailBill/:id" element={<DetailBill />} />
                     <Route path="listBanners" element={<ListBanners />} />
                     <Route path="addBanners" element={<AddBanners />} />
-                    <Route path="updateBanners/:id" element={<UpdateBanners />} />
-                    <Route path="listAttributeValues" element={<ListAttributeValues />} />
-                    <Route path="addAttributes" element={<AddAttributeValues />} />
-                    <Route path="updateAttributes/:id" element={<UpdateAttributeValues />} />
-                    <Route path="detailAttribute/:id" element={<DetailAttributeValues />} />
+                    <Route path="updateBanners" element={<UpdateBanners />} />
+
                 </Route>
-                <Route path="*/*" element={<ErrorPage />} />
+                <Route path="**" element={<ErrorPage />} />
             </Routes>
+            <Search isSearch={isSearch} setIsSearch={setIsSearch} setKeySearch={setKeySearch}/>
         </>
     );
 };

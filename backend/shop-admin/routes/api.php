@@ -5,60 +5,79 @@ use App\Http\Controllers\Api\Admin\UserController;
 use App\Http\Controllers\Api\Client\AuthController;
 use App\Http\Controllers\Api\Admin\AuthController as AdminAuthController;
 use App\Http\Controllers\Api\Client\CategoryController;
-use Illuminate\Http\Request;
+use App\Http\Controllers\Api\Client\Product\ProductController as ClientProductController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\Admin\CategoryController as AdminCategoryController;
 use App\Http\Controllers\Api\Admin\Product\AttributeController;
 use App\Http\Controllers\Api\Admin\Product\AttributeGroupController;
 use App\Http\Controllers\Api\Admin\Product\AttributeValueController;
+use App\Http\Controllers\Api\Admin\PromotionsController;
 use App\Http\Controllers\Api\Client\HomeController;
 use App\Http\Controllers\Api\Client\Product\ProductController as ProductProductController;
 use App\Http\Controllers\Api\Admin\WishlistController;
-
-/*
-|--------------------------------------------------------------------------
-| API Routes
-|--------------------------------------------------------------------------
-|
-| Here is where you can register API routes for your application. These
-| routes are loaded by the RouteServiceProvider and all of them will
-| be assigned to the "api" middleware group. Make something great!
-|
-*/
+use App\Http\Controllers\Api\Client\CheckoutController;
+use App\Http\Controllers\Api\Client\Product\CartController as ProductCartController;
+use App\Http\Controllers\Api\Client\Product\ShippingController;
+use App\Http\Controllers\Api\Client\PromotionController;
+use App\Http\Controllers\CartController;
+use App\Http\Controllers\PaymentController;
 
 Route::prefix('client')->as('client.')->group(function () {
     Route::prefix('auth')
-    ->as('auth.')
-    ->group(function () {
-        Route::post('/signup', [AuthController::class, 'register'])->name('signup');
-        Route::post('/signin', [AuthController::class, 'login'])->name('signin');
-        Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth:sanctum')->name('logout');
-        Route::get('/profile', [AuthController::class, 'user'])->middleware('auth:sanctum')->name('profile');
-        Route::post('/forgot-password', [AuthController::class, 'forgotPassword'])->middleware('guest')->name('password.email');
-        Route::post('/reset-password', [AuthController::class, 'resetPassword'])->middleware('guest')->name('password.update');
-        Route::get('/reset-password/{token}', function ($token) {
-            return response()->json(['token' => $token]);
-        })->middleware('guest')->name('password.reset');
-        Route::get('/google', [AuthController::class, 'redirectToGoogle'])->name('google.redirect');
-        Route::get('/callback/google', [AuthController::class, 'handleGoogleCallback'])->name('google.callback');
-    });
+        ->as('auth.')
+        ->group(function () {
+            Route::post('/signup', [AuthController::class, 'register'])->name('signup');
+            Route::post('/signin', [AuthController::class, 'login'])->name('signin');
+            Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth:sanctum')->name('logout');
+            Route::get('/profile', [AuthController::class, 'user'])->middleware('auth:sanctum')->name('profile');
+            Route::post('/forgot-password', [AuthController::class, 'forgotPassword'])->middleware('guest')->name('password.email');
+            Route::post('/reset-password', [AuthController::class, 'resetPassword'])->middleware('guest')->name('password.update');
+            Route::get('/reset-password/{token}', function ($token) {
+                return response()->json(['token' => $token]);
+            })->middleware('guest')->name('password.reset');
+            Route::get('/google', [AuthController::class, 'redirectToGoogle'])->name('google.redirect');
+            Route::get('/callback/google', [AuthController::class, 'handleGoogleCallback'])->name('google.callback');
+        });
     Route::prefix('categories')->as('categories.')->group(function () {
         Route::get('/', [CategoryController::class, 'index'])->name('list');
-        Route::get('/{id}', [CategoryController::class, 'showCategoryProducts'])->name('products.show');
+        Route::get('/colors', [CategoryController::class, 'getAllColors']);
+        Route::post('/{id}', [CategoryController::class, 'getFilterOptionsByCategory']);
+        Route::get('/{id}/sizes', [CategoryController::class, 'getCategoryAttributes']);
+        Route::get('/{id}/children', [CategoryController::class, 'getCategoryChildren']);
     });
-
-
+    Route::prefix('promotions')->middleware('auth:sanctum')->group(function () {
+        Route::post('/', [PromotionController::class, 'applyPromotion']);
+        Route::get('/available-promotions', [PromotionController::class, 'getAvailablePromotions']);
+        Route::get('/history', [PromotionController::class, 'getPromotionHistory']);
+        Route::post('/check', [PromotionController::class, 'checkPromotion']);
+        Route::get('/product/{productId}', [PromotionController::class, 'getProductPromotions']);
+    });
     Route::prefix('home')->as('home.')->group(function () {
-        Route::get('/',[HomeController::class, 'index'])->name('index');
-        Route::get('search',[HomeController::class, 'search'])->name('search');
-
+        Route::get('/', [HomeController::class, 'index'])->name('index');
+        Route::get('search', [HomeController::class, 'search'])->name('search');
     });
-
-
+    Route::apiResource('shippingaddress', ShippingController::class)
+        ->names('shippingaddress');
     Route::prefix('products')->as('products.')->group(function () {
         Route::get('/showDetail/{id}',[ProductProductController::class, 'showDetail'])->name('showDetail');
-
-
+        Route::post('/purchase',[ProductProductController::class, 'purchase'])->name('purchase')->middleware('auth:sanctum');
+        Route::get('/',[ProductProductController::class, 'index'])->name('index');
+    });
+    Route::prefix('cart')->as('cart.')->middleware('auth:sanctum')->group(function () {
+        Route::get('/', [ProductCartController::class, 'getCartItems'])->name('index');
+        Route::post('/add', [ProductCartController::class, 'addToCart'])->name('add');
+        Route::put('/update/{id}', [ProductCartController::class, 'updateCartItem'])->name('update');
+        Route::delete('/{id}', [ProductCartController::class, 'removeCartItem'])->name('remove');
+    });
+    Route::prefix('wishlist')->as('wishlist.')->middleware('auth:sanctum')->group(function () {
+        Route::post('/add', [WishlistController::class, 'addToWishlist'])->name('wishlist.add');
+        Route::get('/', [WishlistController::class, 'index'])->name('wishlist.index');
+        Route::delete('/remove/{id}', [WishlistController::class, 'destroy'])->name('wishlist.remove');
+    });
+    Route::prefix('checkout')->as('checkout.')->middleware('auth:sanctum')->group(function () {
+        Route::post('/submit', [CheckoutController::class, 'submit'])->name('submit');
+        Route::get('/success', [CheckoutController::class, 'success'])->name('success');
+        Route::get('/cancel', [CheckoutController::class, 'cancel'])->name('cancel');
     });
 });
 
@@ -69,8 +88,9 @@ Route::prefix('admins')
         Route::post('/signin', [AdminAuthController::class, 'login'])->name('signin');
         // Route::middleware(['auth:admin', 'admin'])->group(function () {
             Route::apiResource('products', ProductController::class)
-                ->names('products');
-                Route::apiResource('attributes', AttributeController::class)
+            ->names('products');
+            Route::delete('images/{type}/{encodedPath}', [ProductController::class, 'deleteImageByPath'])->name('images.deleteByPath');
+            Route::apiResource('attributes', AttributeController::class)
                 ->names('attributes');
             Route::apiResource('attribute_groups', AttributeGroupController::class)
                 ->names('attribute_groups');
@@ -87,11 +107,8 @@ Route::prefix('admins')
                 Route::post('/', [UserController::class, 'store']);
                 Route::get('/{id}', [UserController::class, 'show']);
                 Route::put('/{id}', [UserController::class, 'update']);
-            
                 Route::apiResource('users', UserController::class);
-            
                 Route::get('/{id}/block', [UserController::class, 'blockUser']);
-            
                 Route::put('/{id}/unblock', [UserController::class, 'unblockUser']);
                 Route::get('/wishlist', [WishlistController::class, 'index'])->name('wishlist.index');
                 Route::post('/wishlist/add/{id}', [WishlistController::class, 'addToWishlist'])->name('wishlist.add');

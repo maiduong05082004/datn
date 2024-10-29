@@ -1,272 +1,660 @@
-import React, { useState } from 'react';
-import { useForm } from 'react-hook-form';
+import React, { useEffect, useState } from 'react';
+import { CKEditor } from '@ckeditor/ckeditor5-react';
+import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import { useMutation, useQuery } from '@tanstack/react-query';
+import axios from 'axios';
+import { Form, Input, Button, Checkbox, InputNumber, Upload, DatePicker, Spin, Select, Table } from 'antd';
+import { PlusOutlined, UploadOutlined } from '@ant-design/icons';
 
-type Props = {};
+const { Option } = Select;
 
-const AddProduct = (props: Props) => {
-  const [darkMode, setDarkMode] = useState(false);
-
-  const toggleDarkMode = () => {
-    setDarkMode(!darkMode);
-  }
-  const [addImages, setAddImages] = useState(false);
-  const [variantGroup, setVariantGroup] = useState('');
-  const [selectedColor, setSelectedColor] = useState('');
-  const [selectedMaterial, setSelectedMaterial] = useState(''); // State cho chất liệu
-  const [colors, setColors] = useState(['Xanh lá cây', 'Xanh Nước biển']); // Các tùy chọn màu sắc
-  const [variants, setVariants] = useState([
-    { size: 'S', stock: '', discount: '' },
-    { size: 'M', stock: '', discount: '' },
-    { size: 'L', stock: '', discount: '' },
-    { size: 'XL', stock: '', discount: '' },
-    { size: 'XXL', stock: '', discount: '' },
-  ]);
-
-  const handleAddImagesChange = () => {
-    setAddImages(!addImages);
-  };
-
-  const handleVariantGroupChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setVariantGroup(e.target.value);
-  };
-
-  const handleVariantChange = (index: number, field: string, value: string) => {
-    const newVariants = [...variants];
-    newVariants[index] = { ...newVariants[index], [field]: value };
-    setVariants(newVariants);
-  };
-
-  const handleColorChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setSelectedColor(e.target.value);
-  };
-
-  const handleMaterialChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setSelectedMaterial(e.target.value);
-  };
-
-  return (
-    <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-6 text-center text-white-800">Thêm sản phẩm mới</h1>
-      <form>
-        <div className="bg-white shadow-lg rounded-lg mb-6 overflow-hidden">
-          <div className="bg-blue-100 p-4 rounded-t-lg">
-            <h4 className="text-lg font-semibold text-blue-800">Thông tin sản phẩm</h4>
-          </div>
-          <div className="p-6 bg-gray-50">
-            {/* Slug */}
-            <div className="mb-4">
-              <label htmlFor="slug" className="block font-medium text-gray-700">Slug</label>
-              <input type="text" name="slug" id="slug" className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500" required />
-            </div>
-
-            {/* Tên sản phẩm */}
-            <div className="mb-4">
-              <label htmlFor="name_product" className="block font-medium text-gray-700">Tên sản phẩm</label>
-              <input type="text" name="name_product" id="name_product" className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500" required />
-            </div>
-
-            {/* Giá sản phẩm */}
-            <div className="mb-4">
-              <label htmlFor="price" className="block font-medium text-gray-700">Giá sản phẩm</label>
-              <input type="number" name="price" id="price" step="0.01" className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500" required />
-            </div>
-
-            {/* Số lượng trong kho */}
-            <div className="mb-4">
-              <label htmlFor="stock" className="block font-medium text-gray-700">Số lượng trong kho</label>
-              <input type="number" name="stock" id="stock" className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500" required />
-            </div>
-
-            {/* Mô tả */}
-            <div className="mb-4">
-              <label htmlFor="description" className="block font-medium text-gray-700">Mô tả</label>
-              <input type="text" name="description" id="description" className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500" required />
-            </div>
-
-            {/* Nội dung chi tiết */}
-            <div className="mb-4">
-              <label htmlFor="content" className="block font-medium text-gray-700">Nội dung chi tiết</label>
-              <textarea name="content" id="content" className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500" required></textarea>
-            </div>
-
-            {/* Lượt xem */}
-            <div className="mb-4">
-              <label htmlFor="view" className="block font-medium text-gray-700">Lượt xem</label>
-              <input type="number" name="view" id="view" className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500" required />
-            </div>
-
-            {/* ID danh mục */}
-            <div className="mb-4">
-              <label htmlFor="category_id" className="block font-medium text-gray-700">ID danh mục</label>
-              <input type="number" name="category_id" id="category_id" className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500" required />
-            </div>
-
-            {/* Các loại checkbox */}
-            <div className="grid grid-cols-2 gap-4">
-              {/* Loại sản phẩm */}
-              <div className="mb-4">
-                <label htmlFor="is_type" className="block font-medium text-gray-700">Loại sản phẩm</label>
-                <input type="checkbox" name="is_type" id="is_type" className="ml-2 h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500" />
-              </div>
-
-              {/* Sản phẩm hot */}
-              <div className="mb-4">
-                <label htmlFor="is_hot" className="block font-medium text-gray-700">Sản phẩm hot</label>
-                <input type="checkbox" name="is_hot" id="is_hot" className="ml-2 h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500" />
-              </div>
-
-              {/* Hot deal */}
-              <div className="mb-4">
-                <label htmlFor="is_hot_deal" className="block font-medium text-gray-700">Hot deal</label>
-                <input type="checkbox" name="is_hot_deal" id="is_hot_deal" className="ml-2 h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500" />
-              </div>
-
-              {/* Sản phẩm mới */}
-              <div className="mb-4">
-                <label htmlFor="is_new" className="block font-medium text-gray-700">Sản phẩm mới</label>
-                <input type="checkbox" name="is_new" id="is_new" className="ml-2 h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500" />
-              </div>
-
-              {/* Hiển thị trên trang chủ */}
-              <div className="mb-4">
-                <label htmlFor="is_show_home" className="block font-medium text-gray-700">Hiển thị trên trang chủ</label>
-                <input type="checkbox" name="is_show_home" id="is_show_home" className="ml-2 h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500" />
-              </div>
-            </div>
-
-            <div className="mb-4 flex items-center">
-              <label htmlFor="add_images" className="font-medium text-gray-700">Thêm dữ liệu khi không có biến thể</label>
-              <input type="checkbox" id="add_images" className="ml-2 h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500" onChange={handleAddImagesChange} />
-            </div>
-
-            {addImages && (
-              <div id="image-fields" className="bg-white p-4 rounded-lg shadow-md">
-                <div className="mb-4">
-                  <label htmlFor="stock" className="block font-medium text-gray-700">Số lượng sản phẩm</label>
-                  <input type="number" name="stock" id="stock" className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500" />
-                </div>
-
-                <div className="mb-4">
-                  <label htmlFor="thumbnail_image" className="block font-medium text-gray-700">Hình ảnh đại diện</label>
-                  <input type="file" name="thumbnail_image" id="thumbnail_image" className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2" />
-                </div>
-
-                <div className="mb-4">
-                  <label htmlFor="album_images" className="block font-medium text-gray-700">Album hình ảnh</label>
-                  <input type="file" name="album_images[]" id="album_images" className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2" multiple />
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {!addImages && (
-          <div className="bg-white shadow-lg rounded-lg overflow-hidden">
-            <div className={`bg-green-100 dark:bg-green-900 p-4 rounded-t-lg transition-colors duration-300`}>
-              <h4 className={`text-lg font-semibold ${darkMode ? 'text-green-200' : 'text-green-800'} transition-colors duration-300`}>
-                Biến thể sản phẩm
-              </h4>
-            </div>
-
-            <div className={`p-6 ${darkMode ? 'bg-gray-800' : 'bg-gray-50'} transition-colors duration-300`}>
-              <div className="mb-4">
-                <label htmlFor="variant_group" className={`block font-medium ${darkMode ? 'text-white' : 'text-gray-700'} transition-colors duration-300`}>
-                  Chọn nhóm biến thể
-                </label>
-                <select
-                  id="variant_group"
-                  className={`mt-1 block w-full border ${darkMode ? 'border-gray-600 bg-gray-700 text-white' : 'border-gray-300 bg-white text-gray-700'} rounded-md shadow-sm p-2 focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 transition-colors duration-300`}
-                  value={variantGroup}
-                  onChange={handleVariantGroupChange}
-                >
-                  <option value="">Chọn nhóm biến thể</option>
-                  <option value="Biến thể cho quần áo">Biến thể cho quần áo</option>
-                  <option value="Biến thể cho giày">Biến thể cho giày</option>
-                  <option value="Biến thể cho phụ kiện">Biến thể cho phụ kiện</option>
-                </select>
-              </div>
-
-              <div className="mb-4">
-                <label htmlFor="color" className={`block font-medium ${darkMode ? 'text-white' : 'text-gray-700'} transition-colors duration-300`}>
-                  Chọn màu sắc
-                </label>
-                <select
-                  id="color"
-                  className={`mt-1 block w-full border ${darkMode ? 'border-gray-600 bg-gray-700 text-white' : 'border-gray-300 bg-white text-gray-700'} rounded-md shadow-sm p-2 focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 transition-colors duration-300`}
-                  value={selectedColor}
-                  onChange={handleColorChange}
-                >
-                  <option value="">Chọn màu sắc</option>
-                  {colors.map((color, index) => (
-                    <option key={index} value={color}>{color}</option>
-                  ))}
-                </select>
-              </div>
-            </div>
-
-
-            {/* Hiển thị các select loại chất liệu khi chọn màu sắc */}
-            {selectedColor && (
-              <div className="mb-4">
-                <label htmlFor="material" className="block font-medium text-gray-700">Chọn loại chất liệu</label>
-                <select id="material" className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500" value={selectedMaterial} onChange={handleMaterialChange}>
-                  <option value="">Chọn chất liệu</option>
-                  <option value="Cotton">Cotton</option>
-                  <option value="Vải thô">Vải thô</option>
-                </select>
-              </div>
-            )}
-
-            {/* Biến thể kích thước */}
-            {selectedColor && selectedMaterial && (
-              <>
-                {variants.map((variant, index) => (
-                  <div key={index} className="mb-4 grid grid-cols-4 gap-4 items-center">
-                    <div className="flex items-center space-x-2">
-                      <input type="checkbox" id={`size-${variant.size}`} name="size" className="focus:ring-green-500 h-4 w-4 text-green-600 border-gray-300 rounded" />
-                      <label htmlFor={`size-${variant.size}`} className="block text-gray-700">{variant.size}</label>
-                    </div>
-
-                    <input
-                      type="number"
-                      placeholder="Số lượng"
-                      className="border border-gray-300 rounded-md shadow-sm p-2 focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500"
-                      value={variant.stock}
-                      onChange={(e) => handleVariantChange(index, 'stock', e.target.value)}
-                    />
-                    <input
-                      type="number"
-                      placeholder="Giảm giá (%)"
-                      className="border border-gray-300 rounded-md shadow-sm p-2 focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500"
-                      value={variant.discount}
-                      onChange={(e) => handleVariantChange(index, 'discount', e.target.value)}
-                    />
-                    <button type="button" className="bg-red-500 text-white px-4 py-2 rounded-md shadow-sm hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500">
-                      Xóa
-                    </button>
-                  </div>
-                ))}
-
-                {/* Hình ảnh đại diện và Album hình ảnh */}
-                <div className="mb-4">
-                  <label className="block font-medium text-gray-700">Hình ảnh đại diện cho {selectedColor}</label>
-                  <input type="file" className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2" />
-                </div>
-                <div className="mb-4">
-                  <label className="block font-medium text-gray-700">Album hình ảnh cho {selectedColor}</label>
-                  <input type="file" multiple className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2" />
-                </div>
-              </>
-            )}
-          </div>
-  )
+interface VariantProduct {
+  id: number | string;
+  name: string;
+  slug: string;
+  price: number;
+  stock: number;
+  description: string;
+  content: string;
+  input_day: string;
+  category_id: number;
+  is_collection: boolean;
+  is_hot: boolean;
+  is_new: boolean;
+  group: VariantProductGroup;
+  variations: VariantProductVariation[];
+  images: string[];
 }
 
-<button type="submit" className="mt-4 px-4 py-2 bg-green-500 text-white rounded-md shadow-lg hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500">
-  Thêm sản phẩm
-</button>
-      </form >
-    </div >
+interface VariantProductGroup {
+  id: number;
+  name: string;
+}
+
+interface VariantProductVariation {
+  id: number;
+  stock: number;
+  attribute_value_image_variant: AttributeValueImageVariant;
+  variation_values: VariationValue[];
+  variation_album_images: string[];
+}
+
+interface AttributeValueImageVariant {
+  id: number;
+  value: string;
+  image_path: string;
+}
+
+interface VariationValue {
+  attribute_value_id: number;
+  value: string;
+  sku: string;
+  stock: number;
+  price: number;
+  discount: number;
+}
+
+const AddProduct: React.FC = () => {
+  const [form] = Form.useForm();
+  const [content, setContent] = useState<string>('');
+  const [selectedVariantGroup, setSelectedVariantGroup] = useState<VariantProductGroup | null>(null);
+  const [attributes, setAttributes] = useState<any[]>([]);
+  const [variants, setVariants] = useState<any[]>([]);
+  const [fileList, setFileList] = useState<any[]>([]);
+  const [stock, setStock] = useState<number | null>(null);
+  const [albumList, setAlbumList] = useState<any[]>([]);
+  const [showVariantForm, setShowVariantForm] = useState<boolean>(true);
+
+  const { data: variantgroup, isLoading: isLoadingVariantGroup } = useQuery({
+    queryKey: ['variantgroup'],
+    queryFn: async () => {
+      const response = await axios.get('http://localhost:8000/api/admins/attribute_groups');
+      return response?.data?.variation;
+    },
+  });
+
+  const { data: categories, isLoading: isLoadingCategories } = useQuery({
+    queryKey: ['categories'],
+    queryFn: async () => {
+      const response = await axios.get('http://localhost:8000/api/admins/categories');
+      return response?.data;
+    },
+  });
+
+  const { mutate } = useMutation({
+    mutationFn: async (data: VariantProduct) => {
+      const response = await axios.post('http://localhost:8000/api/admins/products', data);
+      return response.data;
+    },
+    onSuccess: () => {
+      toast.success('Thêm sản phẩm thành công!');
+      form.resetFields();
+      setContent('');
+      setSelectedVariantGroup(null);
+      setAttributes([]);
+      setVariants([]);
+      setFileList([]);
+      setAlbumList([]);
+    },
+    onError: (error) => {
+      console.error('Lỗi khi thêm sản phẩm:', error);
+      toast.error('Thêm sản phẩm thất bại!');
+    },
+  });
+  // Xử lý khi chọn nhóm biến thể
+  useEffect(() => {
+    if (selectedVariantGroup && variantgroup) {
+      const selectedGroup = variantgroup.find((group: any) => group.group_id === selectedVariantGroup);
+      if (selectedGroup) {
+        setAttributes(selectedGroup.attributes.map((attribute: any) => ({ ...attribute, values: [] })));
+      }
+    }
+  }, [selectedVariantGroup, variantgroup]);
+
+  // xử lý thay đổi giá trị thuộc tính
+  const handleAttributeValueChange = (index: number, selectedIds: number[]) => {
+    const updatedAttributes = [...attributes];
+    updatedAttributes[index].selectedValues = selectedIds;
+    setAttributes(updatedAttributes);
+  };
+  // reset ảnh 
+  const handleResetImage = (index: number, field: string) => {
+    if (field === 'colorImage') {
+      // Reset ảnh màu về rỗng
+      const updatedVariants = [...variants];
+      updatedVariants[index].colorImage = [];
+      setVariants(updatedVariants);
+    } else if (field === 'albumImages') {
+      // Reset album ảnh về rỗng
+      const updatedVariants = [...variants];
+      updatedVariants[index].albumImages = [];
+      setVariants(updatedVariants);
+    }
+  };
+
+  // tạo biến thể từ thuộc tính "Màu Sắc" và "Kích Thước"
+  const generateVariants = () => {
+    const colorAttribute = attributes.find(attr => attr.name.toLowerCase().includes('màu sắc'));
+    const sizeAttribute = attributes.find(attr => attr.name.toLowerCase().includes('kích thước'));
+
+    if (!colorAttribute || !sizeAttribute) {
+      toast.error('Thiếu thuộc tính Màu Sắc hoặc Kích Thước');
+      return;
+    }
+
+    const newVariants = colorAttribute.selectedValues.map((color: any) => ({
+      colorId: color.id,
+      colorName: color.value,
+      sizes: sizeAttribute.selectedValues.map((size: any) => ({
+        sizeId: size.id,
+        size: size.value,
+        stock: 0,
+        discount: 0,
+      })),
+      colorImage: [],
+      albumImages: [],
+    }));
+
+    setVariants(newVariants);
+  };
+  // thay đổi giá trị biến thể (số lượng, giảm giá, ảnh)
+  const handleVariantChange = (colorId: number, key: string, index: number, subKey: string, value: any) => {
+    const updatedVariants = [...variants];
+    const variant = updatedVariants.find((v) => v.colorId === colorId);
+    if (variant) {
+      variant[key][index][subKey] = value;
+    }
+    setVariants(updatedVariants);
+  };
+  // xử lý khi tải lên ảnh biến thể
+  const handleUploadChangeForVariant = (index: number, key: string, { fileList }: any) => {
+    const updatedVariants = [...variants];
+    updatedVariants[index][key] = fileList;
+    setVariants(updatedVariants);
+  };
+  // Hàm xử lý thay đổi album ảnh
+  const handleAlbumChange2 = ({ fileList }: any) => {
+    const updatedAlbumList = fileList.map((file: any) => {
+      if (file.response && file.response.url) {
+        return {
+          ...file,
+          url: file.response.url,
+        };
+      }
+      return file;
+    });
+
+    setAlbumList(updatedAlbumList);
+  };
+
+  // Hàm ẩn/hiện form biến thể
+  const toggleVariantForm = () => {
+    setShowVariantForm(!showVariantForm);
+  };
+  // Cột dữ liệu cho bảng biến thể
+  const columns = [
+    {
+      title: 'Màu Sắc',
+      dataIndex: 'colorName',
+      key: 'colorName',
+      render: (colorName: string) => (
+        <span className="text-lg font-semibold text-gray-700">{colorName}</span>
+      ),
+    },
+    {
+      title: 'Kích Thước',
+      dataIndex: 'sizes',
+      key: 'sizes',
+      render: (sizes: any[], record: any) => (
+        <div className="grid grid-cols-2 gap-4">
+          {sizes.map((size, index) => (
+            <div key={index} className="flex items-center gap-4 mb-2">
+              <span className="font-semibold text-gray-600 w-10">{size.size}</span>
+              <InputNumber
+                min={0}
+                onChange={(value) => handleVariantChange(record.colorId, 'sizes', index, 'stock', value)}
+                className="border border-gray-300 rounded-md p-1 w-28"
+                placeholder="Số Lượng"
+              />
+              <InputNumber
+                min={0}
+                max={100}
+                onChange={(value) => handleVariantChange(record.colorId, 'sizes', index, 'discount', value)}
+                className="border border-gray-300 rounded-md p-1 w-28"
+                placeholder="Giảm Giá (%)"
+              />
+            </div>
+          ))}
+        </div>
+      ),
+    },
+    {
+      title: 'Ảnh Màu',
+      dataIndex: 'colorImage',
+      key: 'colorImage',
+      render: (_: any, record: any, index: any) => (
+        <div className="flex flex-col items-center justify-center gap-2 p-4 border border-gray-300 rounded-md shadow-sm bg-white">
+          <Upload
+            listType="picture-card"
+            fileList={record.colorImage || []}
+            onChange={(info) => handleUploadChangeForVariant(index, 'colorImage', info)}
+            beforeUpload={() => false}
+            showUploadList={{ showPreviewIcon: true, showRemoveIcon: true, showDownloadIcon: false }}
+            className="upload-inline"
+          >
+            {record.colorImage?.length < 1 && (
+              <div className="w-20 h-20 border border-dashed border-gray-300 rounded-md flex items-center justify-center cursor-pointer">
+                <UploadOutlined className="text-blue-500 text-xl" />
+              </div>
+            )}
+          </Upload>
+          <Button
+            type="dashed"
+            danger
+            className="mt-2 w-full"
+            onClick={() => handleResetImage(index, 'colorImage')}
+          >
+            Reset Ảnh Màu
+          </Button>
+        </div>
+      ),
+    },
+    {
+      title: 'Album Ảnh',
+      dataIndex: 'albumImages',
+      key: 'albumImages',
+      render: (_: any, record: any, index: any) => (
+        <div className="flex flex-col items-center justify-center gap-2 p-4 border border-gray-300 rounded-md shadow-sm bg-white">
+          <Upload
+            listType="picture-card"
+            multiple
+            fileList={record.albumImages || []}
+            onChange={(info) => handleUploadChangeForVariant(index, 'albumImages', info)}
+            beforeUpload={() => false}
+            showUploadList={{ showPreviewIcon: true, showRemoveIcon: true, showDownloadIcon: false }}
+            className="upload-inline"
+          >
+            {record.albumImages?.length < 3 && (
+              <div className="w-20 h-20 border border-dashed border-gray-300 rounded-md flex items-center justify-center cursor-pointer">
+                <UploadOutlined className="text-green-500 text-xl" />
+              </div>
+            )}
+          </Upload>
+          <Button
+            type="dashed"
+            danger
+            className="mt-2 w-full"
+            onClick={() => handleResetImage(index, 'albumImages')}
+          >
+            Reset Album Ảnh
+          </Button>
+        </div>
+      ),
+    },
+  ];
+
+
+
+
+
+  const onFinish = (values: any) => {
+    const formData = new FormData(); // Tạo FormData để gửi dữ liệu
+    const formattedDate = values.input_day ? values.input_day.format('YYYY-MM-DD') : null;
+  
+    console.log("Values nhận được:", values); // Kiểm tra dữ liệu form
+    console.log("Album list:", albumList); // Kiểm tra album list
+  
+    // Nếu không có biến thể
+    if (!showVariantForm) {
+      // Xử lý album ảnh
+      albumList.forEach((file: any, index: number) => {
+        if (file.originFileObj) {
+          // Thêm file vào formData
+          formData.append(`album_images[${index}]`, file.originFileObj);
+        }
+      });
+  
+      // Thêm các trường khác vào formData
+      formData.append('name', values.name);
+      formData.append('price', values.price);
+      formData.append('description', values.description);
+      formData.append('content', content || '');
+      formData.append('input_day', formattedDate);
+      formData.append('category_id', values.category_id);
+      formData.append('stock', stock?.toString() || '0');
+      formData.append('is_collection', values.is_collection ? '1' : '0');
+      formData.append('is_hot', values.is_hot ? '1' : '0');
+      formData.append('is_new', values.is_new ? '1' : '0');
+  
+      // Gọi mutate với FormData
+      console.log("FormData sản phẩm đơn giản:", formData);
+      mutate(formData as any);
+      return;
+    }
+  
+    // Xử lý cho sản phẩm có biến thể
+    if (showVariantForm) {
+      console.log("Biến thể trước khi xử lý:", variants); // Kiểm tra biến thể
+  
+      if (!selectedVariantGroup) {
+        toast.error('Vui lòng chọn nhóm biến thể!');
+        return;
+      }
+  
+      if (variants.length === 0) {
+        toast.error('Vui lòng tạo ít nhất một biến thể!');
+        return;
+      }
+  
+      // Chuẩn bị payload cho sản phẩm có biến thể
+      const validVariants = variants
+        .map((variant) => {
+          const validSizes = variant.sizes.filter(
+            (size: any) => size.stock !== undefined && size.stock > 0
+          );
+  
+          if (validSizes.length === 0) {
+            return null;
+          }
+  
+          return {
+            ...variant,
+            sizes: validSizes,
+          };
+        })
+        .filter(Boolean);
+  
+      if (validVariants.length === 0) {
+        toast.error('Vui lòng điền đầy đủ thông tin cho ít nhất một biến thể và kích thước!');
+        return;
+      }
+  
+      const variationsData = validVariants.reduce((acc, variant) => {
+        const colorId = variant.colorId;
+        const sizeData = variant.sizes.reduce((sizeAcc: any, size: any) => {
+          sizeAcc[size.sizeId] = {
+            stock: size.stock ?? 0,
+            discount: size.discount ?? 0,
+          };
+          return sizeAcc;
+        }, {});
+  
+        if (Object.keys(sizeData).length > 0) {
+          acc[colorId] = sizeData;
+        }
+        return acc;
+      }, {});
+  
+      // Thêm ảnh biến thể vào formData
+      validVariants.forEach((variant: any, index: number) => {
+        const colorId = variant.colorId || variant.id;
+        if (variant.colorImage?.[0]?.originFileObj) {
+          formData.append(`color_image_${colorId}`, variant.colorImage[0].originFileObj);
+        }
+        variant.albumImages?.forEach((file: any, albumIndex: number) => {
+          if (file.originFileObj) {
+            formData.append(`album_images_${colorId}[${albumIndex}]`, file.originFileObj);
+          }
+        });
+      });
+  
+      // Thêm các trường khác vào formData
+      formData.append('name', values.name);
+      formData.append('price', values.price);
+      formData.append('description', values.description);
+      formData.append('content', content || '');
+      formData.append('input_day', formattedDate);
+      formData.append('category_id', values.category_id);
+      formData.append('group_id', selectedVariantGroup?.toString() || '');
+      formData.append('variations', JSON.stringify(variationsData));
+      formData.append('is_collection', values.is_collection ? '1' : '0');
+      formData.append('is_hot', values.is_hot ? '1' : '0');
+      formData.append('is_new', values.is_new ? '1' : '0');
+  
+      console.log("FormData sản phẩm có biến thể:", formData);
+      
+      // Gọi mutate với FormData
+      mutate(formData as any);
+    }
+  };
+  
+
+
+
+
+  if (isLoadingVariantGroup || isLoadingCategories) {
+    return <Spin tip="Loading..." className="flex justify-center items-center h-screen" />;
+  }
+
+  return (
+    <>
+      <div className="w-full px-6 py-8">
+        <ToastContainer />
+        <h2 className="text-4xl font-bold mb-6">Thêm sản phẩm</h2>
+        <Form form={form} layout="vertical" onFinish={onFinish}>
+          <Form.Item
+            label="Tên sản phẩm"
+            name="name"
+            rules={[
+              { required: true, message: 'Tên sản phẩm bắt buộc' },
+              { min: 5, message: 'Tên sản phẩm phải có ít nhất 5 ký tự' },
+              { max: 50, message: 'Tên sản phẩm không được quá 50 ký tự' },
+              {
+                pattern: /^[A-Za-z0-9\s]+$/,
+                message: 'Tên sản phẩm chỉ được chứa ký tự chữ và số',
+              },
+            ]}
+          >
+            <Input />
+          </Form.Item>
+          <Form.Item
+            label="Giá sản phẩm"
+            name="price"
+            rules={[
+              { required: true, message: 'Giá sản phẩm bắt buộc phải điền' },
+              { type: 'number', min: 1, message: 'Giá phải lớn hơn 0' },
+              { type: 'number', max: 1000000, message: 'Giá không được vượt quá 1,000,000' },
+            ]}
+          >
+            <InputNumber min={0} style={{ width: '100%' }} />
+          </Form.Item>
+
+          <Form.Item
+            label="Mô tả sản phẩm"
+            name="description"
+            rules={[
+              { required: true, message: 'Mô tả sản phẩm bắt buộc' },
+              { min: 20, message: 'Mô tả sản phẩm phải có ít nhất 20 ký tự' },
+            ]}
+          >
+            <Input.TextArea rows={4} placeholder="Nhập mô tả sản phẩm ngắn gọn" />
+          </Form.Item>
+
+          <Form.Item
+            label="Nội dung chi tiết"
+            name="content"
+            rules={[{ required: true, message: "Nội dung chi tiết sản phẩm bắt buộc phải điền" }]}
+          >
+            <CKEditor
+              editor={ClassicEditor}
+              data={content}
+              onChange={(event: any, editor: any) => {
+                const data = editor.getData();
+                setContent(data);
+              }}
+            />
+          </Form.Item>
+
+          <Form.Item
+            label="Ngày nhập"
+            name="input_day"
+            rules={[{ required: true, message: "Ngày nhập sản phẩm bắt buộc phải điền" }]}
+          >
+            <DatePicker format="YYYY-MM-DD" style={{ width: '100%' }} />
+          </Form.Item>
+
+          <Form.Item
+            label="Danh mục"
+            name="category_id"
+            rules={[{ required: true, message: "Danh mục sản phẩm bắt buộc phải chọn" }]}
+          >
+            <Select id="category" className="border border-gray-300 rounded-md p-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-400 font-normal">
+              <option value="" className="text-gray-500">--Chọn danh mục--</option>
+              {categories?.map((category: any) => (
+                <optgroup key={category.id} label={category.name} className="text-gray-600 font-medium">
+                  {category.children_recursive?.map((child: any) => (
+                    <option key={child.id} value={child.id} className="text-gray-700 font-normal">
+                      {child.name}
+                    </option>
+                  ))}
+                </optgroup>
+              ))}
+            </Select>
+          </Form.Item>
+
+          <div className='flex gap-5'>
+            <Form.Item name="is_collection" valuePropName="checked">
+              <Checkbox>Bộ sưu tập</Checkbox>
+            </Form.Item>
+
+            <Form.Item name="is_hot" valuePropName="checked">
+              <Checkbox>Nổi bật</Checkbox>
+            </Form.Item>
+
+            <Form.Item name="is_new" valuePropName="checked">
+              <Checkbox>Sản phẩm mới</Checkbox>
+            </Form.Item>
+          </div>
+          <Button onClick={toggleVariantForm} type="default">
+            {showVariantForm ? 'Ẩn Biến Thể' : 'Hiện Biến Thể'}
+          </Button>
+          {showVariantForm && (
+            <div className="variant-form-container bg-white p-6 shadow-md rounded-lg border border-gray-200">
+              {/* Variant Group Selection */}
+              <Form.Item
+                label={<span className="font-semibold text-gray-700">Chọn nhóm biến thể</span>}
+                name="variant_group"
+                rules={[{ required: true, message: 'Vui lòng chọn nhóm biến thể' }]}
+              >
+                <Select
+                  placeholder="Chọn nhóm biến thể"
+                  onChange={setSelectedVariantGroup}
+                  className="rounded-md border border-gray-300 hover:border-gray-400 focus:border-blue-500"
+                >
+                  {variantgroup?.map((group: any) => (
+                    <Option key={group.group_id} value={group.group_id}>
+                      {group.group_name}
+                    </Option>
+                  ))}
+                </Select>
+              </Form.Item>
+
+              {/* Attributes Mapping */}
+              {attributes
+                .sort((a, b) => {
+                  if (a.name.toLowerCase().includes('màu sắc')) return -1;
+                  if (b.name.toLowerCase().includes('màu sắc')) return 1;
+                  return 0;
+                })
+                .map((attribute, index) => (
+                  <Form.Item
+                    key={attribute.id}
+                    label={<span className="font-semibold text-gray-700">Thuộc Tính ({attribute.name})</span>}
+                  >
+                    <Select
+                      mode="tags"
+                      style={{ width: '100%' }}
+                      placeholder={`Nhập giá trị cho ${attribute.name}`}
+                      onChange={(values) =>
+                        handleAttributeValueChange(index, values.map((value: any) => ({ id: value.key, value: value.label })))
+                      }
+                      labelInValue
+                      className="rounded-md border border-gray-300 hover:border-gray-400 focus:border-blue-500"
+                    >
+                      {attribute.attribute_values.map((val: any) => (
+                        <Option key={val.id} value={val.value}>
+                          {val.value}
+                        </Option>
+                      ))}
+                    </Select>
+                  </Form.Item>
+                ))}
+
+              {/* Generate Variants Button */}
+              <Button
+                type="default"
+                className="mb-5 flex items-center justify-center bg-green-500 text-white hover:bg-green-600 rounded-md py-2 px-4"
+                onClick={generateVariants}
+                icon={<PlusOutlined />}
+              >
+                Tạo Biến Thể
+              </Button>
+
+              {/* Variants Table */}
+              <Table
+                dataSource={variants}
+                columns={columns}
+                rowKey={(_, index: any) => index.toString()}
+                pagination={false}
+                className="w-full border border-gray-300 rounded-md"
+              />
+            </div>
+          )}
+
+
+          {!showVariantForm && (
+            <>
+              <div className="mt-4">
+                <Form.Item
+                  label="Nhập số lượng sản phẩm"
+                  name="stock"
+                  rules={[{ required: true, message: 'Số lượng sản phẩm là bắt buộc' }]}
+                >
+                  <InputNumber
+                    placeholder="Số lượng"
+                    value={stock}
+                    className="w-full border border-gray-300 rounded-md p-2"
+                    onChange={(value) => {
+                      setStock(value);
+                      form.setFieldsValue({ stock: value });
+                    }}
+                    min={0}
+                  />
+                </Form.Item>
+
+              </div>
+              <div className="mt-4">
+                <Form.Item
+                  label="Tải lên album ảnh"
+                  name="album_images"
+                >
+                  <Upload
+                    listType="picture"
+                    multiple
+                    fileList={albumList}
+                    onChange={handleAlbumChange2}
+
+                    beforeUpload={() => false}
+                  >
+                    <Button icon={<UploadOutlined />} className="bg-green-500 hover:bg-green-600 text-white">
+                      Tải lên album ảnh
+                    </Button>
+                  </Upload>
+                </Form.Item>
+
+              </div>
+            </>
+          )}
+          <Form.Item>
+            <Button type="primary" htmlType="submit" className="bg-indigo-600 hover:bg-indigo-700 text-white mt-5">
+              Thêm sản phẩm
+            </Button>
+          </Form.Item>
+        </Form>
+      </div>
+    </>
   );
 };
 

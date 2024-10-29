@@ -23,12 +23,13 @@ class ProductResource extends JsonResource
             'content' => $this->content,
             'input_day' => $this->input_day,
             'category_id' => $this->category_id,
+            'category_name' => $this->category?$this->category->name:null,
             'is_collection' => $this->is_collection,
             'is_hot' => $this->is_hot,
             'is_new' => $this->is_new,
             'group' => $group ? new GroupResource($group) : null,
             'variations' => $this->variations->isNotEmpty() ? VariationResource::collection($this->variations) : [],
-            'images' => ProductImageResource::collection($this->images), // Sử dụng ProductImageResource để hiển thị danh sách ảnh
+            'images' => $this->images->where('image_type', 'album')->pluck('image_path'),
             
         ];
     }
