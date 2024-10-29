@@ -45,4 +45,8 @@ class Promotion extends Model
     {
         $this->attributes['product_id'] = is_array($value) ? implode(',', $value) : null;
     }
+    public function userPromotions()
+    {
+        return $this->hasMany(UserPromotion::class, 'promotion_id');
+    }
 }
