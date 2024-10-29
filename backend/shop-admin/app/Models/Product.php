@@ -54,8 +54,6 @@ class Product extends Model
         return $this->hasMany(Comment::class);
     }
 
-
-
     // Quan hệ với BillDetail
     public function billDetails()
     {
@@ -68,4 +66,5 @@ class Product extends Model
     {
         return $this->belongsToMany(User::class, 'wishlists')->withTimestamps();
     }
+    
 }

@@ -33,6 +33,7 @@ class Bill extends Model
         'canceled_at',
         'payment_type',
         'shipping_address_id',
+        'promotion_id'
     ];
 
     // Quan hệ với bảng users

@@ -21,6 +21,7 @@ class PromotionController extends Controller
 
         $user = User::find($request->user_id);
         $appliedPromotions = [];
+        $promotionTypes = [];
 
         foreach ($request->codes as $code) {
             $promotion = Promotion::where('code', $code)
@@ -33,17 +34,16 @@ class PromotionController extends Controller
                 return response()->json(['message' => "Mã $code không hợp lệ hoặc đã hết hạn."], 422);
             }
 
-            if ($promotion->promotion_type === 'shipping') {
-                $usedShippingPromotion = UserPromotion::where('user_id', $user->id)
-                    ->whereHas('promotion', function ($query) {
-                        $query->where('promotion_type', 'shipping');
-                    })
-                    ->first();
-
-                if ($usedShippingPromotion) {
-                    return response()->json(['message' => 'Bạn chỉ có thể áp dụng 1 mã khuyến mãi liên quan đến phí vận chuyển.'], 422);
+            if (in_array($promotion->promotion_type, ['product_discount', 'order_discount', 'first_order'])) {
+                if (in_array('product_discount', $promotionTypes) && in_array($promotion->promotion_type, ['order_discount', 'first_order'])) {
+                    return response()->json(['message' => 'Không thể áp dụng mã giảm giá sản phẩm cùng với giảm giá đơn hàng hoặc đơn hàng đầu tiên.'], 422);
+                }
+                if (in_array($promotion->promotion_type, ['order_discount', 'first_order']) && in_array('product_discount', $promotionTypes)) {
+                    return response()->json(['message' => 'Không thể áp dụng mã giảm giá đơn hàng hoặc đơn hàng đầu tiên cùng với giảm giá sản phẩm.'], 422);
                 }
             }
+
+            $promotionTypes[] = $promotion->promotion_type;
 
             $usedPromotion = UserPromotion::where('user_id', $user->id)
                 ->where('promotion_id', $promotion->id)
@@ -66,8 +66,6 @@ class PromotionController extends Controller
             'applied_promotions' => $appliedPromotions
         ], 200);
     }
-
-
 
 
     public function getAvailablePromotions(Request $request)

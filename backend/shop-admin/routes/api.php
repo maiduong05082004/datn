@@ -74,21 +74,21 @@ Route::prefix('client')->as('client.')->group(function () {
         Route::get('/', [WishlistController::class, 'index'])->name('wishlist.index');
         Route::delete('/remove/{id}', [WishlistController::class, 'destroy'])->name('wishlist.remove');
     });
-    Route::prefix('checkout')->as('checkout.')->group(function () {
+    Route::prefix('checkout')->as('checkout.')->middleware('auth:sanctum')->group(function () {
         Route::post('/submit', [CheckoutController::class, 'submit'])->name('submit');
         Route::get('/success', [CheckoutController::class, 'success'])->name('success');
         Route::get('/cancel', [CheckoutController::class, 'cancel'])->name('cancel');
     });
 });
 
-Route::apiResource('products', ProductController::class)
-->names('products');
+
 Route::prefix('admins')
     ->as('admins.')
     ->group(function () {
         Route::post('/signin', [AdminAuthController::class, 'login'])->name('signin');
         Route::middleware(['auth:admin', 'admin'])->group(function () {
-        
+         Route::apiResource('products', ProductController::class)
+          ->names('products');
             Route::apiResource('attributes', AttributeController::class)
                 ->names('attributes');
             Route::apiResource('attribute_groups', AttributeGroupController::class)
