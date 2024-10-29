@@ -1,10 +1,7 @@
-import { useMutation } from '@tanstack/react-query';
-import { Form, Input, Button, Select, message, DatePicker } from 'antd';
 import axios from 'axios';
 import React, { useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
-import axios from 'axios';
-import { Button, Form, Input, Radio, message, Spin } from 'antd';
+import { Button, Form, Input, Radio, message, Spin, DatePicker, Select } from 'antd';
 import { useNavigate } from 'react-router-dom';
 
 interface Users {
@@ -54,7 +51,7 @@ const AddUser: React.FC = () => {
       messageApi.error(`Lỗi: ${error.message}`);
     },
   });
-  
+
 
   const onFinish = (values: any) => {
     const payload: Users = {
@@ -182,5 +179,4 @@ const AddUser: React.FC = () => {
     </>
   );
 };
-
 export default AddUser;

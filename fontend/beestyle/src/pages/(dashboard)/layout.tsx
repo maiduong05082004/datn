@@ -33,19 +33,16 @@ const items1: MenuProps['items'] = [
     children: [
       { key: 'sub1-1', label: <NavLink to="/admin/listUser">Danh sách tài Khoản</NavLink> },
       { key: 'sub1-2', label: <NavLink to="/admin/addUser">Thêm Tài Khoản</NavLink> },
-      { key: 'sub1-3', label: <NavLink to="/admin/updateUser">Cập nhật Tài Khoản</NavLink> },
-      { key: 'sub1-4', label: <NavLink to="/admin/delete-account">Xóa Tài Khoản</NavLink> },
     ],
   },
   {
     key: '2',
     icon: <UserOutlined />,
-    label: "Quản Lý Banners",
+    label: "Banners",
     children: [
-      { key: 'sub1-1', label: <NavLink to="/admin/listBanners">Danh sách Banners</NavLink> },
-      { key: 'sub1-2', label: <NavLink to="/admin/addBanners">Thêm Banners</NavLink> },
-      { key: 'sub1-3', label: <NavLink to="/admin/updateBanners">Cập nhật Banners</NavLink> },
-      { key: 'sub1-4', label: <NavLink to="/admin/delete-account">Xóa Tài Khoản</NavLink> },
+
+      { key: 'sub2-1', label: <NavLink to="/admin/listbanners">Danh sách Banners</NavLink> },
+      { key: 'sub2-2', label: <NavLink to="/admin/addbanners">Thêm Banners</NavLink> },
     ],
   },
   {
@@ -91,10 +88,9 @@ const items1: MenuProps['items'] = [
     icon: React.createElement(MessageOutlined),
     label: 'Bình Luận',
     children: [
-      { key: 'sub7-1', label: <NavLink to="/admin/listBanners">Danh sách</NavLink> },
-      { key: 'sub7-2', label: <NavLink to="/admin/addBanners">Thêm mới</NavLink> },
-      { key: 'sub7-3', label: <NavLink to="/admin/updateBanners">Cập nhật</NavLink> },
-      { key: 'sub7-4', label: 'Xóa Khuyến Mại' },
+      { key: 'sub7-1', label: <NavLink to="/admin/listComments">Danh sách bình luận</NavLink> },
+      { key: 'sub7-2', label: 'Phê Duyệt Bình Luận' },
+      { key: 'sub7-3', label: 'Xóa Bình Luận' },
     ],
   },
   {
@@ -273,10 +269,10 @@ const App: React.FC = () => {
               </div>
 
               {isOpen && (
-                <div className="absolute right-0 mt-2 w-[300px] rounded-lg shadow-lg bg-black min-w-[200px]">
+                <div className="absolute right-0 mt-2 w-[300px] rounded-lg shadow-lg bg-black min-w-[200px] z-50">
                   <div className="py-1" role="menu">
-                    <a
-                      href="#profile"
+                    <Link
+                      to="profile"
                       className="flex items-center px-4 py-2 text-sm text-white hover:bg-gray-700 hover:translate-x-1 transform transition-transform duration-300 ease-in-out"
                       role="menuitem"
                     >
@@ -367,6 +363,7 @@ const App: React.FC = () => {
                   </div>
                 </div>
               )}
+
 
             </div>
 

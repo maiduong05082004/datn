@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "061a84623f71de27bd095f321a326efe",
+    "content-hash": "ab62a6c9ad9aa3a7d3be21a982f6757b",
     "packages": [
         {
             "name": "brick/math",
@@ -137,16 +137,16 @@
         },
         {
             "name": "cloudinary-labs/cloudinary-laravel",
-            "version": "2.2.0",
+            "version": "2.2.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/cloudinary-community/cloudinary-laravel.git",
-                "reference": "716acb2da0cbfc148f9328784b5b57e6c8530cb9"
+                "reference": "f5c9ca2ecddd5ffa8e04798128b46c065f08ec5e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/cloudinary-community/cloudinary-laravel/zipball/716acb2da0cbfc148f9328784b5b57e6c8530cb9",
-                "reference": "716acb2da0cbfc148f9328784b5b57e6c8530cb9",
+                "url": "https://api.github.com/repos/cloudinary-community/cloudinary-laravel/zipball/f5c9ca2ecddd5ffa8e04798128b46c065f08ec5e",
+                "reference": "f5c9ca2ecddd5ffa8e04798128b46c065f08ec5e",
                 "shasum": ""
             },
             "require": {
@@ -203,9 +203,9 @@
             ],
             "support": {
                 "issues": "https://github.com/cloudinary-community/cloudinary-laravel/issues",
-                "source": "https://github.com/cloudinary-community/cloudinary-laravel/tree/2.2.0"
+                "source": "https://github.com/cloudinary-community/cloudinary-laravel/tree/2.2.2"
             },
-            "time": "2024-08-12T16:20:24+00:00"
+            "time": "2024-09-25T20:03:40+00:00"
         },
         {
             "name": "cloudinary/cloudinary_php",
@@ -9326,12 +9326,12 @@
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": {},
+    "stability-flags": [],
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {
         "php": "^8.1"
     },
     "platform-dev": [],
-    "plugin-api-version": "2.6.0"
+    "plugin-api-version": "2.3.0"
 }
