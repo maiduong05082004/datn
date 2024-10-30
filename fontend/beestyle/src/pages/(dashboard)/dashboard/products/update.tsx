@@ -149,11 +149,10 @@ const UpdateProduct: React.FC = () => {
 
 
   const { mutate: updateProduct } = useMutation({
-    mutationFn: async (formData: any) => {
-      formData.append('_method', 'PUT');
-      const response = await axios.post(`http://localhost:8000/api/admins/products/${id}`, formData, {
+    mutationFn: async (formData) => {
+      const response = await axios.put(`http://127.0.0.1:8000/api/admins/products/${id}`, formData, {
         headers: {
-          'Content-Type': 'multipart/form-data',
+          'Content-Type': 'application/json',
         },
       });
       return response.data;
@@ -165,6 +164,7 @@ const UpdateProduct: React.FC = () => {
       toast.error('Cập nhật sản phẩm thất bại!');
     },
   });
+
 
   const handleStockChange = (value: number | null) => {
     setStock(value);
@@ -260,36 +260,30 @@ const UpdateProduct: React.FC = () => {
 
 
   // Kiểm tra response khi upload ảnh
-  const handleUploadChangeForVariant = (index: number, key: string, info: any) => {
+  const handleUploadChangeForVariant = (index : any, key : any, info : any) => {
     const updatedVariants = [...variants];
     const variant = updatedVariants[index];
-
+  
     if (variant) {
-      variant[key] = info.fileList.map((file: any) => {
-        console.log(file); // Kiểm tra dữ liệu ảnh sau khi tải lên
-        if (file.response) {
-          console.log(file.response.url); // Kiểm tra URL trả về từ server
+      variant[key] = info.fileList.map((file : any) => {
+        if (file.response && file.response.url) {
           return {
             ...file,
-            url: file.response.url, // URL ảnh trả về từ server
+            url: file.response.url,
+            status: 'done',
           };
         }
         return file;
       });
     }
-
+  
     setVariants(updatedVariants);
+  
+    console.log("Upload info:", info); // Kiểm tra để đảm bảo URL mới được trả về
   };
+  
 
 
-  // const handleRemoveFile = (index: number, key: string, file: any) => {
-  //   const updatedVariants = [...variants];
-  //   const variant = updatedVariants[index];
-  //   if (variant) {
-  //     variant[key] = variant[key].filter((item: any) => item.uid !== file.uid);
-  //   }
-  //   setVariants(updatedVariants);
-  // };
 
 
   const columns = [
@@ -334,17 +328,17 @@ const UpdateProduct: React.FC = () => {
             listType="picture-card"
             fileList={record.colorImage || []}
             onChange={(info) => handleUploadChangeForVariant(index, 'colorImage', info)}
-            action="/path_to_upload_endpoint" // Cần thay thế
+            action="http://localhost:8000/api/admins/upload" // URL chính xác của backend
             name="file"
             className="upload-inline"
           >
-
             {record.colorImage?.length < 1 && (
               <div className="w-20 h-20 border border-dashed border-gray-300 rounded-md flex items-center justify-center cursor-pointer">
                 <UploadOutlined className="text-blue-500 text-xl" />
               </div>
             )}
           </Upload>
+
 
           <Button
             type="dashed"
@@ -400,53 +394,46 @@ const UpdateProduct: React.FC = () => {
       return;
     }
 
-    const formData = new FormData();
-    formData.append('name', values.name);
-    formData.append('price', values.price);
-    formData.append('description', values.description);
-    formData.append('content', content || '');
-    formData.append('input_day', formattedDate);
-    formData.append('category_id', values.category_id);
-    formData.append('is_collection', values.is_collection ? '1' : '0');
-    formData.append('is_hot', values.is_hot ? '1' : '0');
-    formData.append('is_new', values.is_new ? '1' : '0');
-    formData.append('group_id', selectedVariantGroup ? selectedVariantGroup.toString() : '');
+    // Kiểm tra các trường bắt buộc
+    if (!values.name || !values.price || !values.category_id) {
+      toast.error('Vui lòng điền đầy đủ các trường bắt buộc.');
+      return;
+    }
 
-    // Xử lý biến thể và thêm vào FormData
-    const variations = variants.map((variant, index) => {
-      const colorImage = variant.colorImage?.[0]?.originFileObj ? null : variant.colorImage?.[0]?.url;
-      const albumImages = variant.albumImages?.map((file: any) =>
-        file.originFileObj ? null : file.url
-      );
+    // Xử lý các biến thể thành định dạng JSON theo yêu cầu
+    const variations: Record<number, Record<number, { stock: number; discount: number }>> = {};
 
-      return {
-        color_image_url: colorImage,
-        album_images_urls: albumImages,
-        sizes: variant.sizes.map((size: any) => ({
-          sizeId: size.sizeId,
-          stock: size.stock,
-          discount: size.discount,
-        })),
-      };
-    });
+    variants.forEach((variant: { colorId: number; sizes: { sizeId: number; stock: number; discount: number }[] }) => {
+      variations[variant.colorId] = {};
 
-    formData.append('variations', JSON.stringify(variations));
-
-    // Thêm ảnh mới vào FormData cho các file ảnh
-    variants.forEach((variant, index) => {
-      const colorImage = variant.colorImage?.[0];
-      if (colorImage?.originFileObj) {
-        formData.append(`color_image_${index}`, colorImage.originFileObj);
-      }
-      variant.albumImages?.forEach((file: any, albumIndex: any) => {
-        if (file.originFileObj) {
-          formData.append(`album_images_${index}[${albumIndex}]`, file.originFileObj);
-        }
+      variant.sizes.forEach((size: { sizeId: number; stock: number; discount: number }) => {
+        variations[variant.colorId][size.sizeId] = {
+          stock: size.stock || 0,
+          discount: size.discount || 0,
+        };
       });
     });
 
+
+    // Tạo object dữ liệu để gửi
+    const formData = {
+      name: values.name,
+      price: values.price,
+      variations: JSON.stringify(variations), // Chuyển `variations` sang chuỗi JSON
+      group_id: selectedVariantGroup,
+      category_id: values.category_id,
+      description: values.description || '',
+      content: content || '',
+      input_day: formattedDate,
+      delete_images: values.delete_images || [], // Danh sách ID ảnh cần xóa
+    };
+    
+
+    // Gửi yêu cầu PUT với dữ liệu JSON
     updateProduct(formData);
   };
+
+
 
   const handleGroupChange = (groupId: number) => {
     const group = variantgroup?.find((g: any) => g.group_id === groupId);
