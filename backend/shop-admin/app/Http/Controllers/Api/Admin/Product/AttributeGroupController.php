@@ -16,9 +16,9 @@ class AttributeGroupController extends Controller
     // public function index()
     // {
     //     $attributeGroups = AttributeGroup::with('group', 'attribute')->get();
-    
+
     //     $groupedData = $attributeGroups->groupBy('group_id');
-    
+
     //     $result = $groupedData->map(function ($group) {
     //         return [
     //             'group_id' => $group->first()->group->id,
@@ -35,38 +35,38 @@ class AttributeGroupController extends Controller
     //             })->values() // Lấy giá trị của từng attribute
     //         ];
     //     });
-    
+
     //     return response()->json(['variation' => $result->values()]);
     // }
-    
+
     public function index()
-{
-    $attributeGroups = AttributeGroup::with('group', 'attribute')->get();
-    
-    $groupedData = $attributeGroups->groupBy('group_id');
-    
-    $result = $groupedData->map(function ($group) {
-        return [
-            'group_id' => $group->first()->group->id,
-            'group_name' => $group->first()->group->name,
-            'attributes' => $group->map(function ($item) {
-                return [
-                    'id' => $item->attribute->id,
-                    'name' => $item->attribute->name,
-                    'attribute_type' => $item->attribute->attribute_type,
-                    'attribute_values' => $item->attribute->values->map(function ($value) {
-                        return [
-                            'id' => $value->id,
-                            'value' => $value->value
-                        ];
-                    })->values() // Chuyển về danh sách các đối tượng có id và value
-                ];
-            })->values() // Lấy giá trị của từng attribute
-        ];
-    });
-    
-    return response()->json(['variation' => $result->values()]);
-}
+    {
+        $attributeGroups = AttributeGroup::with('group', 'attribute')->get();
+
+        $groupedData = $attributeGroups->groupBy('group_id');
+
+        $result = $groupedData->map(function ($group) {
+            return [
+                'group_id' => $group->first()->group->id,
+                'group_name' => $group->first()->group->name,
+                'attributes' => $group->map(function ($item) {
+                    return [
+                        'id' => $item->attribute->id,
+                        'name' => $item->attribute->name,
+                        'attribute_type' => $item->attribute->attribute_type,
+                        'attribute_values' => $item->attribute->values->map(function ($value) {
+                            return [
+                                'id' => $value->id,
+                                'value' => $value->value
+                            ];
+                        })->values() // Chuyển về danh sách các đối tượng có id và value
+                    ];
+                })->values() // Lấy giá trị của từng attribute
+            ];
+        });
+
+        return response()->json(['variation' => $result->values()]);
+    }
 
 
 
@@ -76,7 +76,7 @@ class AttributeGroupController extends Controller
         $group = Group::create([
             'name' => $request->group_name,
         ]);
-    
+
         // Gắn các thuộc tính vào nhóm
         foreach ($request->attribute_id as $attributeId) {
             AttributeGroup::create([
@@ -84,12 +84,12 @@ class AttributeGroupController extends Controller
                 'attribute_id' => $attributeId,
             ]);
         }
-    
+
         // Lấy lại nhóm vừa được tạo với các thuộc tính liên quan
         $groupWithAttributes = Group::with('attributeGroups.attribute')
             ->where('id', $group->id)
             ->first();
-    
+
         // Trả về phản hồi JSON khi thành công
         return response()->json([
             'success' => true,
@@ -97,7 +97,7 @@ class AttributeGroupController extends Controller
             'data' => new AttributeGroupResource($groupWithAttributes)
         ], 201);
     }
-    
+
 
 
 
@@ -106,14 +106,14 @@ class AttributeGroupController extends Controller
         $attributeGroups = AttributeGroup::with('group', 'attribute')
             ->where('group_id', $id)
             ->get();
-    
+
         if ($attributeGroups->isEmpty()) {
             return response()->json([
                 'success' => false,
                 'message' => 'Nhóm thuộc tính không tồn tại.'
             ], 404);
         }
-    
+
         $result = [
             'group_id' => $attributeGroups->first()->group->id,
             'group_name' => $attributeGroups->first()->group->name,
@@ -131,7 +131,7 @@ class AttributeGroupController extends Controller
                 ];
             })->values() // Sử dụng .values() để lấy danh sách attributes
         ];
-    
+
         return response()->json(['variation' => [$result]], 201); // Bọc trong 'variation'
     }
 
@@ -141,22 +141,22 @@ class AttributeGroupController extends Controller
         $group = Group::findOrFail($id);
         $group->name = $request->group_name;
         $group->save();
-    
+
         // Lấy danh sách thuộc tính hiện tại của nhóm
         $existingAttributes = AttributeGroup::where('group_id', $id)->pluck('attribute_id')->toArray();
-    
+
         // Kiểm tra sự khác nhau giữa các thuộc tính mới và thuộc tính cũ
         $newAttributes = $request->attribute_id;
         $attributesToRemove = array_diff($existingAttributes, $newAttributes); // Thuộc tính cần xóa
         $attributesToAdd = array_diff($newAttributes, $existingAttributes);    // Thuộc tính cần thêm
-    
+
         // Xóa những thuộc tính không còn được chọn
         if (!empty($attributesToRemove)) {
             AttributeGroup::where('group_id', $id)
                 ->whereIn('attribute_id', $attributesToRemove)
                 ->delete();
         }
-    
+
         // Thêm những thuộc tính mới được chọn
         foreach ($attributesToAdd as $attributeId) {
             AttributeGroup::create([
@@ -164,7 +164,7 @@ class AttributeGroupController extends Controller
                 'attribute_id' => $attributeId,
             ]);
         }
-    
+
         // Trả về dữ liệu sau khi cập nhật
         return response()->json([
             'success' => true,
@@ -172,7 +172,7 @@ class AttributeGroupController extends Controller
             'data' => new AttributeGroupResource($group->load('attributeGroups.attribute'))
         ], 200);
     }
-    
+
 
 
     /**
@@ -190,6 +190,31 @@ class AttributeGroupController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Nhóm thuộc tính đã được xóa thành công.'
+        ], 200);
+    }
+
+
+
+    public function destroyAttribute($group_id, $attribute_id)
+    {
+        // Tìm và xóa thuộc tính trong nhóm
+        $attributeGroup = AttributeGroup::where('group_id', $group_id)
+            ->where('attribute_id', $attribute_id)
+            ->first();
+
+        if (!$attributeGroup) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Không tìm thấy thuộc tính trong nhóm.'
+            ], 404);
+        }
+
+        // Xóa thuộc tính khỏi nhóm
+        $attributeGroup->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Thuộc tính đã được xóa khỏi nhóm thành công.'
         ], 200);
     }
 }
