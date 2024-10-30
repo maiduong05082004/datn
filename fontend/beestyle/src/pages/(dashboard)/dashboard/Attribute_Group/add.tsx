@@ -1,28 +1,33 @@
 import { useMutation } from '@tanstack/react-query';
-import { Form, Input, Button, message, Space, Divider } from 'antd';
+import { Form, Input, Button, message, Space, Divider, Select, Typography } from 'antd';
 import axios from 'axios';
 import React, { useState } from 'react';
 
 interface Attribute {
   name: string;
-  values: string;
+  attribute_type: number;
+  attribute_values: { id: number; value: string }[];
 }
 
 type Props = {};
 
+const { Title } = Typography;
+
 const AddAttributeGroup = (props: Props) => {
   const [messageApi, contextHolder] = message.useMessage();
   const [form] = Form.useForm();
-  const [attributes, setAttributes] = useState<Attribute[]>([{ name: '', values: '' }]);
+  const [attributes, setAttributes] = useState<Attribute[]>([
+    { name: '', attribute_type: 1, attribute_values: [{ id: 1, value: '' }] },
+  ]);
 
   const { mutate } = useMutation({
     mutationFn: async (attributeGroup: any) => {
       return await axios.post('http://127.0.0.1:8000/api/admins/attribute_groups', attributeGroup);
     },
     onSuccess: () => {
-      messageApi.success('Thêm danh mục thành công!');
+      messageApi.success('Thêm nhóm thuộc tính thành công!');
       form.resetFields();
-      setAttributes([{ name: '', values: '' }]);
+      setAttributes([{ name: '', attribute_type: 1, attribute_values: [{ id: 1, value: '' }] }]);
     },
     onError: (error: any) => {
       const errorMessage = error.response?.data?.message || `Lỗi: ${error.message}`;
@@ -33,115 +38,103 @@ const AddAttributeGroup = (props: Props) => {
   const onFinish = (values: any) => {
     const attributeGroup = {
       group_name: values.name,
-      attributes: attributes.map((attr, index) => ({
+      attributes: attributes.map((attr) => ({
         name: attr.name,
-        attribute_type: 1, // Hoặc bạn có thể xác định type phù hợp từ form
-        attribute_values: attr.values.split(',').map((value, idx) => ({
-          id: idx + 1, // Bạn có thể cần xác định cách tạo `id` hợp lý nếu API yêu cầu
-          value: value.trim(),
-        })),
+        attribute_type: attr.attribute_type,
+        attribute_values: attr.attribute_values,
       })),
     };
-    
+
     console.log(attributeGroup); // Debug xem dữ liệu có đúng không trước khi gửi
     mutate(attributeGroup);
   };
-  
-  
 
   const handleAddAttribute = () => {
-    setAttributes([...attributes, { name: '', values: '' }]);
+    setAttributes([
+      ...attributes,
+      { name: '', attribute_type: 1, attribute_values: [{ id: attributes.length + 1, value: '' }] },
+    ]);
   };
 
-  const handleAttributeChange = (index: number, field: keyof Attribute, value: string) => {
-    const newAttributes = [...attributes];
-    newAttributes[index] = {
-      ...newAttributes[index],
-      [field]: value,
-    };
-    setAttributes(newAttributes);
+  const handleAttributeChange = (index: number, field: string, value: any) => {
+    const updatedAttributes = [...attributes];
+    if (field === 'name') {
+      updatedAttributes[index].name = value;
+    } else if (field === 'attribute_type') {
+      updatedAttributes[index].attribute_type = value;
+    }
+    setAttributes(updatedAttributes);
+  };
+
+  const handleAddAttributeValue = (index: number) => {
+    const updatedAttributes = [...attributes];
+    updatedAttributes[index].attribute_values.push({ id: updatedAttributes[index].attribute_values.length + 1, value: '' });
+    setAttributes(updatedAttributes);
+  };
+
+  const handleAttributeValueChange = (attrIndex: number, valueIndex: number, value: string) => {
+    const updatedAttributes = [...attributes];
+    updatedAttributes[attrIndex].attribute_values[valueIndex].value = value;
+    setAttributes(updatedAttributes);
   };
 
   return (
-    <>
+    <div className="max-w-2xl mx-auto p-8 bg-gray-100 rounded-lg shadow-lg">
       {contextHolder}
-      <div className="min-h-screen flex items-center justify-center p-8">
-        <div className="w-full max-w-3xl bg-white p-10 rounded-xl shadow-lg">
-          <h2 className="text-2xl font-semibold text-center mb-8 text-gray-800">
-            Thêm Mới Nhóm Thuộc Tính
-          </h2>
-          <Form
-            form={form}
-            name="attribute_group_form"
-            layout="vertical"
-            onFinish={onFinish}
-            className="space-y-6"
-          >
-            <Form.Item
-              label={<span className="font-medium text-gray-700">Tên nhóm thuộc tính</span>}
-              name="name"
-              rules={[{ required: true, message: 'Tên nhóm thuộc tính là bắt buộc' }]}
-            >
+      <Title level={2} className="text-center text-blue-700 mb-8">Thêm Nhóm Thuộc Tính</Title>
+      <Form form={form} onFinish={onFinish} layout="vertical" className="space-y-8">
+        <Form.Item
+          label="Tên nhóm thuộc tính"
+          name="name"
+          rules={[{ required: true, message: 'Vui lòng nhập tên nhóm thuộc tính' }]}
+        >
+          <Input className="w-full p-3 border border-gray-300 rounded-md" />
+        </Form.Item>
+
+        {attributes.map((attribute, index) => (
+          <div key={index} className="p-6 border border-gray-300 rounded-md mb-6 bg-white">
+            <Divider orientation="left" plain>Thuộc tính {index + 1}</Divider>
+            <Space direction="vertical" style={{ width: '100%' }}>
               <Input
-                placeholder="Nhập tên nhóm thuộc tính"
-                size="large"
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                placeholder="Tên thuộc tính"
+                value={attribute.name}
+                onChange={(e) => handleAttributeChange(index, 'name', e.target.value)}
+                className="w-full p-3 border border-gray-300 rounded-md"
               />
-            </Form.Item>
-
-            <Divider>Thuộc Tính</Divider>
-            {attributes.map((attr, index) => (
-              <Space key={index} direction="vertical" className="w-full">
-                <Form.Item
-                  label={`Tên thuộc tính ${index + 1}`}
-                  required
-                  className="font-medium text-gray-700"
-                >
-                  <Input
-                    placeholder="Tên thuộc tính"
-                    value={attr.name}
-                    onChange={(e) => handleAttributeChange(index, 'name', e.target.value)}
-                    size="large"
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400"
-                  />
-                </Form.Item>
-                <Form.Item
-                  label="Giá trị thuộc tính (cách nhau bằng dấu phẩy)"
-                  required
-                  className="font-medium text-gray-700"
-                >
-                  <Input
-                    placeholder="Nhập các giá trị, ví dụ: S, M, L"
-                    value={attr.values}
-                    onChange={(e) => handleAttributeChange(index, 'values', e.target.value)}
-                    size="large"
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400"
-                  />
-                </Form.Item>
-              </Space>
-            ))}
-            <Button
-              type="dashed"
-              onClick={handleAddAttribute}
-              className="w-full mt-4 py-2 font-semibold text-indigo-600 border border-indigo-400"
-            >
-              Thêm thuộc tính
-            </Button>
-
-            <Form.Item className="text-center mt-8">
-              <Button
-                type="primary"
-                htmlType="submit"
-                size="large"
-                className="bg-indigo-600 hover:bg-indigo-500 text-white px-6 py-2 rounded-lg font-semibold"
+              <Select
+                value={attribute.attribute_type}
+                onChange={(value) => handleAttributeChange(index, 'attribute_type', value)}
+                style={{ width: '100%' }}
+                className="w-full p-3 border border-gray-300 rounded-md"
               >
-                Thêm Nhóm Thuộc Tính
+                <Select.Option value={0}>Màu Sắc</Select.Option>
+                <Select.Option value={1}>Kích Thước</Select.Option>
+              </Select>
+              {attribute.attribute_values.map((attrValue, valueIndex) => (
+                <Input
+                  key={valueIndex}
+                  placeholder="Giá trị thuộc tính"
+                  value={attrValue.value}
+                  onChange={(e) => handleAttributeValueChange(index, valueIndex, e.target.value)}
+                  className="w-full p-3 border border-gray-300 rounded-md"
+                />
+              ))}
+              <Button type="dashed" onClick={() => handleAddAttributeValue(index)} className="w-full mt-3 border-blue-600 text-blue-600">
+                Thêm giá trị thuộc tính
               </Button>
-            </Form.Item>
-          </Form>
-        </div>
-      </div>
-    </>
+            </Space>
+          </div>
+        ))}
+
+        <Button type="dashed" onClick={handleAddAttribute} className="w-full mb-6 border-blue-600 text-blue-600">
+          Thêm thuộc tính
+        </Button>
+
+        <Button type="primary" htmlType="submit" className="w-full bg-blue-700 text-white py-3">
+          Thêm nhóm thuộc tính
+        </Button>
+      </Form>
+    </div>
   );
 };
 
