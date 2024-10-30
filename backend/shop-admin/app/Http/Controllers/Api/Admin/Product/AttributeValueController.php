@@ -87,35 +87,52 @@ class AttributeValueController extends Controller
     }
     
 
-    public function update(UpdateAttributeValueRequest $request, $attributeId)
+    // public function update(UpdateAttributeValueRequest $request, $attributeId)
 
-    {
-        foreach ($request->values as $valueData) {
-            if (isset($valueData['id']) && $valueData['id']) {
-                $attributeValue = AttributeValue::where('id', $valueData['id'])
-                    ->where('attribute_id', $attributeId)
-                    ->first();
+    // {
+    //     foreach ($request->values as $valueData) {
+    //         if (isset($valueData['id']) && $valueData['id']) {
+    //             $attributeValue = AttributeValue::where('id', $valueData['id'])
+    //                 ->where('attribute_id', $attributeId)
+    //                 ->first();
     
-                if ($attributeValue) {
-                    $attributeValue->update([
-                        'value' => $valueData['value'],
-                    ]);
-                }
-            } else {
-                AttributeValue::create([
-                    'attribute_id' => $attributeId,
-                    'value' => $valueData['value']
-                ]);
-            }
+    //             if ($attributeValue) {
+    //                 $attributeValue->update([
+    //                     'value' => $valueData['value'],
+    //                 ]);
+    //             }
+    //         } else {
+    //             AttributeValue::create([
+    //                 'attribute_id' => $attributeId,
+    //                 'value' => $valueData['value']
+    //             ]);
+    //         }
+    //     }
+    
+    //     return response()->json([
+    //         'success' => true,
+    //         'message' => 'Cập nhật và thêm mới giá trị thuộc tính thành công.',
+    //     ], 200);
+    // }
+    
+    public function update(Request $request, $id)
+    {
+        // Lấy attribute_value theo id
+        $attributeValue = AttributeValue::findOrFail($id);
+    
+        // Kiểm tra và cập nhật giá trị nếu có
+        if ($request->has('value')) {
+            $attributeValue->value = $request->input('value');
         }
+    
+        $attributeValue->save();
     
         return response()->json([
             'success' => true,
-            'message' => 'Cập nhật và thêm mới giá trị thuộc tính thành công.',
+            'message' => 'Giá trị thuộc tính đã được cập nhật thành công.',
         ], 200);
     }
-    
-    
+      
     
     public function destroy($id)
 {

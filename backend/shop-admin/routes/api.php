@@ -59,10 +59,10 @@ Route::prefix('client')->as('client.')->group(function () {
     Route::apiResource('shippingaddress', ShippingController::class)
         ->names('shippingaddress');
     Route::prefix('products')->as('products.')->group(function () {
-        Route::get('/showDetail/{id}',[ProductProductController::class, 'showDetail'])->name('showDetail');
-        Route::post('/purchase',[ProductProductController::class, 'purchase'])->name('purchase')->middleware('auth:sanctum');
-        Route::get('/',[ProductProductController::class, 'index'])->name('index');
-        Route::get('/showDetailOrder/{oderId}',[ProductProductController::class, 'showDetailOrder'])->name('showDetailOrder');
+        Route::get('/showDetail/{id}', [ProductProductController::class, 'showDetail'])->name('showDetail');
+        Route::post('/purchase', [ProductProductController::class, 'purchase'])->name('purchase')->middleware('auth:sanctum');
+        Route::get('/', [ProductProductController::class, 'index'])->name('index');
+        Route::get('/showDetailOrder/{oderId}', [ProductProductController::class, 'showDetailOrder'])->name('showDetailOrder');
     });
     Route::prefix('cart')->as('cart.')->middleware('auth:sanctum')->group(function () {
         Route::get('/', [ProductCartController::class, 'getCartItems'])->name('index');
@@ -88,15 +88,21 @@ Route::prefix('admins')
     ->group(function () {
         Route::post('/signin', [AdminAuthController::class, 'login'])->name('signin');
         Route::middleware(['auth:admin', 'admin'])->group(function () {
+
             Route::apiResource('products', ProductController::class)
-            ->names('products');
+                ->names('products');            
             Route::delete('images/{type}/{encodedPath}', [ProductController::class, 'deleteImageByPath'])->name('images.deleteByPath');
+
             Route::apiResource('attributes', AttributeController::class)
                 ->names('attributes');
+
             Route::apiResource('attribute_groups', AttributeGroupController::class)
                 ->names('attribute_groups');
+            Route::delete('attribute_groups/{group_id}/attributes/{attribute_id}', [AttributeGroupController::class, 'destroyAttribute']);
+
             Route::apiResource('attribute_values', AttributeValueController::class)
                 ->names('attribute_values');
+                
             Route::prefix('categories')->group(function () {
                 Route::post('{id}/soft-delete', [AdminCategoryController::class, 'softDestroy'])->name('categories.soft-delete');
                 Route::post('{id}/restore', [AdminCategoryController::class, 'restore'])->name('categories.restore');
