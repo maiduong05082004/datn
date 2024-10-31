@@ -56,6 +56,74 @@ class ProductController extends Controller
 
 
 
+    // public function purchase(Request $request)
+    // {
+    //     // Xác thực dữ liệu đầu vào
+    //     $validatedData = $request->validate([
+    //         'total' => 'required|numeric|min:0',
+    //         'promotion_ids' => 'nullable|array',
+    //         'promotion_ids.*' => 'integer|exists:promotions,id',
+    //         'note' => 'nullable|string',
+    //         'payment_type' => 'required|in:' . Bill::PAYMENT_TYPE_ONLINE . ',' . Bill::PAYMENT_TYPE_COD,
+    //         'shipping_address_id' => 'required|exists:shipping_addresses,id',
+    //         'cart_id' => 'required|array',
+    //         'cart_id.*' => 'integer|exists:cart_items,id',
+    //     ]);
+    
+    //     DB::beginTransaction();
+    
+    //     try {
+    //         // Tạo mã đơn hàng duy nhất
+    //         $codeOrders = $this->generateUniqueOrderCode();
+    
+    //         // Tạo hóa đơn
+    //         $bill = Bill::create([
+    //             'user_id' => $request->user()->id,
+    //             'code_orders' => $codeOrders,
+    //             'email_receiver' => $request->user()->email,
+    //             'note' => $validatedData['note'],
+    //             'status_bill' => Bill::STATUS_PENDING,
+    //             'payment_type' => $validatedData['payment_type'],
+    //             'subtotal' => 0,
+    //             'total' => $validatedData['total'],
+    //             'shipping_address_id' => $validatedData['shipping_address_id'],
+    //             'promotion_ids' => implode(',', $validatedData['promotion_ids'] ?? []),
+    //             'canceled_at' => null,
+    //         ]);
+    
+    //         $subtotal = 0;
+    
+    //         // Lấy danh sách cart_items dựa trên IDs
+    //         $cartItems = CartItem::whereIn('id', $validatedData['cart_id'])->get();
+    
+    //         foreach ($cartItems as $cartItem) {
+    //             // Đảm bảo sản phẩm và biến thể tồn tại và có đủ tồn kho
+    //             $this->processCartItem($cartItem, $bill, $subtotal);
+    //         }
+    
+    //         // Cập nhật subtotal trong hóa đơn
+    //         $bill->update(['subtotal' => $subtotal]);
+    
+    //         DB::commit();
+    
+    //         // Xóa các cart_items đã thanh toán thành công
+    //         CartItem::whereIn('id', $validatedData['cart_id'])->delete();
+    
+    //         return response()->json([
+    //             'message' => 'Đặt hàng thành công',
+    //             'bill' => $bill
+    //         ], 201);
+    //     } catch (ModelNotFoundException $e) {
+    //         DB::rollBack();
+    //         return response()->json(['message' => 'Không tìm thấy sản phẩm hoặc biến thể'], 404);
+    //     } catch (\Exception $e) {
+    //         DB::rollBack();
+    //         return response()->json(['message' => 'Đã xảy ra lỗi trong quá trình đặt hàng', 'error' => $e->getMessage()], 500);
+    //     }
+    // }
+    
+
+
     public function purchase(Request $request)
     {
         // Xác thực dữ liệu đầu vào
@@ -65,10 +133,38 @@ class ProductController extends Controller
             'promotion_ids.*' => 'integer|exists:promotions,id',
             'note' => 'nullable|string',
             'payment_type' => 'required|in:' . Bill::PAYMENT_TYPE_ONLINE . ',' . Bill::PAYMENT_TYPE_COD,
-            'shipping_address_id' => 'required|exists:shipping_addresses,id',
             'cart_id' => 'required|array',
             'cart_id.*' => 'integer|exists:cart_items,id',
         ]);
+    
+        // Kiểm tra nếu không có `shipping_address_id`, lấy địa chỉ mặc định
+        if (!isset($request->shipping_address_id)) {
+            $defaultAddress = DB::table('shipping_addresses')
+                ->where('user_id', $request->user()->id)
+                ->where('is_default', 1)
+                ->first();
+    
+            if ($defaultAddress) {
+                $validatedData['shipping_address_id'] = $defaultAddress->id;
+            } else {
+                return response()->json([
+                    'message' => 'Vui lòng chọn địa chỉ mặc định cho đơn hàng của bạn.'
+                ], 400);
+            }
+        } else {
+            // Nếu `shipping_address_id` được gửi, kiểm tra địa chỉ có thuộc về người dùng không
+            $addressExists = DB::table('shipping_addresses')
+                ->where('id', $request->shipping_address_id)
+                ->where('user_id', $request->user()->id)
+                ->exists();
+    
+            if (!$addressExists) {
+                return response()->json([
+                    'message' => 'Địa chỉ giao hàng không hợp lệ.'
+                ], 404);
+            }
+            $validatedData['shipping_address_id'] = $request->shipping_address_id;
+        }
     
         DB::beginTransaction();
     
