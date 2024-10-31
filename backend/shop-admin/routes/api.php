@@ -11,6 +11,7 @@ use App\Http\Controllers\Api\Admin\CategoryController as AdminCategoryController
 use App\Http\Controllers\Api\Admin\Product\AttributeController;
 use App\Http\Controllers\Api\Admin\Product\AttributeGroupController;
 use App\Http\Controllers\Api\Admin\Product\AttributeValueController;
+use App\Http\Controllers\Api\Admin\Product\OrderController;
 use App\Http\Controllers\Api\Admin\PromotionsController;
 use App\Http\Controllers\Api\Client\HomeController;
 use App\Http\Controllers\Api\Client\Product\ProductController as ProductProductController;
@@ -82,6 +83,7 @@ Route::prefix('client')->as('client.')->group(function () {
     });
 });
 
+Route::delete('images/{type}/{encodedPath}', [ProductController::class, 'deleteImageByPath'])->name('images.deleteByPath');
 
 Route::prefix('admins')
     ->as('admins.')
@@ -91,7 +93,6 @@ Route::prefix('admins')
 
             Route::apiResource('products', ProductController::class)
                 ->names('products');            
-            Route::delete('images/{type}/{encodedPath}', [ProductController::class, 'deleteImageByPath'])->name('images.deleteByPath');
 
             Route::apiResource('attributes', AttributeController::class)
                 ->names('attributes');
@@ -128,5 +129,17 @@ Route::prefix('admins')
                 Route::get('/user/{userId}/product/{productId}', [PromotionsController::class, 'getUserProductPromotions'])->name('promotions.user-product');
                 Route::get('/event/{eventName}', [PromotionsController::class, 'getEventPromotions'])->name('promotions.event');
             });
+
+
+
+
+            Route::prefix('orders')->group(function () {
+             Route::get('/',[OrderController::class, 'index'])->name('orders.index');
+             Route::get('/pending', [OrderController::class, 'pendingOrders'])->name('orders.pending');
+             Route::get('/shipped', [OrderController::class, 'shippedOrders'])->name('orders.shipped');
+
+
+            });
+
         });
     });

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\ProductResource;
 use App\Models\Bill;
 use App\Models\BillDetail;
+use App\Models\CartItem;
 use App\Models\Product;
 use App\Models\ProductVariationValue;
 use App\Models\Promotion;
@@ -55,212 +56,109 @@ class ProductController extends Controller
 
 
 
-    // public function purchase(Request $request)
-    // {
-    //     $validated = $request->validate([
-    //         '*.product_id' => 'required|exists:products,id',
-    //         '*.email_receiver' => 'required|email',
-    //         '*.note' => 'nullable|string',
-    //         '*.payment_type' => 'required|in:' . Bill::PAYMENT_TYPE_ONLINE . ',' . Bill::PAYMENT_TYPE_COD,
-    //         '*.shipping_address_id' => 'required|exists:shipping_addresses,id',
-    //         '*.variations' => 'required|array|min:1',
-    //         '*.variations.*.product_variation_value_id' => 'required|exists:product_variation_values,id',
-    //         '*.variations.*.quantity' => 'required|integer|min:1',
-    //     ]);
-
-    //     DB::beginTransaction();
-
-    //     try {
-    //         // Sinh mã đơn hàng duy nhất
-    //         $codeOrders = $this->generateUniqueOrderCode();
-
-    //         // Khởi tạo hóa đơn
-    //         $bill = Bill::create([
-    //             'user_id' => $request->user()->id,
-    //             'code_orders' => $codeOrders,
-    //             'email_receiver' => $validated[0]['email_receiver'],
-    //             'note' => $validated[0]['note'],
-    //             'status_bill' => Bill::STATUS_PENDING,
-    //             'payment_type' => $validated[0]['payment_type'],
-    //             'subtotal' => 0,
-    //             'total' => 0,
-    //             'shipping_address_id' => $validated[0]['shipping_address_id'],
-    //             'canceled_at' => null,
-    //         ]);
-
-    //         $subtotal = 0;
-
-    //         // Duyệt qua từng sản phẩm trong request
-    //         foreach ($validated as $order) {
-    //             $this->processOrderItems($order, $bill, $subtotal);
-    //         }
-
-    //         // Cập nhật tổng tiền và hoàn thành giao dịch
-    //         $bill->update([
-    //             'subtotal' => $subtotal,
-    //             'total' => $subtotal,
-    //         ]);
-
-    //         DB::commit();
-
-    //         return response()->json([
-    //             'message' => 'Đặt hàng thành công',
-    //             'bill' => $bill
-    //         ], 201);
-    //     } catch (ModelNotFoundException $e) {
-    //         DB::rollBack();
-    //         return response()->json([
-    //             'message' => 'Không tìm thấy sản phẩm hoặc biến thể'
-    //         ], 404);
-    //     } catch (\Exception $e) {
-    //         DB::rollBack();
-    //         return response()->json([
-    //             'message' => 'Đã xảy ra lỗi trong quá trình đặt hàng',
-    //             'error' => $e->getMessage()
-    //         ], 500);
-    //     }
-    // }
-
     public function purchase(Request $request)
     {
-        // Điều chỉnh xác thực để không yêu cầu `variations` là mảng
+        // Xác thực dữ liệu đầu vào
         $validatedData = $request->validate([
-            '*.product_id' => 'required|exists:products,id',
-            '*.email_receiver' => 'required|email',
-            '*.note' => 'nullable|string',
-            '*.payment_type' => 'required|in:' . Bill::PAYMENT_TYPE_ONLINE . ',' . Bill::PAYMENT_TYPE_COD,
-            '*.shipping_address_id' => 'required|exists:shipping_addresses,id',
-            '*.variations.product_variation_value_id' => 'required|exists:product_variation_values,id',
-            '*.variations.quantity' => 'required|integer|min:1',
+            'total' => 'required|numeric|min:0',
+            'promotion_ids' => 'nullable|array',
+            'promotion_ids.*' => 'integer|exists:promotions,id',
+            'note' => 'nullable|string',
+            'payment_type' => 'required|in:' . Bill::PAYMENT_TYPE_ONLINE . ',' . Bill::PAYMENT_TYPE_COD,
+            'shipping_address_id' => 'required|exists:shipping_addresses,id',
+            'cart_id' => 'required|array',
+            'cart_id.*' => 'integer|exists:cart_items,id',
         ]);
     
         DB::beginTransaction();
     
         try {
-            $bills = [];
+            // Tạo mã đơn hàng duy nhất
+            $codeOrders = $this->generateUniqueOrderCode();
     
-            foreach ($validatedData as $orderData) {
-                // Tạo mã đơn hàng duy nhất
-                $codeOrders = $this->generateUniqueOrderCode();
+            // Tạo hóa đơn
+            $bill = Bill::create([
+                'user_id' => $request->user()->id,
+                'code_orders' => $codeOrders,
+                'email_receiver' => $request->user()->email,
+                'note' => $validatedData['note'],
+                'status_bill' => Bill::STATUS_PENDING,
+                'payment_type' => $validatedData['payment_type'],
+                'subtotal' => 0,
+                'total' => $validatedData['total'],
+                'shipping_address_id' => $validatedData['shipping_address_id'],
+                'promotion_ids' => implode(',', $validatedData['promotion_ids'] ?? []),
+                'canceled_at' => null,
+            ]);
     
-                // Khởi tạo hóa đơn
-                $bill = Bill::create([
-                    'user_id' => $request->user()->id,
-                    'code_orders' => $codeOrders,
-                    'email_receiver' => $orderData['email_receiver'],
-                    'note' => $orderData['note'],
-                    'status_bill' => Bill::STATUS_PENDING,
-                    'payment_type' => $orderData['payment_type'],
-                    'subtotal' => 0,
-                    'total' => 0,
-                    'shipping_address_id' => $orderData['shipping_address_id'],
-                    'canceled_at' => null,
-                ]);
+            $subtotal = 0;
     
-                $subtotal = 0;
+            // Lấy danh sách cart_items dựa trên IDs
+            $cartItems = CartItem::whereIn('id', $validatedData['cart_id'])->get();
     
-                // Điều chỉnh cách xử lý `variations` không bọc trong mảng
-                $this->processOrderItem($orderData['variations'], $orderData['product_id'], $bill, $subtotal);
-    
-                // Cập nhật tổng số tiền
-                $bill->update([
-                    'subtotal' => $subtotal,
-                    'total' => $subtotal,
-                ]);
-    
-                $bills[] = $bill;
+            foreach ($cartItems as $cartItem) {
+                // Đảm bảo sản phẩm và biến thể tồn tại và có đủ tồn kho
+                $this->processCartItem($cartItem, $bill, $subtotal);
             }
+    
+            // Cập nhật subtotal trong hóa đơn
+            $bill->update(['subtotal' => $subtotal]);
     
             DB::commit();
     
+            // Xóa các cart_items đã thanh toán thành công
+            CartItem::whereIn('id', $validatedData['cart_id'])->delete();
+    
             return response()->json([
                 'message' => 'Đặt hàng thành công',
-                'bills' => $bills
+                'bill' => $bill
             ], 201);
-    
         } catch (ModelNotFoundException $e) {
             DB::rollBack();
-            return response()->json([
-                'message' => 'Không tìm thấy sản phẩm hoặc biến thể'
-            ], 404);
+            return response()->json(['message' => 'Không tìm thấy sản phẩm hoặc biến thể'], 404);
         } catch (\Exception $e) {
             DB::rollBack();
-            return response()->json([
-                'message' => 'Đã xảy ra lỗi trong quá trình đặt hàng',
-                'error' => $e->getMessage()
-            ], 500);
+            return response()->json(['message' => 'Đã xảy ra lỗi trong quá trình đặt hàng', 'error' => $e->getMessage()], 500);
         }
     }
-    
-    // // Điều chỉnh hàm để xử lý `variations` không cần bọc mảng
-    // private function processOrderItem($variation, $productId, $bill, &$subtotal)
-    // {
-    //     $variationValue = ProductVariationValue::findOrFail($variation['product_variation_value_id']);
-    
-    //     // Kiểm tra tồn kho
-    //     if ($variationValue->stock < $variation['quantity']) {
-    //         throw new \Exception("Biến thể {$variationValue->id} không đủ số lượng trong kho.");
-    //     }
-    
-    //     // Tính tổng tiền của biến thể
-    //     $totalAmount = $variationValue->price * $variation['quantity'];
-    //     $subtotal += $totalAmount;
-    
-    //     BillDetail::create([
-    //         'bill_id' => $bill->id,
-    //         'product_id' => $productId,
-    //         'product_variation_value_id' => $variation['product_variation_value_id'],
-    //         'don_gia' => $variationValue->price,
-    //         'quantity' => $variation['quantity'],
-    //         'total_amount' => $totalAmount,
-    //     ]);
-    
-    //     // Giảm tồn kho
-    //     $variationValue->decrement('stock', $variation['quantity']);
-    //     $variationValue->productVariation->decrement('stock', $variation['quantity']);
-    
-    //     // Giảm tồn kho sản phẩm chính
-    //     $product = Product::findOrFail($productId);
-    //     $product->decrement('stock', $variation['quantity']);
-    // }
     
 
-    private function processOrderItem($variation, $productId, $bill, &$subtotal)
-    {
-        $variationValue = ProductVariationValue::with('attributeValue')->findOrFail($variation['product_variation_value_id']);
-    
-        // Lấy tên của thuộc tính (ví dụ: size L)
-        $attributeName = $variationValue->attributeValue->value ?? 'không xác định';
-        $variationAttributeName = $variationValue->productVariation->attributeValue->value ?? 'không xác định';
-    
-        // Kiểm tra tồn kho
-        if ($variationValue->stock < $variation['quantity']) {
-            // Trả về thông báo lỗi chi tiết nếu không đủ số lượng tồn kho
-            throw new \Exception("{$variationAttributeName} kích thước {$attributeName} hiện tại không đủ số lượng trong kho. Số lượng còn lại là {$variationValue->stock}, yêu cầu là {$variation['quantity']}.");
-        }
-    
-        // Tính tổng tiền của biến thể
-        $totalAmount = $variationValue->price * $variation['quantity'];
-        $subtotal += $totalAmount;
-    
-        BillDetail::create([
-            'bill_id' => $bill->id,
-            'product_id' => $productId,
-            'product_variation_value_id' => $variation['product_variation_value_id'],
-            'don_gia' => $variationValue->price,
-            'quantity' => $variation['quantity'],
-            'total_amount' => $totalAmount,
-        ]);
-    
-        // Giảm tồn kho
-        $variationValue->decrement('stock', $variation['quantity']);
-        $variationValue->productVariation->decrement('stock', $variation['quantity']);
-    
-        // Giảm tồn kho sản phẩm chính
-        $product = Product::findOrFail($productId);
-        $product->decrement('stock', $variation['quantity']);
+private function processCartItem($cartItem, $bill, &$subtotal)
+{
+    $variationValue = ProductVariationValue::findOrFail($cartItem->product_variation_value_id);
+
+    if ($variationValue->stock < $cartItem->quantity) {
+        throw new \Exception("Số lượng tồn kho không đủ cho biến thể ID {$variationValue->id}. Yêu cầu: {$cartItem->quantity}, Tồn kho: {$variationValue->stock}");
     }
-    
+
+    // Tính tổng tiền cho sản phẩm này
+    $totalAmount = $variationValue->price * $cartItem->quantity;
+    $subtotal += $totalAmount;
+
+    // Thêm vào bill detail
+    BillDetail::create([
+        'bill_id' => $bill->id,
+        'product_id' => $cartItem->product_id,
+        'product_variation_value_id' => $cartItem->product_variation_value_id,
+        'don_gia' => $variationValue->price,
+        'quantity' => $cartItem->quantity,
+        'total_amount' => $totalAmount,
+    ]);
+
+    // Trừ tồn kho
+    $variationValue->decrement('stock', $cartItem->quantity);
+    $variationValue->productVariation->decrement('stock', $cartItem->quantity);
+
+    // Trừ tồn kho cho sản phẩm chính
+    $product = Product::findOrFail($cartItem->product_id);
+    $product->decrement('stock', $cartItem->quantity);
+}
+
+
+
+
+
+
 
     private function generateUniqueOrderCode()
     {
@@ -271,46 +169,6 @@ class ProductController extends Controller
         return $codeOrders;
     }
 
-    private function processOrderItems($order, $bill, &$subtotal)
-    {
-        $totalQuantity = 0;
-
-        foreach ($order['variations'] as $variation) {
-            $variationValue = ProductVariationValue::findOrFail($variation['product_variation_value_id']);
-
-            // Kiểm tra tồn kho
-            if ($variationValue->stock < $variation['quantity']) {
-                throw new \Exception("Biến thể {$variationValue->id} không đủ số lượng trong kho.");
-            }
-
-            // Tính tổng tiền của biến thể
-            $totalAmount = $variationValue->price * $variation['quantity'];
-            $subtotal += $totalAmount;
-
-            BillDetail::create([
-                'bill_id' => $bill->id,
-                'product_id' => $order['product_id'],
-                'product_variation_value_id' => $variation['product_variation_value_id'],
-                'don_gia' => $variationValue->price,
-                'quantity' => $variation['quantity'],
-                'total_amount' => $totalAmount,
-            ]);
-
-            // Giảm tồn kho
-            $variationValue->decrement('stock', $variation['quantity']);
-            $variationValue->productVariation->decrement('stock', $variation['quantity']);
-
-            $totalQuantity += $variation['quantity'];
-        }
-
-        // Giảm tồn kho sản phẩm chính
-        $product = Product::findOrFail($order['product_id']);
-        if ($product->stock < $totalQuantity) {
-            throw new \Exception("Sản phẩm không đủ số lượng trong kho.");
-        }
-
-        $product->decrement('stock', $totalQuantity);
-    }
 
 
 
@@ -319,7 +177,7 @@ class ProductController extends Controller
     public function index(Request $request)
     {
         $user = Auth::user();
-    
+
         $bills = Bill::with([
             'shippingAddress:id,address_line,city,district,ward,phone_number',
             'BillDetail.product:id,name,price',
@@ -329,24 +187,24 @@ class ProductController extends Controller
                 $query->select('product_variation_id', 'image_path'); // Lấy ảnh của biến thể
             }
         ])
-        ->where('user_id', $user->id)
-        ->orderBy('created_at', 'desc')
-        ->paginate(10);
-    
+            ->where('user_id', $user->id)
+            ->orderBy('created_at', 'desc')
+            ->paginate(10);
+
         $bills->getCollection()->transform(function ($bill) {
             // Thêm mô tả trạng thái đơn hàng
             $bill->status_description = $bill->getTrangThaiDonHang();
             $bill->payment_type_description = $bill->getLoaiThanhToan();
-    
+
             // Chuyển đổi created_at sang múi giờ Việt Nam và tách thành ngày và giờ
             $dateTime = Carbon::parse($bill->created_at)->timezone('Asia/Ho_Chi_Minh');
             $bill->order_date = $dateTime->format('d/m/Y'); // Chỉ ngày
             $bill->order_time = $dateTime->format('H:i:s'); // Chỉ giờ
-    
+
             // Bỏ trường updated_at và created_at gốc
             unset($bill->updated_at);
             unset($bill->created_at);
-    
+
             // Đưa các trường từ shippingAddress lên cấp trên
             if ($bill->shippingAddress) {
                 $bill->shipping_address_id = $bill->shippingAddress->id;
@@ -357,7 +215,14 @@ class ProductController extends Controller
                 $bill->phone_number = $bill->shippingAddress->phone_number;
                 unset($bill->shippingAddress); // Xóa shippingAddress để tránh lồng nhau
             }
-    
+
+            // Lấy thông tin từ bảng promotions
+            $promotionIds = explode(',', $bill->promotion_ids); // Tách chuỗi "1,2,3" thành mảng
+            $promotions = Promotion::whereIn('id', $promotionIds)->get(['code', 'discount_amount', 'description']);
+
+            // Thêm thông tin khuyến mãi vào kết quả trả về
+            $bill->promotions = $promotions;
+
             // Đưa thông tin từ product và productVariationValue lên cùng cấp trong mỗi BillDetail và sắp xếp lại các trường
             $bill->BillDetail->transform(function ($detail) {
                 $detail->name = $detail->product->name ?? null;
@@ -366,16 +231,16 @@ class ProductController extends Controller
                 $detail->discount = $detail->productVariationValue->discount ?? null;
                 $detail->attribute_value = $detail->productVariationValue->attributeValue->value ?? null;
                 $detail->attribute_value_name = $detail->productVariationValue->ProductVariation->attributeValue->value ?? null;
-    
+
                 // Lấy hình ảnh từ ProductVariation nếu có
                 $detail->variation_images = $detail->productVariationValue->productVariation->variationImages->pluck('image_path') ?? [];
-    
+
                 // Xóa các thuộc tính không cần thiết
                 unset($detail->product);
                 unset($detail->productVariationValue);
                 unset($detail->created_at);
                 unset($detail->updated_at);
-    
+
                 // Re-order the fields
                 return [
                     'id' => $detail->id,
@@ -386,7 +251,7 @@ class ProductController extends Controller
                     'attribute_value_color' => $detail->attribute_value_name,
                     'attribute_value_size' => $detail->attribute_value,
                     'variation_value_size_id' => $detail->product_variation_value_id,
-                    'discount' => $detail->discount,                 
+                    'discount' => $detail->discount,
                     'sku' => $detail->sku,
                     'don_gia' => $detail->don_gia,
                     'quantity' => $detail->quantity,
@@ -394,9 +259,124 @@ class ProductController extends Controller
                     'variation_images' => $detail->variation_images,
                 ];
             });
-    
+
             // Re-order the fields for bill
             return [
+                'id' => $bill->id,
+                'code_orders' => $bill->code_orders,
+                'user_id' => $bill->user_id,
+                'email_receiver' => $bill->email_receiver,
+                'note' => $bill->note,
+                'payment_type' => $bill->payment_type,
+                'payment_type_description' => $bill->payment_type_description,
+                'status_bill' => $bill->status_bill,
+                'status_description' => $bill->status_description,
+                'order_date' => $bill->order_date,
+                'order_time' => $bill->order_time,
+                'canceled_at' => $bill->canceled_at,
+                'subtotal' => $bill->subtotal,
+                'promotions' => $bill->promotions,
+                'total' => $bill->total,
+                'shipping_address_id' => $bill->shipping_address_id,
+                'address_line' => $bill->address_line,
+                'city' => $bill->city,
+                'district' => $bill->district,
+                'ward' => $bill->ward,
+                'phone_number' => $bill->phone_number,
+                'bill_detail' => $bill->BillDetail,
+                // Thêm thông tin khuyến mãi vào response
+            ];
+        });
+
+        // Trả về dữ liệu với thông tin người dùng ở ngoài cùng
+        return response()->json([
+            'user_id' => $user->id,
+            'name' => $user->name,
+            'bills' => $bills->items(),
+            'pagination' => [
+                'current_page' => $bills->currentPage(),
+                'last_page' => $bills->lastPage(),
+                'per_page' => $bills->perPage(),
+                'total' => $bills->total(),
+            ]
+        ], 200);
+    }
+
+
+
+    public function showDetailOrder($orderId)
+    {
+        try {
+            // Lấy thông tin đơn hàng với các liên kết chi tiết
+            $bill = Bill::with([
+                'shippingAddress:id,address_line,city,district,ward,phone_number',
+                'BillDetail.product:id,name,price',
+                'BillDetail.productVariationValue:id,product_variation_id,attribute_value_id,sku,stock,price,discount',
+                'BillDetail.productVariationValue.attributeValue:id,value',
+                'BillDetail.productVariationValue.productVariation.variationImages' => function ($query) {
+                    $query->select('product_variation_id', 'image_path'); // Lấy ảnh của biến thể
+                }
+            ])->findOrFail($orderId);
+
+            // Xử lý dữ liệu đơn hàng để hiển thị chi tiết hơn
+            $bill->status_description = $bill->getTrangThaiDonHang();
+            $bill->payment_type_description = $bill->getLoaiThanhToan();
+
+            // Chuyển đổi created_at sang múi giờ Việt Nam và tách thành ngày và giờ
+            $dateTime = Carbon::parse($bill->created_at)->timezone('Asia/Ho_Chi_Minh');
+            $bill->order_date = $dateTime->format('d/m/Y'); // Chỉ ngày
+            $bill->order_time = $dateTime->format('H:i:s'); // Chỉ giờ
+
+            // Đưa các trường từ shippingAddress lên cấp trên
+            if ($bill->shippingAddress) {
+                $bill->shipping_address_id = $bill->shippingAddress->id;
+                $bill->address_line = $bill->shippingAddress->address_line;
+                $bill->city = $bill->shippingAddress->city;
+                $bill->district = $bill->shippingAddress->district;
+                $bill->ward = $bill->shippingAddress->ward;
+                $bill->phone_number = $bill->shippingAddress->phone_number;
+                unset($bill->shippingAddress); // Xóa shippingAddress để tránh lồng nhau
+            }
+
+            // Đưa thông tin từ product và productVariationValue lên cùng cấp trong mỗi BillDetail và sắp xếp lại các trường
+            $bill->BillDetail->transform(function ($detail) {
+                $detail->name = $detail->product->name ?? null;
+                $detail->price = $detail->product->price ?? null;
+                $detail->sku = $detail->productVariationValue->sku ?? null;
+                $detail->discount = $detail->productVariationValue->discount ?? null;
+                $detail->attribute_value = $detail->productVariationValue->attributeValue->value ?? null;
+                $detail->attribute_value_name = $detail->productVariationValue->productVariation->attributeValue->value ?? null;
+
+                // Lấy hình ảnh từ ProductVariation nếu có
+                $detail->variation_images = $detail->productVariationValue->productVariation->variationImages->pluck('image_path') ?? [];
+
+                // Xóa các thuộc tính không cần thiết
+                unset($detail->product);
+                unset($detail->productVariationValue);
+                unset($detail->created_at);
+                unset($detail->updated_at);
+
+                // Re-order the fields
+                return [
+                    'id' => $detail->id,
+                    'bill_id' => $detail->bill_id,
+                    'product_id' => $detail->product_id,
+                    'name' => $detail->name,
+                    'price' => $detail->price,
+                    'attribute_value_color' => $detail->attribute_value_name,
+                    'attribute_value_size' => $detail->attribute_value,
+                    'variation_value_size_id' => $detail->product_variation_value_id,
+                    'discount' => $detail->discount,
+                    'sku' => $detail->sku,
+                    'don_gia' => $detail->don_gia,
+                    'quantity' => $detail->quantity,
+                    'total_amount' => $detail->total_amount,
+                    'variation_images' => $detail->variation_images,
+                ];
+            });
+
+            // Re-order the fields for bill
+            return response()->json([
                 'id' => $bill->id,
                 'code_orders' => $bill->code_orders,
                 'user_id' => $bill->user_id,
@@ -418,131 +398,16 @@ class ProductController extends Controller
                 'ward' => $bill->ward,
                 'phone_number' => $bill->phone_number,
                 'bill_detail' => $bill->BillDetail,
-            ];
-        });
-    
-        // Trả về dữ liệu với thông tin người dùng ở ngoài cùng
-        return response()->json([
-            'user_id' => $user->id,
-            'name' => $user->name,
-            'bills' => $bills->items(),
-            'pagination' => [
-                'current_page' => $bills->currentPage(),
-                'last_page' => $bills->lastPage(),
-                'per_page' => $bills->perPage(),
-                'total' => $bills->total(),
-            ]
-        ], 200);
-    }
-    
-
-    public function showDetailOrder($orderId)
-{
-    try {
-        // Lấy thông tin đơn hàng với các liên kết chi tiết
-        $bill = Bill::with([
-            'shippingAddress:id,address_line,city,district,ward,phone_number',
-            'BillDetail.product:id,name,price',
-            'BillDetail.productVariationValue:id,product_variation_id,attribute_value_id,sku,stock,price,discount',
-            'BillDetail.productVariationValue.attributeValue:id,value',
-            'BillDetail.productVariationValue.productVariation.variationImages' => function ($query) {
-                $query->select('product_variation_id', 'image_path'); // Lấy ảnh của biến thể
-            }
-        ])->findOrFail($orderId);
-
-        // Xử lý dữ liệu đơn hàng để hiển thị chi tiết hơn
-        $bill->status_description = $bill->getTrangThaiDonHang();
-        $bill->payment_type_description = $bill->getLoaiThanhToan();
-
-        // Chuyển đổi created_at sang múi giờ Việt Nam và tách thành ngày và giờ
-        $dateTime = Carbon::parse($bill->created_at)->timezone('Asia/Ho_Chi_Minh');
-        $bill->order_date = $dateTime->format('d/m/Y'); // Chỉ ngày
-        $bill->order_time = $dateTime->format('H:i:s'); // Chỉ giờ
-
-        // Đưa các trường từ shippingAddress lên cấp trên
-        if ($bill->shippingAddress) {
-            $bill->shipping_address_id = $bill->shippingAddress->id;
-            $bill->address_line = $bill->shippingAddress->address_line;
-            $bill->city = $bill->shippingAddress->city;
-            $bill->district = $bill->shippingAddress->district;
-            $bill->ward = $bill->shippingAddress->ward;
-            $bill->phone_number = $bill->shippingAddress->phone_number;
-            unset($bill->shippingAddress); // Xóa shippingAddress để tránh lồng nhau
+            ], 200);
+        } catch (ModelNotFoundException $e) {
+            return response()->json([
+                'message' => 'Đơn hàng không tồn tại'
+            ], 404);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Đã xảy ra lỗi khi lấy chi tiết đơn hàng',
+                'error' => $e->getMessage()
+            ], 500);
         }
-
-        // Đưa thông tin từ product và productVariationValue lên cùng cấp trong mỗi BillDetail và sắp xếp lại các trường
-        $bill->BillDetail->transform(function ($detail) {
-            $detail->name = $detail->product->name ?? null;
-            $detail->price = $detail->product->price ?? null;
-            $detail->sku = $detail->productVariationValue->sku ?? null;
-            $detail->discount = $detail->productVariationValue->discount ?? null;
-            $detail->attribute_value = $detail->productVariationValue->attributeValue->value ?? null;
-            $detail->attribute_value_name = $detail->productVariationValue->productVariation->attributeValue->value ?? null;
-
-            // Lấy hình ảnh từ ProductVariation nếu có
-            $detail->variation_images = $detail->productVariationValue->productVariation->variationImages->pluck('image_path') ?? [];
-
-            // Xóa các thuộc tính không cần thiết
-            unset($detail->product);
-            unset($detail->productVariationValue);
-            unset($detail->created_at);
-            unset($detail->updated_at);
-
-            // Re-order the fields
-            return [
-                'id' => $detail->id,
-                'bill_id' => $detail->bill_id,
-                'product_id' => $detail->product_id,
-                'name' => $detail->name,
-                'price' => $detail->price,
-                'attribute_value_color' => $detail->attribute_value_name,
-                'attribute_value_size' => $detail->attribute_value,
-                'variation_value_size_id' => $detail->product_variation_value_id,
-                'discount' => $detail->discount,
-                'sku' => $detail->sku,
-                'don_gia' => $detail->don_gia,
-                'quantity' => $detail->quantity,
-                'total_amount' => $detail->total_amount,
-                'variation_images' => $detail->variation_images,
-            ];
-        });
-
-        // Re-order the fields for bill
-        return response()->json([
-            'id' => $bill->id,
-            'code_orders' => $bill->code_orders,
-            'user_id' => $bill->user_id,
-            'email_receiver' => $bill->email_receiver,
-            'note' => $bill->note,
-            'payment_type' => $bill->payment_type,
-            'payment_type_description' => $bill->payment_type_description,
-            'status_bill' => $bill->status_bill,
-            'status_description' => $bill->status_description,
-            'order_date' => $bill->order_date,
-            'order_time' => $bill->order_time,
-            'canceled_at' => $bill->canceled_at,
-            'subtotal' => $bill->subtotal,
-            'total' => $bill->total,
-            'shipping_address_id' => $bill->shipping_address_id,
-            'address_line' => $bill->address_line,
-            'city' => $bill->city,
-            'district' => $bill->district,
-            'ward' => $bill->ward,
-            'phone_number' => $bill->phone_number,
-            'bill_detail' => $bill->BillDetail,
-        ], 200);
-
-    } catch (ModelNotFoundException $e) {
-        return response()->json([
-            'message' => 'Đơn hàng không tồn tại'
-        ], 404);
-    } catch (\Exception $e) {
-        return response()->json([
-            'message' => 'Đã xảy ra lỗi khi lấy chi tiết đơn hàng',
-            'error' => $e->getMessage()
-        ], 500);
     }
-}
-
-    
 }
