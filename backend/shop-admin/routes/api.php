@@ -151,10 +151,6 @@ Route::prefix('admins')
                 Route::get('/user/{userId}/product/{productId}', [PromotionsController::class, 'getUserProductPromotions'])->name('promotions.user-product');
                 Route::get('/event/{eventName}', [PromotionsController::class, 'getEventPromotions'])->name('promotions.event');
             });
-
-
-
-
             Route::prefix('orders')->group(function () {
              Route::get('/',[OrderController::class, 'index'])->name('orders.index');
              Route::get('/pending', [OrderController::class, 'pendingOrders'])->name('orders.pending');
@@ -174,11 +170,6 @@ Route::prefix('admins')
              Route::post('/ghn-detail/{billId}', [ProductShippingController::class, 'getGHNOrderDetail'])->name('orders.getGHNOrderDetail');
              Route::post('/ghn-cancel/{billId}', [ProductShippingController::class, 'cancelGHNOrder'])->name('orders.cancelGHNOrder');
              Route::post('/ghn-update/{billId}', [ProductShippingController::class, 'updateGHNOrder'])->name('orders.updateGHNOrder');
-
-
-
-
-
             });
         });
     });

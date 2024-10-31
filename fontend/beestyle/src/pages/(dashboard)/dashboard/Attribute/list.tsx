@@ -206,7 +206,7 @@ const ListAttribute: React.FC = () => {
                                             type="default"
                                             icon={<EditOutlined />}
                                             className="text-blue-500 hover:text-blue-600 transition-colors"
-                                            onClick={() => navigate(`attribute_value/update/${value.value_id}`)}
+                                            onClick={() => navigate(`/admin/attribute_value/update/${value.value_id}`)}
                                         />
                                         <Popconfirm
                                             title="Xóa giá trị"
