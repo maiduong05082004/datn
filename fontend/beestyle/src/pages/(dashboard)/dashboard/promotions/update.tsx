@@ -16,6 +16,7 @@ const UpdatePromotion: React.FC = () => {
     const [discountType, setDiscountType] = useState<'amount' | 'percent'>('percent');
     const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
     const [products, setProducts] = useState<Product[]>([]);
+    const token = localStorage.getItem('token');
 
     const { data: categories = [], isLoading: isLoadingCategories } = useQuery<Category[]>({
         queryKey: ['categories'],
@@ -58,7 +59,14 @@ const UpdatePromotion: React.FC = () => {
     useEffect(() => {
         const fetchPromotion = async () => {
             try {
-                const response = await fetch(`http://localhost:8000/api/admins/promotions/${id}`);
+                const response = await fetch(`http://localhost:8000/api/admins/promotions/${id}`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`,
+                    },
+                });
+
                 const data = await response.json();
                 form.setFieldsValue({
                     code: data.code,
@@ -70,6 +78,8 @@ const UpdatePromotion: React.FC = () => {
                     max_discount_amount: data.max_discount_amount,
                     usage_limit: data.usage_limit,
                     min_order_value: data.min_order_value,
+                    promotion_type: data.promotion_type,
+                    promotion_scope: data.products.length > 0 ? 'product' : 'category',
                     is_active: data.is_active,
                     status: data.status,
                     category_ids: data.categories.map((cat: Category) => cat.id),
@@ -86,8 +96,8 @@ const UpdatePromotion: React.FC = () => {
     const onFinish = (values: any) => {
         updatePromotionMutate({
             ...values,
-            start_date: moment(values.start_date).format('YYYY-MM-DD'),
-            end_date: moment(values.end_date).format('YYYY-MM-DD'),
+            start_date: values.start_date.format('YYYY-MM-DD'),
+            end_date: values.end_date.format('YYYY-MM-DD'),
             is_active: values.is_active || false,
         });
     };

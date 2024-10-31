@@ -53,11 +53,6 @@ class CheckoutController extends Controller
                 ? $item->productVariationValue->price
                 : $item->product->price;
 
-            if ($price === null) {
-                Log::error("Sản phẩm hoặc biến thể không có giá (Product ID: {$item->product_id}, Variation ID: {$item->product_variation_value_id})");
-                return 0;
-            }
-
             return $price * $item->quantity;
         });
 
@@ -68,22 +63,20 @@ class CheckoutController extends Controller
             return response()->json(['error' => 'Không thể chuyển đổi tiền tệ. Vui lòng thử lại sau.'], 500);
         }
 
-        $addressData = [];
         if ($request->has('shipping_address_id')) {
-            $shippingAddress = ShippingAddress::find($request->shipping_address_id);
-            if ($shippingAddress) {
-                $addressData = [
-                    'name' => $user->name,
-                    'phone' => $shippingAddress->phone_number,
-                    'email' => $user->email,
-                    'address' => $shippingAddress->address_line,
-                    'city' => $shippingAddress->city,
-                    'district' => $shippingAddress->district,
-                    'ward' => $shippingAddress->ward,
-                ];
-            }
+            $shippingAddressId = $request->shipping_address_id;
         } else {
-            $addressData = $request->only(['name', 'phone', 'email', 'address', 'city', 'district', 'ward']);
+            $shippingAddress = ShippingAddress::create([
+                'user_id' => $user->id,
+                'address_line' => $request->address,
+                'city' => $request->city,
+                'district' => $request->district,
+                'ward' => $request->ward,
+                'phone_number' => $request->phone,
+                'is_default' => false
+            ]);
+
+            $shippingAddressId = $shippingAddress->id;
         }
 
         if (strtolower($request->payment_method) === 'paypal') {
@@ -99,8 +92,8 @@ class CheckoutController extends Controller
             $response = $provider->createOrder([
                 "intent" => "CAPTURE",
                 "application_context" => [
-                    "return_url" => "http://127.0.0.1:8000/api/client/checkout/success",
-                    "cancel_url" => "http://127.0.0.1:8000/api/client/checkout/cancel"
+                    "return_url" => "http://localhost:5173/payment-result?shipping_address_id={$shippingAddressId}",
+                    "cancel_url" => "http://localhost:5173/cancel"
                 ],
                 "purchase_units" => [
                     [
@@ -121,99 +114,111 @@ class CheckoutController extends Controller
                     }
                 }
             } else {
-                $errorDetails = isset($response['details']) ? json_encode($response['details']) : 'Unknown error';
                 Log::error('PayPal order creation failed:', ['response' => $response]);
-                return response()->json(['error' => 'Thanh toán PayPal không thành công.', 'details' => $errorDetails], 500);
+                return response()->json(['error' => 'Thanh toán PayPal không thành công.'], 500);
             }
         }
 
         return response()->json(['error' => 'Phương thức thanh toán không hợp lệ.'], 400);
     }
 
+
+
     public function success(Request $request)
-{
-    $provider = new PayPalClient;
-    $provider->setApiCredentials(config('paypal'));
+    {
+        $provider = new PayPalClient;
+        $provider->setApiCredentials(config('paypal'));
 
-    $accessToken = $provider->getAccessToken();
-    if (!$accessToken) {
-        Log::error('PayPal authentication failed');
-        return response()->json(['error' => 'Không thể xác thực với PayPal.'], 500);
-    }
+        $token = $request->input('token');
+        $payerID = $request->input('PayerID');
+        $shippingAddressId = $request->input('shipping_address_id');
 
-    $response = $provider->capturePaymentOrder($request->token);
+        Log::info("Received payment success request", [
+            'token' => $token,
+            'PayerID' => $payerID,
+            'shipping_address_id' => $shippingAddressId
+        ]);
 
-    // Log chi tiết phản hồi từ PayPal
-    Log::info('PayPal Capture Payment Response:', ['response' => $response]);
-
-    // Kiểm tra phản hồi từ PayPal
-    if (isset($response['status']) && $response['status'] === 'COMPLETED') {
-        $user = Auth::user();
-        $cart = CartItem::where('user_id', $user->id)->get();
-
-        if ($cart->isEmpty()) {
-            Log::error('Giỏ hàng trống sau khi thanh toán thành công.');
-            return response()->json(['error' => 'Giỏ hàng trống sau khi thanh toán thành công.'], 500);
+        if (!$token || !$payerID) {
+            Log::error("Missing token or PayerID in success request.");
+            return response()->json(['error' => 'Thiếu thông tin thanh toán.'], 400);
         }
 
-        $totalAmountVnd = $cart->sum(function ($item) {
-            $price = $item->productVariationValue && $item->productVariationValue->price
-                ? $item->productVariationValue->price
-                : $item->product->price;
-
-            if ($price === null) {
-                Log::error("Sản phẩm hoặc biến thể không có giá (Product ID: {$item->product_id}, Variation ID: {$item->product_variation_value_id})");
-                return 0;
-            }
-
-            return $price * $item->quantity;
-        });
+        $accessToken = $provider->getAccessToken();
+        if (!$accessToken) {
+            Log::error('PayPal authentication failed: Access token is null.');
+            return response()->json(['error' => 'Không thể xác thực với PayPal.'], 500);
+        }
 
         try {
-            $totalAmountUsd = $this->exchangeRateService->convertVndToUsd($totalAmountVnd);
+            $response = $provider->capturePaymentOrder($token);
+            Log::info('PayPal Capture Payment Response:', ['response' => $response]);
         } catch (\Exception $e) {
-            Log::error('Currency conversion error: ' . $e->getMessage());
-            return response()->json(['error' => 'Không thể chuyển đổi tiền tệ. Vui lòng thử lại sau.'], 500);
+            Log::error("Error capturing payment order: " . $e->getMessage());
+            return response()->json(['error' => 'Lỗi trong quá trình xác nhận thanh toán.'], 500);
         }
 
-        $orderCode = 'MD' . rand(1000, 9999) . 'H' . time();
-        $bill = new Bill();
-        $bill->user_id = $user->id;
-        $bill->code_orders = $orderCode;
-        $bill->email_receiver = $user->email;
-        $bill->name = $request->name ?? $user->name;
-        $bill->phone = $request->phone;
-        $bill->address = $request->address;
-        $bill->city = $request->city;
-        $bill->district = $request->district;
-        $bill->ward = $request->ward;
-        $bill->payment_type = "PayPal";
-        $bill->subtotal = $totalAmountVnd;
-        $bill->total = $totalAmountVnd;
-        $bill->status_bill = "COMPLETED";
-        $bill->save();
+        if (isset($response['status']) && $response['status'] === 'COMPLETED') {
+            $user = Auth::user();
+            $cart = CartItem::where('user_id', $user->id)->get();
 
-        foreach ($cart as $item) {
-            $billDetail = new BillDetail();
-            $billDetail->bill_id = $bill->id;
-            $billDetail->product_id = $item->product_id;
-            $billDetail->don_gia = $item->productVariationValue->price ?? $item->product->price;
-            $billDetail->quantity = $item->quantity;
-            $billDetail->total_amount = $billDetail->don_gia * $item->quantity;
-            $billDetail->product_variation_value_id = $item->product_variation_value_id;
-            $billDetail->save();
+            if ($cart->isEmpty()) {
+                Log::error('Giỏ hàng trống sau khi thanh toán thành công.');
+                return response()->json(['error' => 'Giỏ hàng trống sau khi thanh toán.'], 500);
+            }
+
+            $totalAmountVnd = $cart->sum(function ($item) {
+                $price = $item->productVariationValue && $item->productVariationValue->price
+                    ? $item->productVariationValue->price
+                    : $item->product->price;
+
+                return $price * $item->quantity;
+            });
+
+            $orderCode = 'MD' . rand(1000, 9999) . 'H' . time();
+            $bill = new Bill();
+            $bill->user_id = $user->id;
+            $bill->code_orders = $orderCode;
+            $bill->email_receiver = $user->email;
+            $bill->payment_type = Bill::PAYMENT_TYPE_ONLINE;
+            $bill->subtotal = $totalAmountVnd;
+            $bill->total = $totalAmountVnd;
+            $bill->status_bill = "COMPLETED";
+
+            if ($shippingAddressId) {
+                $bill->shipping_address_id = $shippingAddressId;
+            }
+
+            $bill->save();
+
+            foreach ($cart as $item) {
+                $billDetail = new BillDetail();
+                $billDetail->bill_id = $bill->id;
+                $billDetail->product_id = $item->product_id;
+                $billDetail->don_gia = $item->productVariationValue->price ?? $item->product->price;
+                $billDetail->quantity = $item->quantity;
+                $billDetail->total_amount = $billDetail->don_gia * $item->quantity;
+                $billDetail->product_variation_value_id = $item->product_variation_value_id;
+                $billDetail->save();
+            }
+
+            CartItem::where('user_id', $user->id)->delete();
+
+            return response()->json(['message' => 'Thanh toán thành công và đơn hàng đã được tạo.', 'bill_id' => $bill->id]);
+        } else {
+            $errorDetails = isset($response['details']) ? json_encode($response['details']) : 'Unknown error';
+            Log::error('PayPal payment capture failed', ['response' => $response, 'errorDetails' => $errorDetails]);
+            return response()->json(['error' => 'Thanh toán thất bại.', 'details' => $errorDetails], 500);
         }
-
-        CartItem::where('user_id', $user->id)->delete();
-
-        return response()->json(['message' => 'Payment successful and order has been placed.', 'order_id' => $bill->id]);
-    } else {
-        // Trả về chi tiết lỗi nếu thanh toán không hoàn thành
-        $errorDetails = isset($response['details']) ? $response['details'] : 'Unknown error';
-        Log::error('PayPal payment capture failed', ['response' => $response]);
-        return response()->json(['error' => 'Payment failed.', 'details' => $errorDetails], 500);
     }
-}
 
 
+
+
+    public function cancel(Request $request)
+    {
+        Log::info('User canceled the payment process.', ['request' => $request->all()]);
+
+        return response()->json(['message' => 'Bạn đã hủy bỏ thanh toán. Giỏ hàng vẫn còn nguyên.']);
+    }
 }

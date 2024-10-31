@@ -2,7 +2,6 @@ import { Category, Product } from '@/common/types/promotion';
 import { createPromotion, fetchCategories, fetchProductsByCategory } from '@/services/promotions';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { Button, DatePicker, Form, Input, InputNumber, Radio, Select, Switch, message } from 'antd';
-import moment from 'moment';
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
@@ -55,8 +54,8 @@ const AddPromotion: React.FC = () => {
     const onFinish = (values: any) => {
         addPromotion({
             ...values,
-            start_date: moment(values.start_date).format('YYYY-MM-DD'),
-            end_date: moment(values.end_date).format('YYYY-MM-DD'),
+            start_date: values.start_date.format('YYYY-MM-DD'),
+            end_date: values.end_date.format('YYYY-MM-DD'),
             is_active: values.is_active || false,
         });
     };
