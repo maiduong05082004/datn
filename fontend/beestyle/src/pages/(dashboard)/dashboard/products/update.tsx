@@ -5,19 +5,8 @@ import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import axios from 'axios';
-import {
-  Form,
-  Input,
-  Button,
-  Checkbox,
-  InputNumber,
-  Upload,
-  DatePicker,
-  Spin,
-  Select,
-  Table,
-} from 'antd';
-import { PlusOutlined, UploadOutlined } from '@ant-design/icons';
+import { Form, Input, Button, Checkbox, InputNumber, Upload, DatePicker, Spin, Select, Table, Modal } from 'antd';
+import { DeleteOutlined, PlusOutlined, UploadOutlined } from '@ant-design/icons';
 import { useParams } from 'react-router-dom';
 import moment from 'moment';
 
@@ -35,6 +24,8 @@ const UpdateProduct: React.FC = () => {
   const { id } = useParams();
   const [productData, setProductData] = useState<any>(null);
   const [selectedGroup, setSelectedGroup] = useState<any>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [deletingImage, setDeletingImage] = useState<{ [key: string]: boolean }>({});
 
   const { data: variantgroup, isLoading: isLoadingVariantGroup } = useQuery({
     queryKey: ['variantgroup'],
@@ -60,6 +51,52 @@ const UpdateProduct: React.FC = () => {
       return response?.data;
     },
   });
+
+
+  const deleteImageMutation = useMutation({
+    mutationFn: async (fileUrl: string) => {
+      // Convert the URL to Base64
+      const base64FileUrl = btoa(fileUrl); // Encode the entire URL, not just the filename
+      const response = await axios.delete(`http://127.0.0.1:8000/api/admins/images/variation/${base64FileUrl}`, {
+        headers: { 'Content-Type': 'application/json' },
+      });
+      return response.data;
+    },
+    onSuccess: () => {
+      toast.success('Image deleted successfully!');
+    },
+    onError: (error: any) => {
+      toast.error(`Failed to delete image: ${error.message}`);
+    },
+  });
+
+  const handleDeleteImage = (imageUrl: string, variantIndex: number, field: string) => {
+    Modal.confirm({
+      title: 'Are you sure you want to delete this image?',
+      onOk: () => {
+        // Set loading only for the specific image
+        setDeletingImage((prev) => ({ ...prev, [imageUrl]: true }));
+        deleteImageMutation.mutate(imageUrl, {
+          onSuccess: () => {
+            const updatedVariants = [...variants];
+            updatedVariants[variantIndex][field] = updatedVariants[variantIndex][field].filter(
+              (img: any) => img.url !== imageUrl
+            );
+            setVariants(updatedVariants);
+            // Stop loading only for the specific image
+            setDeletingImage((prev) => ({ ...prev, [imageUrl]: false }));
+            toast.success('Image deleted successfully!');
+          },
+          onError: (error: any) => {
+            // Stop loading only for the specific image
+            setDeletingImage((prev) => ({ ...prev, [imageUrl]: false }));
+            toast.error(`Failed to delete image: ${error.message}`);
+          },
+        });
+      },
+    });
+  };
+
 
   useEffect(() => {
     if (UpdateVariant && variantgroup) {
@@ -170,19 +207,6 @@ const UpdateProduct: React.FC = () => {
     setStock(value);
     form.setFieldsValue({ stock: value });
   };
-  const handleResetImage = (index: number, field: string) => {
-    const updatedVariants = [...variants];
-
-    if (field === 'colorImage') {
-      updatedVariants[index].colorImage = [];
-    } else if (field === 'albumImages') {
-      updatedVariants[index].albumImages = [];
-    }
-
-    setVariants(updatedVariants);
-  };
-
-
 
   const handleAttributeValueChange = (attributeId: number, selectedValues: any[]) => {
     const updatedAttributes = attributes.map((attr) => {
@@ -213,34 +237,17 @@ const UpdateProduct: React.FC = () => {
   };
 
   const generateVariants = () => {
-    if (!attributes || attributes.length === 0) {
-      toast.error('Chưa có thuộc tính để tạo biến thể.');
-      return;
-    }
-
     const colorAttribute = attributes.find((attr) => attr.attribute_type === 0);
     const sizeAttribute = attributes.find((attr) => attr.attribute_type === 1);
 
-    // Kiểm tra nếu thuộc tính không tồn tại hoặc không có selectedValues
     if (!colorAttribute || !sizeAttribute) {
       toast.error('Thiếu thuộc tính Màu Sắc hoặc Kích Thước');
-      return;
-    }
-
-    if (!colorAttribute.selectedValues || colorAttribute.selectedValues.length === 0) {
-      toast.error('Bạn chưa chọn Màu Sắc cho sản phẩm.');
-      return;
-    }
-
-    if (!sizeAttribute.selectedValues || sizeAttribute.selectedValues.length === 0) {
-      toast.error('Bạn chưa chọn Kích Thước cho sản phẩm.');
       return;
     }
 
     const selectedColors = colorAttribute.selectedValues || [];
     const selectedSizes = sizeAttribute.selectedValues || [];
 
-    // Tạo biến thể mới với màu sắc và kích thước
     const newVariants = selectedColors.map((color: any) => ({
       colorId: color.key,
       colorName: color.label,
@@ -254,36 +261,37 @@ const UpdateProduct: React.FC = () => {
       albumImages: [],
     }));
 
-    setVariants(newVariants);  // Cập nhật biến thể với size
+    setVariants(newVariants);
   };
 
-
-
   // Kiểm tra response khi upload ảnh
-  const handleUploadChangeForVariant = (index : any, key : any, info : any) => {
+  const handleUploadChangeForVariant = (index: any, key: any, info: any) => {
     const updatedVariants = [...variants];
     const variant = updatedVariants[index];
-  
+
     if (variant) {
-      variant[key] = info.fileList.map((file : any) => {
+      variant[key] = info.fileList.map((file: any) => {
         if (file.response && file.response.url) {
+          // Use the URL from the server response if available
           return {
             ...file,
             url: file.response.url,
+            status: 'done',
+          };
+        } else if (file.originFileObj) {
+          // Generate a local preview URL for the image
+          return {
+            ...file,
+            url: URL.createObjectURL(file.originFileObj),
             status: 'done',
           };
         }
         return file;
       });
     }
-  
+
     setVariants(updatedVariants);
-  
-    console.log("Upload info:", info); // Kiểm tra để đảm bảo URL mới được trả về
   };
-  
-
-
 
 
   const columns = [
@@ -327,10 +335,9 @@ const UpdateProduct: React.FC = () => {
           <Upload
             listType="picture-card"
             fileList={record.colorImage || []}
-            onChange={(info) => handleUploadChangeForVariant(index, 'colorImage', info)}
-            action="http://localhost:8000/api/admins/upload" // URL chính xác của backend
+            action="http://localhost:8000/api/admins/upload"
             name="file"
-            className="upload-inline"
+            onChange={(info) => handleUploadChangeForVariant(index, 'colorImage', info)}
           >
             {record.colorImage?.length < 1 && (
               <div className="w-20 h-20 border border-dashed border-gray-300 rounded-md flex items-center justify-center cursor-pointer">
@@ -338,16 +345,17 @@ const UpdateProduct: React.FC = () => {
               </div>
             )}
           </Upload>
-
-
-          <Button
-            type="dashed"
-            danger
-            className="mt-2"
-            onClick={() => handleResetImage(index, 'colorImage')}
-          >
-            Reset Ảnh Màu
-          </Button>
+          {record.colorImage?.length > 0 && (
+            <Button
+              icon={<DeleteOutlined />}
+              type="primary"
+              danger
+              loading={deletingImage[record.colorImage[0].url] || false} // Only show loading state for the specific image
+              onClick={() => handleDeleteImage(record.colorImage[0].url, index, 'colorImage')}
+            >
+              Delete
+            </Button>
+          )}
         </div>
       ),
     },
@@ -356,33 +364,41 @@ const UpdateProduct: React.FC = () => {
       dataIndex: 'albumImages',
       key: 'albumImages',
       render: (_: any, record: any, index: any) => (
-        <div className="flex flex-col items-center gap-3 p-4 border border-gray-200 rounded-md shadow-sm">
-          <Upload
-            listType="picture-card"
-            multiple
-            fileList={record.albumImages || []}
-            onChange={(info) => handleUploadChangeForVariant(index, 'albumImages', info)}
-            action="/path_to_upload_endpoint"
-            name="file"
-            className="upload-inline"
-          >
-            {record.albumImages?.length < 4 && (
+        <div className="flex flex-wrap gap-3">
+          {record.albumImages?.map((image: any, imageIndex: number) => (
+            <div key={image.uid || imageIndex} className="flex flex-col items-center p-4 border border-gray-200 rounded-md shadow-sm">
+              <img src={image.url} alt={image.name} style={{ width: 80, height: 80 }} />
+              <Button
+                icon={<DeleteOutlined />}
+                type="primary"
+                danger
+                size="small"
+                className="mt-2"
+                loading={deletingImage[image.url] || false} // Only show loading state for the specific image
+                onClick={() => handleDeleteImage(image.url, index, 'albumImages')}
+              >
+                Delete
+              </Button>
+            </div>
+          ))}
+          {record.albumImages?.length < 4 && (
+            <Upload
+              listType="picture-card"
+              onChange={(info) => handleUploadChangeForVariant(index, 'albumImages', info)}
+              action="http://localhost:8000/api/admins/upload"
+              name="file"
+              className="upload-inline"
+            >
               <div className="w-20 h-20 border border-dashed border-gray-300 rounded-md flex items-center justify-center cursor-pointer">
                 <UploadOutlined className="text-green-500 text-xl" />
               </div>
-            )}
-          </Upload>
-          <Button
-            type="dashed"
-            danger
-            className="mt-2"
-            onClick={() => handleResetImage(index, 'albumImages')}
-          >
-            Reset Album Ảnh
-          </Button>
+            </Upload>
+          )}
         </div>
       ),
-    }
+    },
+
+
 
   ];
 
@@ -427,7 +443,7 @@ const UpdateProduct: React.FC = () => {
       input_day: formattedDate,
       delete_images: values.delete_images || [], // Danh sách ID ảnh cần xóa
     };
-    
+
 
     // Gửi yêu cầu PUT với dữ liệu JSON
     updateProduct(formData);
@@ -659,10 +675,7 @@ const UpdateProduct: React.FC = () => {
                   onChange={({ fileList }) => setAlbumList(fileList.map((file) => file.name))}
                   beforeUpload={() => false}
                 >
-                  <Button
-                    icon={<UploadOutlined />}
-                    className="bg-green-500 hover:bg-green-600 text-white"
-                  >
+                  <Button icon={<UploadOutlined />} className="bg-green-500 hover:bg-green-600 text-white">
                     Tải lên album ảnh
                   </Button>
                 </Upload>

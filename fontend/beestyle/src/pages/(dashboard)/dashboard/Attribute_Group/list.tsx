@@ -68,7 +68,7 @@ const ListAttributeGroup = (props: Props) => {
                         type="default"
                         icon={<EditOutlined />}
                         className="bg-yellow-400 text-white hover:bg-yellow-500 rounded-lg px-4 py-2 shadow-md"
-                        onClick={() => navigate(`/admin/products/update/${attribute_group.id}`)}
+                        onClick={() => navigate(`/admin/attribute_group/update/${attribute_group.id}`)}
                     />
                     <Popconfirm
                         title="Xóa nhóm thuộc tính"
