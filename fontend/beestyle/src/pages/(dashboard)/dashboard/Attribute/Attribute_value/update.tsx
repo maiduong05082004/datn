@@ -2,49 +2,60 @@ import React from 'react';
 import axios from 'axios';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Form, Input, Button, Row, Col, Typography, Card, message, Spin, Select } from 'antd';
+import { Form, Input, Button, Select, Row, Col, Typography, Card, message, Spin } from 'antd';
 import { MinusCircleOutlined, PlusOutlined } from '@ant-design/icons';
 
 const { Title } = Typography;
 
-type AttributeValue = {
-    value_id?: number;
-    value: string;
-};
-
 type Attribute = {
-    attribute_id: number;
-    attribute_name: string;
+    id: number;
+    name: string;
     attribute_type: number;
-    values: AttributeValue[];
+    values: { value_id: number; value: string }[];
 };
 
 const UpdateAttributeValues: React.FC = () => {
-    const [form] = Form.useForm();
     const [messageApi, contextHolder] = message.useMessage();
+    const [form] = Form.useForm();
     const queryClient = useQueryClient();
-    const { id } = useParams();
     const navigate = useNavigate();
+    const { id } = useParams();
 
-    const { data: attributeList, isLoading, error } = useQuery({
-        queryKey: ['attributes', id],
+    // Fetch specific attribute values
+    const { data: attributevalue, isLoading, error } = useQuery({
+        queryKey: ['attributevalue', id],
         queryFn: async () => {
             const response = await axios.get(`http://127.0.0.1:8000/api/admins/attribute_values/${id}`);
+            console.log('Dữ liệu trả về từ API attributevalue:', response.data);
             return response?.data?.data;
         },
     });
+    
+    if (attributevalue) {
+        console.log('Dữ liệu attributevalue:', attributevalue);
+    } else {
+        console.log('attributevalue không tồn tại hoặc chưa lấy được');
+    }
+    
+
+    // Fetch all attributes to populate the select options
+    const { data: attributeList } = useQuery({
+        queryKey: ['attributes'],
+        queryFn: async () => {
+            const response = await axios.get('http://127.0.0.1:8000/api/admins/attribute_values');
+            return response?.data?.data;
+        },
+    })
     console.log(attributeList);
 
 
     const { mutate } = useMutation({
-        mutationFn: async (data: { attribute_id: number; values: AttributeValue[] }) => {
-            return await axios.put(`http://127.0.0.1:8000/api/admins/attribute_values/${id}`, data);
+        mutationFn: async (data: { attribute_id: number; values: string[] }) => {
+            return await axios.post('http://127.0.0.1:8000/api/admins/attribute_values', data);
         },
         onSuccess: () => {
-            messageApi.success('Cập nhật giá trị thuộc tính thành công!');
-            queryClient.invalidateQueries({
-                queryKey: ['attributes'],
-            });
+            messageApi.success('Thêm giá trị thuộc tính thành công');
+            queryClient.invalidateQueries({ queryKey: ['attributes'] });
             form.resetFields();
         },
         onError: (error: any) => {
@@ -52,13 +63,11 @@ const UpdateAttributeValues: React.FC = () => {
         },
     });
 
+    // Submit form handler
     const onFinish = (values: any) => {
         const payload = {
-            attribute_id: Number(id),
-            values: values.values.map((item: { value_id?: number; value: string }) => ({
-                value_id: item.value_id,
-                value: item.value.trim(),
-            })),
+            attribute_id: values.attribute,
+            values: values.values.map((item: { value: string }) => item.value.trim()),
         };
         mutate(payload);
     };
@@ -73,23 +82,28 @@ const UpdateAttributeValues: React.FC = () => {
                 <div className="w-full max-w-7xl">
                     <Card bordered={false} className="shadow-lg rounded-xl p-8 bg-white">
                         <Title level={3} className="text-center mb-6 text-gray-700">
-                            Cập nhật giá trị thuộc tính
+                            Thêm mới giá trị thuộc tính
                         </Title>
 
                         <Form
                             form={form}
                             layout="vertical"
                             onFinish={onFinish}
+                            initialValues={attributevalue ? { ...attributevalue } : undefined}
                             className="space-y-6"
-                            initialValues={{ values: attributeList?.[0]?.values }}
                         >
                             <Form.Item
                                 label={<span className="text-gray-700">Chọn thuộc tính</span>}
-                                name="attribute_id"
-                                initialValue={attributeList?.[0]?.attribute_id}
+                                name="attribute"
+                                rules={[{ required: true, message: 'Vui lòng chọn thuộc tính!' }]}
                             >
-                                <Select size="large" disabled>
-                                    {attributeList?.map((attribute: Attribute) => (
+                                <Select
+                                    placeholder="Chọn một thuộc tính"
+                                    size="large"
+                                    allowClear
+                                    className="rounded-md"
+                                >
+                                    {attributeList?.map((attribute: any) => (
                                         <Select.Option key={attribute.attribute_id} value={attribute.attribute_id}>
                                             {attribute.attribute_name}
                                         </Select.Option>
@@ -149,10 +163,10 @@ const UpdateAttributeValues: React.FC = () => {
                                         size="large"
                                         className="bg-indigo-600 hover:bg-indigo-700 text-white rounded-md px-6"
                                     >
-                                        Cập nhật
+                                        Thêm mới
                                     </Button>
                                     <Button
-                                        onClick={() => navigate('/admin/attribute/list')}
+                                        onClick={() => navigate('/admin/listattribute_value')}
                                         size="large"
                                         className="bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-md px-6"
                                     >
@@ -167,4 +181,5 @@ const UpdateAttributeValues: React.FC = () => {
         </>
     );
 };
+
 export default UpdateAttributeValues;

@@ -41,7 +41,7 @@ import UpdateAttributeValues from "@/pages/(dashboard)/dashboard/Attribute/Attri
 import AddtributeGroup from "@/pages/(dashboard)/dashboard/Attribute_Group/add";
 import ListAttributeGroup from "@/pages/(dashboard)/dashboard/Attribute_Group/list";
 import UpdateAttributeGroup from "@/pages/(dashboard)/dashboard/Attribute_Group/update";
-import CartPage from "@/pages/(website)/cart/page";
+// import CartPage from "@/pages/(website)/cart/page";
 
 const Router = () => {
 
@@ -59,7 +59,7 @@ const Router = () => {
                     <Route path="signin" element={<PageSignin />} />
                     <Route path="signup" element={<PageSignup />} />
                     <Route path="search" element={<SearchPage isKeySearch={isKeySearch}/>} />
-                    <Route path="carts" element={<CartPage />} />
+                    {/* <Route path="carts" element={<CartPage />} /> */}
                 </Route>
 
                 {/* Admin Routes */}
@@ -98,7 +98,7 @@ const Router = () => {
                     <Route path="attribute/update/:id" element={< UpdateAttribute />} />
                     {/*giá trị attribute */}
                     <Route path="attribute_value/add" element={<AddAttributeValues />} />
-                    <Route path="attribute_value/update/:id" element={< UpdateAttributeValues />} />
+                    <Route path="attribute_value/update/:id" element={<UpdateAttributeValues />} />
                     {/* Danh Mục */}
                     <Route path="category/list" element={<ListCategories />} />
                     <Route path="category/add" element={<AddCategories />} />
