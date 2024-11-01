@@ -34,6 +34,13 @@ import ListPage from "@/pages/(website)/list/page";
 import SearchPage from "@/pages/(website)/search/page";
 import { useState } from "react";
 import CartPage from "@/pages/(website)/cart/page";
+import WishlistPage from "@/pages/(website)/account/_components/wishlist";
+import AccountPage from "@/pages/(website)/account/page";
+import ViewAccount from "@/pages/(website)/account/_components/view";
+import InfoPage from "@/pages/(website)/account/_components/info";
+import RecentlyPage from "@/pages/(website)/account/_components/recently";
+import AddressesPage from "@/pages/(website)/account/_components/addresses";
+
 const Router = () => {
 
     const [isSearch, setIsSearch] = useState<boolean>(false)
@@ -46,11 +53,18 @@ const Router = () => {
                     <Route index element={<HomePage />} />
                     <Route path="categories/:id" element={<ListPage />} />
                     <Route path="products/:id" element={<DetailPage />} />
-                    <Route path="checkout" element={<CheckOutPage />} />
+                    <Route path="checkouts" element={<CheckOutPage />} />
                     <Route path="signin" element={<PageSignin />} />
                     <Route path="signup" element={<PageSignup />} />
                     <Route path="search" element={<SearchPage isKeySearch={isKeySearch}/>} />
                     <Route path="carts" element={<CartPage />} />
+                    <Route path="account" element={<AccountPage />}>
+                        <Route index element={<ViewAccount />} />
+                        <Route path="wishlist" element={<WishlistPage />} />
+                        <Route path="info" element={<InfoPage />} />
+                        <Route path="recently" element={<RecentlyPage />} />
+                        <Route path="addresses" element={<AddressesPage />} />
+                    </Route>
                 </Route>
 
                 {/* Admin Routes */}
