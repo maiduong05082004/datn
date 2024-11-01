@@ -55,7 +55,6 @@ const UpdateAttributeGroup = () => {
     },
   });
 
-  // Handle form submission
   const handleFinish = (values: any) => {
     const attributeGroup = {
       group_name: values.group_name,
