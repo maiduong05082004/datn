@@ -7,7 +7,7 @@ import "slick-carousel/slick/slick-theme.css";
 import { useProductMutations } from '@/components/hooks/useProductMutations';
 import NavigationButton from './_components/navigationButton';
 import Slider from 'react-slick';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 
 const CartPage = () => {
@@ -23,9 +23,6 @@ const CartPage = () => {
     const [cartItem, setCartItem] = useState<any>()
     const { contextHolder, updateProductMutation, deleteProductMutation } = useProductMutations();
 
-   console.log(variationValues);
-   
-
     const token = localStorage.getItem("token")
     const { data: carts } = useQuery({
         queryKey: ['carts', token],
@@ -37,14 +34,12 @@ const CartPage = () => {
             });
         },
     })
-    console.log(carts);
 
      useEffect(() => {
         if (variationId !== variationIdDf) {
             // const data = carts?.data?.cart_items?find((item: any) => item?.stock > 0)
             // setVariant(data);
             const data = cartItem?.product?.variations?.find((item: any) => item?.id == variationId )
-            console.log(data);
             
             const value = data.variation_values.find((item: any) => item?.stock > 0)
             setVariationValues(value)
@@ -151,6 +146,15 @@ const CartPage = () => {
         } else {
             setSelectedProducts([...selectedProducts, cartItemId]);
         }
+    };
+
+    const navigate = useNavigate();
+    const handleProceedToCheckout = () => {
+        const selectedItems = carts?.data?.cart_items.filter((item: any) =>
+            selectedProducts.includes(item.cart_item_id)
+        );
+        // Bước tiếp theo là lưu trữ hoặc truyền dữ liệu này sang trang thanh toán
+        navigate("/checkouts", { state: { products: selectedItems, totalPrice } }); // Sử dụng React Router để truyền dữ liệu sang trang thanh toán
     };
 
     return (
@@ -263,7 +267,7 @@ const CartPage = () => {
                             </div>
 
                         </div>
-                        <button className='bg-black text-white text-[16px] font-[600] w-full fixed bottom-0 h-[56px] -tracking-wide lg:static lg:rounded-[0_0_8px_8px]'>
+                        <button onClick={() => handleProceedToCheckout()} className='bg-black text-white text-[16px] font-[600] w-full fixed bottom-0 h-[56px] -tracking-wide lg:static lg:rounded-[0_0_8px_8px]'>
                             THANH TOÁN
                         </button>
                     </div>
