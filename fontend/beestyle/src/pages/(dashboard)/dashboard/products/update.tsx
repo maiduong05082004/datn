@@ -9,6 +9,17 @@ import { Form, Input, Button, Checkbox, InputNumber, Upload, DatePicker, Spin, S
 import { DeleteOutlined, PlusOutlined, UploadOutlined } from '@ant-design/icons';
 import { useParams } from 'react-router-dom';
 import moment from 'moment';
+interface Size {
+  sizeId: number;
+  stock: number;
+  discount: number;
+}
+
+interface Variant {
+  colorId: number;
+  colorName: string;
+  sizes: Size[];
+}
 
 const { Option } = Select;
 
@@ -22,6 +33,7 @@ const UpdateProduct: React.FC = () => {
   const [albumList, setAlbumList] = useState<any[]>([]);
   const [showVariantForm, setShowVariantForm] = useState<boolean>(true);
   const { id } = useParams();
+  const [removedVariants, setRemovedVariants] = useState<any[]>([]);
   const [productData, setProductData] = useState<any>(null);
   const [selectedGroup, setSelectedGroup] = useState<any>(null);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -207,7 +219,18 @@ const UpdateProduct: React.FC = () => {
     setStock(value);
     form.setFieldsValue({ stock: value });
   };
-
+  // xóa biến thể
+  const handleDeleteVariant = (colorId: number) => {
+    setRemovedVariants((prev) => [...prev, colorId]);
+    setVariants((prevVariants) => {
+      const updatedVariants = prevVariants.filter((variant) => variant.colorId !== colorId);
+      console.log("Updated Variants after Deletion:", updatedVariants); // Check the updated variants here
+      return updatedVariants;
+    });
+  };
+  
+  
+  
   const handleAttributeValueChange = (attributeId: number, selectedValues: any[]) => {
     const updatedAttributes = attributes.map((attr) => {
       if (attr.id === attributeId) {
@@ -248,6 +271,13 @@ const UpdateProduct: React.FC = () => {
     const selectedColors = colorAttribute.selectedValues || [];
     const selectedSizes = sizeAttribute.selectedValues || [];
 
+    if (selectedColors.length === 0 || selectedSizes.length === 0) {
+      console.log('No colors or sizes selected');  // Debugging output
+      toast.error('Vui lòng chọn ít nhất một màu sắc và một kích thước để tạo biến thể.');
+      return;
+    }
+
+
     const newVariants = selectedColors.map((color: any) => ({
       colorId: color.key,
       colorName: color.label,
@@ -261,8 +291,31 @@ const UpdateProduct: React.FC = () => {
       albumImages: [],
     }));
 
-    setVariants(newVariants);
+    const mergedVariants = [...variants];
+
+    newVariants.forEach((newVariant: any) => {
+      const existingVariantIndex = mergedVariants.findIndex(
+        (variant) => variant.colorId === newVariant.colorId
+      );
+
+      if (existingVariantIndex > -1) {
+        const existingSizes = mergedVariants[existingVariantIndex].sizes;
+
+        // Add only new sizes to the existing variant
+        newVariant.sizes.forEach((newSize: any) => {
+          if (!existingSizes.find((size: any) => size.sizeId === newSize.sizeId)) {
+            existingSizes.push(newSize);
+          }
+        });
+      } else {
+        mergedVariants.push(newVariant); // Add entirely new variants
+      }
+    });
+
+    setVariants(mergedVariants);
   };
+
+
 
   // Kiểm tra response khi upload ảnh
   const handleUploadChangeForVariant = (index: any, key: any, info: any) => {
@@ -434,6 +487,20 @@ const UpdateProduct: React.FC = () => {
         </div>
       ),
     },
+    {
+      title: 'Hành động',
+      key: 'action',
+      render: (text: any, record: any) => (
+        <Button
+          type="primary"
+          danger
+          icon={<DeleteOutlined />}
+          onClick={() => handleDeleteVariant(record.colorId)}
+        >
+          Xóa
+        </Button>
+      ),
+    },
 
 
 
@@ -442,52 +509,52 @@ const UpdateProduct: React.FC = () => {
 
   const onFinish = (values: any) => {
     const formattedDate = values.input_day ? moment(values.input_day).format('YYYY-MM-DD') : null;
-
+  
     if (!formattedDate) {
       toast.error('Ngày nhập không hợp lệ. Vui lòng chọn một ngày!');
       return;
     }
-
-    // Kiểm tra các trường bắt buộc
+  
     if (!values.name || !values.price || !values.category_id) {
       toast.error('Vui lòng điền đầy đủ các trường bắt buộc.');
       return;
     }
-
-    // Xử lý các biến thể thành định dạng JSON theo yêu cầu
+  
+    // Prepare variations, excluding removed variants
     const variations: Record<number, Record<number, { stock: number; discount: number }>> = {};
-
-    variants.forEach((variant: { colorId: number; sizes: { sizeId: number; stock: number; discount: number }[] }) => {
-      variations[variant.colorId] = {};
-
-      variant.sizes.forEach((size: { sizeId: number; stock: number; discount: number }) => {
-        variations[variant.colorId][size.sizeId] = {
-          stock: size.stock || 0,
-          discount: size.discount || 0,
-        };
-      });
+  
+    variants.forEach((variant: Variant) => {
+      if (!removedVariants.includes(variant.colorId)) {
+        variations[variant.colorId] = {};
+        variant.sizes.forEach((size: Size) => {
+          variations[variant.colorId][size.sizeId] = {
+            stock: size.stock || 0,
+            discount: size.discount || 0,
+          };
+        });
+      }
     });
-
-
-    // Tạo object dữ liệu để gửi
+  
+    // Create formData, including removed variants explicitly if necessary
     const formData = {
       name: values.name,
       price: values.price,
-      variations: JSON.stringify(variations), // Chuyển `variations` sang chuỗi JSON
+      variations: JSON.stringify(variations),
       group_id: selectedVariantGroup,
       category_id: values.category_id,
       description: values.description || '',
       content: content || '',
       input_day: formattedDate,
-      delete_images: values.delete_images || [], // Danh sách ID ảnh cần xóa
+      delete_images: values.delete_images || [],
+      delete_variants: removedVariants, // Explicitly include removed variants if required by the API
     };
-
-
-    // Gửi yêu cầu PUT với dữ liệu JSON
+  
+    console.log('Final formData:', formData); // Debugging log
+  
     updateProduct(formData);
   };
-
-
+  
+  
 
   const handleGroupChange = (groupId: number) => {
     const group = variantgroup?.find((g: any) => g.group_id === groupId);
