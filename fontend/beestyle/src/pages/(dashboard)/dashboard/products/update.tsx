@@ -335,9 +335,26 @@ const UpdateProduct: React.FC = () => {
           <Upload
             listType="picture-card"
             fileList={record.colorImage || []}
-            action="http://localhost:8000/api/admins/upload"
-            name="file"
-            onChange={(info) => handleUploadChangeForVariant(index, 'colorImage', info)}
+            onChange={({ fileList }) => {
+              const updatedColorImage = fileList.map((file) => {
+                const fileUrl = file.url || (file.originFileObj ? URL.createObjectURL(file.originFileObj) : '');
+                return {
+                  uid: file.uid,
+                  name: file.name,
+                  status: 'done',
+                  url: fileUrl,
+                };
+              });
+              const updatedRecord = { ...record, colorImage: updatedColorImage };
+              setVariants((prev) => {
+                const updatedVariants = [...prev];
+                updatedVariants[index] = updatedRecord;
+                return updatedVariants;
+              });
+            }}
+            beforeUpload={() => false}
+            showUploadList={{ showPreviewIcon: true, showRemoveIcon: true, showDownloadIcon: false }}
+            className="upload-inline"
           >
             {record.colorImage?.length < 1 && (
               <div className="w-20 h-20 border border-dashed border-gray-300 rounded-md flex items-center justify-center cursor-pointer">
@@ -350,7 +367,7 @@ const UpdateProduct: React.FC = () => {
               icon={<DeleteOutlined />}
               type="primary"
               danger
-              loading={deletingImage[record.colorImage[0].url] || false} // Only show loading state for the specific image
+              loading={deletingImage[record.colorImage[0].url] || false} // Chỉ hiển thị trạng thái loading cho ảnh cụ thể
               onClick={() => handleDeleteImage(record.colorImage[0].url, index, 'colorImage')}
             >
               Delete
@@ -366,27 +383,47 @@ const UpdateProduct: React.FC = () => {
       render: (_: any, record: any, index: any) => (
         <div className="flex flex-wrap gap-3">
           {record.albumImages?.map((image: any, imageIndex: number) => (
-            <div key={image.uid || imageIndex} className="flex flex-col items-center p-4 border border-gray-200 rounded-md shadow-sm">
-              <img src={image.url} alt={image.name} style={{ width: 80, height: 80 }} />
-              <Button
-                icon={<DeleteOutlined />}
-                type="primary"
-                danger
-                size="small"
-                className="mt-2"
-                loading={deletingImage[image.url] || false} // Only show loading state for the specific image
-                onClick={() => handleDeleteImage(image.url, index, 'albumImages')}
-              >
-                Delete
-              </Button>
+            <div
+              key={image.uid || imageIndex}
+              className="relative flex flex-col items-center p-2 border border-gray-200 rounded-md shadow-sm"
+              style={{ width: 100, height: 100 }}
+            >
+              <img
+                src={image.url}
+                alt={image.name}
+                className="object-cover w-full h-full rounded-md"
+              />
+              <div className="absolute inset-0 flex items-center justify-center opacity-0 hover:opacity-100 bg-black bg-opacity-50 rounded-md">
+                <Button
+                  icon={<DeleteOutlined />}
+                  type="primary"
+                  danger
+                  size="small"
+                  className="m-1"
+                  loading={deletingImage[image.url] || false} // Chỉ hiển thị trạng thái loading cho ảnh cụ thể
+                  onClick={() => handleDeleteImage(image.url, index, 'albumImages')}
+                />
+              </div>
             </div>
           ))}
-          {record.albumImages?.length < 4 && (
+          {(!record.albumImages || record.albumImages.length < 3) && (
             <Upload
               listType="picture-card"
-              onChange={(info) => handleUploadChangeForVariant(index, 'albumImages', info)}
-              action="http://localhost:8000/api/admins/upload"
-              name="file"
+              multiple
+              onChange={({ fileList }) => {
+                const updatedAlbumImages = fileList.map((file) => {
+                  const fileUrl = file.url || (file.originFileObj ? URL.createObjectURL(file.originFileObj) : '');
+                  return {
+                    uid: file.uid,
+                    name: file.name,
+                    status: file.status,
+                    url: fileUrl,
+                  };
+                });
+                handleUploadChangeForVariant(index, 'albumImages', updatedAlbumImages);
+              }}
+              beforeUpload={() => false}
+              showUploadList={false}
               className="upload-inline"
             >
               <div className="w-20 h-20 border border-dashed border-gray-300 rounded-md flex items-center justify-center cursor-pointer">
@@ -397,6 +434,7 @@ const UpdateProduct: React.FC = () => {
         </div>
       ),
     },
+
 
 
 
