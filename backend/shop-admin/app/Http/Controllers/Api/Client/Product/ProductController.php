@@ -15,6 +15,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Carbon\Carbon;
+use App\Mail\OrderConfirmationMail;
+use Illuminate\Support\Facades\Mail;
 
 class ProductController extends Controller
 {
@@ -56,6 +58,9 @@ class ProductController extends Controller
 
 
 
+    
+
+
     // public function purchase(Request $request)
     // {
     //     // Xác thực dữ liệu đầu vào
@@ -65,10 +70,38 @@ class ProductController extends Controller
     //         'promotion_ids.*' => 'integer|exists:promotions,id',
     //         'note' => 'nullable|string',
     //         'payment_type' => 'required|in:' . Bill::PAYMENT_TYPE_ONLINE . ',' . Bill::PAYMENT_TYPE_COD,
-    //         'shipping_address_id' => 'required|exists:shipping_addresses,id',
     //         'cart_id' => 'required|array',
     //         'cart_id.*' => 'integer|exists:cart_items,id',
     //     ]);
+    
+    //     // Kiểm tra nếu không có `shipping_address_id`, lấy địa chỉ mặc định
+    //     if (!isset($request->shipping_address_id)) {
+    //         $defaultAddress = DB::table('shipping_addresses')
+    //             ->where('user_id', $request->user()->id)
+    //             ->where('is_default', 1)
+    //             ->first();
+    
+    //         if ($defaultAddress) {
+    //             $validatedData['shipping_address_id'] = $defaultAddress->id;
+    //         } else {
+    //             return response()->json([
+    //                 'message' => 'Vui lòng chọn địa chỉ mặc định cho đơn hàng của bạn.'
+    //             ], 400);
+    //         }
+    //     } else {
+    //         // Nếu `shipping_address_id` được gửi, kiểm tra địa chỉ có thuộc về người dùng không
+    //         $addressExists = DB::table('shipping_addresses')
+    //             ->where('id', $request->shipping_address_id)
+    //             ->where('user_id', $request->user()->id)
+    //             ->exists();
+    
+    //         if (!$addressExists) {
+    //             return response()->json([
+    //                 'message' => 'Địa chỉ giao hàng không hợp lệ.'
+    //             ], 404);
+    //         }
+    //         $validatedData['shipping_address_id'] = $request->shipping_address_id;
+    //     }
     
     //     DB::beginTransaction();
     
@@ -123,8 +156,7 @@ class ProductController extends Controller
     // }
     
 
-
-    public function purchase(Request $request)
+    public function purchase(Request $request) 
     {
         // Xác thực dữ liệu đầu vào
         $validatedData = $request->validate([
@@ -205,8 +237,17 @@ class ProductController extends Controller
             // Xóa các cart_items đã thanh toán thành công
             CartItem::whereIn('id', $validatedData['cart_id'])->delete();
     
+            // Gửi email xác nhận đơn hàng qua hàng đợi
+            $orderData = [
+                'customerName' => $request->user()->name,
+                'orderId' => $bill->code_orders,
+                'totalAmount' => $bill->total,
+            ];
+    
+            Mail::to($request->user()->email)->queue(new OrderConfirmationMail($orderData));
+    
             return response()->json([
-                'message' => 'Đặt hàng thành công',
+                'message' => 'Đặt hàng thành công và email xác nhận sẽ được gửi!',
                 'bill' => $bill
             ], 201);
         } catch (ModelNotFoundException $e) {
@@ -218,6 +259,7 @@ class ProductController extends Controller
         }
     }
     
+
 
 private function processCartItem($cartItem, $bill, &$subtotal)
 {
