@@ -7,7 +7,7 @@ import { useMutation, useQuery } from '@tanstack/react-query';
 import axios from 'axios';
 import { Form, Input, Button, Checkbox, InputNumber, Upload, DatePicker, Spin, Select, Table } from 'antd';
 import { PlusOutlined, UploadOutlined } from '@ant-design/icons';
-
+import AxiosInstance from '@/configs/axios';
 const { Option } = Select;
 
 interface VariantProduct {
@@ -103,7 +103,7 @@ const AddProduct: React.FC = () => {
   const { data: variantgroup, isLoading: isLoadingVariantGroup } = useQuery({
     queryKey: ['variantgroup'],
     queryFn: async () => {
-      const response = await axios.get('http://localhost:8000/api/admins/attribute_groups');
+      const response = await AxiosInstance.get('http://localhost:8000/api/admins/attribute_groups');
       return response?.data?.variation;
     },
   });
@@ -111,14 +111,14 @@ const AddProduct: React.FC = () => {
   const { data: categories, isLoading: isLoadingCategories } = useQuery({
     queryKey: ['categories'],
     queryFn: async () => {
-      const response = await axios.get('http://localhost:8000/api/admins/categories');
+      const response = await AxiosInstance.get('http://localhost:8000/api/admins/categories');
       return response?.data;
     },
   });
 
   const { mutate } = useMutation({
     mutationFn: async (data: VariantProduct) => {
-      const response = await axios.post('http://localhost:8000/api/admins/products', data);
+      const response = await AxiosInstance.post('http://localhost:8000/api/admins/products', data);
       return response.data;
     },
     onSuccess: () => {
@@ -227,119 +227,7 @@ const AddProduct: React.FC = () => {
     setShowVariantForm(!showVariantForm);
   };
 
-  const onFinish = (values: any) => {
-    // const formData = new FormData();
-    // const formattedDate = values.input_day ? values.input_day.format('YYYY-MM-DD') : null;
   
-    // // Logging for debugging
-    // console.log("Received form values:", values);
-    // console.log("Album list:", albumList);
-  
-    // // Handling products without variants
-    // if (!showVariantForm) {
-    //   albumList.forEach((file: any, index: number) => {
-    //     if (file.originFileObj) {
-    //       formData.append(`album_images[${index}]`, file.originFileObj);
-    //     }
-    //   });
-  
-    //   formData.append('name', values.name);
-    //   formData.append('price', values.price);
-    //   formData.append('description', values.description);
-    //   formData.append('content', content || '');
-    //   formData.append('input_day', formattedDate);
-    //   formData.append('category_id', values.category_id);
-    //   formData.append('stock', stock?.toString() || '0');
-    //   formData.append('is_collection', values.is_collection ? '1' : '0');
-    //   formData.append('is_hot', values.is_hot ? '1' : '0');
-    //   formData.append('is_new', values.is_new ? '1' : '0');
-  
-    //   console.log("FormData for simple product:", formData);
-    //   mutate(formData as any);
-    //   return;
-    // }
-  
-    // // Handling products with variants
-    // if (showVariantForm) {
-    //   console.log("Variants before processing:", variants);
-  
-    //   if (!selectedVariantGroup) {
-    //     toast.error('Please select a variant group!');
-    //     return;
-    //   }
-  
-    //   if (variants.length === 0) {
-    //     toast.error('Please create at least one variant!');
-    //     return;
-    //   }
-  
-    //   // Prepare payload for product with variants
-    //   const validVariants = variants.map((variant) => {
-    //     const validAttributes = variant.attributes.filter(
-    //       (attribute: any) => attribute.stock !== undefined && attribute.stock > 0
-    //     );
-  
-    //     if (validAttributes.length === 0) {
-    //       return null;
-    //     }
-  
-    //     return {
-    //       ...variant,
-    //       attributes: validAttributes,
-    //     };
-    //   }).filter(Boolean);
-  
-    //   if (validVariants.length === 0) {
-    //     toast.error('Please fill out information for at least one variant and attribute!');
-    //     return;
-    //   }
-  
-    //   const variationsData = validVariants.reduce((acc, variant) => {
-    //     const primaryAttributeId = variant.primaryAttributeId;
-    //     const attributeData = variant.attributes.reduce((attrAcc: any, attribute: any) => {
-    //       attrAcc[attribute.attributeId] = {
-    //         stock: attribute.stock ?? 0,
-    //         discount: attribute.discount ?? 0,
-    //       };
-    //       return attrAcc;
-    //     }, {});
-  
-    //     if (Object.keys(attributeData).length > 0) {
-    //       acc[primaryAttributeId] = attributeData;
-    //     }
-    //     return acc;
-    //   }, {});
-  
-    //   // Add variant images to formData
-    //   validVariants.forEach((variant: any) => {
-    //     const primaryAttributeId = variant.primaryAttributeId;
-    //     if (variant.primaryImage?.[0]?.originFileObj) {
-    //       formData.append(`primary_image_${primaryAttributeId}`, variant.primaryImage[0].originFileObj);
-    //     }
-    //     variant.albumImages?.forEach((file: any, index: number) => {
-    //       if (file.originFileObj) {
-    //         formData.append(`album_images_${primaryAttributeId}[${index}]`, file.originFileObj);
-    //       }
-    //     });
-    //   });
-  
-    //   // Add other fields to formData
-    //   formData.append('name', values.name);
-    //   formData.append('price', values.price);
-    //   formData.append('description', values.description);
-    //   formData.append('content', content || '');
-    //   formData.append('input_day', formattedDate);
-    //   formData.append('category_id', values.category_id);
-    //   formData.append('group_id', selectedVariantGroup?.toString() || '');
-    //   formData.append('variations', JSON.stringify(variationsData));
-    //   formData.append('is_collection', values.is_collection ? '1' : '0');
-    //   formData.append('is_hot', values.is_hot ? '1' : '0');
-    //   formData.append('is_new', values.is_new ? '1' : '0');
-  
-    //   console.log("FormData for product with variants:", formData);
-    //   mutate(formData as any);
-    // }
-  };
   
   
   
@@ -405,13 +293,18 @@ const AddProduct: React.FC = () => {
             name="category_id"
             rules={[{ required: true, message: "Danh mục sản phẩm bắt buộc phải chọn" }]}
           >
-            <Select placeholder="Chọn danh mục">
-              {categories?.map((category: { id: number; name: string }) => (
-                <Option key={category.id} value={category.id}>
-                  {category.name}
-                </Option>
+            <select id="category" className="border border-gray-300 rounded-md p-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-400 font-normal">
+              <option value="" className="text-gray-500">--Chọn danh mục--</option>
+              {categories?.map((category: any) => (
+                <optgroup key={category.id} label={category.name} className="text-gray-600 font-medium">
+                  {category.children_recursive?.map((child: any) => (
+                    <option key={child.id} value={child.id} className="text-gray-700 font-normal">
+                      {child.name}
+                    </option>
+                  ))}
+                </optgroup>
               ))}
-            </Select>
+            </select>
           </Form.Item>
 
           <div className='flex gap-5'>
