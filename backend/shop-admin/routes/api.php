@@ -141,6 +141,12 @@ Route::prefix('admins')
              Route::get('/shipped', [OrderController::class, 'shippedOrders'])->name('orders.shipped');
              Route::get('/delivered', [OrderController::class, 'deliveredOrders'])->name('orders.delivered');
              Route::get('/canceled', [OrderController::class, 'canceledOrders'])->name('orders.canceled');
+             Route::post('/search_order', [OrderController::class, 'searchOrder'])->name('orders.searchorder');
+             Route::post('/search-pending', [OrderController::class, 'searchPendingOrder'])->name('orders.searchpending');
+             Route::post('/search-processed', [OrderController::class, 'searchProcessedOrder'])->name('orders.searchprocessed');
+             Route::post('/search-shipped', [OrderController::class, 'searchShippedOrder'])->name('orders.searchshipped');
+             Route::post('/search-delivered', [OrderController::class, 'searchDeliveredOrder'])->name('orders.searchdelivered');
+             Route::post('/search-canceled', [OrderController::class, 'searchCanceledOrder'])->name('orders.searchcanceled');
 
 
             });
