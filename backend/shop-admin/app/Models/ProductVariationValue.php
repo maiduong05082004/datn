@@ -30,6 +30,11 @@ class ProductVariationValue extends Model
         return $this->belongsTo(ProductVariation::class, 'product_variation_id');
     }
 
+    public function billDetail()
+    {
+        return $this->hasMany(BillDetail::class, 'bill_detail_id');
+    }
+
     // Định nghĩa quan hệ với bảng AttributeValue
     public function attributeValue()
     {

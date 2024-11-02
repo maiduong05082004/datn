@@ -46,7 +46,7 @@ class ProductController extends Controller
     public function store(ProductRequest $request)
     {
         DB::beginTransaction();
-    
+
         try {
             // Tạo slug cho sản phẩm
             $slug = $this->generateSeoFriendlySlug($request->name);
@@ -60,49 +60,49 @@ class ProductController extends Controller
                 'category_id' => $request->category_id,
                 'is_collection' => $request->is_collection ? 1 : 0,
                 'is_hot' => $request->is_hot ? 1 : 0,
-                'is_new' => $request->is_new ? 1 : 0,         
+                'is_new' => $request->is_new ? 1 : 0,
             ]);
-    
+
 
             $hasVariations = $request->has('variations') && !empty($request->variations);
             $variations = json_decode($request->input('variations'), true);
             if (!$hasVariations || !is_array($variations)) {
                 // Cập nhật tồn kho
                 $product->update(['stock' => $request->stock]);
-    
+
                 // Lưu ảnh sản phẩm
                 $this->saveImages($product, $request);
             }
-    
+
 
             if ($hasVariations && is_array($variations)) {
-                $totalProductStock = 0; 
-    
+                $totalProductStock = 0;
+
                 foreach ($variations as $attributeValueId => $sizes) {
 
                     if (!$this->isValidAttributeForGroup($request->group_id, $attributeValueId)) {
                         throw new \Exception("Thuộc tính không hợp lệ cho nhóm đã chọn.");
                     }
-    
+
 
                     $productVariation = ProductVariation::create([
                         'product_id' => $product->id,
                         'group_id' => $request->group_id,
                         'attribute_value_id' => $attributeValueId,
                     ]);
-    
+
 
                     $this->saveImages($productVariation, $request, true, $attributeValueId);
-    
+
 
                     $totalVariationStock = 0;
-    
+
                     // Lưu các size (kích thước) của từng biến thể
                     foreach ($sizes as $sizeId => $details) {
                         if (!empty($details['stock']) && isset($details['discount'])) {
                             $sku = $this->generateVariationSku();
                             $calculatedPrice = $product->price - ($product->price * ($details['discount'] / 100));
-    
+
                             ProductVariationValue::create([
                                 'product_variation_id' => $productVariation->id,
                                 'attribute_value_id' => $sizeId,
@@ -120,9 +120,9 @@ class ProductController extends Controller
                 }
                 $product->update(['stock' => $totalProductStock]);
             }
-    
+
             DB::commit();
-    
+
             return response()->json([
                 'success' => true,
                 'message' => 'Product created successfully',
@@ -136,15 +136,15 @@ class ProductController extends Controller
             ], 500);
         }
     }
-    
 
-    
-    
+
+
+
     private function saveImages($model, $request, $isVariation = false, $attributeValueId = null)
     {
         if ($isVariation) {
             $modelType = 'product_variation_id';
-    
+
             // Xử lý ảnh variant (màu sắc)
             $colorImageInput = "color_image_$attributeValueId";
             if ($request->hasFile($colorImageInput)) {
@@ -158,23 +158,23 @@ class ProductController extends Controller
             } elseif (isset($request[$colorImageInput])) {
                 $colorImagePath = $request[$colorImageInput];
             }
-    
+
             if (isset($colorImagePath)) {
                 $existingVariant = ProductVariationImage::where($modelType, $model->id)
                     ->where('image_type', 'variant')
                     ->first();
-    
+
                 if ($existingVariant) {
                     throw new \Exception('Biến thể này đã có ảnh variant. Không thể thêm thêm ảnh variant.');
                 }
-    
+
                 ProductVariationImage::create([
                     $modelType => $model->id,
                     'image_path' => $colorImagePath,
                     'image_type' => 'variant',
                 ]);
             }
-    
+
             // Lưu album hình ảnh cho biến thể
             $albumInput = "album_images_$attributeValueId";
             if ($request->hasFile($albumInput)) {
@@ -185,7 +185,7 @@ class ProductController extends Controller
                         'public_id' => 'album_image_' . uniqid()
                     ]);
                     $albumPath = $cloudinaryResponse->getSecurePath();
-    
+
                     ProductVariationImage::create([
                         $modelType => $model->id,
                         'image_path' => $albumPath,
@@ -203,7 +203,7 @@ class ProductController extends Controller
             }
         } else {
             $modelType = 'product_id';
-    
+
             // Lưu album hình ảnh cho sản phẩm
             $albumInput = 'album_images';
             if ($request->hasFile($albumInput)) {
@@ -214,7 +214,7 @@ class ProductController extends Controller
                         'public_id' => 'album_image_' . uniqid()
                     ]);
                     $albumPath = $cloudinaryResponse->getSecurePath();
-    
+
                     ProductImage::create([
                         $modelType => $model->id,
                         'image_path' => $albumPath,
@@ -232,7 +232,7 @@ class ProductController extends Controller
             }
         }
     }
-    
+
 
     private function isValidAttributeForGroup($groupId, $attributeValueId)
     {
@@ -273,181 +273,180 @@ class ProductController extends Controller
 
 
 
-public function update(UpdateProductRequest $request, $id)
-{
-    DB::beginTransaction();
+    public function update(UpdateProductRequest $request, $id)
+    {
+        DB::beginTransaction();
 
-    try {
-        $product = Product::findOrFail($id);
+        try {
+            $product = Product::findOrFail($id);
 
-        // Cập nhật sản phẩm
-        $product->update([
-            'name' => $request->name,
-            'slug' => $request->slug ?? $product->slug,
-            'price' => $request->price,
-            'description' => $request->description,
-            'content' => $request->content,
-            'input_day' => $request->input_day,
-            'category_id' => $request->category_id,
-            'is_collection' => $request->is_collection ? 1 : 0,
-            'is_hot' => $request->is_hot ? 1 : 0,
-            'is_new' => $request->is_new ? 1 : 0,
-        ]);
+            $product->update([
+                'name' => $request->name,
+                'slug' => $request->slug ?? $product->slug,
+                'price' => $request->price,
+                'description' => $request->description,
+                'content' => $request->content,
+                'input_day' => $request->input_day,
+                'category_id' => $request->category_id,
+                'is_collection' => $request->is_collection ? 1 : 0,
+                'is_hot' => $request->is_hot ? 1 : 0,
+                'is_new' => $request->is_new ? 1 : 0,
+            ]);
 
-        // Xử lý xóa ảnh nếu có yêu cầu
-        if ($request->has('delete_images')) {
-            $this->deleteSelectedImages($request->input('delete_images'), false); // false vì đây là ảnh sản phẩm
-        }
-
-        // Cập nhật hình ảnh sản phẩm
-        $this->saveImagesUpdate($product, $request); // Gọi hàm cập nhật hình ảnh
-
-        // Giải mã JSON phần `variations` để chuyển từ chuỗi JSON thành mảng
-        $variations = json_decode($request->input('variations'), true);
-
-        // Xử lý cập nhật các biến thể
-        if (is_array($variations)) {
-            $totalProductStock = 0;
-
-            foreach ($variations as $attributeValueId => $sizes) {
-                // Tạo hoặc cập nhật biến thể
-                $productVariation = ProductVariation::updateOrCreate(
-                    ['product_id' => $product->id, 'attribute_value_id' => $attributeValueId],
-                    ['group_id' => $request->group_id]
-                );
-
-                // Xử lý xóa ảnh của biến thể nếu có yêu cầu
-                if ($request->has('delete_images_variation')) {
-                    $this->deleteSelectedImages($request->input('delete_images_variation'), true); // true vì đây là biến thể
-                }
-
-                // Cập nhật hình ảnh biến thể
-                $this->saveImagesUpdate($productVariation, $request, true, $attributeValueId);
-
-                // Cập nhật size và tồn kho
-                $totalVariationStock = 0;
-                foreach ($sizes as $sizeId => $details) {
-                    if (!empty($details['stock']) && isset($details['discount'])) {
-                        ProductVariationValue::updateOrCreate(
-                            ['product_variation_id' => $productVariation->id, 'attribute_value_id' => $sizeId],
-                            [
-                                'sku' => $this->generateVariationSku(),
-                                'stock' => $details['stock'],
-                                'price' => $product->price - ($product->price * ($details['discount'] / 100)),
-                                'discount' => $details['discount'] ?? null
-                            ]
-                        );
-
-                        $totalVariationStock += $details['stock'];
-                    }
-                }
-
-                $productVariation->update(['stock' => $totalVariationStock]);
-                $totalProductStock += $totalVariationStock;
+            // Xử lý xóa ảnh nếu có yêu cầu
+            if ($request->has('delete_images')) {
+                $this->deleteSelectedImages($request->input('delete_images'), false); // false vì đây là ảnh sản phẩm
             }
 
-            // Cập nhật tổng tồn kho sản phẩm
-            $product->update(['stock' => $totalProductStock]);
+            // Cập nhật hình ảnh sản phẩm
+            $this->saveImagesUpdate($product, $request); // Gọi hàm cập nhật hình ảnh
+
+            // Giải mã JSON phần `variations` để chuyển từ chuỗi JSON thành mảng
+            $variations = json_decode($request->input('variations'), true);
+
+            // Xử lý cập nhật các biến thể
+            if (is_array($variations)) {
+                $totalProductStock = 0;
+
+                foreach ($variations as $attributeValueId => $sizes) {
+                    // Tạo hoặc cập nhật biến thể
+                    $productVariation = ProductVariation::updateOrCreate(
+                        ['product_id' => $product->id, 'attribute_value_id' => $attributeValueId],
+                        ['group_id' => $request->group_id]
+                    );
+
+                    // Xử lý xóa ảnh của biến thể nếu có yêu cầu
+                    if ($request->has('delete_images_variation')) {
+                        $this->deleteSelectedImages($request->input('delete_images_variation'), true); // true vì đây là biến thể
+                    }
+
+                    // Cập nhật hình ảnh biến thể
+                    $this->saveImagesUpdate($productVariation, $request, true, $attributeValueId);
+
+                    // Cập nhật size và tồn kho
+                    $totalVariationStock = 0;
+                    foreach ($sizes as $sizeId => $details) {
+                        if (!empty($details['stock']) && isset($details['discount'])) {
+                            ProductVariationValue::updateOrCreate(
+                                ['product_variation_id' => $productVariation->id, 'attribute_value_id' => $sizeId],
+                                [
+                                    'sku' => $this->generateVariationSku(),
+                                    'stock' => $details['stock'],
+                                    'price' => $product->price - ($product->price * ($details['discount'] / 100)),
+                                    'discount' => $details['discount'] ?? null
+                                ]
+                            );
+
+                            $totalVariationStock += $details['stock'];
+                        }
+                    }
+
+                    $productVariation->update(['stock' => $totalVariationStock]);
+                    $totalProductStock += $totalVariationStock;
+                }
+
+                // Cập nhật tổng tồn kho sản phẩm
+                $product->update(['stock' => $totalProductStock]);
+            }
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Product updated successfully',
+                'data' => new ProductResource($product),
+            ], 200);
+        } catch (\Exception $e) {
+            DB::rollback();
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to update product: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
+
+
+
+
+
+
+    private function saveImagesUpdate($model, $request, $isVariation = false, $attributeValueId = null)
+    {
+        $modelType = $isVariation ? 'product_variation_id' : 'product_id';
+        $albumInput = $isVariation ? "album_images_$attributeValueId" : 'album_images';
+        $colorImageInput = $isVariation ? "color_image_$attributeValueId" : null;
+
+        // Xử lý ảnh màu cho biến thể
+        if ($isVariation && $colorImageInput && $request->hasFile($colorImageInput)) {
+            $this->processFileImage($model, $request->file($colorImageInput), 'variant', $modelType, $isVariation);
         }
 
-        DB::commit();
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Product updated successfully',
-            'data' => new ProductResource($product),
-        ], 200);
-    } catch (\Exception $e) {
-        DB::rollback();
-        return response()->json([
-            'success' => false,
-            'message' => 'Failed to update product: ' . $e->getMessage(),
-        ], 500);
-    }
-}
-
-
-
-
-
-
-private function saveImagesUpdate($model, $request, $isVariation = false, $attributeValueId = null)
-{
-    $modelType = $isVariation ? 'product_variation_id' : 'product_id';
-    $albumInput = $isVariation ? "album_images_$attributeValueId" : 'album_images';
-    $colorImageInput = $isVariation ? "color_image_$attributeValueId" : null;
-
-    // Xử lý ảnh màu cho biến thể
-    if ($isVariation && $colorImageInput && $request->hasFile($colorImageInput)) {
-        $this->processFileImage($model, $request->file($colorImageInput), 'variant', $modelType, $isVariation);
-    }
-
-    // Xử lý album ảnh
-    if ($request->hasFile($albumInput)) {
-        foreach ($request->file($albumInput) as $file) {
-            $this->processFileImage($model, $file, 'album', $modelType, $isVariation);
-        }
-    } elseif ($request->has($albumInput) && is_array($request->input($albumInput))) {
-        foreach ($request->input($albumInput) as $url) {
-            $this->processSingleImage($model, $albumInput, $url, 'album', $modelType);
+        // Xử lý album ảnh
+        if ($request->hasFile($albumInput)) {
+            foreach ($request->file($albumInput) as $file) {
+                $this->processFileImage($model, $file, 'album', $modelType, $isVariation);
+            }
+        } elseif ($request->has($albumInput) && is_array($request->input($albumInput))) {
+            foreach ($request->input($albumInput) as $url) {
+                $this->processSingleImage($model, $albumInput, $url, 'album', $modelType);
+            }
         }
     }
-}
 
-// Hàm xử lý ảnh từ file và upload lên Cloudinary
-private function processFileImage($model, $file, $type, $modelType, $isVariation)
-{
-    try {
-        Log::info("Uploading new $type image for {$modelType} ID {$model->id}");
+    // Hàm xử lý ảnh từ file và upload lên Cloudinary
+    private function processFileImage($model, $file, $type, $modelType, $isVariation)
+    {
+        try {
+            Log::info("Uploading new $type image for {$modelType} ID {$model->id}");
 
-        $folder = $isVariation ? "products/{$model->product_id}/variations/{$model->id}" : "products/{$model->id}/albums";
-        $cloudinaryResponse = Cloudinary::upload($file->getRealPath(), [
-            'folder' => $folder,
-            'public_id' => "{$type}_image_" . uniqid()
-        ]);
-        $imagePath = $cloudinaryResponse->getSecurePath();
+            $folder = $isVariation ? "products/{$model->product_id}/variations/{$model->id}" : "products/{$model->id}/albums";
+            $cloudinaryResponse = Cloudinary::upload($file->getRealPath(), [
+                'folder' => $folder,
+                'public_id' => "{$type}_image_" . uniqid()
+            ]);
+            $imagePath = $cloudinaryResponse->getSecurePath();
 
-        $this->saveImageRecord($model, $imagePath, $type, $modelType);
-    } catch (\Exception $e) {
-        Log::error("Failed to upload $type image for {$modelType} ID {$model->id}: " . $e->getMessage());
-    }
-}
-
-// Hàm xử lý ảnh từ URL hoặc đường dẫn cục bộ
-private function processSingleImage($model, $inputName, $imagePath, $type, $modelType)
-{
-    try {
-        Log::info("Processing $type image for {$modelType} ID {$model->id} with path: $imagePath");
-
-        if (!empty($imagePath)) {
             $this->saveImageRecord($model, $imagePath, $type, $modelType);
-        } else {
-            Log::warning("No valid $type image provided for {$modelType} ID {$model->id}.");
+        } catch (\Exception $e) {
+            Log::error("Failed to upload $type image for {$modelType} ID {$model->id}: " . $e->getMessage());
         }
-    } catch (\Exception $e) {
-        Log::error("Failed to process $type image for {$modelType} ID {$model->id}: " . $e->getMessage());
     }
-}
 
-private function saveImageRecord($model, $imagePath, $type, $modelType)
-{
-    // Kiểm tra xem ảnh đã tồn tại trong cơ sở dữ liệu chưa dựa trên `modelType`, `model->id` và `image_path`
-    $existingImage = ProductVariationImage::where($modelType, $model->id)
-        ->where('image_type', $type)
-        ->where('image_path', $imagePath)
-        ->exists();
+    // Hàm xử lý ảnh từ URL hoặc đường dẫn cục bộ
+    private function processSingleImage($model, $inputName, $imagePath, $type, $modelType)
+    {
+        try {
+            Log::info("Processing $type image for {$modelType} ID {$model->id} with path: $imagePath");
 
-    if (!$existingImage) {
-        ProductVariationImage::create([
-            $modelType => $model->id,
-            'image_path' => $imagePath,
-            'image_type' => $type,
-        ]);
-        Log::info("Saved $type image for {$modelType} ID {$model->id}.");
-    } else {
-        Log::info("Skipped saving duplicate $type image for {$modelType} ID {$model->id}.");
+            if (!empty($imagePath)) {
+                $this->saveImageRecord($model, $imagePath, $type, $modelType);
+            } else {
+                Log::warning("No valid $type image provided for {$modelType} ID {$model->id}.");
+            }
+        } catch (\Exception $e) {
+            Log::error("Failed to process $type image for {$modelType} ID {$model->id}: " . $e->getMessage());
+        }
     }
-}
+
+    private function saveImageRecord($model, $imagePath, $type, $modelType)
+    {
+        // Kiểm tra xem ảnh đã tồn tại trong cơ sở dữ liệu chưa dựa trên `modelType`, `model->id` và `image_path`
+        $existingImage = ProductVariationImage::where($modelType, $model->id)
+            ->where('image_type', $type)
+            ->where('image_path', $imagePath)
+            ->exists();
+
+        if (!$existingImage) {
+            ProductVariationImage::create([
+                $modelType => $model->id,
+                'image_path' => $imagePath,
+                'image_type' => $type,
+            ]);
+            Log::info("Saved $type image for {$modelType} ID {$model->id}.");
+        } else {
+            Log::info("Skipped saving duplicate $type image for {$modelType} ID {$model->id}.");
+        }
+    }
 
 
 
@@ -504,7 +503,7 @@ private function saveImageRecord($model, $imagePath, $type, $modelType)
     }
 
 
- 
+
 
 
     private function generateSeoFriendlySlug($productName)
@@ -542,224 +541,222 @@ private function saveImageRecord($model, $imagePath, $type, $modelType)
     }
 
 
-   
+
 
     public function destroy(string $id)
-{
-    DB::beginTransaction();
+    {
+        DB::beginTransaction();
 
-    try {
-        $product = Product::withTrashed()->findOrFail($id);
-        $variations = ProductVariation::where('product_id', $product->id)->get();
+        try {
+            $product = Product::withTrashed()->findOrFail($id);
+            $variations = ProductVariation::where('product_id', $product->id)->get();
 
 
-        foreach ($variations as $variation) {
-            $variationImages = ProductVariationImage::where('product_variation_id', $variation->id)->get();
+            foreach ($variations as $variation) {
+                $variationImages = ProductVariationImage::where('product_variation_id', $variation->id)->get();
 
-   
-            foreach ($variationImages as $variationImage) {
-                if (Storage::disk('public')->exists($variationImage->image_path)) {
-                    Storage::disk('public')->delete($variationImage->image_path);
+
+                foreach ($variationImages as $variationImage) {
+                    if (Storage::disk('public')->exists($variationImage->image_path)) {
+                        Storage::disk('public')->delete($variationImage->image_path);
+                    }
+
+                    $directoryPath = dirname($variationImage->image_path);
+                    $this->deleteDirectoryIfEmpty($directoryPath);
+
+                    $variationImage->delete();
+                }
+                ProductVariationValue::where('product_variation_id', $variation->id)->delete();
+                $variation->forceDelete();
+            }
+
+            $productImages = ProductImage::where('product_id', $product->id)->get();
+            foreach ($productImages as $productImage) {
+                if (Storage::disk('public')->exists($productImage->image_path)) {
+                    Storage::disk('public')->delete($productImage->image_path);
                 }
 
-                $directoryPath = dirname($variationImage->image_path);
+                $directoryPath = dirname($productImage->image_path);
                 $this->deleteDirectoryIfEmpty($directoryPath);
-
-                $variationImage->delete();
+                $productImage->delete();
             }
-            ProductVariationValue::where('product_variation_id', $variation->id)->delete();
-            $variation->forceDelete();
-        }
+            $product->forceDelete();
 
-        $productImages = ProductImage::where('product_id', $product->id)->get();
-        foreach ($productImages as $productImage) {
-            if (Storage::disk('public')->exists($productImage->image_path)) {
-                Storage::disk('public')->delete($productImage->image_path);
-            }
+            DB::commit();
 
-            $directoryPath = dirname($productImage->image_path);
-            $this->deleteDirectoryIfEmpty($directoryPath);
-            $productImage->delete();
-        }
-        $product->forceDelete();  
-
-        DB::commit();
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Xóa sản phẩm thành công'
-        ], 200);
-    } catch (\Exception $e) {
-        DB::rollback();
-        return response()->json([
-            'success' => false,
-            'message' => 'Failed to delete product: ' . $e->getMessage(),
-        ], 500);
-    }
-}
-
-
-
-
-
-
-// public function deleteImageByPath($type, $encodedPath)
-// {
-//     DB::beginTransaction();
-
-//     try {
-//         // Giải mã đường dẫn ảnh từ base64
-//         $imagePath = base64_decode($encodedPath);
-//         Log::info("Đang xóa ảnh với đường dẫn: " . $imagePath);
-
-//         // Loại bỏ phần tên miền và phần mở rộng
-//         $publicId = preg_replace('/^.+\/upload\/(v[0-9]+\/)?/', '', $imagePath);
-//         $publicId = pathinfo($publicId, PATHINFO_DIRNAME) . '/' . pathinfo($publicId, PATHINFO_FILENAME);
-
-//         // Xóa ảnh trên Cloudinary bằng UploadApi
-//         $response = (new UploadApi())->destroy($publicId);
-//         Log::info("Kết quả xóa ảnh trên Cloudinary: " . json_encode($response));
-
-//         if ($response['result'] !== 'ok') {
-//             throw new \Exception("Không thể xóa ảnh trên Cloudinary với public_id: " . $publicId);
-//         }
-
-//         // Xóa bản ghi trong database nếu xóa trên Cloudinary thành công
-//         if ($type === 'product') {
-//             $productImage = ProductImage::where('image_path', $imagePath)->first();
-
-//             if (!$productImage) {
-//                 return response()->json([
-//                     'success' => false,
-//                     'message' => 'Ảnh sản phẩm không tồn tại.'
-//                 ], 404);
-//             }
-
-//             $productImage->delete();
-//         } elseif ($type === 'variation') {
-//             $variationImage = ProductVariationImage::where('image_path', $imagePath)->first();
-
-//             if (!$variationImage) {
-//                 return response()->json([
-//                     'success' => false,
-//                     'message' => 'Ảnh biến thể không tồn tại.'
-//                 ], 404);
-//             }
-
-//             $variationImage->delete();
-//         } else {
-//             return response()->json([
-//                 'success' => false,
-//                 'message' => 'Loại ảnh không hợp lệ.'
-//             ], 400);
-//         }
-
-//         DB::commit();
-
-//         return response()->json([
-//             'success' => true,
-//             'message' => 'Xóa ảnh thành công.'
-//         ], 200);
-
-//     } catch (\Exception $e) {
-//         DB::rollback();
-//         Log::error("Lỗi khi xóa ảnh: " . $e->getMessage());
-//         return response()->json([
-//             'success' => false,
-//             'message' => 'Lỗi khi xóa ảnh: ' . $e->getMessage()
-//         ], 500);
-//     }
-// }
-
-
-
-
-
-public function deleteImageByPath($type, $encodedPath)
-{
-    DB::beginTransaction();
-
-    try {
-        // Giải mã đường dẫn ảnh từ base64
-        $imagePath = base64_decode($encodedPath);
-        Log::info("Đang xóa ảnh với đường dẫn: " . $imagePath);
-
-        // Khởi tạo publicId là null
-        $publicId = null;
-
-        // Xác định publicId dựa trên loại ảnh
-        if ($type === 'product') {
-            // Lấy public_id cho ảnh sản phẩm không biến thể (album_image)
-            // Loại bỏ phần tên miền, phiên bản và phần mở rộng
-            $publicId = preg_replace('/^.+\/upload\/v[0-9]+\/(.+)\.[a-z]+$/', '$1', $imagePath);
-            Log::info("Loại ảnh: product, Public ID: " . $publicId);
-        } elseif ($type === 'variation') {
-            // Lấy public_id cho ảnh sản phẩm có biến thể (variant_image)
-            // Loại bỏ phần tên miền, phiên bản và phần mở rộng
-            $publicId = preg_replace('/^.+\/upload\/v[0-9]+\/(.+)\.[a-z]+$/', '$1', $imagePath);
-            Log::info("Loại ảnh: variation, Public ID: " . $publicId);
-        } else {
+            return response()->json([
+                'success' => true,
+                'message' => 'Xóa sản phẩm thành công'
+            ], 200);
+        } catch (\Exception $e) {
+            DB::rollback();
             return response()->json([
                 'success' => false,
-                'message' => 'Loại ảnh không hợp lệ.'
-            ], 400);
+                'message' => 'Failed to delete product: ' . $e->getMessage(),
+            ], 500);
         }
-
-        // Kiểm tra lại publicId xem có hợp lệ không trước khi gọi xóa
-        if (!$publicId) {
-            throw new \Exception("Không thể lấy public_id từ đường dẫn ảnh.");
-        }
-
-        // Xóa ảnh trên Cloudinary bằng UploadApi
-        $response = (new UploadApi())->destroy($publicId);
-        Log::info("Kết quả xóa ảnh trên Cloudinary: " . json_encode($response));
-
-        if ($response['result'] !== 'ok') {
-            throw new \Exception("Không thể xóa ảnh trên Cloudinary với public_id: " . $publicId);
-        }
-
-        // Xóa bản ghi trong database nếu xóa trên Cloudinary thành công
-        if ($type === 'product') {
-            $productImage = ProductImage::where('image_path', $imagePath)->first();
-
-            if (!$productImage) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Ảnh sản phẩm không tồn tại.'
-                ], 404);
-            }
-
-            Log::info("Xóa ảnh sản phẩm từ database.");
-            $productImage->delete();
-        } elseif ($type === 'variation') {
-            $variationImage = ProductVariationImage::where('image_path', $imagePath)->first();
-
-            if (!$variationImage) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Ảnh biến thể không tồn tại.'
-                ], 404);
-            }
-
-            Log::info("Xóa ảnh biến thể từ database.");
-            $variationImage->delete();
-        }
-
-        DB::commit();
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Xóa ảnh thành công.'
-        ], 200);
-
-    } catch (\Exception $e) {
-        DB::rollback();
-        Log::error("Lỗi khi xóa ảnh: " . $e->getMessage());
-        return response()->json([
-            'success' => false,
-            'message' => 'Lỗi khi xóa ảnh: ' . $e->getMessage()
-        ], 500);
     }
-}
 
+
+
+
+
+
+    // public function deleteImageByPath($type, $encodedPath)
+    // {
+    //     DB::beginTransaction();
+
+    //     try {
+    //         // Giải mã đường dẫn ảnh từ base64
+    //         $imagePath = base64_decode($encodedPath);
+    //         Log::info("Đang xóa ảnh với đường dẫn: " . $imagePath);
+
+    //         // Loại bỏ phần tên miền và phần mở rộng
+    //         $publicId = preg_replace('/^.+\/upload\/(v[0-9]+\/)?/', '', $imagePath);
+    //         $publicId = pathinfo($publicId, PATHINFO_DIRNAME) . '/' . pathinfo($publicId, PATHINFO_FILENAME);
+
+    //         // Xóa ảnh trên Cloudinary bằng UploadApi
+    //         $response = (new UploadApi())->destroy($publicId);
+    //         Log::info("Kết quả xóa ảnh trên Cloudinary: " . json_encode($response));
+
+    //         if ($response['result'] !== 'ok') {
+    //             throw new \Exception("Không thể xóa ảnh trên Cloudinary với public_id: " . $publicId);
+    //         }
+
+    //         // Xóa bản ghi trong database nếu xóa trên Cloudinary thành công
+    //         if ($type === 'product') {
+    //             $productImage = ProductImage::where('image_path', $imagePath)->first();
+
+    //             if (!$productImage) {
+    //                 return response()->json([
+    //                     'success' => false,
+    //                     'message' => 'Ảnh sản phẩm không tồn tại.'
+    //                 ], 404);
+    //             }
+
+    //             $productImage->delete();
+    //         } elseif ($type === 'variation') {
+    //             $variationImage = ProductVariationImage::where('image_path', $imagePath)->first();
+
+    //             if (!$variationImage) {
+    //                 return response()->json([
+    //                     'success' => false,
+    //                     'message' => 'Ảnh biến thể không tồn tại.'
+    //                 ], 404);
+    //             }
+
+    //             $variationImage->delete();
+    //         } else {
+    //             return response()->json([
+    //                 'success' => false,
+    //                 'message' => 'Loại ảnh không hợp lệ.'
+    //             ], 400);
+    //         }
+
+    //         DB::commit();
+
+    //         return response()->json([
+    //             'success' => true,
+    //             'message' => 'Xóa ảnh thành công.'
+    //         ], 200);
+
+    //     } catch (\Exception $e) {
+    //         DB::rollback();
+    //         Log::error("Lỗi khi xóa ảnh: " . $e->getMessage());
+    //         return response()->json([
+    //             'success' => false,
+    //             'message' => 'Lỗi khi xóa ảnh: ' . $e->getMessage()
+    //         ], 500);
+    //     }
+    // }
+
+
+
+
+
+    public function deleteImageByPath($type, $encodedPath)
+    {
+        DB::beginTransaction();
+
+        try {
+            // Giải mã đường dẫn ảnh từ base64
+            $imagePath = base64_decode($encodedPath);
+            Log::info("Đang xóa ảnh với đường dẫn: " . $imagePath);
+
+            // Khởi tạo publicId là null
+            $publicId = null;
+
+            // Xác định publicId dựa trên loại ảnh
+            if ($type === 'product') {
+                // Lấy public_id cho ảnh sản phẩm không biến thể (album_image)
+                // Loại bỏ phần tên miền, phiên bản và phần mở rộng
+                $publicId = preg_replace('/^.+\/upload\/v[0-9]+\/(.+)\.[a-z]+$/', '$1', $imagePath);
+                Log::info("Loại ảnh: product, Public ID: " . $publicId);
+            } elseif ($type === 'variation') {
+                // Lấy public_id cho ảnh sản phẩm có biến thể (variant_image)
+                // Loại bỏ phần tên miền, phiên bản và phần mở rộng
+                $publicId = preg_replace('/^.+\/upload\/v[0-9]+\/(.+)\.[a-z]+$/', '$1', $imagePath);
+                Log::info("Loại ảnh: variation, Public ID: " . $publicId);
+            } else {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Loại ảnh không hợp lệ.'
+                ], 400);
+            }
+
+            // Kiểm tra lại publicId xem có hợp lệ không trước khi gọi xóa
+            if (!$publicId) {
+                throw new \Exception("Không thể lấy public_id từ đường dẫn ảnh.");
+            }
+
+            // Xóa ảnh trên Cloudinary bằng UploadApi
+            $response = (new UploadApi())->destroy($publicId);
+            Log::info("Kết quả xóa ảnh trên Cloudinary: " . json_encode($response));
+
+            if ($response['result'] !== 'ok') {
+                throw new \Exception("Không thể xóa ảnh trên Cloudinary với public_id: " . $publicId);
+            }
+
+            // Xóa bản ghi trong database nếu xóa trên Cloudinary thành công
+            if ($type === 'product') {
+                $productImage = ProductImage::where('image_path', $imagePath)->first();
+
+                if (!$productImage) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Ảnh sản phẩm không tồn tại.'
+                    ], 404);
+                }
+
+                Log::info("Xóa ảnh sản phẩm từ database.");
+                $productImage->delete();
+            } elseif ($type === 'variation') {
+                $variationImage = ProductVariationImage::where('image_path', $imagePath)->first();
+
+                if (!$variationImage) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Ảnh biến thể không tồn tại.'
+                    ], 404);
+                }
+
+                Log::info("Xóa ảnh biến thể từ database.");
+                $variationImage->delete();
+            }
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Xóa ảnh thành công.'
+            ], 200);
+        } catch (\Exception $e) {
+            DB::rollback();
+            Log::error("Lỗi khi xóa ảnh: " . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Lỗi khi xóa ảnh: ' . $e->getMessage()
+            ], 500);
+        }
+    }
 }
