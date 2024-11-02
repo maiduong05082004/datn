@@ -112,8 +112,13 @@ const DetailProduct = () => {
           )}
 
           <div className="mb-8">
+<<<<<<< HEAD
             <h4 className="text-xl font-semibold text-gray-800 mb-4">Biến Thể</h4>
             <div className="flex flex-wrap gap-4">
+=======
+            <h4 className="text-lg font-semibold text-gray-800 mb-4">Biến Thể</h4>
+            <div className="flex flex-wrap gap-3">
+>>>>>>> 3843526 (Fix admins)
               {variations.map((variation: any, index: number) => (
                 <div
                   key={index}
@@ -132,8 +137,13 @@ const DetailProduct = () => {
           </div>
 
           <div className="mb-8">
+<<<<<<< HEAD
             <h4 className="text-xl font-semibold text-gray-800 mb-4">Chọn Kích Cỡ</h4>
             <div className="flex flex-wrap gap-4">
+=======
+            <h4 className="text-lg font-semibold text-gray-800 mb-4">Thông Tin</h4>
+            <div className="flex flex-wrap gap-3">
+>>>>>>> 3843526 (Fix admins)
               {selectedVariation.variation_values?.map((value: any, index: number) => (
                 <button
                   key={index}
