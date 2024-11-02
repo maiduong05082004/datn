@@ -200,7 +200,7 @@ const ListProducts = () => {
   ];
 
   if (isLoading) return <Spin tip="Loading..." className="flex justify-center items-center h-screen" />;
-  
+
   return (
     <>
       {contextHolder}

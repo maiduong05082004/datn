@@ -103,7 +103,7 @@ const DetailProduct = () => {
           )}
 
           <div className="mb-8">
-            <h4 className="text-lg font-semibold text-gray-800 mb-4">Màu sắc</h4>
+            <h4 className="text-lg font-semibold text-gray-800 mb-4">Biến Thể</h4>
             <div className="flex flex-wrap gap-3">
               {variations.map((variation: any, index: number) => (
                 <div
@@ -124,7 +124,7 @@ const DetailProduct = () => {
           </div>
 
           <div className="mb-8">
-            <h4 className="text-lg font-semibold text-gray-800 mb-4">Kích thước</h4>
+            <h4 className="text-lg font-semibold text-gray-800 mb-4">Thông Tin</h4>
             <div className="flex flex-wrap gap-3">
               {selectedVariation.variation_values?.map((value: any, index: number) => (
                 <button
