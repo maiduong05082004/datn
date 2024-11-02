@@ -767,4 +767,15 @@ class ProductController extends Controller
             ], 500);
         }
     }
+    public function getProductsByIds(Request $request)
+    {
+        $request->validate([
+            'ids' => 'required|array',
+            'ids.*' => 'integer|exists:products,id',
+        ]);
+
+        $products = Product::whereIn('id', $request->ids)->get();
+
+        return response()->json(['products' => $products], 200);
+    }
 }
