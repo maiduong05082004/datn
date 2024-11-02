@@ -64,6 +64,9 @@ Route::prefix('client')->as('client.')->group(function () {
         Route::post('/purchase', [ProductProductController::class, 'purchase'])->name('purchase')->middleware('auth:sanctum');
         Route::get('/', [ProductProductController::class, 'index'])->name('index');
         Route::get('/showDetailOrder/{oderId}', [ProductProductController::class, 'showDetailOrder'])->name('showDetailOrder');
+        Route::post('orders/cancel/{orderId}', [ProductProductController::class, 'cancelOrder']);
+        Route::post('orders/confirm/{orderId}', [ProductProductController::class, 'confirmOrder']);
+
     });
     Route::prefix('cart')->as('cart.')->middleware('auth:sanctum')->group(function () {
         Route::get('/', [ProductCartController::class, 'getCartItems'])->name('index');
@@ -134,7 +137,10 @@ Route::prefix('admins')
             Route::prefix('orders')->group(function () {
              Route::get('/',[OrderController::class, 'index'])->name('orders.index');
              Route::get('/pending', [OrderController::class, 'pendingOrders'])->name('orders.pending');
+             Route::get('/processed', [OrderController::class, 'processedOrders'])->name('orders.processed');
              Route::get('/shipped', [OrderController::class, 'shippedOrders'])->name('orders.shipped');
+             Route::get('/delivered', [OrderController::class, 'deliveredOrders'])->name('orders.delivered');
+             Route::get('/canceled', [OrderController::class, 'canceledOrders'])->name('orders.canceled');
 
 
             });
