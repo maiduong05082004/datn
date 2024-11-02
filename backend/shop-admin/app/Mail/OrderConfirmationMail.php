@@ -22,6 +22,11 @@ class OrderConfirmationMail extends Mailable
                     ->with([
                         'customerName' => $this->orderData['customerName'],
                         'orderId' => $this->orderData['orderId'],
+                        'orderDate' => $this->orderData['orderDate'],
+                        'paymentType' => $this->orderData['paymentType'],
+                        'shippingAddress' => $this->orderData['shippingAddress'],
+                        'phoneNumber' => $this->orderData['phoneNumber'],
+                        'orderItems' => $this->orderData['orderItems'],  // Danh sách sản phẩm
                         'totalAmount' => $this->orderData['totalAmount'],
                     ])
                     ->subject('Xác Nhận Đơn Hàng');
