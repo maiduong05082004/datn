@@ -1,291 +1,218 @@
-import React, { useState } from 'react';
-import { Table, message, Button, Image, Tag, Modal, Popconfirm, Spin } from 'antd';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import axios from 'axios';
-import { format } from 'date-fns';
-import { Link, useNavigate } from 'react-router-dom';
 import { DeleteOutlined, EditOutlined, EyeOutlined, PlusOutlined } from '@ant-design/icons';
-
-interface Product {
-  id: number;
-  name: string;
-  price: string;
-  stock: number;
-  description: string;
-  input_day: string;
-  category_name: string;
-  group: {
-    name: string;
-  } | null;
-  variations: Variation[];
-}
-
-interface Variation {
-  id: number;
-  stock: number;
-  attribute_value_image_variant: {
-    value: string;
-    image_path: string;
-  };
-  variation_values: VariationValue[];
-  variation_album_images: string[];
-}
-
-interface VariationValue {
-  attribute_value_id: number;
-  value: string;
-  price: string;
-  discount: number;
-}
+import { Button, Popconfirm, Table } from 'antd';
+import React, { useState, useEffect } from 'react';
 
 const ListBill = () => {
-  const [messageApi, contextHolder] = message.useMessage();
-  const queryClient = useQueryClient();
-  const [isModalVisible, setIsModalVisible] = useState(false);
-  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
-  const [selectedDescription, setSelectedDescription] = useState<string | null>(null); // State cho phần mô tả
-  const navigate = useNavigate();
-
-  const { data: productsData, isLoading } = useQuery({
-    queryKey: ['products'],
-    queryFn: async () => {
-      const response = await axios.get('http://localhost:8000/api/admins/products');
-      return response.data;
+  const [bills, setBills] = useState([
+    {
+      orderCode: '719533246',
+      deliveryMethod: 'Shoppe giao hàng',
+      status: 'Shoppe Đã Nhận Giao Hàng',
+      statusColor: 'bg-yellow-200 text-yellow-800',
+      quantity: 1,
+      customerPay: 0,
+      confirmationDeadline: 'Ngày mai 09:28:00'
+    },
+    {
+      orderCode: '750602738',
+      deliveryMethod: 'Shoppe giao hàng',
+      status: 'Được giao bởi Shoppe',
+      statusColor: 'bg-yellow-200 text-yellow-800',
+      quantity: 5,
+      customerPay: 1450374,
+      confirmationDeadline: 'XN lúc 07/06/2021 14:05:07'
+    },
+    {
+      orderCode: '294668007',
+      deliveryMethod: 'Shoppe giao hàng',
+      status: 'Shoppe Đã Nhận Giao Hàng',
+      statusColor: 'bg-yellow-200 text-yellow-800',
+      quantity: 2,
+      customerPay: 2879000,
+      confirmationDeadline: '-'
     }
-  });
-  const mutation = useMutation({
-    mutationFn: async (id: number) => {
-      await axios.delete(`http://localhost:8000/api/admins/products/${id}`);
+  ]);
+  const column = [
+    {
+      title: '',
+      key: 'expand',
+      render: () => (
+        <Button
+          type="link"
+          icon={<PlusOutlined />}
+          className="text-gray-500"
+        />
+      ),
     },
-    onSuccess: () => {
-      messageApi.success('Xóa thành công');
-      queryClient.invalidateQueries({ queryKey: ['products'] });
-    },
-    onError: () => {
-      messageApi.error('Xóa sản phẩm thất bại');
-    },
-  });
-
-  const showModal = (product: Product) => {
-    setSelectedProduct(product);
-    setIsModalVisible(true);
-  };
-
-  const showDescriptionModal = (description: string) => {
-    setSelectedDescription(description);
-    setIsModalVisible(true);
-  };
-
-
-  const handleCancel = () => {
-    setIsModalVisible(false);
-    setSelectedProduct(null);
-    setSelectedDescription(null);
-  };
-
-  const columns: Array<any> = [
     {
       title: 'STT',
       dataIndex: 'index',
       key: 'index',
-      render: (_: any, __: Product, index: number) => <span>{index + 1}</span>,
+      render: (_: any, __: any, index: number) => <span>{index + 1}</span>,
     },
     {
-      title: 'Tên sản phẩm',
-      dataIndex: 'name',
-      key: 'name',
-      filters: productsData?.data?.map((product: Product) => ({
-        text: product.name,
-        value: product.name,
-      })),
-      onFilter: (value: string, record: Product) => record.name.indexOf(value) === 0,
+      title: 'Mã Đơn Hàng',
+      dataIndex: 'orderCode',
+      key: 'orderCode',
     },
     {
-      title: 'Giá',
-      dataIndex: 'price',
-      key: 'price',
-      sorter: (a: Product, b: Product) => parseFloat(a.price) - parseFloat(b.price),
-      sortDirections: ['ascend', 'descend'],
-      render: (text: string) => <span>{parseFloat(text).toLocaleString()} VND</span>,
-    },
-    {
+      title: 'Hình Thức Giao Hàng',
+      dataIndex: 'deliveryMethod',
+      key: 'deliveryMethod',
+    }, {
+      title: 'Trạng Thái',
+      dataIndex: 'status',
+      key: 'status',
+      render: (text: string, record: any) => (
+        <div className={`p-1 rounded ${record.statusColor}`}>{text}</div>
+      ),
+    }, {
       title: 'Số Lượng',
-      dataIndex: 'stock',
-      key: 'stock',
+      dataIndex: 'quantity',
+      key: 'quantity',
+    }, {
+      title: 'Khách Hàng Phải Trả',
+      dataIndex: 'customerPay',
+      key: 'customerPay',
+      render: (text: number) => (
+        <div>{text.toLocaleString()} đ</div>
+      ),
+    }, {
+      title: 'Hạn Xác Nhận',
+      dataIndex: 'confirmationDeadline',
+      key: 'confirmationDeadline',
     },
     {
-      title: 'Mô tả',
-      dataIndex: 'description',
-      key: 'description',
-      render: (text: string) => (
-        <div style={{ maxWidth: '150px' }}>
-          {text.length > 20 ? (
-            <>
-              {text.slice(0, 20)}...
-              <Button type="link" onClick={() => showDescriptionModal(text)}>Xem chi tiết</Button>
-            </>
-          ) : (
-            text
-          )}
+      title: 'Thao Tác',
+      key: 'action',
+      render: () => (
+        <div className="flex space-x-2">
+          <Button
+            type="link"
+            icon={<EyeOutlined />}
+            className="text-white bg-blue-500 hover:bg-blue-600"
+          />
+          <Button
+            type="default"
+            icon={<EditOutlined />}
+            className="bg-yellow-500 text-white hover:bg-yellow-600"
+          />
+          <Popconfirm
+            title="Xóa sản phẩm"
+            description="Bạn có chắc muốn xóa sản phẩm này không?"
+            okText="Yes"
+            cancelText="No"
+          >
+            <Button icon={<DeleteOutlined />} type="primary" danger className="bg-red-500 text-white hover:bg-red-600" />
+          </Popconfirm>
         </div>
       ),
     },
-    {
-      title: 'Ngày nhập',
-      dataIndex: 'input_day',
-      key: 'input_day',
-      render: (date: string) => <span>{format(new Date(date), 'dd/MM/yyyy')}</span>,
-    },
-    {
-      title: 'Danh mục', // Cột danh mục sản phẩm
-      dataIndex: 'category_name',
-      key: 'category_name',
-      filters: productsData?.data?.map((product: Product) => ({
-        text: product.category_name,
-        value: product.category_name,
-      })),
-      onFilter: (value: string, record: Product) => record.category_name === value,
-      render: (text: string) => <span>{text}</span>,
-    },
-    {
-      title: 'Biến thể',
-      key: 'variations',
-      render: (product: Product) => (
-        <Button className="bg-black" type="primary" icon={<EyeOutlined />} onClick={() => showModal(product)}>
-        </Button>
-      ),
-    },
-    {
-      title: 'Action',
-      key: 'action',
-      render: (product: Product) => (
-        <>
-
-          <div className='flex justify-between'>
-            <Button
-              type="link"
-              icon={<EyeOutlined />}
-              className="bg-blue-500 text-white hover:bg-blue-700"
-              onClick={() => navigate(`admin/bill/detail/${product.id}`)}
-            >
-            </Button>
-            <Button
-              type="default"
-              icon={<EditOutlined />}
-              onClick={() => navigate(`/admin/bill/update/${product.id}`)}
+  ]
+  return (
+    <div className="w-[95%] mx-auto p-6 bg-slate-100">
+      <div>
+        <select className='border w-[300px] h-[35px]'>
+          <option value="#">Vui lòng chọn nhà bán</option>
+          <option value="">Nhà bán 1</option>
+          <option value="">Nhà bán 2</option>
+          <option value="">Nhà bán 3</option>
+        </select>
+      </div>
+      <div className="flex justify-between items-center mb-6 pt-5">
+        <div className="flex gap-2">
+          <button className="w-[180px] h-[50px] bg-gray-200 rounded hover:bg-gray-300"><div><h2>Tất Cả</h2><p>0 Đơn Hàng</p></div></button>
+          <button className="w-[180px] h-[50px] bg-gray-200 rounded hover:bg-gray-300"><div><h2>Chờ Xác Nhận</h2><p>0/0 đơn quá hạn XN</p></div></button>
+          <button className="w-[180px] h-[50px] bg-gray-200 rounded hover:bg-gray-300"><div><h2>Đang Xử Lý</h2><p>0/0 đơn quá hạn XN</p></div></button>
+          <button className="w-[180px] h-[50px] bg-gray-200 rounded hover:bg-gray-300"><div><h2>Đang Vận Chuyển</h2><p>0 Đơn Hàng</p></div></button>
+          <button className="w-[180px] h-[50px] bg-gray-200 rounded hover:bg-gray-300"><div><h2>Đang Giao Hàng</h2><p>0 Đơn Hàng</p></div></button>
+          <button className="w-[180px] h-[50px] bg-gray-200 rounded hover:bg-gray-300"><div><h2>Đã Hủy</h2><p>0 Đơn Hàng</p></div></button>
+        </div>
+      </div>
+      <div className='border w-[100%] h-auto bg-white'>
+        <div className='w-[97%] mx-auto pt-5 pb-5'>
+          <div className="flex items-center gap-4 mb-2">
+            <div>
+              <select className='border p-2 w-[200px] rounded'>
+                <option value="#">Mã Đơn Hàng</option>
+                <option value="">1</option>
+                <option value="">2</option>
+                <option value="">3</option>
+              </select>
+            </div>
+            <input
+              type="text"
+              className="border p-2 rounded w-[500px]"
+              placeholder="Nhập mã đơn hàng để tìm kiếm..."
             />
-            <Popconfirm
-              title="Xóa sản phẩm"
-              description="Bạn có chắc muốn xóa sản phẩm này không?"
-              onConfirm={() => mutation.mutate(product.id)}
-              okText="Yes"
-              cancelText="No"
-            >
-              <Button icon={<DeleteOutlined />} type="primary" danger>
-              </Button>
-            </Popconfirm>
+            <div className='flex gap-2'>
+              <select className='w-[150px] h-[38px] border text-black'>
+                <option value="#">Nhãn Đơn Hàng</option>
+                <option value="">1</option>
+                <option value="">2</option>
+                <option value="">3</option>
+              </select>
+              <select className='w-[150px] h-[38px] border text-black'>
+                <option value="#">Ngày đặt hàng</option>
+                <option value="">1</option>
+                <option value="">2</option>
+                <option value="">3</option>
+              </select>
+              <button className="w-[150px] h-[38px] border text-black">Bộ lọc khác</button>
+            </div>
           </div>
-        </>
-      ),
-    },
-  ];
+          <div className='pb-10 flex gap-2'>
+            <button className='w-[150px] h-[30px] border bg-gray-200'>Shoppe Giao Hàng</button>
+            <button className='w-[150px] h-[30px] border bg-gray-200'>NB Tư Vận Hành</button>
+            <button className='w-[150px] h-[30px] border bg-gray-200'>Giao Thẳng Từ NB</button>
+            <button className='w-[150px] h-[30px] border bg-gray-200'>Giao Từ Nước Ngoài</button>
+            <button className='w-[150px] h-[30px] border bg-gray-200'>Dich Vụ</button>
+          </div>
+          <hr />
+          <div className='flex gap-10 pt-5 pb-5'>
+            <h3>Đang Lọc:</h3>
+            <p>Ngày đặt tháng 30 ngày qua (08/05/2021 - 07/06/2021)</p>
+            <button className="text-blue-500 ml-4 hover:underline">Xoá tất cả</button>
+          </div>
+        </div>
+      </div>
 
-
-  const renderVariationDetails = () => {
-    if (!selectedProduct) return null;
-    return selectedProduct.variations.map((variant, index) => (
-      <div key={index} className="mb-4 p-2 bg-gray-50 rounded-lg">
-        <h4 className="font-semibold text-indigo-700">
-          Tên biến thể: {selectedProduct?.group?.name}
-        </h4>
-        <h4 className="font-semibold text-indigo-700">
-          Tên màu biến thể: {variant.attribute_value_image_variant.value}
-        </h4>
-        <Image
-          width={50}
-          height={50}
-          src={variant.attribute_value_image_variant.image_path}
-          alt={variant.attribute_value_image_variant.value}
-        />
-        {variant.variation_values.map((value: any) => (
-          <div key={value.attribute_value_id} className="mt-2 p-2 bg-gray-50 rounded-lg border">
-            <div className="flex justify-between items-center">
-              <h2 className="font-semibold">Size: {value.value}</h2>
-              <div className="flex space-x-2 items-center">
-                <span className="text-lg font-bold">{parseFloat(value.price).toLocaleString()} VND</span>
-                {value.discount > 0 && <Tag color="red" className="ml-2">-{value.discount}%</Tag>}
+      <div className="overflow-x-auto pt-5">
+        <div className='bg-white'>
+          <div className='w-[97%] mx-auto'>
+            <div className='flex gap-10 pt-5 pb-5'>
+              <div className='w-[200px] flex  items-center h-[40px]'>
+                <span className='font-bold text-2xl'>Đơn Hàng :</span>
+                <p className='text-2xl ml-2'>2698</p>
+              </div>
+              <div className='border w-[200px] flex items-center justify-center bg-slate-200'>
+                <button>Xác Nhận Đơn Hàng</button>
+              </div>
+              <div className='border w-[200px] flex justify-center items-center bg-slate-200'>
+                <select className='bg-slate-200'>
+                  <option value="#">Xuất Đơn Hàng</option>
+                  <option value="1">Xuất Đơn Hàng1</option>
+                  <option value="2">Xuất Đơn Hàng2</option>
+                </select>
+              </div>
+              <div className='w-[200px] flex items-center'>
+                <button className="text-blue-500 ml-4 hover:underline">Mở Rộng Tất Cả</button>
               </div>
             </div>
-            <div className="flex justify-between items-center mt-2">
-              <h2 className="font-semibold">Số Lượng:</h2>
-              <h2 className="border border-[#ffa39e] rounded-sm bg-[#fff1f0] text-[#cf1322] mt-2 w-[44px] flex justify-center">
-                {value.stock}
-              </h2>
-            </div>
-          </div>
-        ))}
-
-        {/* Hiển thị album ảnh cho biến thể */}
-        <div className="mt-4">
-          <h2 className="font-bold">Album ảnh:</h2>
-          <div className="flex space-x-2 mt-2">
-            {variant.variation_album_images.map((image, index) => (
-              <Image
-                key={index}
-                src={image}
-                alt={`Album image ${index + 1}`}
-                width={200}
-                height={200}
-                className="rounded border"
-              />
-            ))}
+            <Table
+              columns={column}
+              dataSource={bills}
+              rowKey={(record) => record.orderCode}
+              bordered
+              pagination={{
+                pageSize: 7,
+                showTotal: (total) => `Tổng ${total} danh mục`,
+              }}
+            />
           </div>
         </div>
       </div>
-    ));
-  };
-
-
-  const renderDescriptionDetails = () => {
-    if (!selectedDescription) return null;
-    return (
-      <div>
-        <p>{selectedDescription}</p>
-      </div>
-    );
-  };
-
-  if (isLoading) return <Spin tip="Loading..." className="flex justify-center items-center h-screen" />;
-  return (
-    <>
-      {contextHolder}
-      <div className="w-full mx-auto px-6 py-8">
-        <div className="flex justify-between items-center mb-6">
-          <Button className='bg-indigo-600 hover:bg-indigo-700 text-white' icon={<PlusOutlined />} type="primary" onClick={() => navigate('/addProducts')} >
-            Thêm mới
-          </Button>
-        </div>
-        <Table
-          columns={columns}
-          dataSource={productsData?.data}
-          bordered
-          rowKey="id"
-          pagination={{
-            pageSize: 7,
-            showTotal: (total) => `Tổng ${total} danh mục`,
-          }}
-        />
-      </div>
-
-      <Modal
-        title={selectedProduct ? `Chi tiết biến thể sản phẩm: ${selectedProduct?.name}` : 'Chi tiết mô tả'}
-        visible={isModalVisible}
-        onCancel={handleCancel}
-        footer={null}
-      >
-        {selectedProduct ? renderVariationDetails() : renderDescriptionDetails()}
-      </Modal>
-    </>
+    </div>
   );
 };
 
