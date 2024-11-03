@@ -86,6 +86,10 @@ Route::prefix('client')->as('client.')->group(function () {
     });
 });
 
+
+Route::apiResource('products', ProductController::class)
+->names('products');
+
 Route::delete('images/{type}/{encodedPath}', [ProductController::class, 'deleteImageByPath'])->name('images.deleteByPath');
 
 Route::prefix('admins')
@@ -93,8 +97,7 @@ Route::prefix('admins')
     ->group(function () {
         Route::post('/signin', [AdminAuthController::class, 'login'])->name('signin');
         Route::middleware(['auth:sanctum', 'admin'])->group(function () {
-         Route::apiResource('products', ProductController::class)
-          ->names('products');
+ 
             Route::apiResource('attributes', AttributeController::class)
                 ->names('attributes');
 
