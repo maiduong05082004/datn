@@ -42,7 +42,6 @@ class ProductController extends Controller
 
 
 
-
     public function store(ProductRequest $request)
     {
         DB::beginTransaction();
@@ -63,42 +62,44 @@ class ProductController extends Controller
                 'is_new' => $request->is_new ? 1 : 0,
             ]);
 
-
+            // Kiểm tra nếu có biến thể
             $hasVariations = $request->has('variations') && !empty($request->variations);
             $variations = json_decode($request->input('variations'), true);
+
             if (!$hasVariations || !is_array($variations)) {
-                // Cập nhật tồn kho
+                // Không có biến thể, cập nhật tồn kho trực tiếp
                 $product->update(['stock' => $request->stock]);
-
-                // Lưu ảnh sản phẩm
-                $this->saveImages($product, $request);
-            }
-
-
-            if ($hasVariations && is_array($variations)) {
+                $this->saveImages($product, $request);  // Lưu ảnh sản phẩm
+            } else {
                 $totalProductStock = 0;
 
-                foreach ($variations as $attributeValueId => $sizes) {
+                foreach ($variations as $variation) {
+                    $attributeValueId = $variation['attribute_value_id'] ?? null;
 
+                    // Kiểm tra giá trị attribute_value_id trước khi lưu
+                    if (is_null($attributeValueId) || $attributeValueId == 0) {
+                        throw new \Exception("Giá trị attribute_value_id không hợp lệ: $attributeValueId");
+                    }
+
+                    // Kiểm tra tính hợp lệ của attribute_value_id với nhóm
                     if (!$this->isValidAttributeForGroup($request->group_id, $attributeValueId)) {
                         throw new \Exception("Thuộc tính không hợp lệ cho nhóm đã chọn.");
                     }
 
-
+                    // Lưu biến thể sản phẩm
                     $productVariation = ProductVariation::create([
                         'product_id' => $product->id,
                         'group_id' => $request->group_id,
                         'attribute_value_id' => $attributeValueId,
                     ]);
 
-
+                    // Lưu hình ảnh biến thể
                     $this->saveImages($productVariation, $request, true, $attributeValueId);
-
 
                     $totalVariationStock = 0;
 
-                    // Lưu các size (kích thước) của từng biến thể
-                    foreach ($sizes as $sizeId => $details) {
+                    // Lưu các size (kích thước) cho từng biến thể
+                    foreach ($variation['sizes'] as $sizeId => $details) {
                         if (!empty($details['stock']) && isset($details['discount'])) {
                             $sku = $this->generateVariationSku();
                             $calculatedPrice = $product->price - ($product->price * ($details['discount'] / 100));
@@ -115,9 +116,12 @@ class ProductController extends Controller
                             $totalVariationStock += $details['stock'];
                         }
                     }
+
                     $productVariation->update(['stock' => $totalVariationStock]);
                     $totalProductStock += $totalVariationStock;
                 }
+
+                // Cập nhật tổng tồn kho của sản phẩm
                 $product->update(['stock' => $totalProductStock]);
             }
 
@@ -293,37 +297,30 @@ class ProductController extends Controller
                 'is_new' => $request->is_new ? 1 : 0,
             ]);
 
-            // Xử lý xóa ảnh nếu có yêu cầu
+            // Xóa ảnh nếu có yêu cầu
             if ($request->has('delete_images')) {
-                $this->deleteSelectedImages($request->input('delete_images'), false); // false vì đây là ảnh sản phẩm
+                $this->deleteSelectedImages($request->input('delete_images'), false);
             }
 
-            // Cập nhật hình ảnh sản phẩm
-            $this->saveImagesUpdate($product, $request); // Gọi hàm cập nhật hình ảnh
+            // Lưu cập nhật hình ảnh
+            $this->saveImagesUpdate($product, $request);
 
-            // Giải mã JSON phần `variations` để chuyển từ chuỗi JSON thành mảng
             $variations = json_decode($request->input('variations'), true);
-
-            // Xử lý cập nhật các biến thể
             if (is_array($variations)) {
                 $totalProductStock = 0;
 
                 foreach ($variations as $attributeValueId => $sizes) {
-                    // Tạo hoặc cập nhật biến thể
                     $productVariation = ProductVariation::updateOrCreate(
                         ['product_id' => $product->id, 'attribute_value_id' => $attributeValueId],
                         ['group_id' => $request->group_id]
                     );
 
-                    // Xử lý xóa ảnh của biến thể nếu có yêu cầu
                     if ($request->has('delete_images_variation')) {
-                        $this->deleteSelectedImages($request->input('delete_images_variation'), true); // true vì đây là biến thể
+                        $this->deleteSelectedImages($request->input('delete_images_variation'), true);
                     }
 
-                    // Cập nhật hình ảnh biến thể
                     $this->saveImagesUpdate($productVariation, $request, true, $attributeValueId);
 
-                    // Cập nhật size và tồn kho
                     $totalVariationStock = 0;
                     foreach ($sizes as $sizeId => $details) {
                         if (!empty($details['stock']) && isset($details['discount'])) {
@@ -338,6 +335,17 @@ class ProductController extends Controller
                             );
 
                             $totalVariationStock += $details['stock'];
+                        } else {
+                            // Nếu không có stock, đặt mặc định về 0
+                            ProductVariationValue::updateOrCreate(
+                                ['product_variation_id' => $productVariation->id, 'attribute_value_id' => $sizeId],
+                                [
+                                    'sku' => $this->generateVariationSku(),
+                                    'stock' => 0,  // Đặt stock về 0 nếu không có giá trị
+                                    'price' => $product->price,
+                                    'discount' => $details['discount'] ?? null
+                                ]
+                            );
                         }
                     }
 
@@ -345,7 +353,6 @@ class ProductController extends Controller
                     $totalProductStock += $totalVariationStock;
                 }
 
-                // Cập nhật tổng tồn kho sản phẩm
                 $product->update(['stock' => $totalProductStock]);
             }
 
@@ -364,6 +371,7 @@ class ProductController extends Controller
             ], 500);
         }
     }
+
 
 
 
