@@ -31,6 +31,7 @@ class Bill extends Model
         'subtotal',
         'total',
         'canceled_at',
+        'canceled_reason',
         'promotion_ids',
         'payment_type',
         'shipping_address_id',
