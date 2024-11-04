@@ -464,7 +464,7 @@ class ProductController extends Controller
         try {
             // Lấy thông tin đơn hàng với các liên kết chi tiết
             $bill = Bill::with([
-                'shippingAddress:id,address_line,city,district,ward,phone_number',
+                'shippingAddress:id,full_name,address_line,city,district,ward,phone_number',
                 'BillDetail.product:id,name,price',
                 'BillDetail.productVariationValue:id,product_variation_id,attribute_value_id,sku,stock,price,discount',
                 'BillDetail.productVariationValue.attributeValue:id,value',
@@ -485,6 +485,7 @@ class ProductController extends Controller
             // Đưa các trường từ shippingAddress lên cấp trên
             if ($bill->shippingAddress) {
                 $bill->shipping_address_id = $bill->shippingAddress->id;
+                $bill->full_name = $bill->shippingAddress->full_name;
                 $bill->address_line = $bill->shippingAddress->address_line;
                 $bill->city = $bill->shippingAddress->city;
                 $bill->district = $bill->shippingAddress->district;
@@ -493,6 +494,11 @@ class ProductController extends Controller
                 unset($bill->shippingAddress); // Xóa shippingAddress để tránh lồng nhau
             }
 
+            $promotionIds = explode(',', $bill->promotion_ids); // Tách chuỗi "1,2,3" thành mảng
+            $promotions = Promotion::whereIn('id', $promotionIds)->get(['code', 'discount_amount', 'description']);
+
+            // Thêm thông tin khuyến mãi vào kết quả trả về
+            $bill->promotions = $promotions;
             // Đưa thông tin từ product và productVariationValue lên cùng cấp trong mỗi BillDetail và sắp xếp lại các trường
             $bill->BillDetail->transform(function ($detail) {
                 $detail->name = $detail->product->name ?? null;
@@ -545,8 +551,10 @@ class ProductController extends Controller
                 'order_time' => $bill->order_time,
                 'canceled_at' => $bill->canceled_at,
                 'subtotal' => $bill->subtotal,
+                'promotions' => $bill->promotions,
                 'total' => $bill->total,
                 'shipping_address_id' => $bill->shipping_address_id,
+                'full_name' => $bill->full_name,
                 'address_line' => $bill->address_line,
                 'city' => $bill->city,
                 'district' => $bill->district,
@@ -602,9 +610,10 @@ class ProductController extends Controller
             $bill = Bill::findOrFail($orderId);
 
             // Kiểm tra nếu trạng thái đơn hàng là "shipped"
-            if ($bill->status_bill !== Bill::STATUS_SHIPPED) {
+            if (!$bill->isShipped()) {
                 return response()->json(['message' => 'Chỉ có thể xác nhận đơn hàng khi đơn hàng đang được vận chuyển giao.'], 400);
             }
+            
 
             $bill->update([
                 'status_bill' => Bill::STATUS_DELIVERED,

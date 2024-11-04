@@ -87,17 +87,17 @@ Route::prefix('client')->as('client.')->group(function () {
 });
 
 
-Route::apiResource('products', ProductController::class)
-->names('products');
 
-Route::delete('images/{type}/{encodedPath}', [ProductController::class, 'deleteImageByPath'])->name('images.deleteByPath');
 
 Route::prefix('admins')
     ->as('admins.')
     ->group(function () {
         Route::post('/signin', [AdminAuthController::class, 'login'])->name('signin');
         Route::middleware(['auth:sanctum', 'admin'])->group(function () {
- 
+            Route::apiResource('products', ProductController::class)
+            ->names('products');
+            Route::delete('images/{type}/{encodedPath}', [ProductController::class, 'deleteImageByPath'])->name('images.deleteByPath');
+            
             Route::apiResource('attributes', AttributeController::class)
                 ->names('attributes');
 
@@ -150,6 +150,8 @@ Route::prefix('admins')
              Route::post('/search-shipped', [OrderController::class, 'searchShippedOrder'])->name('orders.searchshipped');
              Route::post('/search-delivered', [OrderController::class, 'searchDeliveredOrder'])->name('orders.searchdelivered');
              Route::post('/search-canceled', [OrderController::class, 'searchCanceledOrder'])->name('orders.searchcanceled');
+             Route::get('/show_detailorder/{id}', [OrderController::class, 'showDetailOrder'])->name('orders.showdetailorder');
+             Route::post('/update_order/{id}', [OrderController::class, 'updateOrderStatus'])->name('orders.updateorder');
 
 
             });
