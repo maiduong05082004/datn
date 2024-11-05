@@ -105,8 +105,6 @@ Route::prefix('client')->as('client.')->group(function () {
 });
 
 
-
-
 Route::prefix('admins')
     ->as('admins.')
     ->group(function () {

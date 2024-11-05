@@ -1,59 +1,18 @@
-import React, { useEffect, useState } from 'react';
-import { CKEditor } from '@ckeditor/ckeditor5-react';
+import AxiosInstance from '@/configs/axios';
+import { PlusOutlined, UploadOutlined } from '@ant-design/icons';
 import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
+import { CKEditor } from '@ckeditor/ckeditor5-react';
+import { useMutation, useQuery } from '@tanstack/react-query';
+import { Button, Checkbox, DatePicker, Form, Input, InputNumber, Select, Spin, Table, Upload } from 'antd';
+import moment from 'moment';
+import React, { useEffect, useState } from 'react';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { useMutation, useQuery } from '@tanstack/react-query';
-import axios from 'axios';
-import { Form, Input, Button, Checkbox, InputNumber, Upload, DatePicker, Spin, Select, Table } from 'antd';
-import { PlusOutlined, UploadOutlined } from '@ant-design/icons';
-import AxiosInstance from '@/configs/axios';
 const { Option } = Select;
-
-interface VariantProduct {
-  id: number | string;
-  name: string;
-  slug: string;
-  price: number;
-  stock?: number | null;
-  description: string;
-  content: string;
-  input_day: string;
-  category_id: number;
-  is_collection: boolean;
-  is_hot: boolean;
-  is_new: boolean;
-  group: VariantProductGroup;
-  variations: VariantProductVariation[];
-  images: string[];
-}
 
 interface VariantProductGroup {
   id: number;
   name: string;
-}
-
-interface VariantProductVariation {
-  id: number;
-  stock: number;
-  attribute_value_image_variant: AttributeValueImageVariant;
-  variation_values: VariationValue[];
-  variation_album_images: string[];
-}
-
-interface AttributeValueImageVariant {
-  id: number;
-  value: string;
-  image_path: string;
-}
-
-interface VariationValue {
-  attribute_value_id: number;
-  value: string;
-  sku: string;
-  stock: number;
-  price: number;
-  discount: number;
 }
 
 interface Attribute {
@@ -72,6 +31,7 @@ interface AttributeValue {
 interface Variant {
   attributeName: string;
   attributeValue: string;
+  attributeValueId: number;
   combinations: Combination[];
   colorImage: any[];
   albumImages: any[];
@@ -117,7 +77,7 @@ const AddProduct: React.FC = () => {
   });
 
   const { mutate } = useMutation({
-    mutationFn: async (data: VariantProduct) => {
+    mutationFn: async (data: FormData) => {
       const response = await AxiosInstance.post('http://localhost:8000/api/admins/products', data);
       return response.data;
     },
@@ -183,16 +143,16 @@ const AddProduct: React.FC = () => {
   const generateVariants = () => {
     const primaryAttribute = attributes.find((attr) => attr.attribute_type === 0);
     const otherAttributes = attributes.filter((attr) => attr.attribute_type !== 0);
-
+  
     if (!primaryAttribute || otherAttributes.length === 0) {
       toast.error('Thiếu thuộc tính chính hoặc các thuộc tính khác để tạo biến thể');
       return;
     }
-
+  
     const newVariants: Variant[] = primaryAttribute.selectedValues.flatMap((primaryValueId) => {
       const primaryValue = primaryAttribute.attribute_values.find((val) => val.id === primaryValueId);
       if (!primaryValue) return [];
-
+  
       const combinations: Combination[] = otherAttributes.flatMap((attribute) => {
         return attribute.selectedValues.map((valueId) => {
           const value = attribute.attribute_values.find((val) => val.id === valueId);
@@ -204,18 +164,20 @@ const AddProduct: React.FC = () => {
           };
         });
       });
-
+  
       return {
         attributeName: primaryAttribute.name,
         attributeValue: primaryValue.value,
+        attributeValueId: primaryValue.id,
         combinations,
         colorImage: [],
         albumImages: [],
       };
     });
-
+  
     setVariants(newVariants);
   };
+  
 
   const handleUploadChangeForVariant = (index: number, key: 'colorImage' | 'albumImages', { fileList }: any) => {
     const updatedVariants = [...variants];
@@ -227,6 +189,61 @@ const AddProduct: React.FC = () => {
     setShowVariantForm(!showVariantForm);
   };
 
+  
+  const onFinish = async (values: any) => {
+    const formData = new FormData();
+    const formattedInputDay = moment(values.input_day).format("YYYY-MM-DD");
+
+    formData.append('name', values.name);
+    formData.append('price', values.price.toString());
+    formData.append('description', values.description);
+    formData.append('content', content);
+    formData.append('input_day', formattedInputDay);
+    formData.append('category_id', values.category_id.toString());
+    formData.append('is_collection', values.is_collection ? '1' : '0');
+    formData.append('is_hot', values.is_hot ? '1' : '0');
+    formData.append('is_new', values.is_new ? '1' : '0');
+    formData.append('stock', values.stock ? values.stock.toString() : '0');
+    formData.append('group_id', values.variant_group ? values.variant_group.toString() : '');
+
+    albumList.forEach((file: any) => {
+        formData.append('album_images[]', file.originFileObj);
+    });
+
+    const variantData = variants.map((variant) => {
+      const attributeValueId = variant.attributeValueId;
+        const colorImageFile = variant.colorImage.length ? variant.colorImage[0].originFileObj : null;
+        const albumImages = variant.albumImages.map((file: any) => file.originFileObj);
+
+        const sizes = variant.combinations.reduce((acc: { [key: number]: { stock: number; discount: number } }, combination) => {
+            acc[combination.sizeId] = {
+                stock: combination.stock,
+                discount: combination.discount,
+            };
+            return acc;
+        }, {});
+
+        if (colorImageFile) {
+            formData.append(`color_image_${attributeValueId}`, colorImageFile);
+        }
+        albumImages.forEach((file: any) => {
+            formData.append(`album_images_${attributeValueId}[]`, file);
+        });
+
+        return {
+          attribute_value_id: attributeValueId,
+          colorImage: colorImageFile ? colorImageFile.name : null,
+          albumImages: albumImages.map((file: any) => file.name),
+          sizes: sizes,
+      };
+    });
+
+    formData.append('variations', JSON.stringify(variantData));
+    mutate(formData);
+};
+
+  
+  
   
   
   
@@ -374,7 +391,7 @@ const AddProduct: React.FC = () => {
                     key: 'attributeValue',
                   },
                   {
-                    title: 'Thông tin ',
+                    title: 'Thông tin',
                     dataIndex: 'combinations',
                     key: 'combinations',
                     render: (combinations: Combination[], record, index) => (
