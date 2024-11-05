@@ -67,7 +67,6 @@ Route::prefix('client')->as('client.')->group(function () {
         Route::get('/showDetailOrder/{oderId}', [ProductProductController::class, 'showDetailOrder'])->name('showDetailOrder');
         Route::post('orders/cancel/{orderId}', [ProductProductController::class, 'cancelOrder']);
         Route::post('orders/confirm/{orderId}', [ProductProductController::class, 'confirmOrder']);
-
     });
     Route::prefix('cart')->as('cart.')->middleware('auth:sanctum')->group(function () {
         Route::get('/', [ProductCartController::class, 'getCartItems'])->name('index');
@@ -84,7 +83,7 @@ Route::prefix('client')->as('client.')->group(function () {
         Route::post('/submit', [CheckoutController::class, 'submit'])->name('submit');
         Route::get('/success', [CheckoutController::class, 'success'])->name('success');
         Route::get('/cancel', [CheckoutController::class, 'cancel'])->name('cancel');
-
+    });
     Route::prefix('payment')->as('payment.')->group(function () {
         Route::post('/vn-pay', [PaymentController::class, 'vnpayPayment'])->name('payment.vn-pay');
         Route::get('/callback', [PaymentController::class, 'vnpayCallback'])->name('payment.callback');
@@ -112,9 +111,9 @@ Route::prefix('admins')
         Route::post('/signin', [AdminAuthController::class, 'login'])->name('signin');
         Route::middleware(['auth:sanctum', 'admin'])->group(function () {
             Route::apiResource('products', ProductController::class)
-            ->names('products');
+                ->names('products');
             Route::delete('images/{type}/{encodedPath}', [ProductController::class, 'deleteImageByPath'])->name('images.deleteByPath');
-            
+
             Route::apiResource('attributes', AttributeController::class)
                 ->names('attributes');
 
@@ -124,7 +123,7 @@ Route::prefix('admins')
 
             Route::apiResource('attribute_values', AttributeValueController::class)
                 ->names('attribute_values');
-                
+
             Route::prefix('categories')->group(function () {
                 Route::post('{id}/soft-delete', [AdminCategoryController::class, 'softDestroy'])->name('categories.soft-delete');
                 Route::post('{id}/restore', [AdminCategoryController::class, 'restore'])->name('categories.restore');
@@ -155,23 +154,20 @@ Route::prefix('admins')
 
 
             Route::prefix('orders')->group(function () {
-             Route::get('/',[OrderController::class, 'index'])->name('orders.index');
-             Route::get('/pending', [OrderController::class, 'pendingOrders'])->name('orders.pending');
-             Route::get('/processed', [OrderController::class, 'processedOrders'])->name('orders.processed');
-             Route::get('/shipped', [OrderController::class, 'shippedOrders'])->name('orders.shipped');
-             Route::get('/delivered', [OrderController::class, 'deliveredOrders'])->name('orders.delivered');
-             Route::get('/canceled', [OrderController::class, 'canceledOrders'])->name('orders.canceled');
-             Route::post('/search_order', [OrderController::class, 'searchOrder'])->name('orders.searchorder');
-             Route::post('/search-pending', [OrderController::class, 'searchPendingOrder'])->name('orders.searchpending');
-             Route::post('/search-processed', [OrderController::class, 'searchProcessedOrder'])->name('orders.searchprocessed');
-             Route::post('/search-shipped', [OrderController::class, 'searchShippedOrder'])->name('orders.searchshipped');
-             Route::post('/search-delivered', [OrderController::class, 'searchDeliveredOrder'])->name('orders.searchdelivered');
-             Route::post('/search-canceled', [OrderController::class, 'searchCanceledOrder'])->name('orders.searchcanceled');
-             Route::get('/show_detailorder/{id}', [OrderController::class, 'showDetailOrder'])->name('orders.showdetailorder');
-             Route::post('/update_order/{id}', [OrderController::class, 'updateOrderStatus'])->name('orders.updateorder');
-
-
+                Route::get('/', [OrderController::class, 'index'])->name('orders.index');
+                Route::get('/pending', [OrderController::class, 'pendingOrders'])->name('orders.pending');
+                Route::get('/processed', [OrderController::class, 'processedOrders'])->name('orders.processed');
+                Route::get('/shipped', [OrderController::class, 'shippedOrders'])->name('orders.shipped');
+                Route::get('/delivered', [OrderController::class, 'deliveredOrders'])->name('orders.delivered');
+                Route::get('/canceled', [OrderController::class, 'canceledOrders'])->name('orders.canceled');
+                Route::post('/search_order', [OrderController::class, 'searchOrder'])->name('orders.searchorder');
+                Route::post('/search-pending', [OrderController::class, 'searchPendingOrder'])->name('orders.searchpending');
+                Route::post('/search-processed', [OrderController::class, 'searchProcessedOrder'])->name('orders.searchprocessed');
+                Route::post('/search-shipped', [OrderController::class, 'searchShippedOrder'])->name('orders.searchshipped');
+                Route::post('/search-delivered', [OrderController::class, 'searchDeliveredOrder'])->name('orders.searchdelivered');
+                Route::post('/search-canceled', [OrderController::class, 'searchCanceledOrder'])->name('orders.searchcanceled');
+                Route::get('/show_detailorder/{id}', [OrderController::class, 'showDetailOrder'])->name('orders.showdetailorder');
+                Route::post('/update_order/{id}', [OrderController::class, 'updateOrderStatus'])->name('orders.updateorder');
             });
-
         });
     });
