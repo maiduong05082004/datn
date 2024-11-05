@@ -21,7 +21,8 @@ use App\Http\Controllers\Api\Client\Product\CartController as ProductCartControl
 use App\Http\Controllers\Api\Client\Product\ShippingController;
 use App\Http\Controllers\Api\Client\PromotionController;
 use App\Http\Controllers\CartController;
-use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\Api\Admin\PaymentController;
+use App\Http\Controllers\Api\Client\CommentController;
 
 Route::prefix('client')->as('client.')->group(function () {
     Route::prefix('auth')
@@ -83,6 +84,22 @@ Route::prefix('client')->as('client.')->group(function () {
         Route::post('/submit', [CheckoutController::class, 'submit'])->name('submit');
         Route::get('/success', [CheckoutController::class, 'success'])->name('success');
         Route::get('/cancel', [CheckoutController::class, 'cancel'])->name('cancel');
+
+    Route::prefix('payment')->as('payment.')->group(function () {
+        Route::post('/vn-pay', [PaymentController::class, 'vnpayPayment'])->name('payment.vn-pay');
+        Route::get('/callback', [PaymentController::class, 'vnpayCallback'])->name('payment.callback');
+    });
+    Route::prefix('comment')->as('comment.')->group(function () {
+        Route::post('/store', [CommentController::class, 'store'])->name('comment.store'); // Tạo 1 bình luận
+        Route::get('/list', [CommentController::class, 'index'])->name('comment.list'); // Lấy list bình luận đã duyệt theo user_id & product_id
+        Route::put('/update', [CommentController::class, 'update'])->name('comment.update'); // Cập nhật bình luận
+        Route::delete('/destroy', [CommentController::class, 'destroy'])->name('comment->destroy'); // Xóa bình luận bên giao diện
+        Route::get('/rating', [CommentController::class, 'getProductRating'])->name('comment.rating'); // Trung bình số sao đánh giá
+
+        Route::post('approve', [CommentController::class, 'approve'])->name('comment.approve'); // Duyệt bình luận
+        Route::post('/reply', [CommentController::class, 'reply'])->name('comment.reply'); // Admin trả lời bình luận của user
+        Route::post('/hide', [CommentController::class, 'hideComment'])->name('comment.hide'); // Ẩn bình luận nếu vi phạm 
+        Route::post('/manageUser', [CommentController::class, 'manageUser'])->name('comment.manageUser'); // quản lý user (khóa nếu comment bị báo cáo nhiều)
     });
 });
 
