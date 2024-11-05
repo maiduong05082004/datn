@@ -62,9 +62,9 @@ class Product extends Model
     protected $dates = ['deleted_at'];
 
     // Relationship with wishlist
-    public function wishlistedBy()
+    public function wishlistItems()
     {
-        return $this->belongsToMany(User::class, 'wishlists')->withTimestamps();
+        return $this->hasMany(WishlistItem::class);
     }
     
 }

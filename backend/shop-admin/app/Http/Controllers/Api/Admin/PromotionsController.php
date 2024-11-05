@@ -9,6 +9,7 @@ use App\Models\Product;
 use App\Models\User;
 use App\Models\Promotion;
 use App\Models\Wishlist;
+use App\Models\WishlistItem;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 
@@ -27,7 +28,7 @@ class PromotionsController extends Controller
 
     public function getUserProductPromotions($userId, $productId)
     {
-        $userWishlistedProduct = Wishlist::where('user_id', $userId)
+        $userWishlistedProduct = WishlistItem::where('user_id', $userId)
             ->where('product_id', $productId)
             ->exists();
         if ($userWishlistedProduct) {

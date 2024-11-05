@@ -43,12 +43,16 @@ class ProductVariationValue extends Model
     public function attribute()
     {
         return $this->hasOneThrough(
-            Attribute::class, 
-            AttributeValue::class, 
-            'id', 
-            'id', 
-            'attribute_value_id', 
+            Attribute::class,
+            AttributeValue::class,
+            'id',
+            'id',
+            'attribute_value_id',
             'attribute_id'
         );
+    }
+    public function billDetails()
+    {
+        return $this->hasMany(BillDentail::class, 'product_variation_value_id');
     }
 }

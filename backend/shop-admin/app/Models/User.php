@@ -90,9 +90,9 @@ class User extends Authenticatable
         $this->notify(new ResetPasswordNotification($token));
     }
 
-    public function wishlist()
+    public function wishlistItems()
     {
-        return $this->belongsToMany(Product::class, 'wishlists')->withTimestamps();
+        return $this->hasMany(WishlistItem::class);
     }
     public function userPromotions()
     {
