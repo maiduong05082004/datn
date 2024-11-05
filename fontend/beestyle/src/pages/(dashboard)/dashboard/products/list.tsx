@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { Table, message, Button, Image, Tag, Modal, Popconfirm, Spin } from 'antd';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import axios from 'axios';
 import { format } from 'date-fns';
 import { DeleteOutlined, EditOutlined, EyeOutlined, PlusOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
+import AxiosInstance from '@/configs/axios';
 
 interface Product {
   id: number;
@@ -46,14 +46,14 @@ const ListProducts = () => {
   const { data: productsData, isLoading } = useQuery({
     queryKey: ['products'],
     queryFn: async () => {
-      const response = await axios.get('http://localhost:8000/api/admins/products');
+      const response = await AxiosInstance.get('http://localhost:8000/api/admins/products');
       return response.data;
     }
   });
 
   const mutation = useMutation({
     mutationFn: async (id: number) => {
-      await axios.delete(`http://localhost:8000/api/admins/products/${id}`);
+      await AxiosInstance.delete(`http://localhost:8000/api/admins/products/${id}`);
     },
     onSuccess: () => {
       messageApi.success('Xóa thành công');
