@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Form, Input, Button, Select, message, DatePicker } from 'antd';
-import axios from 'axios';
+import axiosInstance from '@/configs/axios';
 import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
 
@@ -28,7 +28,7 @@ const UpdateUser = () => {
   const { data: userValue } = useQuery({
     queryKey: ['user', id],
     queryFn: async () => {
-      const response = await axios.get(`http://127.0.0.1:8000/api/admins/users/${id}`);
+      const response = await axiosInstance.get(`http://127.0.0.1:8000/api/admins/users/${id}`);
       return response.data;
 
     },
