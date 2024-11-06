@@ -1,6 +1,7 @@
 import { useMutation } from '@tanstack/react-query';
 import { Form, Input, Button, Select, message, DatePicker } from 'antd';
-import axios from 'axios';
+import axiosInstance from '@/configs/axios';
+
 import React, { useState } from 'react';
 
 interface Users {
@@ -11,6 +12,9 @@ interface Users {
   is_active: boolean;
   date_of_birth: string;
   sex: 'male' | 'female';
+  phone: string;
+  password: string;
+  address: string;
   provider_name?: string | null;
   provider_id?: string | null;
   email_verified_at?: string | null;
@@ -20,12 +24,12 @@ interface Users {
 const AddUser: React.FC = () => {
   const [form] = Form.useForm();
   const [messageApi, contextHolder] = message.useMessage();
-  const [loading] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const mutation = useMutation({
     mutationFn: async (user: Users) => {
       try {
-        const response = await axios.post(
+        const response = await axiosInstance.post(
           `http://127.0.0.1:8000/api/admins/users`,
           user,
           {
@@ -50,9 +54,9 @@ const AddUser: React.FC = () => {
       messageApi.error(`Lỗi: ${error.message}`);
     },
   });
-  
 
   const onFinish = (values: any) => {
+    setLoading(true);
     const payload: Users = {
       name: values.name.trim(),
       email: values.email.trim(),
@@ -62,12 +66,19 @@ const AddUser: React.FC = () => {
         ? values.date_of_birth.format('YYYY-MM-DD')
         : null,
       sex: values.sex || null,
+      phone: values.phone.trim(),
+      password: values.password,
+      address: values.address.trim(),
       provider_name: null,
       provider_id: null,
       email_verified_at: null,
       last_login_at: null,
     };
-    mutation.mutate(payload);
+    mutation.mutate(payload, {
+      onSettled: () => {
+        setLoading(false);
+      },
+    });
   };
 
   return (
@@ -102,6 +113,38 @@ const AddUser: React.FC = () => {
               ]}
             >
               <Input placeholder="Nhập email" size="large" />
+            </Form.Item>
+
+            <Form.Item
+              label="Số điện thoại"
+              name="phone"
+              rules={[
+                { required: true, message: 'Số điện thoại là bắt buộc' },
+                { pattern: /^[0-9]{10,11}$/, message: 'Số điện thoại không hợp lệ' },
+              ]}
+            >
+              <Input placeholder="Nhập số điện thoại" size="large" />
+            </Form.Item>
+
+            <Form.Item
+              label="Mật khẩu"
+              name="password"
+              rules={[
+                { required: true, message: 'Mật khẩu là bắt buộc' },
+                { min: 6, message: 'Mật khẩu phải có ít nhất 6 ký tự' },
+              ]}
+            >
+              <Input.Password placeholder="Nhập mật khẩu" size="large" />
+            </Form.Item>
+
+            <Form.Item
+              label="Địa chỉ"
+              name="address"
+              rules={[
+                { required: true, message: 'Địa chỉ là bắt buộc' },
+              ]}
+            >
+              <Input placeholder="Nhập địa chỉ" size="large" />
             </Form.Item>
 
             <Form.Item

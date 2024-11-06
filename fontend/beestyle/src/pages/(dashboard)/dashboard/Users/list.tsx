@@ -1,17 +1,15 @@
 import React from 'react';
-import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Table, Spin, message, Button, Space } from 'antd';
 import { EditOutlined, PlusOutlined, EyeOutlined } from '@ant-design/icons';
-import dayjs from 'dayjs';
+import axiosInstance from '@/configs/axios';
 
 interface User {
   id: number;
   name: string;
   email: string;
-  phone: string;
-  address: string;
+  phone: string | null;
   role: 'admin' | 'user' | 'moderator';
   is_active: boolean;
   date_of_birth: string | null;
@@ -28,7 +26,7 @@ const UserList: React.FC = () => {
   const { data: userManager = [], isLoading } = useQuery<User[]>({
     queryKey: ['userManager'],
     queryFn: async () => {
-      const response = await axios.get('http://127.0.0.1:8000/api/admins/users');
+      const response = await axiosInstance.get('http://127.0.0.1:8000/api/admins/users');
       return response.data;
     },
   });
@@ -46,7 +44,7 @@ const UserList: React.FC = () => {
     role: item.role,
     isActive: item.is_active ? 'Active' : 'Inactive',
     dateOfBirth: item.date_of_birth,
-    sex: item.sex === 'male' ? 'Nam' : 'Nữ',
+    sex: item.sex === 'male' ? 'Nam' : item.sex === 'female' ? 'Nữ' : '',
     createdAt: new Date(item.created_at).toLocaleString(),
     updatedAt: new Date(item.updated_at).toLocaleString(),
   }));
@@ -67,11 +65,6 @@ const UserList: React.FC = () => {
       title: 'Email',
       dataIndex: 'email',
       key: 'email',
-    },
-    {
-      title: 'Địa chỉ',
-      dataIndex: 'address',
-      key: 'address',
     },
     {
       title: 'Vai trò',
@@ -132,7 +125,7 @@ const UserList: React.FC = () => {
           <Button
             type="primary"
             icon={<PlusOutlined />}
-            onClick={() => navigate('/admin/addUser')}
+            onClick={() => navigate('/admin/user/add')}
             className="bg-indigo-600 hover:bg-indigo-700 text-white"
           >
             Thêm mới
