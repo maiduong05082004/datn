@@ -43,8 +43,8 @@ class Comment extends Model
         return $this->hasMany(Comment::class, 'parent_id');
     }
 
-    public function billDentail()
+    public function billDetail()
     {
-        return $this->belongsTo(BillDentail::class, 'bill_detail_id');
+        return $this->belongsTo(BillDetail::class, 'bill_detail_id');
     }
 }

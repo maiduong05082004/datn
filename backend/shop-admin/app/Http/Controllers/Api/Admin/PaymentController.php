@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Api\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Bill;
-use App\Models\BillDentail;
+use App\Models\BillDetail;
 use App\Models\CartItem;
 use App\Models\Payment;
 use App\Models\ProductVariationValue;
@@ -119,7 +119,7 @@ class PaymentController extends Controller
             $subtotal += $total_amount;
 
             // Tạo bản ghi BillDetail
-            BillDentail::create([
+            BillDetail::create([
                 'bill_id' => $bill->id,
                 'product_id' => $item->product_id,
                 'quantity' => $item->quantity,
@@ -156,6 +156,9 @@ class PaymentController extends Controller
         $hashdata = '';
 
         foreach ($inputData as $key => $value) {
+            if (is_array($value)) {
+                $value = json_encode($value);
+            }
             $hashdata .= '&' . urldecode($key) . '=' . urlencode($value);
         }
         $hashdata = ltrim($hashdata, '&');
@@ -172,7 +175,7 @@ class PaymentController extends Controller
                 return response()->json(['message' => 'Bill not found'], 404);
             }
             $orderDetails = [];
-            foreach ($bill->billDentail as $detail) {
+            foreach ($bill->billDetail as $detail) {
                 $orderDetails[] = [
                     'product_id' => $detail->product_id,
                     'variations' => [
@@ -193,6 +196,7 @@ class PaymentController extends Controller
                 ]);
                 $bill->status_bill = 'completed';
                 $bill->save();
+
                 $userId = $bill->user_id;
                 CartItem::where('user_id', $userId)->delete();
                 return response()->json([
@@ -206,7 +210,7 @@ class PaymentController extends Controller
                     'message' => 'Payment processed successfully, cart items cleared'
                 ]);
                 // foreach ($bill->billDentail as $dentails) {
-                //     BillDentail::create([
+                //     BillDetail::create([
                 //         'bill_id' => $bill->id,
                 //         'product_id' => $dentails->product_id,
                 //         'quantity' => $dentails->quantity,

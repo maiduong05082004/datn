@@ -53,6 +53,6 @@ class ProductVariationValue extends Model
     }
     public function billDetails()
     {
-        return $this->hasMany(BillDentail::class, 'product_variation_value_id');
+        return $this->hasMany(BillDetail::class, 'product_variation_value_id');
     }
 }
