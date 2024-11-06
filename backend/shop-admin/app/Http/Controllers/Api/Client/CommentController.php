@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Api\Client;
 
 use App\Http\Controllers\Controller;
 use App\Models\Bill;
-use App\Models\BillDentail;
+use App\Models\BillDetail;
 use App\Models\Comment;
 use App\Models\User;
 use Auth;
@@ -21,16 +21,16 @@ class CommentController extends Controller
     // Kiểm tra xem user đã mua sản phẩm chưa
     private function hasPurchasedProduct($userId, $productId)
     {
-        // return Bill::join('bill_dentails', 'bills.id', '=', 'bill_dentails.bill_id')
+        // return Bill::join('bill_details', 'bills.id', '=', 'bill_details.bill_id')
         //     ->where('bills.user_id', $userId)
-        //     ->where('bill_dentails.product_id', $productId)
+        //     ->where('bill_details.product_id', $productId)
         //     ->where('bills.status_bill', 'completed')
         //     ->exists();
-        return BillDentail::join('bills', 'bill_dentails.bill_id', '=', 'bills.id')
+        return BillDetail::join('bills', 'bill_details.bill_id', '=', 'bills.id')
             ->where('bills.user_id', $userId)
-            ->where('bill_dentails.product_id', $productId)
+            ->where('bill_details.product_id', $productId)
             ->where('bills.status_bill', 'completed') // Chỉ kiểm tra hóa đơn đã thanh toán
-            ->select('bill_dentails.id as bill_detail_id', 'bill_dentails.product_id', 'bill_dentails.product_variation_value_id') // Chọn các trường bạn cần
+            ->select('bill_details.id as bill_detail_id', 'bill_details.product_id', 'bill_details.product_variation_value_id') // Chọn các trường bạn cần
             ->first();
     }
 
@@ -54,7 +54,7 @@ class CommentController extends Controller
             $stars = $item['stars'] ?? null;
 
             // Kiểm tra từng bình luận với bill_detail_id
-            $billDetail = BillDentail::find($billDetailId);
+            $billDetail = BillDetail::find($billDetailId);
 
             if (!$billDetail || $billDetail->product_id !== $productDetails->product_id) {
                 return response()->json(['message' => 'Invalid bill detail for the product.'], 404);
@@ -105,7 +105,7 @@ class CommentController extends Controller
     {
         $productId = $request->input('product_id');
 
-        $comments = Comment::with(['BillDentail.productVariationValue.attributeValue'])
+        $comments = Comment::with(['BillDetail.productVariationValue.attributeValue'])
             ->where('product_id', $productId)
             ->where('is_visible', 1)
             ->paginate(10);
@@ -116,12 +116,12 @@ class CommentController extends Controller
                 'comment_id' => $comment->id,
                 'content' => $comment->content,
                 'bill_detail_id' => $comment->bill_detail_id,
-                'product_id' => $comment->billDentail->product_id ?? null,
+                'product_id' => $comment->billDetail->product_id ?? null,
                 'commentDate' => $comment->commentDate,
                 'variation_value' => [
-                    'product_variation_value_id' => $comment->billDentail->productVariationValue->id ?? null,
-                    'size' => $comment->billDentail->productVariationValue->attributeValue->value ?? null,
-                    'color' => $comment->billDentail->productVariationValue->productVariation->attributeValue->value ?? null,
+                    'product_variation_value_id' => $comment->billDetail->productVariationValue->id ?? null,
+                    'size' => $comment->billDetail->productVariationValue->attributeValue->value ?? null,
+                    'color' => $comment->billDetail->productVariationValue->productVariation->attributeValue->value ?? null,
                 ],
             ];
         }
@@ -165,6 +165,28 @@ class CommentController extends Controller
         $comment->save();
 
         return response()->json(['message' => 'Comment updated successfully.', 'comment' => $comment]);
+    }
+
+    public function destroy(Request $request)
+    {
+        $userId = Auth::id();
+        $id = $request->input('id');
+        $comment = Comment::find($id);
+
+        // Kiểm tra xem bình luận có tồn tại không
+        if (!$comment) {
+            return response()->json(['message' => 'Comment not found.'], 404);
+        }
+
+        // Chỉ cho phép xóa nếu là quản trị viên hoặc là chủ sở hữu của bình luận
+        if (Auth::user()->role !== 'admin' && $comment->user_id !== $userId) {
+            return response()->json(['message' => 'Permission denied.'], 403);
+        }
+
+        // Xóa bình luận
+        $comment->delete();
+
+        return response()->json(['message' => 'Comment deleted successfully.']);
     }
 
     public function report(Request $request)
