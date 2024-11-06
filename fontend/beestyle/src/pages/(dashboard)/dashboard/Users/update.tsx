@@ -31,14 +31,14 @@ const UpdateUser: React.FC = () => {
 
   const { mutate } = useMutation({
     mutationFn: async (user: Users) => {
-        const response = await axiosInstance.put(
-          `http://127.0.0.1:8000/api/admins/users/${id}`,
-          user,
-          {
-            headers: { 'Content-Type': 'application/json' },
-          }
-        );
-        return response.data;
+      const response = await axiosInstance.put(
+        `http://127.0.0.1:8000/api/admins/users/${id}`,
+        user,
+        {
+          headers: { 'Content-Type': 'application/json' },
+        }
+      );
+      return response.data;
     },
     onSuccess: () => {
       messageApi.success('Cập nhật người dùng thành công');
@@ -70,28 +70,30 @@ const UpdateUser: React.FC = () => {
             layout="vertical"
             onFinish={onFinish}
             className="space-y-6"
-            initialValues={{...userManager}}
+            initialValues={{ ...userManager }}
           >
             <Form.Item
               label="Tên Người Dùng"
               name="name"
+              className="mb-[10px]"
               rules={[
                 { required: true, message: 'Tên người dùng là bắt buộc' },
                 { pattern: /^[a-zA-Z\s-]+$/, message: 'Tên chỉ chứa chữ cái, khoảng trắng và dấu gạch nối' },
               ]}
             >
-              <Input placeholder="Nhập tên người dùng" size="large" />
+              <Input placeholder="Nhập tên người dùng" size="large" className='h-10' />
             </Form.Item>
 
             <Form.Item
               label="Email"
               name="email"
+              className="mb-[10px]"
               rules={[
                 { required: true, message: 'Email là bắt buộc' },
                 { type: 'email', message: 'Email không hợp lệ' },
               ]}
             >
-              <Input placeholder="Nhập email" size="large" />
+              <Input placeholder="Nhập email" size="large" className='h-10' />
             </Form.Item>
 
             <Form.Item
@@ -102,18 +104,17 @@ const UpdateUser: React.FC = () => {
                 { pattern: /^[0-9]{10,11}$/, message: 'Số điện thoại không hợp lệ' },
               ]}
             >
-              <Input placeholder="Nhập số điện thoại" size="large" />
+              <Input placeholder="Nhập số điện thoại" size="large" className='h-10' />
             </Form.Item>
 
             <Form.Item
               label="Mật khẩu"
               name="password"
               rules={[
-                { required: true, message: 'Mật khẩu là bắt buộc' },
                 { min: 6, message: 'Mật khẩu phải có ít nhất 6 ký tự' },
               ]}
             >
-              <Input.Password placeholder="Nhập mật khẩu" size="large" />
+              <Input.Password placeholder="Nhập mật khẩu" size="large" className='h-10' />
             </Form.Item>
 
             <Form.Item
@@ -123,7 +124,7 @@ const UpdateUser: React.FC = () => {
                 { required: true, message: 'Địa chỉ là bắt buộc' },
               ]}
             >
-              <Input placeholder="Nhập địa chỉ" size="large" />
+              <Input placeholder="Nhập địa chỉ" size="large" className='h-10' />
             </Form.Item>
 
             <Form.Item>

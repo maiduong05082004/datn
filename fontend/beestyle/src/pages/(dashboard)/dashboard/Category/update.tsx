@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import axiosInstance from '@/configs/axios';
 import { Button, Form, Input, Select, message, Spin, Checkbox } from 'antd';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -20,6 +20,8 @@ const UpdateCategories: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const [file, setFile] = useState<File | null>(null);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
+  const queryClient = useQueryClient();
+  const [loading, setLoading] = useState<boolean>(false);
 
   const { data: categories, isLoading: isLoadingCategories } = useQuery<Category[]>({
     queryKey: ['categories'],
@@ -51,14 +53,16 @@ const UpdateCategories: React.FC = () => {
 
   const { mutate } = useMutation({
     mutationFn: async (categoryData: FormData) => {
-      return await axiosInstance.put(`http://127.0.0.1:8000/api/admins/categories/${id}`, categoryData, {
+      return await axiosInstance.post(`http://127.0.0.1:8000/api/admins/categories/${id}`, categoryData, {
         headers: { 'Content-Type': 'multipart/form-data' },
+        params: { _method: 'PUT' },
       });
     },
     onSuccess: () => {
       messageApi.success('Cập nhật danh mục thành công!');
-      form.resetFields();
+      queryClient.invalidateQueries({ queryKey: ['categories'] });
       setFile(null);
+      setLoading(false);
     },
     onError: (error: any) => {
       const errorMessage = error.response?.data?.message || `Lỗi: ${error.message}`;
@@ -67,17 +71,18 @@ const UpdateCategories: React.FC = () => {
   });
 
   const onFinish = (values: any) => {
+    setLoading(true);
     const formData = new FormData();
-  
+
     if (values.name) {
       formData.append('name', values.name);
     } else {
       message.error('Tên danh mục là bắt buộc.');
       return;
     }
-  
+
     formData.append('status', values.status ? '1' : '0');
-  
+
     if (values.parent_id) {
       formData.append('parent_id', values.parent_id);
       if (file) {
@@ -92,11 +97,11 @@ const UpdateCategories: React.FC = () => {
         return;
       }
     }
-  
+
     mutate(formData);
   };
-  
-  
+
+
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -126,23 +131,25 @@ const UpdateCategories: React.FC = () => {
               label={<span className="font-medium text-gray-700">Tên danh mục</span>}
               name="name"
               rules={[{ required: true, message: 'Tên danh mục là bắt buộc' }]}
+              className='mb-[10px]'
             >
               <Input
                 placeholder="Nhập tên danh mục"
                 size="large"
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                className="h-10"
               />
             </Form.Item>
 
             <Form.Item
               label={<span className="font-medium text-gray-700">Danh mục cha</span>}
               name="parent_id"
+              className='mb-[10px]'
             >
               <Select
                 allowClear
                 placeholder="Chọn danh mục cha (nếu có)"
                 size="large"
-                className="w-full border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-400"
+                className="h-10"
                 options={categories?.map((cat) => ({
                   value: cat.id,
                   label: cat.name,
@@ -155,7 +162,7 @@ const UpdateCategories: React.FC = () => {
               name="image"
             >
               {previewImage && (
-                <div className="mb-4">
+                <div className="mb-[10px]">
                   <img
                     src={previewImage}
                     alt="Category Preview"
@@ -180,7 +187,7 @@ const UpdateCategories: React.FC = () => {
 
             <Form.Item>
               <div className='flex justify-end space-x-4'>
-                <Button type="primary" htmlType="submit">
+                <Button type="primary" htmlType="submit" loading={loading}>
                   Submit
                 </Button>
                 <Button
