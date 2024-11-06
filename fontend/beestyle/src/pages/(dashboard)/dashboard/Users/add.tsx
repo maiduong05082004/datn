@@ -4,6 +4,7 @@ import axiosInstance from '@/configs/axios';
 
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { HomeOutlined, LockOutlined, MailOutlined, PhoneOutlined, UserOutlined } from '@ant-design/icons';
 
 interface Users {
   name: string;
@@ -71,7 +72,7 @@ const AddUser: React.FC = () => {
                 { pattern: /^[a-zA-Z\s-]+$/, message: 'Tên chỉ chứa chữ cái, khoảng trắng và dấu gạch nối' },
               ]}
             >
-              <Input placeholder="Nhập tên người dùng" size="large" />
+              <Input placeholder="Nhập tên người dùng" size="large" prefix={<UserOutlined />} />
             </Form.Item>
 
             <Form.Item
@@ -82,7 +83,7 @@ const AddUser: React.FC = () => {
                 { type: 'email', message: 'Email không hợp lệ' },
               ]}
             >
-              <Input placeholder="Nhập email" size="large" />
+              <Input placeholder="Nhập email" size="large" prefix={<MailOutlined />}/>
             </Form.Item>
 
             <Form.Item
@@ -93,7 +94,7 @@ const AddUser: React.FC = () => {
                 { pattern: /^[0-9]{10,11}$/, message: 'Số điện thoại không hợp lệ' },
               ]}
             >
-              <Input placeholder="Nhập số điện thoại" size="large" />
+              <Input placeholder="Nhập số điện thoại" size="large" prefix={<PhoneOutlined />}/>
             </Form.Item>
 
             <Form.Item
@@ -104,7 +105,7 @@ const AddUser: React.FC = () => {
                 { min: 6, message: 'Mật khẩu phải có ít nhất 6 ký tự' },
               ]}
             >
-              <Input.Password placeholder="Nhập mật khẩu" size="large" />
+              <Input.Password placeholder="Nhập mật khẩu" size="large" prefix={<LockOutlined />}/>
             </Form.Item>
 
             <Form.Item
@@ -114,7 +115,7 @@ const AddUser: React.FC = () => {
                 { required: true, message: 'Địa chỉ là bắt buộc' },
               ]}
             >
-              <Input placeholder="Nhập địa chỉ" size="large" />
+              <Input placeholder="Nhập địa chỉ" size="large"  prefix={<HomeOutlined />}/>
             </Form.Item>
 
             <Form.Item>

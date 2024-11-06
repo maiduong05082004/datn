@@ -151,86 +151,141 @@ const DetailBill: React.FC = () => {
       render: (text: string) => <span className="text-red-500 font-bold">{text}</span>,
     },
   ];
+  const DetailRow = ({ label, value, icon }: { label: any, icon: any, value: any }) => (
+    <div className="flex items-center space-x-3">
+      <span className="text-[18px]">{icon}</span>
+      <div>
+        <p className="text-[16px] text-gray-500">{label}</p>
+        <p className={`font-medium ${value === 'Đang Xử Lý Đơn Hàng' ? 'text-green-500' : 'text-gray-800'}`}>{value}</p>
+      </div>
+    </div>
+  );
+
+  const FinancialRow = ({ label, value }: { label: string, value: string }) => (
+    <div className="flex justify-between items-center">
+      <span className="text-gray-700">{label}</span>
+      <span className="font-semibold text-gray-900">{value} đ</span>
+    </div>
+  );
 
   return (
-    <div className="px-6 py-8 bg-gray-50 min-h-screen">
-      <h2 className="text-3xl font-bold text-gray-800 mb-6 border-b pb-4">
-        Đơn Hàng: <span className="text-blue-500">{detailBill?.code_orders}</span>
-      </h2>
+    <div className=" mx-auto p-5">
+      <div className="bg-white shadow-md rounded-lg p-6 mb-4 border-l-4 border-blue-500">
+        <h2 className="text-[18px] font-bold text-gray-800">
+          Đơn Hàng:
+          <span className="text-blue-500 ml-2">{detailBill?.code_orders}</span>
+        </h2>
+        <p className="text-gray-500 text-[16px]">Chi tiết đơn hàng của bạn</p>
+      </div>
 
-      {/* Thông tin chi tiết */}
-      <div className="mb-6 p-6 bg-white rounded-xl shadow-lg border border-gray-200">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <p className="text-lg text-gray-700 font-medium">
-            <strong className="text-gray-800">Người Nhận:</strong> {detailBill?.full_name}
-          </p>
-          <p className="text-lg text-gray-700 font-medium">
-            <strong className="text-gray-800">Địa Chỉ:</strong> {`${detailBill?.address_line}, ${districtName}, ${provinceName}`}
-          </p>
-          <p className="text-lg text-gray-700 font-medium">
-            <strong className="text-gray-800">Email:</strong> {detailBill?.email_receiver}
-          </p>
-          <p className="text-lg text-gray-700 font-medium">
-            <strong className="text-gray-800">Số Điện Thoại:</strong> {detailBill?.phone_number}
-          </p>
-          <p className="text-lg text-gray-700 font-medium">
-            <strong className="text-gray-800">Ghi Chú:</strong> {detailBill?.note}
-          </p>
-          <p className="text-lg text-gray-700 font-medium">
-            <strong className="text-gray-800">Hình Thức Thanh Toán:</strong> {detailBill?.payment_type_description}
-          </p>
-          <p className="text-lg text-gray-700 font-medium">
-            <strong className="text-gray-800">Trạng Thái Đơn Hàng:</strong>
-            <span className={`ml-2 text-lg font-semibold ${detailBill?.status_description === 'Đã hủy đơn hàng' ? 'text-red-500' : 'text-green-500'}`}>
-              {detailBill?.status_description}
-            </span>
-          </p>
-          <p className="text-lg text-gray-700 font-medium">
-            <strong className="text-gray-800">Ngày Đặt Hàng:</strong> {detailBill?.order_date} {detailBill?.order_time}
-          </p>
-          <p className="text-lg text-gray-700 font-medium">
-            <strong className="text-gray-800">Tổng Phụ:</strong> {parseFloat(detailBill?.subtotal).toLocaleString()} đ
-          </p>
-          <p className="text-lg text-gray-700 font-medium">
-            <strong className="text-gray-800">Phí Vận Chuyển:</strong> {parseFloat(detailBill?.shipping_fee).toLocaleString()} đ
-          </p>
-          <p className="text-lg text-gray-700 font-medium">
-            <strong className="text-gray-800">Giảm Giá Đã Áp Dụng:</strong> {parseFloat(detailBill?.discounted_amount).toLocaleString()} đ
-          </p>
-          <p className="text-lg text-gray-700 font-medium">
-            <strong className="text-gray-800">Giảm Giá Phí Vận Chuyển:</strong> {parseFloat(detailBill?.discounted_shipping_fee).toLocaleString()} đ
-          </p>
-          <p className="text-lg font-bold text-gray-800">
-            <strong className="text-gray-800">Tổng Cộng:</strong>
-            <span className="text-red-500 ml-2">{parseFloat(detailBill?.total).toLocaleString()} đ</span>
-          </p>
+      <div className="grid md:grid-cols-2 gap-4 mb-4">
+        {/* Customer Details */}
+        <div className="bg-white rounded-lg shadow-md p-6 border">
+          <h3 className="text-[18px] font-semibold text-gray-700 border-b pb-2 mb-4">Thông Tin Khách Hàng</h3>
+          <div className="space-y-3">
+            <DetailRow
+              label="Người Nhận"
+              value={detailBill?.full_name}
+              icon="👤"
+            />
+            <DetailRow
+              label="Địa Chỉ"
+              value={`${detailBill?.address_line}, ${districtName}, ${provinceName}`}
+              icon="🏠"
+            />
+            <DetailRow
+              label="Email"
+              value={detailBill?.email_receiver}
+              icon="✉️"
+            />
+            <DetailRow
+              label="Số Điện Thoại"
+              value={detailBill?.phone_number}
+              icon="📱"
+            />
+          </div>
+        </div>
+
+        {/* Order Details */}
+        <div className="bg-white rounded-lg shadow-md p-6 border">
+          <h3 className="text-[18px] font-semibold text-gray-700 border-b pb-2 mb-4">Chi Tiết Đơn Hàng</h3>
+          <div className="space-y-3">
+            <DetailRow
+              label="Hình Thức Thanh Toán"
+              value={detailBill?.payment_type_description}
+              icon="💳"
+            />
+            <DetailRow
+              label="Trạng Thái"
+              value={detailBill?.status_bill === 'pending' ? 'Đang Xử Lý Đơn Hàng' : detailBill?.status_bill}
+              icon="🚚"
+            />
+            <DetailRow
+              label="Ngày Đặt Hàng"
+              value={`${detailBill?.order_date} ${detailBill?.order_time}`}
+              icon="📅"
+            />
+            <DetailRow
+              label="Ghi Chú"
+              value={detailBill?.note || 'Không có ghi chú'}
+              icon="📝"
+            />
+          </div>
         </div>
       </div>
-
-      {/* Khuyến mãi */}
-      <div className="mt-6 bg-white p-6 rounded-xl shadow-lg border border-gray-200">
-        <p className="text-xl font-bold text-gray-800 mb-4">Khuyến Mãi Đã Áp Dụng:</p>
-        <ul className="list-disc list-inside pl-4 text-lg text-gray-700 space-y-2">
-          {detailBill?.promotions?.map((promotion: any, index: number) => (
-            <li key={index}>
-              <strong className="text-gray-800">{promotion.code}:</strong> {promotion.description} - Giảm {promotion.discount_amount}%
-            </li>
-          ))}
-        </ul>
-      </div>
-
-      {/* Bảng sản phẩm */}
-      <div className="mt-8">
+      <div className="bg-white rounded-lg shadow-md overflow-hidden mb-4">
         <Table
           dataSource={dataSource}
           columns={columns}
           bordered
           pagination={false}
-          className="rounded-lg shadow-lg overflow-hidden"
+          className="w-full"
         />
       </div>
-    </div>
 
+      {detailBill?.promotions?.length > 0 && (
+        <div className="bg-white rounded-lg shadow-md p-4 mb-4 border">
+          <h3 className="text-[18px] font-semibold text-gray-700 border-b pb-2 mb-4">Khuyến Mãi Đã Áp Dụng</h3>
+          <ul className="space-y-2">
+            {detailBill.promotions.map((promotion: any, index: number) => (
+              <li key={index} className="flex items-center space-x-3 text-gray-700">
+                <span className="text-green-500">🎁</span>
+                <span className='text-[16px]'>
+                  <strong>{promotion.code}:</strong> {promotion.description} - Giảm {promotion.discount_amount}%
+                </span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      <div className="bg-white rounded-lg shadow-md p-4 border">
+        <h3 className="text-[18px] font-semibold text-gray-700 border-b pb-2 mb-4">Chi Tiết Thanh Toán</h3>
+        <div className="grid md:grid-cols-2 gap-4 text-[16px]">
+          <FinancialRow
+            label="Tổng Phụ"
+            value={parseFloat(detailBill?.subtotal).toLocaleString()}
+          />
+          <FinancialRow
+            label="Phí Vận Chuyển"
+            value={parseFloat(detailBill?.shipping_fee).toLocaleString()}
+          />
+          <FinancialRow
+            label="Giảm Giá"
+            value={parseFloat(detailBill?.discounted_amount).toLocaleString()}
+          />
+          <div className="md:col-span-2 mt-4 border-t pt-4">
+            <div className="flex justify-between items-center">
+              <span className="text-[18px] font-bold text-gray-800">Tổng Cộng</span>
+              <span className="text-2xl font-bold text-red-500">
+                {parseFloat(detailBill?.total).toLocaleString()} đ
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
   );
 };
 
