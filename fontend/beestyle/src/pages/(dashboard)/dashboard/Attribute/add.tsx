@@ -1,6 +1,6 @@
 import { useMutation } from '@tanstack/react-query';
 import { Form, Input, Button, message, Card, Select } from 'antd';
-import axios from 'axios';
+import axiosInstance from '@/configs/axios';
 import React from 'react';
 
 const { Option } = Select;
@@ -11,7 +11,7 @@ const AddAttribute: React.FC = () => {
 
     const { mutate } = useMutation({
         mutationFn: async (newAttribute: { name: string; attribute_type: number }) => {
-            return await axios.post('http://127.0.0.1:8000/api/admins/attributes', newAttribute);
+            return await axiosInstance.post('http://127.0.0.1:8000/api/admins/attributes', newAttribute);
         },
         onSuccess: () => {
             messageApi.success('Thêm thuộc tính thành công!');

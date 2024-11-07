@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import axios from 'axios';
+import axiosInstance from '@/configs/axios';
 import { Button, message, Modal, Popconfirm, Spin, Table } from 'antd';
 import { Link, useNavigate } from 'react-router-dom';
 import { PlusCircleFilled, DeleteOutlined, EyeOutlined, EditOutlined } from '@ant-design/icons';
@@ -33,7 +33,7 @@ const ListAttribute: React.FC = () => {
     const { data: attributes = [], isLoading, error } = useQuery({
         queryKey: ['attributes'],
         queryFn: async () => {
-            const response = await axios.get('http://127.0.0.1:8000/api/admins/attributes');
+            const response = await axiosInstance.get('http://127.0.0.1:8000/api/admins/attributes');
             return response.data.data || [];
         },
     });
@@ -42,14 +42,14 @@ const ListAttribute: React.FC = () => {
     const { data: attributeValues = [] } = useQuery({
         queryKey: ['attributesvalue'],
         queryFn: async () => {
-            const response = await axios.get('http://127.0.0.1:8000/api/admins/attribute_values');
+            const response = await axiosInstance.get('http://127.0.0.1:8000/api/admins/attribute_values');
             return response.data || [];
         },
     });
 
     const deleteAttributeMutation = useMutation({
         mutationFn: async (id: number) => {
-            await axios.delete(`http://127.0.0.1:8000/api/admins/attributes/${id}`);
+            await axiosInstance.delete(`http://127.0.0.1:8000/api/admins/attributes/${id}`);
         },
         onSuccess: () => {
             messageApi.success('Xóa thuộc tính thành công');
@@ -64,7 +64,7 @@ const ListAttribute: React.FC = () => {
 
     const deleteAttributeValueMutation = useMutation({
         mutationFn: async (valueId: number) => {
-            await axios.delete(`http://127.0.0.1:8000/api/admins/attribute_values/${valueId}`);
+            await axiosInstance.delete(`http://127.0.0.1:8000/api/admins/attribute_values/${valueId}`);
         },
         onSuccess: () => {
             messageApi.success('Xóa giá trị thành công');
