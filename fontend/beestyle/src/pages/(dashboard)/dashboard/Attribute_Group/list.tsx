@@ -1,9 +1,10 @@
-import { DeleteOutlined, EditOutlined, EyeOutlined, PlusOutlined } from '@ant-design/icons';
+import { DeleteOutlined, EditOutlined, PlusOutlined } from '@ant-design/icons';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Button, message, Popconfirm, Table } from 'antd';
 import axiosInstance from '@/configs/axios';
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { ColumnsType } from 'antd/es/table';
 
 type Props = {};
 
@@ -19,6 +20,7 @@ const ListAttributeGroup = (props: Props) => {
             return response?.data?.variation;
         },
     });
+
     const mutation = useMutation({
         mutationFn: async (id: any) => {
             return await axiosInstance.delete(`http://127.0.0.1:8000/api/admins/attribute_groups/${id}`);
@@ -30,7 +32,7 @@ const ListAttributeGroup = (props: Props) => {
         onError: () => {
             messageApi.error('Xóa nhóm thuộc tính thất bại');
         }
-    })
+    });
 
     const dataSource = attributeGroups ? attributeGroups.map((group: any, index: number) => ({
         key: group.group_id,
@@ -40,30 +42,62 @@ const ListAttributeGroup = (props: Props) => {
         attributes: group.attributes,
     })) : [];
 
-    const columns = [
+    const columns: ColumnsType<any> = [
         {
             title: 'STT',
             dataIndex: 'stt',
             key: 'stt',
-            className: 'w-12',
+            align: 'center',
+            width: "50px",
         },
         {
             title: 'Tên nhóm thuộc tính',
             dataIndex: 'name',
             key: 'name',
-            className: 'text-left text-lg font-semibold p-3',
+            align: 'center',
+            width: "250px",
         },
         {
-            title: 'Action',
-            width: 200,
-
+            title: 'Thuộc tính và Giá trị',
+            key: 'attributes',
+            render: (record) => (
+                <div className="space-y-3">
+                    {record.attributes.map((attr: any, index: number) => (
+                        <div 
+                            key={index} 
+                            className="bg-gray-50 rounded-lg p-3 border border-gray-200 hover:shadow-sm transition-shadow duration-300"
+                        >
+                            <div className="flex items-center mb-2">
+                                <span className="font-semibold text-gray-800 mr-2">{attr.name}:</span>
+                                <span className="text-sm text-gray-600">({attr.attribute_values.length} giá trị)</span>
+                            </div>
+                            <div className="grid grid-cols-3 gap-2">
+                                {attr.attribute_values.map((value: any, idx: number) => (
+                                    <div 
+                                        key={idx} 
+                                        className="bg-white border rounded px-2 py-1 text-sm text-gray-700 
+                                                    hover:bg-blue-50 hover:border-blue-200 
+                                                    transition-colors duration-200 text-center"
+                                    >
+                                        {value.value}
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            ),
+        },
+        {
+            title: 'Hành Động',
+            align: 'center',
             key: 'action',
+            width: "150px",
             render: (attribute_group: any) => (
                 <div className="flex space-x-4 justify-center">
                     <Button
                         type="default"
                         icon={<EditOutlined />}
-                        className='rounded-full hover:bg-gray-200 transition duration-300 ease-in-out'
                         onClick={() => navigate(`/admin/dashboard/attribute_group/update/${attribute_group.id}`)}
                     />
                     <Popconfirm
@@ -76,39 +110,13 @@ const ListAttributeGroup = (props: Props) => {
                         <Button
                             icon={<DeleteOutlined />}
                             type="default"
-                            className='rounded-full hover:bg-gray-200 transition duration-300 ease-in-out'
+                            danger
                         />
                     </Popconfirm>
                 </div>
             ),
         },
     ];
-
-    const expandedRowRender = (record: any) => {
-        return (
-            <div className="space-y-6 px-5 py-3">
-                {record.attributes.map((attr: any, index: any) => (
-                    <div
-                        key={index}
-                        className="p-4 border border-gray-300 rounded-lg bg-white shadow-md hover:shadow-lg transition-shadow duration-300 ease-in-out"
-                    >
-                        <strong className="text-lg">{attr.name}:</strong>
-                        <div className="flex flex-wrap gap-2 mt-2">
-                            {attr.attribute_values.map((value: any, idx: any) => (
-                                <span
-                                    key={idx}
-                                    className="px-3 py-1 bg-gray-200 rounded-full text-sm font-medium shadow-sm hover:bg-gray-300 transition duration-300 ease-in-out"
-                                >
-                                    {value.value}
-                                </span>
-                            ))}
-                        </div>
-                    </div>
-                ))}
-            </div>
-        );
-    };
-
 
     return (
         <div className="list-attribute-group-container w-full mx-auto p-5">
@@ -131,10 +139,6 @@ const ListAttributeGroup = (props: Props) => {
                     className: 'text-gray-600',
                 }}
                 bordered
-                expandable={{
-                    expandedRowRender,
-                    rowExpandable: (record) => record.attributes.length > 0,
-                }}
             />
         </div>
     );
