@@ -78,29 +78,33 @@ const ListBill: React.FC = () => {
 
   const searchBill = async () => {
     if (searchCode) {
-      try {
-        const response = await axiosInstance.post(getApiUrlSearch(filterStatus, searchCode));
+        try {
+            const response = await axiosInstance.post(getApiUrlSearch(filterStatus, searchCode));
 
-        if (response.data.bill) {
-          const updatedBillData = billData.map((bill) =>
-            bill.id === response.data.bill.id ? { ...bill, isHighlighted: true } : { ...bill, isHighlighted: false }
-          );
-          setBillData(updatedBillData);
-        } else if (response.data.bills) {
-          const highlightedIds = response.data.bills.map((bill: BillRecord) => bill.id);
-          const updatedBillData = billData.map((bill) =>
-            highlightedIds.includes(bill.id) ? { ...bill, isHighlighted: true } : { ...bill, isHighlighted: false }
-          );
-          setBillData(updatedBillData);
+            if (response.data.bill) {
+                const updatedBillData = billData
+                    .map((bill) =>
+                        bill.id === response.data.bill.id ? { ...bill, isHighlighted: true } : { ...bill, isHighlighted: false }
+                    )
+                    .sort((a, b) => (b.isHighlighted ? 1 : 0) - (a.isHighlighted ? 1 : 0)); // Move highlighted bills to the top
+                setBillData(updatedBillData);
+            } else if (response.data.bills) {
+                const highlightedIds = response.data.bills.map((bill: BillRecord) => bill.id);
+                const updatedBillData = billData
+                    .map((bill) =>
+                        highlightedIds.includes(bill.id) ? { ...bill, isHighlighted: true } : { ...bill, isHighlighted: false }
+                    )
+                    .sort((a, b) => (b.isHighlighted ? 1 : 0) - (a.isHighlighted ? 1 : 0)); // Move highlighted bills to the top
+                setBillData(updatedBillData);
+            }
+        } catch (error) {
+            toast.error('Mã Đơn Hàng Không Tìm Thấy!');
         }
-
-      } catch (error) {
-        toast.error('Mã Đơn Hàng Không Tìm Thấy!');
-      }
     } else {
-      toast.warning('Vui lòng nhập mã đơn hàng để tìm kiếm.');
+        toast.warning('Vui lòng nhập mã đơn hàng để tìm kiếm.');
     }
-  };
+};
+
 
   const handleFilterStatusChange = (status: string) => {
     setFilterStatus(status);
@@ -243,9 +247,9 @@ const ListBill: React.FC = () => {
                   <h2 className="font-semibold text-lg text-gray-800">
                     {status === 'all' ? 'Tất Cả' :
                       status === 'pending' ? 'Chờ Xác Nhận' :
-                      status === 'processing' ? 'Đã Xử Lý' :
-                      status === 'shipping' ? 'Đang Vận Chuyển' :
-                      status === 'delivered' ? 'Đã Giao Hàng' : 'Đã Hủy'}
+                        status === 'processing' ? 'Đã Xử Lý' :
+                          status === 'shipping' ? 'Đang Vận Chuyển' :
+                            status === 'delivered' ? 'Đã Giao Hàng' : 'Đã Hủy'}
                   </h2>
                   <p className="text-gray-600">
                     {BillData?.bills?.filter((bill: BillRecord) => status === 'all' || bill.status_bill === status).length || 0} Đơn Hàng
@@ -279,13 +283,12 @@ const ListBill: React.FC = () => {
                 rowKey={(record) => record.id}
                 bordered
                 pagination={{
-                  pageSize: BillData?.pagination?.per_page,
-                  current: BillData?.pagination?.current_page,
-                  total: BillData?.pagination?.total,
-                  showTotal: (total) => `Tổng ${total} danh mục`,
+                  pageSize: 10,
+                  showTotal: (total) => `Tổng ${total} sản phẩm`,
                 }}
                 className="rounded-lg shadow-lg"
               />
+
             </div>
           </div>
         </div>

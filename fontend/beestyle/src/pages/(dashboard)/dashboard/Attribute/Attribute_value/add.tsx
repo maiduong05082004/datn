@@ -1,5 +1,5 @@
 import React from 'react';
-import axios from 'axios';
+import axiosInstance from '@/configs/axios';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { Form, Input, Button, Select, Row, Col, Typography, Card, message, Spin } from 'antd';
@@ -22,7 +22,7 @@ const AddAttributeValues: React.FC = () => {
     const { data: attributeList, isLoading, error } = useQuery({
         queryKey: ['attributes'],
         queryFn: async () => {
-            const response = await axios.get('http://127.0.0.1:8000/api/admins/attributes');
+            const response = await axiosInstance.get('http://127.0.0.1:8000/api/admins/attributes');
             return response.data.data;
         },
     });
@@ -30,7 +30,7 @@ const AddAttributeValues: React.FC = () => {
 
     const { mutate } = useMutation({
         mutationFn: async (data: { attribute_id: number; values: string[] }) => {
-            return await axios.post('http://127.0.0.1:8000/api/admins/attribute_values', data);
+            return await axiosInstance.post('http://127.0.0.1:8000/api/admins/attribute_values', data);
         },
         onSuccess: () => {
             messageApi.success('Thêm giá trị thuộc tính thành công');
