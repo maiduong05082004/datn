@@ -35,6 +35,10 @@ class Bill extends Model
         'promotion_ids',
         'payment_type',
         'shipping_address_id',
+        'order_code_shipping',
+        'shipping_fee',
+        'discounted_amount',        
+        'discounted_shipping_fee'    
     ];
 
     // Quan hệ với bảng users

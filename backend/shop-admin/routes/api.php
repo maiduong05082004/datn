@@ -12,6 +12,7 @@ use App\Http\Controllers\Api\Admin\Product\AttributeController;
 use App\Http\Controllers\Api\Admin\Product\AttributeGroupController;
 use App\Http\Controllers\Api\Admin\Product\AttributeValueController;
 use App\Http\Controllers\Api\Admin\Product\OrderController;
+use App\Http\Controllers\Api\Admin\Product\ShippingController as ProductShippingController;
 use App\Http\Controllers\Api\Admin\PromotionsController;
 use App\Http\Controllers\Api\Client\HomeController;
 use App\Http\Controllers\Api\Client\Product\ProductController as ProductProductController;
@@ -155,20 +156,29 @@ Route::prefix('admins')
 
 
             Route::prefix('orders')->group(function () {
-                Route::get('/', [OrderController::class, 'index'])->name('orders.index');
-                Route::get('/pending', [OrderController::class, 'pendingOrders'])->name('orders.pending');
-                Route::get('/processed', [OrderController::class, 'processedOrders'])->name('orders.processed');
-                Route::get('/shipped', [OrderController::class, 'shippedOrders'])->name('orders.shipped');
-                Route::get('/delivered', [OrderController::class, 'deliveredOrders'])->name('orders.delivered');
-                Route::get('/canceled', [OrderController::class, 'canceledOrders'])->name('orders.canceled');
-                Route::post('/search_order', [OrderController::class, 'searchOrder'])->name('orders.searchorder');
-                Route::post('/search-pending', [OrderController::class, 'searchPendingOrder'])->name('orders.searchpending');
-                Route::post('/search-processed', [OrderController::class, 'searchProcessedOrder'])->name('orders.searchprocessed');
-                Route::post('/search-shipped', [OrderController::class, 'searchShippedOrder'])->name('orders.searchshipped');
-                Route::post('/search-delivered', [OrderController::class, 'searchDeliveredOrder'])->name('orders.searchdelivered');
-                Route::post('/search-canceled', [OrderController::class, 'searchCanceledOrder'])->name('orders.searchcanceled');
-                Route::get('/show_detailorder/{id}', [OrderController::class, 'showDetailOrder'])->name('orders.showdetailorder');
-                Route::post('/update_order/{id}', [OrderController::class, 'updateOrderStatus'])->name('orders.updateorder');
+             Route::get('/',[OrderController::class, 'index'])->name('orders.index');
+             Route::get('/pending', [OrderController::class, 'pendingOrders'])->name('orders.pending');
+             Route::get('/processed', [OrderController::class, 'processedOrders'])->name('orders.processed');
+             Route::get('/shipped', [OrderController::class, 'shippedOrders'])->name('orders.shipped');
+             Route::get('/delivered', [OrderController::class, 'deliveredOrders'])->name('orders.delivered');
+             Route::get('/canceled', [OrderController::class, 'canceledOrders'])->name('orders.canceled');
+             Route::post('/search_order', [OrderController::class, 'searchOrder'])->name('orders.searchorder');
+             Route::post('/search-pending', [OrderController::class, 'searchPendingOrder'])->name('orders.searchpending');
+             Route::post('/search-processed', [OrderController::class, 'searchProcessedOrder'])->name('orders.searchprocessed');
+             Route::post('/search-shipped', [OrderController::class, 'searchShippedOrder'])->name('orders.searchshipped');
+             Route::post('/search-delivered', [OrderController::class, 'searchDeliveredOrder'])->name('orders.searchdelivered');
+             Route::post('/search-canceled', [OrderController::class, 'searchCanceledOrder'])->name('orders.searchcanceled');
+             Route::get('/show_detailorder/{id}', [OrderController::class, 'showDetailOrder'])->name('orders.showdetailorder');
+             Route::post('/update_order/{id}', [OrderController::class, 'updateOrderStatus'])->name('orders.updateorder');
+             Route::post('/ghn-create/{billId}', [ProductShippingController::class, 'createGHNOrderFromBill'])->name('orders.createGHNOrder');
+             Route::post('/ghn-detail/{billId}', [ProductShippingController::class, 'getGHNOrderDetail'])->name('orders.getGHNOrderDetail');
+             Route::post('/ghn-cancel/{billId}', [ProductShippingController::class, 'cancelGHNOrder'])->name('orders.cancelGHNOrder');
+             Route::post('/ghn-update/{billId}', [ProductShippingController::class, 'updateGHNOrder'])->name('orders.updateGHNOrder');
+
+
+
+
+
             });
         });
     });
