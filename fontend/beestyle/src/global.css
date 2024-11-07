@@ -71,6 +71,7 @@ input[type="radio"]:checked::before, input[type="checkbox"]:checked::before {
 ::-webkit-scrollbar {
   width: 7px;
   height: 0;
+  display: none;
 }
 
 ::-webkit-scrollbar-track {

@@ -99,7 +99,6 @@ const ProductsList = ({ products }: any) => {
         setCartItem(item);
 
     }
-
     const handleSubmitCart = async (id: any, indexItem: any) => {
         if (!variationValues) {
             messageApi.error("Vui lòng chọn size")
@@ -115,19 +114,7 @@ const ProductsList = ({ products }: any) => {
             }
         }
     }
-    // const handleSubmitByItem = (id: any) => {
-    //     if (!variationValues) {
-    //         messageApi.error("Vui lòng chọn size")
-    //     } if (!variationId) {
-    //         messageApi.error("Vui lòng chọn màu sắc")
-    //     }
-    //     if (id) {
-    //         mutate({ product_id: parseInt(id), product_variation_value_id: variationValues.id, quantity: quantity })
-    //     }
-        
-    // }
     
-
     if (products?.data?.length === 0) return (<div>Hiện nhóm sản phẩm chưa cập nhật sản phẩm</div>)
 
     return (
