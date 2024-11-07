@@ -311,7 +311,10 @@ class OrderController extends Controller
                 'canceled_at' => $bill->canceled_at,
                 'subtotal' => $bill->subtotal,
                 'promotions' => $bill->promotions,
-                'total' => $bill->total,
+                'discounted_amount' => $bill->discounted_amount ?? 0,
+                'discounted_shipping_fee' => $bill->discounted_shipping_fee ?? 0,
+                'shipping_fee' => $bill->shipping_fee ?? 0,
+                'total' => (int) ($bill->total + ($bill->shipping_fee ?? 0) - ($bill->discounted_amount ?? 0) - ($bill->discounted_shipping_fee ?? 0)),
                 'shipping_address_id' => $bill->shipping_address_id,
                 'full_name' => $bill->full_name,
                 'address_line' => $bill->address_line,
@@ -410,9 +413,5 @@ class OrderController extends Controller
         return $statusMessages[$status] ?? 'Trạng thái đơn hàng đã được cập nhật.';
     }
 
-
-
-
-    
 
 }

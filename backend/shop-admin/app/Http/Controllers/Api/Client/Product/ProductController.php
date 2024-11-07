@@ -69,6 +69,10 @@ class ProductController extends Controller
             'payment_type' => 'required|in:' . Bill::PAYMENT_TYPE_ONLINE . ',' . Bill::PAYMENT_TYPE_COD,
             'cart_id' => 'required|array',
             'cart_id.*' => 'integer|exists:cart_items,id',
+            'shipping_fee' => 'nullable|numeric|min:0',
+            'discounted_amount' => 'nullable|numeric|min:0', 
+            'discounted_shipping_fee' => 'nullable|numeric|min:0', 
+
         ]);
 
         // Kiểm tra và lấy địa chỉ giao hàng mặc định nếu không có `shipping_address_id`
@@ -128,6 +132,9 @@ class ProductController extends Controller
     private function createBill($request, $validatedData)
     {
         $codeOrders = $this->generateUniqueOrderCode();
+        $shippingFee = $validatedData['shipping_fee'] ?? 0;
+        $discountedAmount = $validatedData['discounted_amount'] ?? 0; 
+        $discountedShippingFee = $validatedData['discounted_shipping_fee'] ?? 0; 
         return Bill::create([
             'user_id' => $request->user()->id,
             'code_orders' => $codeOrders,
@@ -140,6 +147,10 @@ class ProductController extends Controller
             'shipping_address_id' => $validatedData['shipping_address_id'],
             'promotion_ids' => implode(',', $validatedData['promotion_ids'] ?? []),
             'canceled_at' => null,
+            'shipping_fee' => $shippingFee,
+            'discounted_amount' => $discountedAmount, 
+            'discounted_shipping_fee' => $discountedShippingFee, 
+
         ]);
     }
 
@@ -552,7 +563,10 @@ class ProductController extends Controller
                 'canceled_at' => $bill->canceled_at,
                 'subtotal' => $bill->subtotal,
                 'promotions' => $bill->promotions,
-                'total' => $bill->total,
+                'discounted_amount' => $bill->discounted_amount ?? 0,
+                'discounted_shipping_fee' => $bill->discounted_shipping_fee ?? 0,
+                'shipping_fee' => $bill->shipping_fee ?? 0,
+                'total' => (int) ($bill->total + ($bill->shipping_fee ?? 0) - ($bill->discounted_amount ?? 0) - ($bill->discounted_shipping_fee ?? 0)),
                 'shipping_address_id' => $bill->shipping_address_id,
                 'full_name' => $bill->full_name,
                 'address_line' => $bill->address_line,
