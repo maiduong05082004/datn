@@ -76,7 +76,7 @@ const SearchPage = ({ isKeySearch }: Props) => {
                             <div className="flex justify-between">
                                 <div onClick={() => setFilter(!filter)} className="flex cursor-pointer items-center lg:border-[#E8E8E8] lg:border-[1px] lg:px-[16px] lg:py-[10px] lg:rounded-[4px]">
                                     <span className='mr-[5px] text-[14px] font-[500] lg:mr-[20px]'>Bộ lọc</span>
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="12" viewBox="0 0 16 12" fill="none"><path d="M1.33325 2.66699H8.83325" stroke="black" stroke-linecap="square"></path><path d="M12.1665 2.66699L14.6665 2.66699" stroke="black" stroke-linecap="square"></path><path d="M7.1665 9.33301L14.6665 9.33301" stroke="black" stroke-linecap="square"></path><path d="M1.33325 9.33301H3.83325" stroke="black" stroke-linecap="square"></path><ellipse cx="5.49992" cy="9.33366" rx="1.66667" ry="1.66667" stroke="black"></ellipse><ellipse cx="10.4999" cy="2.66667" rx="1.66667" ry="1.66667" stroke="black"></ellipse></svg>
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="12" viewBox="0 0 16 12" fill="none"><path d="M1.33325 2.66699H8.83325" stroke="black" strokeLinecap="square"></path><path d="M12.1665 2.66699L14.6665 2.66699" stroke="black" strokeLinecap="square"></path><path d="M7.1665 9.33301L14.6665 9.33301" stroke="black" strokeLinecap="square"></path><path d="M1.33325 9.33301H3.83325" stroke="black" strokeLinecap="square"></path><ellipse cx="5.49992" cy="9.33366" rx="1.66667" ry="1.66667" stroke="black"></ellipse><ellipse cx="10.4999" cy="2.66667" rx="1.66667" ry="1.66667" stroke="black"></ellipse></svg>
                                 </div>
 
                                 <div className="my-[3px] text-[14px] font-[500] lg:ml-[12px]">
@@ -104,7 +104,7 @@ const SearchPage = ({ isKeySearch }: Props) => {
                             <div className="flex justify-between items-center p-[8px_20px] shadow-sm">
                                 <h2 className="text-lg font-semibold">Bộ lọc</h2>
                                 <div onClick={() => setFilter(!filter)} className="flex cursor-pointer w-[40px] h-[40px] justify-center items-center">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M18 6L6 18" stroke="black" stroke-width="1.2" stroke-linecap="square" stroke-linejoin="round"></path><path d="M6 6L18 18" stroke="black" stroke-width="1.2" stroke-linecap="square" stroke-linejoin="round"></path></svg>
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M18 6L6 18" stroke="black" strokeWidth="1.2" strokeLinecap="square" strokeLinejoin="round"></path><path d="M6 6L18 18" stroke="black" strokeWidth="1.2" strokeLinecap="square" strokeLinejoin="round"></path></svg>
                                 </div>
                             </div>
                             <div className="p-[48px_24px] h-full overflow-y-auto whitespace-nowrap scrollbar">
@@ -113,7 +113,7 @@ const SearchPage = ({ isKeySearch }: Props) => {
                                         <h3 className="font-medium">Màu sắc</h3>
                                         <div className="w-[24px] h-[24px] border-[1px] border-[#E8E8E8] rounded-[100%] flex justify-center items-center cursor-pointer">
                                             {isColorMenuOpen ? (
-                                                <svg xmlns="http://www.w3.org/2000/svg" width="10" height="6" viewBox="0 0 10 6" fill="none"><path d="M1 5L4.75 1.25L8.5 5" stroke="black" stroke-width="1.2" stroke-linecap="square"></path></svg>) :
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="10" height="6" viewBox="0 0 10 6" fill="none"><path d="M1 5L4.75 1.25L8.5 5" stroke="black" strokeWidth="1.2" strokeLinecap="square"></path></svg>) :
                                                 (<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-3.5">
                                                     <path strokeLinecap="round" strokeLinejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
                                                 </svg>)
@@ -142,7 +142,7 @@ const SearchPage = ({ isKeySearch }: Props) => {
                                         <h3 className="font-medium">Loại sản phẩm</h3>
                                         <div className="w-[24px] h-[24px] border-[1px] border-[#E8E8E8] rounded-[100%] flex justify-center items-center cursor-pointer">
                                             {isDesignMenuOpen ? (
-                                                <svg xmlns="http://www.w3.org/2000/svg" width="10" height="6" viewBox="0 0 10 6" fill="none"><path d="M1 5L4.75 1.25L8.5 5" stroke="black" stroke-width="1.2" stroke-linecap="square"></path></svg>) :
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="10" height="6" viewBox="0 0 10 6" fill="none"><path d="M1 5L4.75 1.25L8.5 5" stroke="black" strokeWidth="1.2" strokeLinecap="square"></path></svg>) :
                                                 (<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-3.5">
                                                     <path strokeLinecap="round" strokeLinejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
                                                 </svg>)
@@ -164,7 +164,7 @@ const SearchPage = ({ isKeySearch }: Props) => {
                                         <h3 className="font-medium">Kích thước</h3>
                                         <div className="w-[24px] h-[24px] border-[1px] border-[#E8E8E8] rounded-[100%] flex justify-center items-center cursor-pointer">
                                             {isSizeMenuOpen ? (
-                                                <svg xmlns="http://www.w3.org/2000/svg" width="10" height="6" viewBox="0 0 10 6" fill="none"><path d="M1 5L4.75 1.25L8.5 5" stroke="black" stroke-width="1.2" stroke-linecap="square"></path></svg>) :
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="10" height="6" viewBox="0 0 10 6" fill="none"><path d="M1 5L4.75 1.25L8.5 5" stroke="black" strokeWidth="1.2" strokeLinecap="square"></path></svg>) :
                                                 (<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-3.5">
                                                     <path strokeLinecap="round" strokeLinejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
                                                 </svg>)
@@ -186,7 +186,7 @@ const SearchPage = ({ isKeySearch }: Props) => {
                                         <h3 className="font-medium">Giá</h3>
                                         <div className="w-[24px] h-[24px] border-[1px] border-[#E8E8E8] rounded-[100%] flex justify-center items-center cursor-pointer">
                                             {isPriceMenuOpen ? (
-                                                <svg xmlns="http://www.w3.org/2000/svg" width="10" height="6" viewBox="0 0 10 6" fill="none"><path d="M1 5L4.75 1.25L8.5 5" stroke="black" stroke-width="1.2" stroke-linecap="square"></path></svg>) :
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="10" height="6" viewBox="0 0 10 6" fill="none"><path d="M1 5L4.75 1.25L8.5 5" stroke="black" strokeWidth="1.2" strokeLinecap="square"></path></svg>) :
                                                 (<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-3.5">
                                                     <path strokeLinecap="round" strokeLinejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
                                                 </svg>)

@@ -53,7 +53,7 @@ const Router = () => {
                     <Route index element={<HomePage />} />
                     <Route path="categories/:id" element={<ListPage />} />
                     <Route path="products/:id" element={<DetailPage />} />
-                    <Route path="checkouts" element={<CheckOutPage />} />
+                    <Route path="checkouts" element={<CheckOutPage/>} />
                     <Route path="signin" element={<PageSignin />} />
                     <Route path="signup" element={<PageSignup />} />
                     <Route path="search" element={<SearchPage isKeySearch={isKeySearch}/>} />

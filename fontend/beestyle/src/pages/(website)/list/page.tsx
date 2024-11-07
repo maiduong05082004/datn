@@ -55,13 +55,6 @@ const ListPage = (props: Props) => {
         }
     })
 
-    // console.log(size);
-
-
-
-
-
-
     const toggleSelect = (id: string) => {
         setCategoryIds((prev: any) =>
             prev.includes(id) ? prev.filter((item: any) => item !== id) : [...prev, id]
@@ -77,8 +70,6 @@ const ListPage = (props: Props) => {
             prev.includes(id) ? prev.filter((item: any) => item !== id) : [...prev, id]
         );
     };
-
-    // if(isLoading) return (<LoadingPage />)
 
     return (
         <main>
@@ -138,7 +129,7 @@ const ListPage = (props: Props) => {
                     <div className="flex justify-between">
                         <div onClick={() => setFilter(!filter)} className="flex cursor-pointer items-center lg:border-[#E8E8E8] lg:border-[1px] lg:px-[16px] lg:py-[10px] lg:rounded-[4px]">
                             <span className='mr-[5px] text-[14px] font-[500] lg:mr-[20px]'>Bộ lọc</span>
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="12" viewBox="0 0 16 12" fill="none"><path d="M1.33325 2.66699H8.83325" stroke="black" stroke-linecap="square"></path><path d="M12.1665 2.66699L14.6665 2.66699" stroke="black" stroke-linecap="square"></path><path d="M7.1665 9.33301L14.6665 9.33301" stroke="black" stroke-linecap="square"></path><path d="M1.33325 9.33301H3.83325" stroke="black" stroke-linecap="square"></path><ellipse cx="5.49992" cy="9.33366" rx="1.66667" ry="1.66667" stroke="black"></ellipse><ellipse cx="10.4999" cy="2.66667" rx="1.66667" ry="1.66667" stroke="black"></ellipse></svg>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="12" viewBox="0 0 16 12" fill="none"><path d="M1.33325 2.66699H8.83325" stroke="black" strokeLinecap="square"></path><path d="M12.1665 2.66699L14.6665 2.66699" stroke="black" strokeLinecap="square"></path><path d="M7.1665 9.33301L14.6665 9.33301" stroke="black" strokeLinecap="square"></path><path d="M1.33325 9.33301H3.83325" stroke="black" strokeLinecap="square"></path><ellipse cx="5.49992" cy="9.33366" rx="1.66667" ry="1.66667" stroke="black"></ellipse><ellipse cx="10.4999" cy="2.66667" rx="1.66667" ry="1.66667" stroke="black"></ellipse></svg>
                         </div>
 
                         <div className="my-[3px] text-[14px] font-[500] lg:ml-[12px]">
@@ -166,21 +157,21 @@ const ListPage = (props: Props) => {
                     <div className="flex justify-between items-center p-[8px_20px] shadow-sm">
                         <h2 className="text-lg font-semibold">Bộ lọc</h2>
                         <div onClick={() => setFilter(!filter)} className="flex cursor-pointer w-[40px] h-[40px] justify-center items-center">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M18 6L6 18" stroke="black" stroke-width="1.2" stroke-linecap="square" stroke-linejoin="round"></path><path d="M6 6L18 18" stroke="black" stroke-width="1.2" stroke-linecap="square" stroke-linejoin="round"></path></svg>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M18 6L6 18" stroke="black" strokeWidth="1.2" strokeLinecap="square" strokeLinejoin="round"></path><path d="M6 6L18 18" stroke="black" strokeWidth="1.2" strokeLinecap="square" strokeLinejoin="round"></path></svg>
                         </div>
                     </div>
                     <div className="absolute bottom-0 bg-slate-400 w-[100%]">
                         <div className="bg-[#F8F8F8] min-h-[58px] p-[10px] flex">
                             <div onClick={() => { setPiceCheck(""), setColor([]), setSizeIds([]), setCategoryIds([]) }} className="flex items-center cursor-pointer text-black mr-[10px] min-w-[75px]">
                                 <span className='mr-[3px] text-[16px] font-[500]'>Xóa lọc</span>
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8.5 3C11.5376 3 14 5.46243 14 8.5C14 11.5376 11.5376 14 8.5 14C5.46243 14 3 11.5376 3 8.5C3 6.77223 3.79669 5.23053 5.04274 4.22222" stroke="black" stroke-linecap="square"></path><path d="M3 3.9165H5.44444V6.36095" stroke="black" stroke-linecap="square"></path></svg>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8.5 3C11.5376 3 14 5.46243 14 8.5C14 11.5376 11.5376 14 8.5 14C5.46243 14 3 11.5376 3 8.5C3 6.77223 3.79669 5.23053 5.04274 4.22222" stroke="black" strokeLinecap="square"></path><path d="M3 3.9165H5.44444V6.36095" stroke="black" strokeLinecap="square"></path></svg>
                             </div>
                             <div className="flex flex-wrap">
                                 {categoryIds.length > 0 &&
                                     categoryIds.map((item: any) => (
                                         <div className="p-[2px_10px] rounded-full mb-[5px] mr-[5px] bg-black text-white flex items-center">
                                             <span className='text-[12px]'>{item}</span>
-                                            <svg className='ml-[5px]' xmlns="http://www.w3.org/2000/svg" width="8" height="8" viewBox="0 0 8 8" fill="none"><path d="M7.19995 0.800049L0.80005 7.20005" stroke="#F8F8F8" stroke-linecap="square" stroke-linejoin="round"></path><path d="M0.800049 0.800049L7.19995 7.20005" stroke="#F8F8F8" stroke-linecap="square" stroke-linejoin="round"></path></svg>
+                                            <svg className='ml-[5px]' xmlns="http://www.w3.org/2000/svg" width="8" height="8" viewBox="0 0 8 8" fill="none"><path d="M7.19995 0.800049L0.80005 7.20005" stroke="#F8F8F8" strokeLinecap="square" strokeLinejoin="round"></path><path d="M0.800049 0.800049L7.19995 7.20005" stroke="#F8F8F8" strokeLinecap="square" strokeLinejoin="round"></path></svg>
                                         </div>
                                     ))
                                 }
@@ -196,7 +187,7 @@ const ListPage = (props: Props) => {
                                 <h3 className="font-medium">Màu sắc</h3>
                                 <div className="w-[24px] h-[24px] border-[1px] border-[#E8E8E8] rounded-[100%] flex justify-center items-center cursor-pointer">
                                     {isColorMenuOpen ? (
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="10" height="6" viewBox="0 0 10 6" fill="none"><path d="M1 5L4.75 1.25L8.5 5" stroke="black" stroke-width="1.2" stroke-linecap="square"></path></svg>) :
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="10" height="6" viewBox="0 0 10 6" fill="none"><path d="M1 5L4.75 1.25L8.5 5" stroke="black" strokeWidth="1.2" strokeLinecap="square"></path></svg>) :
                                         (<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-3.5">
                                             <path strokeLinecap="round" strokeLinejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
                                         </svg>)
@@ -221,7 +212,7 @@ const ListPage = (props: Props) => {
                                 <h3 className="font-medium cursor-pointer select-none">Loại sản phẩm</h3>
                                 <div className="w-[24px] h-[24px] border-[1px] border-[#E8E8E8] rounded-[100%] flex justify-center items-center cursor-pointer">
                                     {isDesignMenuOpen ? (
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="10" height="6" viewBox="0 0 10 6" fill="none"><path d="M1 5L4.75 1.25L8.5 5" stroke="black" stroke-width="1.2" stroke-linecap="square"></path></svg>) :
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="10" height="6" viewBox="0 0 10 6" fill="none"><path d="M1 5L4.75 1.25L8.5 5" stroke="black" strokeWidth="1.2" strokeLinecap="square"></path></svg>) :
                                         (<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-3.5">
                                             <path strokeLinecap="round" strokeLinejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
                                         </svg>)
@@ -257,7 +248,7 @@ const ListPage = (props: Props) => {
                                 <h3 className="font-medium cursor-pointer select-none">Kích thước</h3>
                                 <div className="w-[24px] h-[24px] border-[1px] border-[#E8E8E8] rounded-[100%] flex justify-center items-center cursor-pointer">
                                     {isSizeMenuOpen ? (
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="10" height="6" viewBox="0 0 10 6" fill="none"><path d="M1 5L4.75 1.25L8.5 5" stroke="black" stroke-width="1.2" stroke-linecap="square"></path></svg>) :
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="10" height="6" viewBox="0 0 10 6" fill="none"><path d="M1 5L4.75 1.25L8.5 5" stroke="black" strokeWidth="1.2" strokeLinecap="square"></path></svg>) :
                                         (<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-3.5">
                                             <path strokeLinecap="round" strokeLinejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
                                         </svg>)
@@ -284,7 +275,7 @@ const ListPage = (props: Props) => {
                                 <h3 className="cursor-pointer select-none  font-medium">Giá</h3>
                                 <div className="w-[24px] h-[24px] border-[1px] border-[#E8E8E8] rounded-[100%] flex justify-center items-center cursor-pointer">
                                     {isPriceMenuOpen ? (
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="10" height="6" viewBox="0 0 10 6" fill="none"><path d="M1 5L4.75 1.25L8.5 5" stroke="black" stroke-width="1.2" stroke-linecap="square"></path></svg>) :
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="10" height="6" viewBox="0 0 10 6" fill="none"><path d="M1 5L4.75 1.25L8.5 5" stroke="black" strokeWidth="1.2" strokeLinecap="square"></path></svg>) :
                                         (<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-3.5">
                                             <path strokeLinecap="round" strokeLinejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
                                         </svg>)

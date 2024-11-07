@@ -63,7 +63,7 @@ const Favorite = (props: Props) => {
 
     return (
         <button onClick={() => onSubmitFavorite(!favoriteStatus)}>
-            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32" fill={`${favoriteStatus ? "black" : "none"}`}> <g clip-path="url(#wishlist-svg)"> <path d="M15.7232 25.5459L7.37014 17.1929C5.20995 15.0327 5.20995 11.5303 7.37014 9.37014C9.53033 7.20995 13.0327 7.20995 15.1929 9.37014L15.7232 9.90047L16.2535 9.37014C18.4137 7.20995 21.9161 7.20995 24.0763 9.37014C26.2365 11.5303 26.2365 15.0327 24.0763 17.1929L15.7232 25.5459Z" stroke="black" stroke-width="1.5" stroke-linecap="round"></path> </g> <defs> <clipPath id="wishlist-svg"> <rect width="32" height="32" fill="white"></rect> </clipPath> </defs> </svg>
+            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32" fill={`${favoriteStatus ? "black" : "none"}`}> <g clip-path="url(#wishlist-svg)"> <path d="M15.7232 25.5459L7.37014 17.1929C5.20995 15.0327 5.20995 11.5303 7.37014 9.37014C9.53033 7.20995 13.0327 7.20995 15.1929 9.37014L15.7232 9.90047L16.2535 9.37014C18.4137 7.20995 21.9161 7.20995 24.0763 9.37014C26.2365 11.5303 26.2365 15.0327 24.0763 17.1929L15.7232 25.5459Z" stroke="black" strokeWidth="1.5" strokeLinecap="round"></path> </g> <defs> <clipPath id="wishlist-svg"> <rect width="32" height="32" fill="white"></rect> </clipPath> </defs> </svg>
         </button>
     )
 }

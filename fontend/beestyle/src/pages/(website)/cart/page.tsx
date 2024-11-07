@@ -34,13 +34,12 @@ const CartPage = () => {
             });
         },
     })
+    console.log(carts);
 
-     useEffect(() => {
+    useEffect(() => {
         if (variationId !== variationIdDf) {
-            // const data = carts?.data?.cart_items?find((item: any) => item?.stock > 0)
-            // setVariant(data);
-            const data = cartItem?.product?.variations?.find((item: any) => item?.id == variationId )
-            
+            const data = cartItem?.product?.variations?.find((item: any) => item?.id == variationId)
+
             const value = data.variation_values.find((item: any) => item?.stock > 0)
             setVariationValues(value)
         }
@@ -48,7 +47,7 @@ const CartPage = () => {
             setVariationValues(variationValuesDf)
         }
     }, [variationId])
-    
+
 
     const settings = {
         dots: true,
@@ -153,8 +152,7 @@ const CartPage = () => {
         const selectedItems = carts?.data?.cart_items.filter((item: any) =>
             selectedProducts.includes(item.cart_item_id)
         );
-        // Bước tiếp theo là lưu trữ hoặc truyền dữ liệu này sang trang thanh toán
-        navigate("/checkouts", { state: { products: selectedItems, totalPrice } }); // Sử dụng React Router để truyền dữ liệu sang trang thanh toán
+        navigate("/checkouts", { state: { products: selectedItems, totalPrice } });
     };
 
     return (
@@ -182,71 +180,72 @@ const CartPage = () => {
                         </div>
 
 
-                        <div className="px-[20px]">
-                            {carts?.data?.cart_items.map((item: any, index: any) => (
-                                <div key={index + 1} className="flex flex-wrap items-center justify-between mt-[24px] lg:justify-between lg:flex-nowrap">
-                                    <div className='flex items-start w-[100%]'>
-                                        <div className="w-[120px]">
-                                            <input className='absolute w-[20px] h-[20px]'
-                                                type="checkbox"
-                                                checked={selectedProducts.includes(item?.cart_item_id)}
-                                                onChange={() => handleSelectProduct(item?.cart_item_id)}
+                        {carts?.data?.cart_items.length !== 0 ? (
+                            <div className="px-[20px]">
+                                {carts?.data?.cart_items.map((item: any, index: any) => (
+                                    <div key={index + 1} className="flex flex-wrap items-center justify-between mt-[24px] lg:justify-between lg:flex-nowrap">
+                                        <div className='flex items-start w-[100%]'>
+                                            <div className="w-[120px]">
+                                                <input className='absolute w-[20px] h-[20px]'
+                                                    type="checkbox"
+                                                    checked={selectedProducts.includes(item?.cart_item_id)}
+                                                    onChange={() => handleSelectProduct(item?.cart_item_id)}
 
-                                            />
+                                                />
 
-                                            <div className="pt-[123.5%] bg-cover bg-center bg-no-repeat"
-                                                style={{ backgroundImage: `url(${item.album_images[0]})` }}
-                                            ></div>
-                                        </div>
+                                                <div className="pt-[123.5%] bg-cover bg-center bg-no-repeat"
+                                                    style={{ backgroundImage: `url(${item.album_images[0]})` }}
+                                                ></div>
+                                            </div>
 
-                                        <div className='w-[calc(100%-120px)]'>
-                                            <div className="pl-[16px]">
-                                                <div className="leading-5">
-                                                    <a href="#" className='text-black hover:underline text-[14px] font-[600] w-[100%]'>
-                                                        {item.product.name}
-                                                    </a>
-                                                </div>
-                                                <div className='text-[12px] text-black font-[500] my-[4px]'> {item.variation_values.value} / {item.variation_values.sku} </div>
-                                                <div className='text-[12px] text-black font-[500]'>Số lượng: {item.quantity}</div>
-                                                <div className='mt-[24px] flex flex-col'>
-                                                    <del className={` text-[#808080] font-[500] text-[14px]`}>{new Intl.NumberFormat('vi-VN').format(item.product.price)} VND</del>
-                                                    <span className={` font-[700] text-[16px]`}>{new Intl.NumberFormat('vi-VN').format(item.variation_values.price)} VND</span>
+                                            <div className='w-[calc(100%-120px)]'>
+                                                <div className="pl-[16px]">
+                                                    <div className="leading-5">
+                                                        <Link to={`/products/${item?.product?.id}`} className='text-black hover:underline text-[14px] font-[600] w-[100%]'>
+                                                            {item.product.name}
+                                                        </Link>
+                                                    </div>
+                                                    <div className='text-[12px] text-black font-[500] my-[4px]'> {item.variation_values.value} / {item.variation_values.sku} </div>
+                                                    <div className='text-[12px] text-black font-[500]'>Số lượng: {item.quantity}</div>
+
+                                                    {item.stock === 0 ?
+                                                        (<div className='mt-[24px] flex flex-col'>
+                                                            <span className={` font-[700] text-[16px]`}>{new Intl.NumberFormat('vi-VN').format(item.variation_values.price)} VND</span>
+                                                        </div>) : (<div className='mt-[24px] flex flex-col'>
+                                                            <del className={` text-[#808080] font-[500] text-[14px]`}>{new Intl.NumberFormat('vi-VN').format(item.product.price)} VND</del>
+                                                            <span className={`text-red-500 font-[700] text-[16px]`}>{new Intl.NumberFormat('vi-VN').format(item.variation_values.price)} VND</span>
+                                                        </div>)}
                                                 </div>
                                             </div>
-                                        </div>
 
-                                        <div className="lg:hidden">
-                                            <button onClick={() => handleDelete(item.cart_item_id)} >
-                                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
-                                                    <path d="M13.9998 6L5.99988 14" stroke="black" strokeLinecap="square" strokeLinejoin="round"></path>
-                                                    <path d="M6 6L13.9999 14" stroke="black" strokeLinecap="square" strokeLinejoin="round"></path>
-                                                </svg>
-                                            </button>
+                                            <div className="lg:hidden">
+                                                <button onClick={() => handleDelete(item.cart_item_id)} >
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
+                                                        <path d="M13.9998 6L5.99988 14" stroke="black" strokeLinecap="square" strokeLinejoin="round"></path>
+                                                        <path d="M6 6L13.9999 14" stroke="black" strokeLinecap="square" strokeLinejoin="round"></path>
+                                                    </svg>
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <div className="flex justify-center items-center mt-[20px] w-[100%] lg:w-[156.5px] lg:flex-wrap *:font-[500] lg:mt-0">
+                                            <button onClick={() => handleSubmitClick(item)} className='w-[100%] text-center border border-[#E8E8E8] rounded-[3px] text-[14px] py-[6px] px-[8px]'>Thay đổi tùy chọn</button>
+                                            <button onClick={() => handleDelete(item.cart_item_id)} className='hidden w-full text-center border border-[#E8E8E8] rounded-[3px] text-[14px] py-[6px] px-[8px] mt-[8px] lg:block'>Xóa</button>
                                         </div>
                                     </div>
-                                    <div className="flex justify-center items-center mt-[20px] w-[100%] lg:w-[156.5px] lg:flex-wrap *:font-[500] lg:mt-0">
-                                        <button onClick={() => handleSubmitClick(item)} className='w-[100%] text-center border border-[#E8E8E8] rounded-[3px] text-[14px] py-[6px] px-[8px]'>Thay đổi tùy chọn</button>
-                                        <button onClick={() => handleDelete(item.cart_item_id)} className='hidden w-full text-center border border-[#E8E8E8] rounded-[3px] text-[14px] py-[6px] px-[8px] mt-[8px] lg:block'>Xóa</button>
-                                    </div>
+                                ))}
+                                <div className="hidden lg:flex justify-center mt-[12px] pt-[48px] border-t-[1px] border-t-[#E8E8E8]">
+                                    <NavigationButton />
                                 </div>
-                            ))}
-
-                            <div className="hidden lg:flex justify-center mt-[12px] pt-[48px] border-t-[1px] border-t-[#E8E8E8]">
+                            </div>
+                        ) : (
+                            <div className="w-[100%] py-[60px] flex flex-col items-center">
+                                <div className="icon-empty-cart">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64" fill="none"> <path d="M21.27 31.67C21.76 31.67 22.19 31.48 22.57 31.1C22.95 30.72 23.14 30.29 23.14 29.8C23.14 29.31 22.95 28.88 22.57 28.5C22.19 28.12 21.76 27.93 21.27 27.93C20.74 27.93 20.29 28.12 19.94 28.5C19.58 28.88 19.41 29.31 19.41 29.8C19.41 30.29 19.59 30.72 19.94 31.1C20.3 31.48 20.74 31.67 21.27 31.67ZM32.27 31.67C32.76 31.67 33.19 31.48 33.57 31.1C33.95 30.72 34.14 30.29 34.14 29.8C34.14 29.31 33.95 28.88 33.57 28.5C33.19 28.12 32.76 27.93 32.27 27.93C31.78 27.93 31.35 28.12 30.97 28.5C30.59 28.88 30.4 29.31 30.4 29.8C30.4 30.29 30.59 30.72 30.97 31.1C31.35 31.48 31.78 31.67 32.27 31.67ZM43.14 31.67C43.63 31.67 44.06 31.48 44.44 31.1C44.82 30.72 45.01 30.29 45.01 29.8C45.01 29.31 44.82 28.88 44.44 28.5C44.06 28.12 43.63 27.93 43.14 27.93C42.65 27.93 42.22 28.12 41.84 28.5C41.46 28.88 41.27 29.31 41.27 29.8C41.27 30.29 41.46 30.72 41.84 31.1C42.22 31.48 42.65 31.67 43.14 31.67ZM9 55.2V15.6C9 14.58 9.34 13.72 10.03 13.03C10.72 12.34 11.58 12 12.6 12H51.8C52.82 12 53.68 12.34 54.37 13.03C55.06 13.72 55.4 14.57 55.4 15.6V44.13C55.4 45.15 55.06 46.01 54.37 46.7C53.68 47.39 52.83 47.73 51.8 47.73H16.47L9 55.2ZM10.47 51.6L15.8 46.27H51.8C52.42 46.27 52.93 46.07 53.33 45.67C53.73 45.27 53.93 44.76 53.93 44.14V15.6C53.93 14.98 53.73 14.47 53.33 14.07C52.93 13.67 52.42 13.47 51.8 13.47H12.6C11.98 13.47 11.47 13.67 11.07 14.07C10.67 14.47 10.47 14.98 10.47 15.6V51.6Z" fill="#D0D0D0"></path> <path opacity="0.05" d="M51.8 42.2696H15.8L10.47 47.5996V51.5996L15.8 46.2696H51.8C52.42 46.2696 52.93 46.0696 53.33 45.6696C53.73 45.2696 53.93 44.7596 53.93 44.1396V40.1396C53.93 40.7596 53.73 41.2696 53.33 41.6696C52.93 42.0696 52.42 42.2696 51.8 42.2696Z" fill="black"></path> </svg>
+                                </div>
+                                <p className='my-[24px] text-[16px] font-[500]'>Không có sản phẩm nào trong giỏ hàng</p>
                                 <NavigationButton />
                             </div>
-                        </div>
-
-
-                        <div className="w-[100%] py-[60px] flex flex-col items-center">
-                            <div className="icon-empty-cart">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64" fill="none"> <path d="M21.27 31.67C21.76 31.67 22.19 31.48 22.57 31.1C22.95 30.72 23.14 30.29 23.14 29.8C23.14 29.31 22.95 28.88 22.57 28.5C22.19 28.12 21.76 27.93 21.27 27.93C20.74 27.93 20.29 28.12 19.94 28.5C19.58 28.88 19.41 29.31 19.41 29.8C19.41 30.29 19.59 30.72 19.94 31.1C20.3 31.48 20.74 31.67 21.27 31.67ZM32.27 31.67C32.76 31.67 33.19 31.48 33.57 31.1C33.95 30.72 34.14 30.29 34.14 29.8C34.14 29.31 33.95 28.88 33.57 28.5C33.19 28.12 32.76 27.93 32.27 27.93C31.78 27.93 31.35 28.12 30.97 28.5C30.59 28.88 30.4 29.31 30.4 29.8C30.4 30.29 30.59 30.72 30.97 31.1C31.35 31.48 31.78 31.67 32.27 31.67ZM43.14 31.67C43.63 31.67 44.06 31.48 44.44 31.1C44.82 30.72 45.01 30.29 45.01 29.8C45.01 29.31 44.82 28.88 44.44 28.5C44.06 28.12 43.63 27.93 43.14 27.93C42.65 27.93 42.22 28.12 41.84 28.5C41.46 28.88 41.27 29.31 41.27 29.8C41.27 30.29 41.46 30.72 41.84 31.1C42.22 31.48 42.65 31.67 43.14 31.67ZM9 55.2V15.6C9 14.58 9.34 13.72 10.03 13.03C10.72 12.34 11.58 12 12.6 12H51.8C52.82 12 53.68 12.34 54.37 13.03C55.06 13.72 55.4 14.57 55.4 15.6V44.13C55.4 45.15 55.06 46.01 54.37 46.7C53.68 47.39 52.83 47.73 51.8 47.73H16.47L9 55.2ZM10.47 51.6L15.8 46.27H51.8C52.42 46.27 52.93 46.07 53.33 45.67C53.73 45.27 53.93 44.76 53.93 44.14V15.6C53.93 14.98 53.73 14.47 53.33 14.07C52.93 13.67 52.42 13.47 51.8 13.47H12.6C11.98 13.47 11.47 13.67 11.07 14.07C10.67 14.47 10.47 14.98 10.47 15.6V51.6Z" fill="#D0D0D0"></path> <path opacity="0.05" d="M51.8 42.2696H15.8L10.47 47.5996V51.5996L15.8 46.2696H51.8C52.42 46.2696 52.93 46.0696 53.33 45.6696C53.73 45.2696 53.93 44.7596 53.93 44.1396V40.1396C53.93 40.7596 53.73 41.2696 53.33 41.6696C52.93 42.0696 52.42 42.2696 51.8 42.2696Z" fill="black"></path> </svg>
-                            </div>
-                            <p className='my-[24px] text-[16px] font-[500]'>Không có sản phẩm nào trong giỏ hàng</p>
-                            <NavigationButton />
-                        </div>
-
-
-
+                        )}
                     </div>
 
                     <div className='mt-[32px] lg:w-[30%] lg:pl-[32px] lg:mt-0 lg:sticky top-0'>
@@ -267,7 +266,8 @@ const CartPage = () => {
                             </div>
 
                         </div>
-                        <button onClick={() => handleProceedToCheckout()} className='bg-black text-white text-[16px] font-[600] w-full fixed bottom-0 h-[56px] -tracking-wide lg:static lg:rounded-[0_0_8px_8px]'>
+
+                        <button onClick={() => handleProceedToCheckout()} className={`${carts?.data?.cart_items.length === 0 || selectedProducts.length === 0 ? "pointer-events-none opacity-50" : ""} outline-none bg-black text-white text-[16px] font-[600] w-full fixed bottom-0 h-[56px] -tracking-wide lg:static lg:rounded-[0_0_8px_8px]`}>
                             THANH TOÁN
                         </button>
                     </div>

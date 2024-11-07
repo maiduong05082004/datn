@@ -134,7 +134,7 @@ const Search = ({ isSearch, setIsSearch, setKeySearch }: any) => {
 
             </div>
             <div onClick={() => setIsSearch(!isSearch)} className="top-[15px] right-[15px] w-[40px] h-[40px] absolute border-[1px] border-[#E8E8E8] flex items-center justify-center rounded-[100%] cursor-pointer lg:top-[48px] lg:right-[48px] lg:w-[56px] lg:h-[56px]">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none"> <path d="M14.6006 1.40002L1.81646 14.6007" stroke="black" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path> <path d="M1.40039 1.53528L14.4637 14.4654" stroke="black" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path> </svg>
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none"> <path d="M14.6006 1.40002L1.81646 14.6007" stroke="black" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"></path> <path d="M1.40039 1.53528L14.4637 14.4654" stroke="black" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"></path> </svg>
             </div>
         </div>
     )
