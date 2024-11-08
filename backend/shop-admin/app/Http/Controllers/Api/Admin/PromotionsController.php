@@ -87,6 +87,7 @@ class PromotionsController extends Controller
                 'usage_limit' => $promotion->usage_limit,
                 'min_order_value' => $promotion->min_order_value,
                 'promotion_type' => $promotion->promotion_type,
+                'promotion_subtype' => $promotion->promotion_subtype,
                 'is_active' => $promotion->is_active,
                 'status' => $promotion->status,
                 'created_at' => $promotion->created_at,
@@ -109,7 +110,8 @@ class PromotionsController extends Controller
             'discount_amount' => 'required|numeric|min:0',
             'discount_type' => 'required|in:amount,percent',
             'max_discount_amount' => 'nullable|required_if:discount_type,percent|numeric|min:0',
-            'promotion_type' => 'required|in:shipping,product_discount,voucher_discount,first_order',
+            'promotion_type' => 'required|in:shipping,product',
+            'promotion_subtype' => 'required|in:first_order,product_discount,voucher_discount,shipping',
             'category_ids' => 'array|nullable',
             'category_ids.*' => 'exists:categories,id',
             'product_ids' => 'array|nullable',
@@ -117,14 +119,15 @@ class PromotionsController extends Controller
             'usage_limit' => 'nullable|integer|min:1',
             'status' => 'required',
         ]);
-
+    
         $promotion = new Promotion($request->all());
         $promotion->category_ids = $request->category_ids;
         $promotion->product_ids = $request->product_ids;
         $promotion->save();
-
+    
         return response()->json($promotion, 201);
     }
+    
 
     public function show($id)
     {
@@ -159,6 +162,7 @@ class PromotionsController extends Controller
             'usage_limit' => $promotion->usage_limit,
             'min_order_value' => $promotion->min_order_value,
             'promotion_type' => $promotion->promotion_type,
+            'promotion_subtype' => $promotion->promotion_subtype,
             'is_active' => $promotion->is_active,
             'status' => $promotion->status,
             'created_at' => $promotion->created_at,
@@ -172,36 +176,38 @@ class PromotionsController extends Controller
 
 
     public function update(Request $request, $id)
-    {
-        $promotion = Promotion::find($id);
-        if (!$promotion) {
-            return response()->json(['message' => 'Khuyến mãi không tồn tại.'], 404);
-        }
-
-        $request->validate([
-            'code' => 'required|unique:promotions,code,' . $id,
-            'description' => 'required',
-            'start_date' => 'required|date',
-            'end_date' => 'required|date|after_or_equal:start_date',
-            'discount_amount' => 'required|numeric|min:0',
-            'discount_type' => 'required|in:amount,percent',
-            'max_discount_amount' => 'nullable|required_if:discount_type,percent|numeric|min:0',
-            'promotion_type' => 'required|in:shipping,product_discount,voucher_discount,first_order',
-            'category_ids' => 'array|nullable',
-            'category_ids.*' => 'exists:categories,id',
-            'product_ids' => 'array|nullable',
-            'product_ids.*' => 'exists:products,id',
-            'usage_limit' => 'nullable|integer|min:1',
-            'status' => 'required'
-        ]);
-
-        $promotion->update($request->except(['category_ids', 'product_ids']));
-        $promotion->category_ids = $request->category_ids;
-        $promotion->product_ids = $request->product_ids;
-        $promotion->save();
-
-        return response()->json($promotion, 200);
+{
+    $promotion = Promotion::find($id);
+    if (!$promotion) {
+        return response()->json(['message' => 'Khuyến mãi không tồn tại.'], 404);
     }
+
+    $request->validate([
+        'code' => 'required|unique:promotions,code,' . $id,
+        'description' => 'required',
+        'start_date' => 'required|date',
+        'end_date' => 'required|date|after_or_equal:start_date',
+        'discount_amount' => 'required|numeric|min:0',
+        'discount_type' => 'required|in:amount,percent',
+        'max_discount_amount' => 'nullable|required_if:discount_type,percent|numeric|min:0',
+        'promotion_type' => 'required|in:shipping,product',
+        'promotion_subtype' => 'required|in:first_order,product_discount,voucher_discount,shipping',
+        'category_ids' => 'array|nullable',
+        'category_ids.*' => 'exists:categories,id',
+        'product_ids' => 'array|nullable',
+        'product_ids.*' => 'exists:products,id',
+        'usage_limit' => 'nullable|integer|min:1',
+        'status' => 'required'
+    ]);
+
+    $promotion->update($request->except(['category_ids', 'product_ids']));
+    $promotion->category_ids = $request->category_ids;
+    $promotion->product_ids = $request->product_ids;
+    $promotion->save();
+
+    return response()->json($promotion, 200);
+}
+
 
     public function destroy($id)
     {
