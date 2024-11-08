@@ -63,30 +63,6 @@ const ListComments: React.FC = () => {
       dataIndex: 'date',
       key: 'date',
     },
-    // {
-    //   title: 'Hành động',
-    //   key: 'action',
-    //   render: (_: any, comment: Comment) => (
-    //     <Space size="middle" className="flex justify-around">
-    //       <Button
-    //         type="default"
-    //         icon={<EditOutlined />}
-    //         onClick={() => navigate(`/admin/editComment/${comment.id}`)}
-    //       />
-    //       <Popconfirm
-    //         title="Xóa bình luận"
-    //         description="Bạn có chắc muốn xóa bình luận này không?"
-    //         okText="Có"
-    //         cancelText="Không"
-    //       >
-    //         <Button type="primary" danger icon={<DeleteOutlined />} />
-    //       </Popconfirm>
-    //       <Button type="link" onClick={() => handleViewDetails(comment)}>
-    //         Xem chi tiết
-    //       </Button>
-    //     </Space>
-    //   ),
-    // },
     {
       title: 'Hành động',
       key: 'action',
@@ -96,12 +72,12 @@ const ListComments: React.FC = () => {
           <Button
             type="default"
             icon={<EditOutlined />}
-            onClick={() => navigate(`/admin/updateUser/${comment.id}`)}
+            onClick={() => navigate(`/admin/updateComment/${comment.id}`)}
           />
           <Popconfirm
             title="Xóa bình luận"
             description="Bạn có chắc muốn xóa bình luận này không?"
-            onConfirm={() => console.log('Xóa bình luận', comment.id)}
+            onConfirm={() => console.log('Xóa bình luận', comment.id)} // Thực hiện hành động xóa ở đây
             okText="Có"
             cancelText="Không"
           >

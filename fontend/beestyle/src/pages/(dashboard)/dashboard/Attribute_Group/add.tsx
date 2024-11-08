@@ -1,16 +1,18 @@
 import { useMutation, useQuery } from '@tanstack/react-query';
-import { Form, Input, Button, message, Space, Divider, Select, Typography } from 'antd';
+import { Form, Input, Button, message, Space, Divider, Select, Typography, Card } from 'antd';
 import axios from 'axios';
 import React, { useState } from 'react';
-
-type Props = {};
+import { useNavigate } from 'react-router-dom';
 
 const { Title } = Typography;
+
+type Props = {};
 
 const AddAttributeGroup = (props: Props) => {
   const [messageApi, contextHolder] = message.useMessage();
   const [form] = Form.useForm();
   const [selectedAttributes, setSelectedAttributes] = useState<number[]>([]);
+  const navigate = useNavigate();
 
   const { data: attributes } = useQuery({
     queryKey: ['attributes'],
@@ -48,9 +50,9 @@ const AddAttributeGroup = (props: Props) => {
       {contextHolder}
       <div className="min-h-screen flex items-center justify-center p-8">
         <div className="w-full max-w-7xl bg-white p-10 rounded-xl shadow-lg">
-          <h2 className="text-2xl font-semibold text-center mb-8 text-gray-800">
-            Thêm Mới Danh Mục
-          </h2>
+          <Title level={3} className="text-center mb-8 text-gray-700">
+            Thêm Mới Nhóm Thuộc Tính
+          </Title>
           <Form form={form} layout="vertical" onFinish={handleFinish}>
             <Form.Item
               label="Tên Nhóm Biến Thể"
@@ -78,9 +80,23 @@ const AddAttributeGroup = (props: Props) => {
 
             <Divider />
             <Form.Item>
-              <Button type="primary" htmlType="submit">
-                Thêm Nhóm Biến Thể
-              </Button>
+              <div className="flex justify-end space-x-4">
+                <Button
+                  type="primary"
+                  htmlType="submit"
+                  size="large"
+                  className="bg-indigo-600 hover:bg-indigo-700 text-white rounded-md px-6"
+                >
+                  Thêm mới
+                </Button>
+                <Button
+                  onClick={() => navigate('/admin/attribute_group/list')}
+                  size="large"
+                  className="bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-md px-6"
+                >
+                  Quay lại
+                </Button>
+              </div>
             </Form.Item>
           </Form>
         </div>

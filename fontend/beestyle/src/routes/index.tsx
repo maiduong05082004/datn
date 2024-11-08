@@ -11,17 +11,17 @@ import { Route, Routes } from "react-router-dom";
 import ListBill from "@/pages/(dashboard)/dashboard/Bill/list";
 import DetailBill from "@/pages/(dashboard)/dashboard/Bill/detail";
 // banner
-import AddBanners from "@/pages/(dashboard)/dashboard/Banner/add";
-import ListBanners from "@/pages/(dashboard)/dashboard/Banner/list";
+import AddBanners from "@/pages/(dashboard)/dashboard/Banner/list";
+import ListBanners from "@/pages/(dashboard)/dashboard/Banner/add";
 import UpdateBanners from "@/pages/(dashboard)/dashboard/Banner/update";
 import ListUser from "@/pages/(dashboard)/dashboard/Users/list";
 import AddUser from "@/pages/(dashboard)/dashboard/Users/add";
 import UpdateUser from "@/pages/(dashboard)/dashboard/Users/update";
 import ListComments from "@/pages/(dashboard)/dashboard/Comment/list";
-import ListProducts from "@/pages/(dashboard)/dashboard/Products/list";
-import UpdateProduct from "@/pages/(dashboard)/dashboard/Products/update";
-import AddProduct from "@/pages/(dashboard)/dashboard/Products/add";
-import DetailProduct from "@/pages/(dashboard)/dashboard/Products/detail";
+// import ListProducts from "@/pages/(dashboard)/dashboard/Products/list";
+// import UpdateProduct from "@/pages/(dashboard)/dashboard/Products/update";
+// import AddProduct from "@/pages/(dashboard)/dashboard/Products/add";
+// import DetailProduct from "@/pages/(dashboard)/dashboard/Products/detail";
 import AddCategories from "@/pages/(dashboard)/dashboard/Category/add";
 import ListCategories from "@/pages/(dashboard)/dashboard/Category/list";
 import UpdateCategories from "@/pages/(dashboard)/dashboard/Category/update";
@@ -41,6 +41,10 @@ import UpdateAttributeValues from "@/pages/(dashboard)/dashboard/Attribute/Attri
 import AddtributeGroup from "@/pages/(dashboard)/dashboard/Attribute_Group/add";
 import ListAttributeGroup from "@/pages/(dashboard)/dashboard/Attribute_Group/list";
 import UpdateAttributeGroup from "@/pages/(dashboard)/dashboard/Attribute_Group/update";
+import ListProducts from "@/pages/(dashboard)/dashboard/products/list";
+import AddProduct from "@/pages/(dashboard)/dashboard/products/add";
+import UpdateProduct from "@/pages/(dashboard)/dashboard/products/update";
+import DetailProduct from "@/pages/(dashboard)/dashboard/products/detail";
 // import CartPage from "@/pages/(website)/cart/page";
 
 const Router = () => {

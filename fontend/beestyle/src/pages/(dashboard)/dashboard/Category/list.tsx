@@ -108,6 +108,12 @@ const ListCategories: React.FC = () => {
       key: 'action',
       render: (_: any, category: Category) => (
         <Space size="middle">
+
+          <Button
+            type="default"
+            icon={<EditOutlined />}
+            onClick={() => navigate(`/admin/category/update/${category.id}`)}
+          />
           <Popconfirm
             title="Xóa danh mục"
             description="Bạn có chắc muốn xóa danh mục này không?"
@@ -117,11 +123,6 @@ const ListCategories: React.FC = () => {
           >
             <Button type="primary" danger icon={<DeleteOutlined />} />
           </Popconfirm>
-          <Button
-            type="default"
-            icon={<EditOutlined />}
-            onClick={() => navigate(`/admin/category/update/${category.id}`)}
-          />
         </Space>
       ),
     },

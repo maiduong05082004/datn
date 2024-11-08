@@ -238,9 +238,23 @@ const AddPromotion: React.FC = () => {
                 </Form.Item>
 
                 <Form.Item>
-                    <Button type="default" className='bg-black hover:bg-slate-300 text-white' htmlType="submit" loading={isPending}>
-                        Thêm Khuyến Mãi
-                    </Button>
+                    <div className="flex justify-end space-x-4">
+                        <Button
+                            type="primary"
+                            htmlType="submit"
+                            size="large"
+                            className="bg-indigo-600 hover:bg-indigo-700 text-white rounded-md px-6"
+                        >
+                            Thêm mới
+                        </Button>
+                        <Button
+                            onClick={() => navigate('/admin/promotions/list')}
+                            size="large"
+                            className="bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-md px-6"
+                        >
+                            Quay lại
+                        </Button>
+                    </div>
                 </Form.Item>
             </Form>
         </div>

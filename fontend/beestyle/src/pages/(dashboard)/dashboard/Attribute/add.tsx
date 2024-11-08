@@ -1,3 +1,4 @@
+import { Title } from '@radix-ui/react-toast';
 import { useMutation } from '@tanstack/react-query';
 import { Form, Input, Button, message, Card, Select } from 'antd';
 import axios from 'axios';
@@ -32,6 +33,7 @@ const AddAttribute: React.FC = () => {
         <>
             {contextHolder}
             <div className="min-h-screen flex items-center justify-center p-8">
+            <div className="w-full max-w-7xl bg-white p-10 rounded-xl shadow-lg">
                 <Card className="w-full max-w-7xl p-10 rounded-xl shadow-lg">
                     <Form
                         form={form}
@@ -57,12 +59,27 @@ const AddAttribute: React.FC = () => {
                             </Select>
                         </Form.Item>
                         <Form.Item>
-                            <Button className='bg-indigo-600 hover:bg-indigo-700 text-white rounded-md px-6' type="primary" htmlType="submit">
-                                Thêm thuộc tính
-                            </Button>
+                            <div className="flex justify-end space-x-4">
+                                <Button
+                                    type="primary"
+                                    htmlType="submit"
+                                    size="large"
+                                    className="bg-indigo-600 hover:bg-indigo-700 text-white rounded-md px-6"
+                                >
+                                    Thêm mới
+                                </Button>
+                                <Button
+                                    
+                                    size="large"
+                                    className="bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-md px-6"
+                                >
+                                    Quay lại
+                                </Button>
+                            </div>
                         </Form.Item>
                     </Form>
                 </Card>
+            </div>
             </div>
         </>
     );

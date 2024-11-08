@@ -114,7 +114,7 @@ const ListPromotions: React.FC = () => {
             <div className="flex justify-between items-center mb-4">
                 <Button
                     type="default"
-                    className="bg-black hover:bg-slate-300 text-white"
+                   className="bg-indigo-600 hover:bg-indigo-700 text-white"
                     icon={<PlusOutlined />}
                     onClick={() => navigate('/admin/promotions/add')}
                 >

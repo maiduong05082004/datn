@@ -26,7 +26,7 @@ const AddAttributeValues: React.FC = () => {
             return response.data.data;
         },
     });
-    
+
 
     const { mutate } = useMutation({
         mutationFn: async (data: { attribute_id: number; values: string[] }) => {
@@ -35,7 +35,7 @@ const AddAttributeValues: React.FC = () => {
         onSuccess: () => {
             messageApi.success('Thêm giá trị thuộc tính thành công');
             queryClient.invalidateQueries({ queryKey: ['attributes'] });
-            form.resetFields(); 
+            form.resetFields();
         },
         onError: (error: any) => {
             messageApi.error(`Lỗi: ${error.response?.data?.message || error.message}`);
@@ -144,7 +144,7 @@ const AddAttributeValues: React.FC = () => {
                                         Thêm mới
                                     </Button>
                                     <Button
-                                        onClick={() => navigate('/admin/listattribute_value')}
+                                        onClick={() => navigate('/admin/attribute/list')}
                                         size="large"
                                         className="bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-md px-6"
                                     >
