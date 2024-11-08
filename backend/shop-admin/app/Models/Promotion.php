@@ -20,6 +20,7 @@ class Promotion extends Model
         'usage_limit',
         'min_order_value',
         'promotion_type',
+        'promotion_subtype',
         'is_active',
         'category_id',
         'product_id',

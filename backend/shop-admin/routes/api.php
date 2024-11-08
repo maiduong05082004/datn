@@ -113,7 +113,7 @@ Route::prefix('admins')
             Route::apiResource('products', ProductController::class)
                 ->names('products');
             Route::delete('images/{type}/{encodedPath}', [ProductController::class, 'deleteImageByPath'])->name('images.deleteByPath');
-
+            Route::post('/products/by-ids', [ProductController::class, 'getProductsByIds'])->name('products.by-ids');
             Route::apiResource('attributes', AttributeController::class)
                 ->names('attributes');
 
@@ -148,6 +148,7 @@ Route::prefix('admins')
                 Route::delete('/{id}', [PromotionsController::class, 'destroy'])->name('promotions.destroy');
                 Route::get('/user/{userId}/product/{productId}', [PromotionsController::class, 'getUserProductPromotions'])->name('promotions.user-product');
                 Route::get('/event/{eventName}', [PromotionsController::class, 'getEventPromotions'])->name('promotions.event');
+                Route::post('/products/by-ids', [ProductController::class, 'getProductsByIds'])->name('products.by-ids');
             });
             Route::prefix('orders')->group(function () {
              Route::get('/',[OrderController::class, 'index'])->name('orders.index');

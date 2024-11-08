@@ -10,7 +10,7 @@ const { Option } = Select;
 const AddPromotion: React.FC = () => {
     const navigate = useNavigate();
     const [form] = Form.useForm();
-    const [promotionScope, setPromotionScope] = useState<'category' | 'product'>('category');
+    const [promotionScope, setPromotionScope] = useState<'category' | 'product' | 'none'>('category');
     const [discountType, setDiscountType] = useState<'amount' | 'percent'>('percent');
     const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
     const [products, setProducts] = useState<Product[]>([]);
@@ -25,7 +25,7 @@ const AddPromotion: React.FC = () => {
         onSuccess: () => {
             message.success('Khuyến mãi đã được tạo thành công!');
             form.resetFields();
-            navigate('/admin/listPromotions');
+            navigate('/admin/promotions/list');
         },
         onError: () => {
             message.error('Có lỗi xảy ra. Vui lòng thử lại!');
@@ -52,8 +52,16 @@ const AddPromotion: React.FC = () => {
     }, [selectedCategory, promotionScope]);
 
     const onFinish = (values: any) => {
+        let promotionType = '';
+        if (values.promotion_subtype === 'shipping') {
+            promotionType = 'shipping';
+        } else {
+            promotionType = 'product';
+        }
+
         addPromotion({
             ...values,
+            promotion_type: promotionType,
             start_date: values.start_date.format('YYYY-MM-DD'),
             end_date: values.end_date.format('YYYY-MM-DD'),
             is_active: values.is_active || false,
@@ -109,26 +117,37 @@ const AddPromotion: React.FC = () => {
                         <Radio value="amount">Giảm theo số tiền</Radio>
                     </Radio.Group>
                 </Form.Item>
-
-                <Form.Item
-                    label="Số Tiền Giảm"
-                    name="discount_amount"
-                    rules={[{ required: true, message: 'Vui lòng nhập số tiền giảm!' }]}
-                >
-                    <InputNumber min={0} style={{ width: '100%' }} />
-                </Form.Item>
-
+                
                 {discountType === 'percent' && (
-                    <Form.Item
-                        label="Giảm Tối Đa"
-                        name="max_discount_amount"
-                        rules={[{ required: true, message: 'Vui lòng nhập giá trị giảm tối đa!' }]}
-                    >
-                        <InputNumber min={0} style={{ width: '100%' }} />
-                    </Form.Item>
+                    <>
+                        <Form.Item
+                            label="Số Phần Trăm Giảm"
+                            name="discount_amount"
+                            rules={[{ required: true, message: 'Vui lòng nhập số tiền giảm!' }]}
+                        >
+                            <InputNumber min={0} max={100} style={{ width: '100%' }} />
+                        </Form.Item>
+                        <Form.Item
+                            label="Giảm Tối Đa"
+                            name="max_discount_amount"
+                            rules={[{ required: true, message: 'Vui lòng nhập giá trị giảm tối đa!' }]}
+                        >
+                            <InputNumber min={0} style={{ width: '100%' }} />
+                        </Form.Item>
+                    </>
                 )}
-
-                <Form.Item label="Số Lần Sử Dụng" name="usage_limit">
+                {discountType === 'amount' && (
+                    <>
+                        <Form.Item
+                            label="Số Tiền Giảm"
+                            name="discount_amount"
+                            rules={[{ required: true, message: 'Vui lòng nhập số tiền giảm!' }]}
+                        >
+                            <InputNumber min={0} style={{ width: '100%' }} />
+                        </Form.Item>
+                    </>
+                )}
+                <Form.Item label="tổng Số Lượng Voucher" name="usage_limit">
                     <InputNumber min={1} style={{ width: '100%' }} />
                 </Form.Item>
 
@@ -138,7 +157,7 @@ const AddPromotion: React.FC = () => {
 
                 <Form.Item
                     label="Loại Khuyến Mãi"
-                    name="promotion_type"
+                    name="promotion_subtype"
                     rules={[{ required: true, message: 'Vui lòng chọn loại khuyến mãi!' }]}
                 >
                     <Select placeholder="Chọn loại khuyến mãi">
@@ -160,6 +179,7 @@ const AddPromotion: React.FC = () => {
                     >
                         <Radio value="category">Theo Danh Mục</Radio>
                         <Radio value="product">Theo Sản Phẩm</Radio>
+                        <Radio value="none">Không Có</Radio>
                     </Radio.Group>
                 </Form.Item>
 

@@ -45,3 +45,8 @@ export const fetchProductsByCategory = async (categoryId: number): Promise<Produ
     const { data } = await axiosInstance.post(`http://localhost:8000/api/client/categories/${categoryId}`);
     return data.products;
 };
+
+export const fetchProductsByIds = async (productIds: number[]): Promise<Product[]> => {
+  const { data } = await axiosInstance.post(`/api/admins/products/by-ids`, { ids: productIds });
+  return data.products;
+};
