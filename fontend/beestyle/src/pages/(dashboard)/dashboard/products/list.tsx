@@ -67,22 +67,22 @@ const ListProducts = () => {
   // Hàm mở rộng để render danh sách các biến thể
   const expandedRowRender = (record: Product) => {
     return (
-      <div className="space-y-4 bg-gray-50 p-4 rounded-lg shadow-lg">
+      <div className="">
         {record.variations.map((variant, index) => (
           <div key={index} className="bg-white p-4 rounded-lg shadow-md">
             <h4 className="font-semibold text-indigo-600">Màu: {variant.attribute_value_image_variant.value}</h4>
             <Image
               className="rounded-lg mb-2"
-              width={100}
+              width={200}
               src={variant.attribute_value_image_variant.image_path}
               alt={variant.attribute_value_image_variant.value}
             />
             <h4 className="font-semibold text-gray-700">Số lượng tồn kho: {variant.stock}</h4>
 
             {variant.variation_values.map((value) => (
-              <div key={value.attribute_value_id} className="ml-4 mt-2">
-                <p>Size: {value.value}</p>
-                <p>Giá: {parseFloat(value.price).toLocaleString()} VND</p>
+              <div key={value.attribute_value_id} className="ml-4 mt-2 flex gap-10">
+                <p className='w-20 flex'><h2 className='font-bold'>Size</h2>: {value.value}</p>
+                <p className='flex'><h2 className='font-bold'>Giá</h2>: {parseFloat(value.price).toLocaleString()} VND</p>
                 {value.discount > 0 && <Tag color="red" className="mt-2">Giảm giá: {value.discount}%</Tag>}
               </div>
             ))}
@@ -221,7 +221,7 @@ const ListProducts = () => {
           bordered
           rowKey="id"
           expandable={{
-            expandedRowRender: expandedRowRender, // Hiển thị danh sách biến thể dưới mỗi sản phẩm
+            expandedRowRender: expandedRowRender, 
           }}
           pagination={{
             pageSize: 7,

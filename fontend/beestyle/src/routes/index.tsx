@@ -34,6 +34,7 @@ import ListPage from "@/pages/(website)/list/page";
 import SearchPage from "@/pages/(website)/search/page";
 import { useState } from "react";
 import ListAttribute from "@/pages/(dashboard)/dashboard/Attribute/list";
+import Shiping from "@/pages/(dashboard)/dashboard/Bill/shiping";
 import AddAttribute from "@/pages/(dashboard)/dashboard/Attribute/add";
 import UpdateAttribute from "@/pages/(dashboard)/dashboard/Attribute/update";
 import AddAttributeValues from "@/pages/(dashboard)/dashboard/Attribute/Attribute_value/add";
@@ -85,6 +86,7 @@ const Router = () => {
                     {/* bills */}
                     <Route path="bill/list" element={<ListBill />} />
                     <Route path="bill/detail/:id" element={<DetailBill />} />
+                    <Route path="bill/shiping/:id" element={<Shiping />} />
                     {/* comments */}
                     <Route path="comment/list" element={<ListComments />} />
                     {/* banner */}

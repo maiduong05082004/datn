@@ -78,32 +78,32 @@ const ListBill: React.FC = () => {
 
   const searchBill = async () => {
     if (searchCode) {
-        try {
-            const response = await axiosInstance.post(getApiUrlSearch(filterStatus, searchCode));
+      try {
+        const response = await axiosInstance.post(getApiUrlSearch(filterStatus, searchCode));
 
-            if (response.data.bill) {
-                const updatedBillData = billData
-                    .map((bill) =>
-                        bill.id === response.data.bill.id ? { ...bill, isHighlighted: true } : { ...bill, isHighlighted: false }
-                    )
-                    .sort((a, b) => (b.isHighlighted ? 1 : 0) - (a.isHighlighted ? 1 : 0)); // Move highlighted bills to the top
-                setBillData(updatedBillData);
-            } else if (response.data.bills) {
-                const highlightedIds = response.data.bills.map((bill: BillRecord) => bill.id);
-                const updatedBillData = billData
-                    .map((bill) =>
-                        highlightedIds.includes(bill.id) ? { ...bill, isHighlighted: true } : { ...bill, isHighlighted: false }
-                    )
-                    .sort((a, b) => (b.isHighlighted ? 1 : 0) - (a.isHighlighted ? 1 : 0)); // Move highlighted bills to the top
-                setBillData(updatedBillData);
-            }
-        } catch (error) {
-            toast.error('Mã Đơn Hàng Không Tìm Thấy!');
+        if (response.data.bill) {
+          const updatedBillData = billData
+            .map((bill) =>
+              bill.id === response.data.bill.id ? { ...bill, isHighlighted: true } : { ...bill, isHighlighted: false }
+            )
+            .sort((a, b) => (b.isHighlighted ? 1 : 0) - (a.isHighlighted ? 1 : 0)); // Move highlighted bills to the top
+          setBillData(updatedBillData);
+        } else if (response.data.bills) {
+          const highlightedIds = response.data.bills.map((bill: BillRecord) => bill.id);
+          const updatedBillData = billData
+            .map((bill) =>
+              highlightedIds.includes(bill.id) ? { ...bill, isHighlighted: true } : { ...bill, isHighlighted: false }
+            )
+            .sort((a, b) => (b.isHighlighted ? 1 : 0) - (a.isHighlighted ? 1 : 0)); // Move highlighted bills to the top
+          setBillData(updatedBillData);
         }
+      } catch (error) {
+        toast.error('Mã Đơn Hàng Không Tìm Thấy!');
+      }
     } else {
-        toast.warning('Vui lòng nhập mã đơn hàng để tìm kiếm.');
+      toast.warning('Vui lòng nhập mã đơn hàng để tìm kiếm.');
     }
-};
+  };
 
 
   const handleFilterStatusChange = (status: string) => {
@@ -131,8 +131,8 @@ const ListBill: React.FC = () => {
     },
     {
       title: 'Trạng Thái',
-      dataIndex: 'status_description',
-      key: 'status_description',
+      dataIndex: 'status_bill',
+      key: 'status_bill',
       render: (text: string) => (
         <div className="p-2 rounded-md bg-yellow-200 text-yellow-800 font-bold text-center shadow-md">{text}</div>
       ),
@@ -216,17 +216,32 @@ const ListBill: React.FC = () => {
       key: 'action',
       render: (record: BillRecord) => (
         <div className="relative w-[180px] flex gap-2">
-          <Button
-            type="default"
-            icon={<EyeOutlined />}
-            onClick={() => navigate(`/admin/bill/detail/${record.id}`)}
-            className="bg-blue-500 text-white hover:bg-blue-600 focus:bg-blue-700 rounded-md shadow-md"
-          >
-            Xem Chi Tiết
-          </Button>
+          {/* Display "Xem Chi Tiết" button for specific statuses */}
+          {['pending', 'shipping', 'confirmed'].includes(record.status_bill) && (
+            <Button
+              type="default"
+              icon={<EyeOutlined />}
+              onClick={() => navigate(`/admin/bill/detail/${record.id}`)}
+              className="bg-blue-500 text-white hover:bg-blue-600 focus:bg-blue-700 rounded-md shadow-md"
+            >
+              Xem Chi Tiết
+            </Button>
+          )}
+    
+          {['processed'].includes(record.status_bill) && (
+            <Button
+              type="default"
+              onClick={() => navigate(`/admin/bill/shiping/${record.id}`)}
+              className="bg-yellow-500 text-white hover:bg-yellow-600 focus:bg-yellow-700 rounded-md shadow-md"
+            >
+              Gửi Đơn Hàng Sang GHN
+            </Button>
+          )}
         </div>
       ),
     }
+    
+
   ];
 
   if (isLoading) return <Spin tip="Loading..." className="flex justify-center items-center h-screen" />;
@@ -247,7 +262,7 @@ const ListBill: React.FC = () => {
                   <h2 className="font-semibold text-lg text-gray-800">
                     {status === 'all' ? 'Tất Cả' :
                       status === 'pending' ? 'Chờ Xác Nhận' :
-                        status === 'processing' ? 'Đã Xử Lý' :
+                        status === 'processing' ? 'Đã Xác Nhận' :
                           status === 'shipping' ? 'Đang Vận Chuyển' :
                             status === 'delivered' ? 'Đã Giao Hàng' : 'Đã Hủy'}
                   </h2>
@@ -274,7 +289,7 @@ const ListBill: React.FC = () => {
           </div>
         </div>
         <div className="overflow-x-auto pt-5">
-          <div className='bg-white pt-5 rounded-md shadow-md'>
+          <div className='bg-white pt-5 rounded-md shadow-md pb-5'>
             <div className='w-[97%] mx-auto'>
               <Table
                 columns={columns}

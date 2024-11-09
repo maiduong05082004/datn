@@ -79,7 +79,7 @@ const UpdateAttributeValues: React.FC = () => {
         <>
             {contextHolder}
             <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 p-6">
-                <div className="w-full max-w-7xl">
+                <div className="w-full max-w-8xl">
                     <Card bordered={false} className="shadow-lg rounded-xl p-8 bg-white">
                         <Title level={3} className="text-center mb-6 text-gray-700">
                             Thêm mới giá trị thuộc tính
