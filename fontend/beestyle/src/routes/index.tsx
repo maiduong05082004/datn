@@ -1,67 +1,68 @@
+import AddBanners from "@/pages/(dashboard)/dashboard/Banner/add";
+import UpdateBanners from "@/pages/(dashboard)/dashboard/Banner/update";
+import DetailBill from "@/pages/(dashboard)/dashboard/Bill/detail";
+import ListBill from "@/pages/(dashboard)/dashboard/Bill/list";
 import DashboardPage from "@/pages/(dashboard)/dashboard/page";
 import MyProfile from "@/pages/(dashboard)/dashboard/profile";
 import AddPromotion from "@/pages/(dashboard)/dashboard/promotions/add";
 import ListPromotions from "@/pages/(dashboard)/dashboard/promotions/list";
 import UpdatePromotion from "@/pages/(dashboard)/dashboard/promotions/update";
+import AddUser from "@/pages/(dashboard)/dashboard/Users/add";
+import ListUser from "@/pages/(dashboard)/dashboard/Users/list";
+import UpdateUser from "@/pages/(dashboard)/dashboard/Users/update";
 import LayoutAdmin from "@/pages/(dashboard)/layout";
 import HomePage from "@/pages/(website)/home/page";
 import LayoutWebsite from "@/pages/(website)/layout";
 import { Route, Routes } from "react-router-dom";
-// Bill
-import ListBill from "@/pages/(dashboard)/dashboard/Bill/list";
-import DetailBill from "@/pages/(dashboard)/dashboard/Bill/detail";
-// banner
-import AddBanners from "@/pages/(dashboard)/dashboard/Banner/add";
-import ListBanners from "@/pages/(dashboard)/dashboard/Banner/list";
-import UpdateBanners from "@/pages/(dashboard)/dashboard/Banner/update";
-import ListUser from "@/pages/(dashboard)/dashboard/Users/list";
-import AddUser from "@/pages/(dashboard)/dashboard/Users/add";
-import UpdateUser from "@/pages/(dashboard)/dashboard/Users/update";
-import ListComments from "@/pages/(dashboard)/dashboard/Comment/list";
-import ListProducts from "@/pages/(dashboard)/dashboard/Products/list";
-import UpdateProduct from "@/pages/(dashboard)/dashboard/Products/update";
-import AddProduct from "@/pages/(dashboard)/dashboard/Products/add";
-import DetailProduct from "@/pages/(dashboard)/dashboard/Products/detail";
+import AddAttribute from "@/pages/(dashboard)/dashboard/Attribute/add";
+import AddAttributeValues from "@/pages/(dashboard)/dashboard/Attribute/Attribute_value/add";
+import UpdateAttributeValues from "@/pages/(dashboard)/dashboard/Attribute/Attribute_value/update";
+import ListAttribute from "@/pages/(dashboard)/dashboard/Attribute/list";
+import UpdateAttribute from "@/pages/(dashboard)/dashboard/Attribute/update";
+import AddtributeGroup from "@/pages/(dashboard)/dashboard/Attribute_Group/add";
+import ListAttributeGroup from "@/pages/(dashboard)/dashboard/Attribute_Group/list";
+import UpdateAttributeGroup from "@/pages/(dashboard)/dashboard/Attribute_Group/update";
+import DeatilConfirm from "@/pages/(dashboard)/dashboard/Bill/detailConfirm";
+import Detailship from "@/pages/(dashboard)/dashboard/Bill/detailSuccessful";
 import AddCategories from "@/pages/(dashboard)/dashboard/Category/add";
 import ListCategories from "@/pages/(dashboard)/dashboard/Category/list";
 import UpdateCategories from "@/pages/(dashboard)/dashboard/Category/update";
+import AddProduct from "@/pages/(dashboard)/dashboard/Product/add";
+import Comments from "@/pages/(dashboard)/dashboard/Product/comments";
+import ListProducts from "@/pages/(dashboard)/dashboard/Product/list";
+import UpdateProduct from "@/pages/(dashboard)/dashboard/Product/update";
+import DetailUser from "@/pages/(dashboard)/dashboard/Users/detail";
+import ErrorPage from "@/pages/(website)/404/page";
 import Search from "@/pages/(website)/_components/Search";
+import AddressesPage from "@/pages/(website)/account/_components/addresses";
+import InfoPage from "@/pages/(website)/account/_components/info";
+import OrderDetail from "@/pages/(website)/account/_components/orderDetail";
+import RecentlyPage from "@/pages/(website)/account/_components/recently";
+import ViewAccount from "@/pages/(website)/account/_components/view";
+import WishlistPage from "@/pages/(website)/account/_components/wishlist";
+import AccountPage from "@/pages/(website)/account/page";
 import PageSignin from "@/pages/(website)/auth/signin/page";
 import PageSignup from "@/pages/(website)/auth/signup/page";
+import CartPage from "@/pages/(website)/cart/page";
 import CheckOutPage from "@/pages/(website)/checkout/page";
 import DetailPage from "@/pages/(website)/detail/page";
 import ListPage from "@/pages/(website)/list/page";
 import SearchPage from "@/pages/(website)/search/page";
 import { useState } from "react";
-import ListAttribute from "@/pages/(dashboard)/dashboard/Attribute/list";
-import Shiping from "@/pages/(dashboard)/dashboard/Bill/shiping";
-import AddAttribute from "@/pages/(dashboard)/dashboard/Attribute/add";
-import UpdateAttribute from "@/pages/(dashboard)/dashboard/Attribute/update";
-import AddAttributeValues from "@/pages/(dashboard)/dashboard/Attribute/Attribute_value/add";
-import UpdateAttributeValues from "@/pages/(dashboard)/dashboard/Attribute/Attribute_value/update";
-import AddtributeGroup from "@/pages/(dashboard)/dashboard/Attribute_Group/add";
-import ListAttributeGroup from "@/pages/(dashboard)/dashboard/Attribute_Group/list";
-import UpdateAttributeGroup from "@/pages/(dashboard)/dashboard/Attribute_Group/update";
-import CartPage from "@/pages/(website)/cart/page";
-import WishlistPage from "@/pages/(website)/account/_components/wishlist";
-import AccountPage from "@/pages/(website)/account/page";
-import ViewAccount from "@/pages/(website)/account/_components/view";
-import InfoPage from "@/pages/(website)/account/_components/info";
-import RecentlyPage from "@/pages/(website)/account/_components/recently";
-import AddressesPage from "@/pages/(website)/account/_components/addresses";
-import App from "@/pages/(dashboard)/dashboard/Bill/app";
-import Detailship from "@/pages/(dashboard)/dashboard/Bill/detailship";
-import DeatilConfirm from "@/pages/(dashboard)/dashboard/Bill/detailConfirm"
-import Comments from "@/pages/(dashboard)/dashboard/Products/comments";
-import DetailUser from "@/pages/(dashboard)/dashboard/Users/detail";
-import PrivateRouter from "./PrivateRoute";
-import OrderDetail from "@/pages/(website)/account/_components/orderDetail";
-import ErrorPage from "@/pages/(website)/404/page";
-// import CartPage from "@/pages/(website)/cart/page";
-import InventoryManagement from "@/pages/(dashboard)/dashboard/Inventory/list";
 import Signin from "@/pages/(dashboard)/dashboard/auth.tsx/signin";
+import DetailBanner from "@/pages/(dashboard)/dashboard/Banner/detail";
+import InventoryManagement from "@/pages/(dashboard)/dashboard/Inventory/list";
 import ForgotPasswordPage from "@/pages/(website)/ForgotPassword/page";
 import ResetPasswordPage from "@/pages/(website)/ResetPassword/page";
+import ListBannersMain from "@/pages/(dashboard)/dashboard/Banner/list";
+import ListBannersCustom from "@/pages/(dashboard)/dashboard/Banner/list_banner_custom";
+import ListBannersCategory from "@/pages/(dashboard)/dashboard/Banner/listbanner_category";
+import CancelBill from "@/pages/(dashboard)/dashboard/Bill/cancel";
+import ShipNoGHN from "@/pages/(dashboard)/dashboard/Bill/ShipNoGHN";
+// import DetailProduct from "@/pages/(dashboard)/dashboard/Product/detail";
+import ListUserChat from "@/pages/(dashboard)/dashboard/ChatRealTime/ListUserChat";
+import DetailPro from "@/pages/(dashboard)/dashboard/Product/detailpro";
+import ListAllChart from "@/pages/(dashboard)/dashboard/Statistic/page";
 
 const Router = () => {
 
@@ -76,8 +77,6 @@ const Router = () => {
                     <Route path="categories/:id" element={<ListPage />} />
                     <Route path="products/:id" element={<DetailPage />} />
                     <Route path="checkouts" element={<CheckOutPage />} />
-                    <Route path="forgot-password" element={<ForgotPasswordPage />} />
-                    <Route path="reset-password/:token" element={<ResetPasswordPage />} />
                     <Route path="search" element={<SearchPage isKeySearch={isKeySearch} />} />
                     <Route path="carts" element={<CartPage />} />
                     <Route path="account" element={<AccountPage />}>
@@ -90,6 +89,8 @@ const Router = () => {
                     </Route>
                     <Route path="*" element={<ErrorPage />} />
                 </Route>
+                <Route path="forgot-password" element={<ForgotPasswordPage />} />
+                <Route path="reset-password/:token" element={<ResetPasswordPage />} />
                 <Route path="signin" element={<PageSignin />} />
                 <Route path="signup" element={<PageSignup />} />
 
@@ -99,20 +100,27 @@ const Router = () => {
                 <Route path="admin/dashboard" element={<LayoutAdmin />}>
                     <Route index element={<DashboardPage />} />
                     <Route path="profile" element={<MyProfile />} />
+                    <Route path="chat" element={<ListUserChat />} />
                     {/* bills */}
-                    <Route path="bill/app" element={<App />} />
                     <Route path="bill/list" element={<ListBill />} />
                     <Route path="bill/detail/:id" element={<DetailBill />} />
-                    <Route path="bill/detailship/:id" element={<Detailship />} />
-                    <Route path="bill/detailConfirm/:id" element={<DeatilConfirm />} />
-                    <Route path="bill/shiping/:id" element={<Shiping />} />
+                    <Route path="bill/detailSuccessful/:id" element={<Detailship />} />
+                    {/* <Route path="bill/detailConfirm/:id" element={<DeatilConfirm />} /> */}
+                    {/* <Route path="bill/detailConfirm/:id" element={<DeatilConfirm />} /> */}
+                    <Route path="bill/cancel/:id" element={<CancelBill />} />
+                    {/* <Route path="bill/detailConfirm/:id" element={<DeatilConfirm />} /> */}
+                    <Route path="bill/cancel" element={<CancelBill />} />
+                    {/* <Route path="bill/shiping/:id" element={<Shiping />} /> */}
+                    <Route path="bill/shiping/:id" element={<ShipNoGHN />} />
                     {/* <Route path="bill/address" element={<AddAddresses />} /> */}
                     {/* comments */}
-                    <Route path="comment/list" element={<ListComments />} />
                     {/* banners */}
                     <Route path="banner/add" element={<AddBanners />} />
-                    <Route path="banner/list" element={<ListBanners />} />
+                    <Route path="banner/list/main" element={<ListBannersMain />} />
+                    <Route path="banner/list/custom" element={<ListBannersCustom />} />
+                    <Route path="banner/list/category" element={<ListBannersCategory />} />
                     <Route path="banner/update/:id" element={<UpdateBanners />} />
+                    <Route path="banner/detail/:id" element={<DetailBanner />} />
                     {/* users */}
                     <Route path="user/add" element={<AddUser />} />
                     <Route path="user/list" element={<ListUser />} />
@@ -123,7 +131,8 @@ const Router = () => {
                     <Route path="comments/list/:id" element={<Comments />} />
                     <Route path="products/add" element={<AddProduct />} />
                     <Route path="products/update/:id" element={<UpdateProduct />} />
-                    <Route path="products/detail/:id" element={<DetailProduct />} />
+                    {/* <Route path="products/detail/:id" element={<DetailProduct />} /> */}
+                    <Route path="products/detail/:id" element={<DetailPro />} />
                     {/* attribute_group */}
                     <Route path="attribute_group/add" element={<AddtributeGroup />} />
                     <Route path="attribute_group/list" element={<ListAttributeGroup />} />
@@ -145,6 +154,15 @@ const Router = () => {
                     <Route path="promotions/update/:id" element={<UpdatePromotion />} />
                     {/* inventory */}
                     <Route path="inventory/list" element={<InventoryManagement />} />
+                    {/*{/* statistic */}
+                    {/* <Route path="statistic/revenue" element={<ListStatistics />} />
+                    <Route path="statistic/selling" element={<ListTopSelling />} />
+                    <Route path="statistic/user" element={<ListNewPerson />} />
+                    <Route path="statistic/customer" element={<ListCustomer />} />
+                    {/* <Route path="statistic/product" element={<StatisticsProducts />} /> */}
+                    <Route path="statistic/list" element={<ListAllChart />} />
+                    {/* chatrealtime */}
+                    {/* <Route path="chat/main" element={<ChatRealTime />} /> */}
                 </Route>
             </Routes>
             <Search isSearch={isSearch} setIsSearch={setIsSearch} setKeySearch={setKeySearch} />

@@ -42,6 +42,8 @@ const ListProducts = () => {
   const [messageApi, contextHolder] = message.useMessage();
   const queryClient = useQueryClient();
   const navigate = useNavigate();
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [currentDescription, setCurrentDescription] = useState('');
   // const { id } = useParams();
 
   const { data: productsData, isLoading } = useQuery({
@@ -64,19 +66,22 @@ const ListProducts = () => {
       messageApi.error('Xóa sản phẩm thất bại');
     },
   });
-  // Hàm mở rộng để render danh sách các biến thể
 
   const columns: Array<any> = [
     {
       title: 'STT',
       dataIndex: 'index',
       key: 'index',
+      align: 'center',
+      width:"50px",
       render: (_: any, __: Product, index: number) => <span>{index + 1}</span>,
     },
     {
       title: 'Tên sản phẩm',
       dataIndex: 'name',
       key: 'name',
+      width:"250px",
+      align: 'center',
       filters: productsData?.data?.map((product: Product) => ({
         text: product.name,
         value: product.name,
@@ -84,34 +89,71 @@ const ListProducts = () => {
       onFilter: (value: string, record: Product) => record.name.includes(value),
     },
     {
-      title: 'Giá',
+      title: 'Số Lượng',
+      dataIndex: 'stock',
+      key: 'stock',
+      align: 'center',
+    },
+    {
+      title: 'Giá Nhập',
+      dataIndex: 'product_cost',
+      key: 'product_cost',
+      align: 'center',
+      render: (product_cost: { cost_price: string }) => (
+        <span>{product_cost?.cost_price ? parseFloat(product_cost.cost_price).toLocaleString() : 'Không có'} VND</span>
+      ),
+    },
+    {
+      title: 'Nhà cung cấp',
+      dataIndex: 'product_cost',
+      key: 'supplier',
+      align: 'center',
+      render: (product_cost: { supplier: string }) => (
+        <span>{product_cost?.supplier || 'Không có'}</span>
+      ),
+    },
+    
+    {
+      title: 'Ngày nhập',
+      dataIndex: 'product_cost',
+      align: 'center',
+      key: 'import_date',
+      render: (product_cost: { import_date: string }) => (
+        <span>{product_cost ? format(new Date(product_cost.import_date), 'dd/MM/yyyy') : 'Không có'}</span>
+      ),
+    }
+    ,
+    {
+      title: 'Giá Bán',
       dataIndex: 'price',
+      align: 'center',
       key: 'price',
       sorter: (a: Product, b: Product) => parseFloat(a.price) - parseFloat(b.price),
       render: (text: string) => <span>{parseFloat(text).toLocaleString()} VND</span>,
     },
-    {
-      title: 'Số Lượng',
-      dataIndex: 'stock',
-      key: 'stock',
-    },
+    ,
     {
       title: 'Mô tả',
       dataIndex: 'description',
+      align: 'center',
+      width:"100px",
       key: 'description',
       render: (text: string) => (
         <div className="max-w-xs truncate">
-          {text.length > 30 ? ( 
-            <Tooltip title={text}>  
+          {text.length > 30 ? (
+            <Tooltip title={text}>
               <span>
                 {text.slice(0, 30)}...{' '}
                 <Button
-                  type="link"
-                  onClick={() => messageApi.info(text)}
-                  className="text-indigo-600 p-0"
-                  style={{ fontSize: '0.875rem' }}  
+                  type="default"
+                  onClick={() => {
+                    setCurrentDescription(text);
+                    setIsModalVisible(true);
+                  }}
+                  className="text-indigo-600"
+                  style={{ fontSize: '0.875rem' }}
+                  icon={<EyeOutlined />}
                 >
-                  Xem chi tiết
                 </Button>
               </span>
             </Tooltip>
@@ -122,15 +164,11 @@ const ListProducts = () => {
       ),
     },
     {
-      title: 'Ngày nhập',
-      dataIndex: 'input_day',
-      key: 'input_day',
-      render: (date: string) => <span>{format(new Date(date), 'dd/MM/yyyy')}</span>,
-    },
-    {
       title: 'Danh mục',
       dataIndex: 'category_name',
+      align: 'center',
       key: 'category_name',
+      width:"100px",
       filters: productsData?.data?.map((product: Product) => ({
         text: product.category_name,
         value: product.category_name,
@@ -140,38 +178,41 @@ const ListProducts = () => {
     },
     {
       title: 'Bình Luận',
+      align: 'center',
       key: 'comments',
+      width:"50px",
       render: (product: Product) => (
-        <div className="flex space-x-2">
+        <div className="m-auto">
           <Button
             type="default"
             icon={<EyeOutlined />}
             onClick={() => navigate(`/admin/dashboard/comments/list/${product.id}`)}
           >
-            Xem Bình Luận
           </Button>
 
-          
+
         </div>
       ),
     }
     ,
     {
-      title: 'Action',
+      title: 'Hành Động',
       key: 'action',
+      align: 'center',
+      width:"50px",
       render: (product: Product) => (
         <div className="flex space-x-2">
           <Button
             type="default"
             icon={<EyeOutlined />}
-            className='rounded-full'
+
             onClick={() => navigate(`/admin/dashboard/products/detail/${product.id}`)}
           />
 
           <Button
             type="default"
             icon={<EditOutlined />}
-            className='rounded-full'
+
             onClick={() => navigate(`/admin/dashboard/products/update/${product.id}`)}
           />
           <Popconfirm
@@ -181,7 +222,7 @@ const ListProducts = () => {
             okText="Yes"
             cancelText="No"
           >
-            <Button icon={<DeleteOutlined />} danger type="default"className='rounded-full'
+            <Button icon={<DeleteOutlined />} danger type="default"
             />
           </Popconfirm>
         </div>
@@ -214,6 +255,18 @@ const ListProducts = () => {
             showTotal: (total) => `Tổng ${total} sản phẩm`,
           }}
         />
+        <Modal
+          title="Chi tiết mô tả"
+          visible={isModalVisible}
+          onCancel={() => setIsModalVisible(false)}
+          footer={[
+            <Button key="close" onClick={() => setIsModalVisible(false)}>
+              Đóng
+            </Button>,
+          ]}
+        >
+          <p>{currentDescription}</p>
+        </Modal>
       </div>
     </>
   );
