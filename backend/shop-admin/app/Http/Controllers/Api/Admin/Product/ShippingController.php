@@ -16,47 +16,12 @@ class ShippingController extends Controller
     public function __construct()
     {
         $this->ghnToken = '4bd9602e-9ad5-11ef-8e53-0a00184fe694';
-        $this->ghnShopId = '195219 - 0968350160';
+        $this->ghnShopId = '195219';
     }
 
-//  public function createGHNOrderFromBill($billId)
-//     {
-//         // Lấy thông tin từ bảng bills và shipping_addresses
-//         $bill = Bill::findOrFail($billId);
-//         $shippingAddress = ShippingAddress::findOrFail($bill->shipping_address_id);
-
-//         // Chuẩn bị dữ liệu JSON để gửi tới GHN API
-//         $data = $this->prepareGHNOrderData($bill, $shippingAddress);
-
-//         $url = 'https://dev-online-gateway.ghn.vn/shiip/public-api/v2/shipping-order/create';
-
-//         // Gửi request đến API GHN
-//         $response = Http::withHeaders([
-//             'Token' => $this->ghnToken,
-//             'Content-Type' => 'application/json',
-//         ])->post($url, $data);
-
-//         // Kiểm tra và trả về phản hồi
-//         if ($response->successful()) {
-//             $data = $response->json();
-//             // Lưu mã order_code từ GHN vào trường order_code_shipping trong bảng bills
-//             $bill->order_code_shipping = $data['data']['order_code'] ?? null;
-//             $bill->save();
-
-//             return response()->json([
-//                 'success' => true,
-//                 'order_data' => $data['data'] ?? null,
-//             ]);
-//         } else {
-//             return response()->json([
-//                 'success' => false,
-//                 'message' => 'Lỗi khi gọi API GHN',
-//                 'error' => $response->json() ?? 'Unknown error'
-//             ], $response->status());
-//         }
-//     }
 
 
+    
 public function createGHNOrderFromBill($billId)
 {
     // Kiểm tra nếu đơn hàng đã có mã `order_code_shipping`
@@ -79,6 +44,7 @@ public function createGHNOrderFromBill($billId)
     // Gửi request đến API GHN
     $response = Http::withHeaders([
         'Token' => $this->ghnToken,
+        'ShopId' => $this->ghnShopId,
         'Content-Type' => 'application/json',
     ])->post($url, $data);
 
@@ -137,7 +103,7 @@ public function createGHNOrderFromBill($billId)
             'payment_type_id' => $bill->payment_type == 'cod' ? 2 : 1,
             'note' => $bill->note,
             'required_note' => 'KHONGCHOXEMHANG',
-            'from_name' => 'TestSender',
+            'from_name' => 'Beestyle',
             'from_phone' => '0987654321',
             'from_address' => '12 Láng Hạ, Phường Láng Hạ, Quận Đống Đa, Hà Nội',
             'from_ward_name' => 'Láng Hạ',
@@ -207,50 +173,7 @@ public function createGHNOrderFromBill($billId)
         }
     }
     
-    // public function cancelGHNOrder($billId)
-    // {
-    //     // Lấy đơn hàng từ bảng bills để tìm order_code_shipping
-    //     $bill = Bill::findOrFail($billId);
-    
-    //     if (empty($bill->order_code_shipping)) {
-    //         return response()->json([
-    //             'success' => false,
-    //             'message' => 'Không tìm thấy mã đơn hàng từ GHN để hủy.'
-    //         ], 400);
-    //     }
-    
-    //     $orderCode = $bill->order_code_shipping;
-    
-    //     $url = 'https://dev-online-gateway.ghn.vn/shiip/public-api/v2/switch-status/cancel';
-    
-    //     // Dữ liệu để gửi tới API GHN
-    //     $data = [
-    //         'order_codes' => [$orderCode]
-    //     ];
-    
-    //     // Gửi yêu cầu POST để hủy đơn hàng
-    //     $response = Http::withHeaders([
-    //         'Token' => $this->ghnToken,
-    //         'ShopId' => $this->ghnShopId,
-    //         'Content-Type' => 'application/json',
-    //     ])->post($url, $data);
-    
-    //     // Kiểm tra phản hồi và trả về kết quả
-    //     if ($response->successful()) {
-    //         $data = $response->json();
-    //         return response()->json([
-    //             'success' => true,
-    //             'message' => 'Đơn hàng đã được hủy thành công',
-    //             'data' => $data['data'] ?? null,
-    //         ]);
-    //     } else {
-    //         return response()->json([
-    //             'success' => false,
-    //             'message' => 'Lỗi khi hủy đơn hàng trên GHN',
-    //             'error' => $response->json() ?? 'Unknown error'
-    //         ], $response->status());
-    //     }
-    // }
+
     
 
     public function cancelGHNOrder($billId)

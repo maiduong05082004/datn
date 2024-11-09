@@ -208,123 +208,6 @@ class ProductController extends Controller
     }
 
 
-    // public function purchase(Request $request)
-    // {
-    //     $validatedData = $request->validate([
-    //         'total' => 'required|numeric|min:0',
-    //         'promotion_ids' => 'nullable|array',
-    //         'promotion_ids.*' => 'integer|exists:promotions,id',
-    //         'note' => 'nullable|string',
-    //         'payment_type' => 'required|in:' . Bill::PAYMENT_TYPE_ONLINE . ',' . Bill::PAYMENT_TYPE_COD,
-    //         'cart_id' => 'required|array',
-    //         'cart_id.*' => 'integer|exists:cart_items,id',
-    //     ]);
-
-    //     // Kiểm tra và lấy địa chỉ giao hàng mặc định nếu không có `shipping_address_id`
-    //     $shippingAddressId = isset($request->shipping_address_id)
-    //         ? DB::table('shipping_addresses')
-    //         ->where('id', $request->shipping_address_id)
-    //         ->where('user_id', $request->user()->id)
-    //         ->exists() ? $request->shipping_address_id : null
-    //         : DB::table('shipping_addresses')
-    //         ->where('user_id', $request->user()->id)
-    //         ->where('is_default', 1)
-    //         ->value('id');
-
-    //     if (!$shippingAddressId) {
-    //         return response()->json(['message' => 'Vui lòng chọn địa chỉ mặc định cho đơn hàng của bạn.'], 400);
-    //     }
-
-    //     DB::beginTransaction();
-
-    //     try {
-    //         // Tạo mã đơn hàng duy nhất và hóa đơn
-    //         $bill = Bill::create([
-    //             'user_id' => $request->user()->id,
-    //             'code_orders' => 'ORDER-' . strtoupper(uniqid()),
-    //             'email_receiver' => $request->user()->email,
-    //             'note' => $validatedData['note'],
-    //             'status_bill' => Bill::STATUS_PENDING,
-    //             'payment_type' => $validatedData['payment_type'],
-    //             'subtotal' => 0,
-    //             'total' => $validatedData['total'],
-    //             'shipping_address_id' => $shippingAddressId,
-    //             'promotion_ids' => implode(',', $validatedData['promotion_ids'] ?? []),
-    //             'canceled_at' => null,
-    //         ]);
-
-    //         // Xử lý các mục trong giỏ hàng và tính tổng phụ
-    //         $orderItems = $this->processCartItems($validatedData['cart_id'], $bill);
-    //         $subtotal = array_sum(array_column($orderItems, 'total'));
-    //         $bill->update(['subtotal' => $subtotal]);
-
-    //         DB::commit();
-
-    //         // Xóa các mục trong giỏ hàng đã thanh toán thành công
-    //         CartItem::whereIn('id', $validatedData['cart_id'])->delete();
-
-    //         // Gửi email xác nhận đơn hàng qua hàng đợi
-    //         $orderData = [
-    //             'customerName' => $request->user()->name,
-    //             'orderId' => $bill->code_orders,
-    //             'orderDate' => now()->format('d/m/Y H:i'),
-    //             'paymentType' => $bill->getLoaiThanhToan(),
-    //             'shippingAddress' => $bill->shippingAddress->address_line,
-    //             'phoneNumber' => $bill->shippingAddress->phone_number,
-    //             'orderItems' => $orderItems,
-    //             'totalAmount' => $bill->total,
-    //         ];
-    //         Mail::to($request->user()->email)->queue(new OrderConfirmationMail($orderData));
-
-    //         return response()->json(['message' => 'Đặt hàng thành công và email xác nhận sẽ được gửi!', 'bill' => $bill], 201);
-    //     } catch (ModelNotFoundException $e) {
-    //         DB::rollBack();
-    //         return response()->json(['message' => 'Không tìm thấy sản phẩm hoặc biến thể'], 404);
-    //     } catch (\Exception $e) {
-    //         DB::rollBack();
-    //         return response()->json(['message' => 'Đã xảy ra lỗi trong quá trình đặt hàng', 'error' => $e->getMessage()], 500);
-    //     }
-    // }
-
-    // private function processCartItems($cartIds, $bill)
-    // {
-    //     $orderItems = [];
-    //     $cartItems = CartItem::whereIn('id', $cartIds)->get();
-
-    //     foreach ($cartItems as $cartItem) {
-    //         $variationValue = ProductVariationValue::findOrFail($cartItem->product_variation_value_id);
-    //         $totalAmount = $variationValue->price * $cartItem->quantity;
-
-    //         BillDetail::create([
-    //             'bill_id' => $bill->id,
-    //             'product_id' => $cartItem->product_id,
-    //             'product_variation_value_id' => $cartItem->product_variation_value_id,
-    //             'don_gia' => $variationValue->price,
-    //             'quantity' => $cartItem->quantity,
-    //             'total_amount' => $totalAmount,
-    //         ]);
-
-    //         $variationValue->decrement('stock', $cartItem->quantity);
-    //         $variationValue->productVariation->decrement('stock', $cartItem->quantity);
-    //         Product::findOrFail($cartItem->product_id)->decrement('stock', $cartItem->quantity);
-
-    //         $orderItems[] = [
-    //             'productName' => $cartItem->product->name,
-    //             'size' => $variationValue->attributeValue->value,
-    //             'color' => $variationValue->productVariation->attributeValue->value,
-    //             'quantity' => $cartItem->quantity,
-    //             'unitPrice' => $variationValue->price,
-    //             'total' => $totalAmount,
-    //             'image' => $variationValue->productVariation->variationImages()
-    //                 ->where('image_type', 'album')
-    //                 ->first()?->image_path,
-    //         ];
-    //     }
-
-    //     return $orderItems;
-    // }
-
-
 
     private function generateUniqueOrderCode()
     {
@@ -593,18 +476,24 @@ class ProductController extends Controller
     public function cancelOrder(Request $request, $orderId)
     {
         try {
-            // Tìm đơn hàng 
             $bill = Bill::findOrFail($orderId);
-
-            // Kiểm tra trạng thái đơn hàng
+    
             if ($bill->isPending() || $bill->isProcessed()) {
+                foreach ($bill->BillDetail as $billDetail) {
+                    $variationValue = $billDetail->productVariationValue;
+                    $variationValue->increment('stock', $billDetail->quantity);
+                    
+                    $variationValue->productVariation->increment('stock', $billDetail->quantity);
+                    $variationValue->productVariation->product->increment('stock', $billDetail->quantity);
+                }
+    
                 // Cập nhật trạng thái đơn hàng thành đã hủy và ghi nhận thời gian hủy
                 $bill->update([
                     'status_bill' => Bill::STATUS_CANCELED,
                     'canceled_at' => now(),
                 ]);
-
-                return response()->json(['message' => 'Đơn hàng đã được hủy thành công.'], 200);
+    
+                return response()->json(['message' => 'Đơn hàng đã được hủy thành công và tồn kho đã được cập nhật lại.'], 200);
             } elseif ($bill->isShipped()) {
                 return response()->json(['message' => 'Không thể hủy đơn hàng vì đơn hàng đã được giao cho vận chuyển.'], 400);
             } else {
@@ -616,6 +505,7 @@ class ProductController extends Controller
             return response()->json(['message' => 'Đã xảy ra lỗi khi hủy đơn hàng.', 'error' => $e->getMessage()], 500);
         }
     }
+    
 
 
     public function confirmOrder(Request $request, $orderId)
