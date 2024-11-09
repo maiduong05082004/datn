@@ -53,7 +53,7 @@ const UpdateAttribute: React.FC = () => {
     <>
       {contextHolder}
       <div className="min-h-screen flex items-center justify-center p-8">
-        <Card className="w-full max-w-7xl p-10 rounded-xl shadow-lg">
+        <Card className="w-full max-w-8xl p-10 rounded-xl shadow-lg">
           <Form
             form={form}
             layout="vertical"

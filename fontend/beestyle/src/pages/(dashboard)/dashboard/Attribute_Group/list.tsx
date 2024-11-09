@@ -45,6 +45,7 @@ const ListAttributeGroup = (props: Props) => {
             title: 'STT',
             dataIndex: 'stt',
             key: 'stt',
+            className: 'w-[10px]',
         },
         {
             title: 'Tên nhóm thuộc tính',
@@ -54,6 +55,8 @@ const ListAttributeGroup = (props: Props) => {
         },
         {
             title: 'Action',
+            width: 200,
+            
             key: 'action',
             render: (attribute_group: any) => (
                 <div className="flex space-x-4 justify-center">
@@ -95,7 +98,7 @@ const ListAttributeGroup = (props: Props) => {
                             {attr.attribute_values.map((value : any, idx : any) => (
                                 <span
                                     key={idx}
-                                    className="px-3 py-1 bg-blue-200 text-blue-700 rounded-full text-sm font-medium shadow-sm"
+                                    className="px-3 py-1 bg-blue-200 text-blue-500 rounded-full text-sm font-medium shadow-sm"
                                 >
                                     {value.value}
                                 </span>
