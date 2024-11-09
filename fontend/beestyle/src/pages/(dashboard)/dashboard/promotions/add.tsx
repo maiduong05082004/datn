@@ -147,7 +147,7 @@ const AddPromotion: React.FC = () => {
                         </Form.Item>
                     </>
                 )}
-                <Form.Item label="tổng Số Lượng Voucher" name="usage_limit">
+                <Form.Item label="Tổng Số Lượng Voucher" name="usage_limit">
                     <InputNumber min={1} style={{ width: '100%' }} />
                 </Form.Item>
 

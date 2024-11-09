@@ -20,6 +20,9 @@ interface Variant {
   colorId: number;
   colorName: string;
   sizes: Size[];
+  colorImage: any[];
+  albumImages: any[];
+  [key: string]: any;
 }
 
 const { Option } = Select;
@@ -29,16 +32,21 @@ const UpdateProduct: React.FC = () => {
   const [content, setContent] = useState<string>('');
   const [selectedVariantGroup, setSelectedVariantGroup] = useState<number | null>(null);
   const [attributes, setAttributes] = useState<any[]>([]);
-  const [variants, setVariants] = useState<any[]>([]);
+  const [variants, setVariants] = useState<Variant[]>([]);
   const [stock, setStock] = useState<number | null>(null);
-  const [albumList, setAlbumList] = useState<any[]>([]);
+  const [albumList, setAlbumList] = useState<string[]>([]); // Lưu URL ảnh
   const [showVariantForm, setShowVariantForm] = useState<boolean>(true);
   const { id } = useParams();
-  const [removedVariants, setRemovedVariants] = useState<any[]>([]);
+  const [removedVariants, setRemovedVariants] = useState<number[]>([]);
   const [productData, setProductData] = useState<any>(null);
   const [selectedGroup, setSelectedGroup] = useState<any>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [deletingImage, setDeletingImage] = useState<{ [key: string]: boolean }>({});
+
+  // State để lưu trữ các tệp ảnh mới
+  const [newColorImages, setNewColorImages] = useState<{ [key: number]: File[] }>({});
+  const [newAlbumImages, setNewAlbumImages] = useState<{ [key: number]: File[] }>({});
+  const [newVariationAlbumImages, setNewVariationAlbumImages] = useState<File[]>([]);
 
   const { data: variantgroup, isLoading: isLoadingVariantGroup } = useQuery({
     queryKey: ['variantgroup'],
@@ -48,14 +56,13 @@ const UpdateProduct: React.FC = () => {
     },
   });
 
-  const { data: UpdateVariant } = useQuery({
+  const { data: UpdateVariant, isLoading: isLoadingProduct } = useQuery({
     queryKey: ['updatevariant', id],
     queryFn: async () => {
       const response = await AxiosInstance.get(`http://localhost:8000/api/admins/products/${id}`);
       return response?.data?.data;
     },
   });
-
 
   const { data: categories, isLoading: isLoadingCategories } = useQuery({
     queryKey: ['categories'],
@@ -65,11 +72,9 @@ const UpdateProduct: React.FC = () => {
     },
   });
 
-
   const deleteImageMutation = useMutation({
-    mutationFn: async (fileUrl: string) => {
-      // Convert the URL to Base64
-      const base64FileUrl = btoa(fileUrl); // Encode the entire URL, not just the filename
+    mutationFn: async ({ imageUrl, type }: { imageUrl: string; type: 'product' | 'variation' }) => {
+      const base64FileUrl = btoa(imageUrl); // Encode toàn bộ URL
       const response = await AxiosInstance.delete(`http://127.0.0.1:8000/api/admins/images/variation/${base64FileUrl}`, {
         headers: { 'Content-Type': 'application/json' },
       });
@@ -83,33 +88,35 @@ const UpdateProduct: React.FC = () => {
     },
   });
 
-  const handleDeleteImage = (imageUrl: string, variantIndex: number, field: string) => {
+  const handleDeleteImage = (imageUrl: string, variantIndex: number, field: string, type: 'product' | 'variation') => {
     Modal.confirm({
-      title: 'Are you sure you want to delete this image?',
+      title: 'Bạn có chắc chắn muốn xóa ảnh này?',
       onOk: () => {
-        // Set loading only for the specific image
+        // Set loading chỉ cho ảnh cụ thể
         setDeletingImage((prev) => ({ ...prev, [imageUrl]: true }));
-        deleteImageMutation.mutate(imageUrl, {
-          onSuccess: () => {
-            const updatedVariants = [...variants];
-            updatedVariants[variantIndex][field] = updatedVariants[variantIndex][field].filter(
-              (img: any) => img.url !== imageUrl
-            );
-            setVariants(updatedVariants);
-            // Stop loading only for the specific image
-            setDeletingImage((prev) => ({ ...prev, [imageUrl]: false }));
-            toast.success('Image deleted successfully!');
-          },
-          onError: (error: any) => {
-            // Stop loading only for the specific image
-            setDeletingImage((prev) => ({ ...prev, [imageUrl]: false }));
-            toast.error(`Failed to delete image: ${error.message}`);
-          },
-        });
+        deleteImageMutation.mutate(
+          { imageUrl, type },
+          {
+            onSuccess: () => {
+              const updatedVariants = [...variants];
+              updatedVariants[variantIndex][field] = updatedVariants[variantIndex][field].filter(
+                (img: any) => img.url !== imageUrl
+              );
+              setVariants(updatedVariants);
+              // Dừng loading chỉ cho ảnh cụ thể
+              setDeletingImage((prev) => ({ ...prev, [imageUrl]: false }));
+              toast.success('Xóa ảnh thành công!');
+            },
+            onError: (error: any) => {
+              // Dừng loading chỉ cho ảnh cụ thể
+              setDeletingImage((prev) => ({ ...prev, [imageUrl]: false }));
+              toast.error(`Không thể xóa ảnh: ${error.message}`);
+            },
+          }
+        );
       },
     });
   };
-
 
   useEffect(() => {
     if (UpdateVariant && variantgroup) {
@@ -165,7 +172,7 @@ const UpdateProduct: React.FC = () => {
         setAttributes(formattedAttributes);
       }
 
-      const formattedVariants = UpdateVariant.variations.map((variation: any) => ({
+      const formattedVariants: Variant[] = UpdateVariant.variations.map((variation: any) => ({
         colorId: variation.attribute_value_image_variant.id,
         colorName: variation.attribute_value_image_variant.value,
         sizes: variation.variation_values.map((value: any) => ({
@@ -176,14 +183,14 @@ const UpdateProduct: React.FC = () => {
         })),
         colorImage: variation.attribute_value_image_variant.image_path
           ? [
-            {
-              name: variation.attribute_value_image_variant.image_path,
-              uid: variation.attribute_value_image_variant.image_path,
-              status: 'done',
-              url: variation.attribute_value_image_variant.image_path,
-              isExisting: true,
-            },
-          ]
+              {
+                name: variation.attribute_value_image_variant.image_path,
+                uid: variation.attribute_value_image_variant.image_path,
+                status: 'done',
+                url: variation.attribute_value_image_variant.image_path,
+                isExisting: true,
+              },
+            ]
           : [],
         albumImages: variation.variation_album_images.map((image: string) => ({
           name: image,
@@ -197,12 +204,15 @@ const UpdateProduct: React.FC = () => {
     }
   }, [UpdateVariant, form, variantgroup]);
 
-
-  const { mutate: updateProduct } = useMutation<any, Error, any>({
-    mutationFn: async (formData) => {
-      const response = await AxiosInstance.put(`http://127.0.0.1:8000/api/admins/products/${id}`, formData, {
+  // Đã chỉnh sửa để destructure mutateAsync
+  const { mutateAsync: updateProductMutation, isPending: isUpdating } = useMutation({
+    mutationFn: async (formData: FormData) => {
+      const response = await AxiosInstance.post(`http://127.0.0.1:8000/api/admins/products/${id}`, formData, {
         headers: {
-          'Content-Type': 'application/json',
+          // Do not set Content-Type explicitly; let Axios handle it.
+        },
+        params: {
+          _method: 'PUT', // Laravel will interpret this as a PUT request.
         },
       });
       return response.data;
@@ -210,17 +220,17 @@ const UpdateProduct: React.FC = () => {
     onSuccess: () => {
       toast.success('Cập nhật sản phẩm thành công!');
     },
-    onError: () => {
-      toast.error('Cập nhật sản phẩm thất bại!');
+    onError: (error: any) => {
+      toast.error(`Cập nhật sản phẩm thất bại: ${error.message}`);
     },
   });
-
 
   const handleStockChange = (value: number | null) => {
     setStock(value);
     form.setFieldsValue({ stock: value });
   };
-  // xóa biến thể
+
+  // Xóa biến thể
   const handleDeleteVariant = (colorId: number) => {
     setRemovedVariants((prev) => [...prev, colorId]);
     setVariants((prevVariants) => {
@@ -229,9 +239,7 @@ const UpdateProduct: React.FC = () => {
       return updatedVariants;
     });
   };
-  
-  
-  
+
   const handleAttributeValueChange = (attributeId: number, selectedValues: any[]) => {
     const updatedAttributes = attributes.map((attr) => {
       if (attr.id === attributeId) {
@@ -278,7 +286,6 @@ const UpdateProduct: React.FC = () => {
       return;
     }
 
-
     const newVariants = selectedColors.map((color: any) => ({
       colorId: color.key,
       colorName: color.label,
@@ -316,15 +323,13 @@ const UpdateProduct: React.FC = () => {
     setVariants(mergedVariants);
   };
 
-
-
-  // Kiểm tra response khi upload ảnh
-  const handleUploadChangeForVariant = (index: any, key: any, info: any) => {
+  // Xử lý thay đổi upload cho biến thể
+  const handleUploadChangeForVariant = (index: number, key: string, fileList: any[]) => {
     const updatedVariants = [...variants];
     const variant = updatedVariants[index];
 
     if (variant) {
-      variant[key] = info.fileList.map((file: any) => {
+      variant[key] = fileList.map((file: any) => {
         if (file.response && file.response.url) {
           // Use the URL from the server response if available
           return {
@@ -346,7 +351,6 @@ const UpdateProduct: React.FC = () => {
 
     setVariants(updatedVariants);
   };
-
 
   const columns = [
     {
@@ -384,21 +388,22 @@ const UpdateProduct: React.FC = () => {
       title: 'Ảnh Màu',
       dataIndex: 'colorImage',
       key: 'colorImage',
-      render: (_: any, record: any, index: any) => (
+      render: (_: any, record: any, index: number) => (
         <div className="flex flex-col items-center gap-3 p-4 border border-gray-200 rounded-md shadow-sm">
           <Upload
             listType="picture-card"
             fileList={record.colorImage || []}
             onChange={({ fileList }) => {
-              const updatedColorImage = fileList.map((file) => {
-                const fileUrl = file.url || (file.originFileObj ? URL.createObjectURL(file.originFileObj) : '');
-                return {
-                  uid: file.uid,
-                  name: file.name,
-                  status: 'done',
-                  url: fileUrl,
-                };
-              });
+              const filesToUpload = fileList.filter(file => file.originFileObj);
+              setNewColorImages(prev => ({
+                ...prev,
+                [record.colorId]: filesToUpload.map(file => file.originFileObj as File),
+              }));
+              // Cập nhật giao diện hiển thị ảnh nếu cần
+              const updatedColorImage = fileList.map((file) => ({
+                ...file,
+                url: file.url || (file.originFileObj ? URL.createObjectURL(file.originFileObj) : ''),
+              }));
               const updatedRecord = { ...record, colorImage: updatedColorImage };
               setVariants((prev) => {
                 const updatedVariants = [...prev];
@@ -422,7 +427,7 @@ const UpdateProduct: React.FC = () => {
               type="primary"
               danger
               loading={deletingImage[record.colorImage[0].url] || false} // Chỉ hiển thị trạng thái loading cho ảnh cụ thể
-              onClick={() => handleDeleteImage(record.colorImage[0].url, index, 'colorImage')}
+              onClick={() => handleDeleteImage(record.colorImage[0].url, index, 'colorImage', 'variation')}
             >
               Delete
             </Button>
@@ -434,7 +439,7 @@ const UpdateProduct: React.FC = () => {
       title: 'Album Ảnh',
       dataIndex: 'albumImages',
       key: 'albumImages',
-      render: (_: any, record: any, index: any) => (
+      render: (_: any, record: any, index: number) => (
         <div className="flex flex-wrap gap-3">
           {record.albumImages?.map((image: any, imageIndex: number) => (
             <div
@@ -455,35 +460,50 @@ const UpdateProduct: React.FC = () => {
                   size="small"
                   className="m-1"
                   loading={deletingImage[image.url] || false} // Chỉ hiển thị trạng thái loading cho ảnh cụ thể
-                  onClick={() => handleDeleteImage(image.url, index, 'albumImages')}
+                  onClick={() => handleDeleteImage(image.url, index, 'albumImages', 'variation')}
                 />
               </div>
             </div>
           ))}
           {(!record.albumImages || record.albumImages.length < 3) && (
             <Upload
-              listType="picture-card"
-              multiple
-              onChange={({ fileList }) => {
-                const updatedAlbumImages = fileList.map((file) => {
-                  const fileUrl = file.url || (file.originFileObj ? URL.createObjectURL(file.originFileObj) : '');
-                  return {
-                    uid: file.uid,
-                    name: file.name,
-                    status: file.status,
-                    url: fileUrl,
-                  };
-                });
-                handleUploadChangeForVariant(index, 'albumImages', updatedAlbumImages);
-              }}
-              beforeUpload={() => false}
-              showUploadList={false}
-              className="upload-inline"
-            >
-              <div className="w-20 h-20 border border-dashed border-gray-300 rounded-md flex items-center justify-center cursor-pointer">
-                <UploadOutlined className="text-green-500 text-xl" />
-              </div>
-            </Upload>
+            listType="picture-card"
+            multiple
+            onChange={({ fileList }) => {
+              const filesToUpload = fileList.filter(file => file.originFileObj);
+              
+              setNewAlbumImages(prev => ({
+                ...prev,
+                [record.colorId]: [
+                  ...(prev[record.colorId] || []), // giữ lại các ảnh cũ trong album
+                  ...filesToUpload.map(file => file.originFileObj as File),
+                ],
+              }));
+          
+              // Cập nhật giao diện hiển thị ảnh nếu cần
+              const updatedAlbumImages = [
+                ...(record.albumImages || []), // giữ lại các ảnh cũ
+                ...fileList.map((file) => ({
+                  ...file,
+                  url: file.url || (file.originFileObj ? URL.createObjectURL(file.originFileObj) : ''),
+                })),
+              ];
+          
+              const updatedRecord = { ...record, albumImages: updatedAlbumImages };
+              setVariants((prev) => {
+                const updatedVariants = [...prev];
+                updatedVariants[index] = updatedRecord;
+                return updatedVariants;
+              });
+            }}
+            beforeUpload={() => false}
+            showUploadList={false}
+            className="upload-inline"
+          >
+            <div className="w-20 h-20 border border-dashed border-gray-300 rounded-md flex items-center justify-center cursor-pointer">
+              <UploadOutlined className="text-green-500 text-xl" />
+            </div>
+          </Upload>
           )}
         </div>
       ),
@@ -502,13 +522,9 @@ const UpdateProduct: React.FC = () => {
         </Button>
       ),
     },
-
-
-
-
   ];
 
-  const onFinish = (values: any) => {
+  const onFinish = async (values: any) => {
     const formattedDate = values.input_day ? moment(values.input_day).format('YYYY-MM-DD') : null;
   
     if (!formattedDate) {
@@ -536,25 +552,47 @@ const UpdateProduct: React.FC = () => {
       }
     });
   
-    // Create formData, including removed variants explicitly if necessary
-    const formData = {
-      name: values.name,
-      price: values.price,
-      variations: JSON.stringify(variations),
-      group_id: selectedVariantGroup,
-      category_id: values.category_id,
-      description: values.description || '',
-      content: content || '',
-      input_day: formattedDate,
-      delete_images: values.delete_images || [],
-      delete_variants: removedVariants, // Explicitly include removed variants if required by the API
-    };
+    // Tạo FormData
+    const formData = new FormData();
+    formData.append('name', values.name);
+    formData.append('price', values.price.toString());
+    formData.append('variations', JSON.stringify(variations));
+    formData.append('group_id', selectedVariantGroup?.toString() || '');
+    formData.append('category_id', values.category_id.toString());
+    formData.append('description', values.description || '');
+    formData.append('content', content || '');
+    formData.append('input_day', formattedDate);
   
-    console.log('Final formData:', formData); // Debugging log
   
-    updateProduct(formData);
+    // Kiểm tra và append ảnh colorImage
+    Object.keys(newColorImages).forEach(colorId => {
+      newColorImages[Number(colorId)].forEach(file => {
+        formData.append(`color_image_${colorId}`, file);
+      });
+    });
+  
+    // Kiểm tra và append ảnh albumImages
+    Object.keys(newAlbumImages).forEach(colorId => {
+      newAlbumImages[Number(colorId)].forEach(file => {
+        formData.append(`album_images_${colorId}[]`, file);
+      });
+    });
+  
+    // Kiểm tra và append ảnh variation_album_images
+    newVariationAlbumImages.forEach(file => {
+      formData.append('variation_album_images[]', file);
+    });
+  
+    console.log('Final FormData:', formData); // Debugging log
+  
+    // Gọi mutation để cập nhật sản phẩm
+    try {
+      await updateProductMutation(formData); // Sử dụng mutateAsync
+      // Có thể reset các state liên quan nếu cần
+    } catch (error: any) {
+      toast.error(`Cập nhật sản phẩm thất bại: ${error.message}`);
+    }
   };
-  
   
 
   const handleGroupChange = (groupId: number) => {
@@ -572,14 +610,13 @@ const UpdateProduct: React.FC = () => {
     }
   };
 
-
   useEffect(() => {
     if (selectedGroup) {
       setSelectedVariantGroup(selectedGroup.group_id);
     }
   }, [selectedGroup]);
 
-  if (isLoadingVariantGroup || isLoadingCategories) {
+  if (isLoadingVariantGroup || isLoadingCategories || isLoadingProduct) {
     return (
       <div className="flex justify-center items-center h-screen">
         <Spin tip="Loading..." />
@@ -636,7 +673,6 @@ const UpdateProduct: React.FC = () => {
           rules={[{ required: true, message: "Ngày nhập sản phẩm bắt buộc phải điền" }]}
         >
           <DatePicker format="YYYY-MM-DD" style={{ width: '100%' }} />
-
         </Form.Item>
         <Form.Item
           label="Danh mục"
@@ -670,8 +706,6 @@ const UpdateProduct: React.FC = () => {
             ))}
           </Select>
         </Form.Item>
-
-
 
         <div className="flex gap-5">
           <Form.Item name="is_collection" valuePropName="checked">
@@ -733,7 +767,6 @@ const UpdateProduct: React.FC = () => {
                     ))}
                   </Select>
                 </Form.Item>
-
               ))}
 
             <Button
@@ -748,7 +781,7 @@ const UpdateProduct: React.FC = () => {
             <Table
               dataSource={variants}
               columns={columns}
-              rowKey={(_, index: any) => index.toString()}
+              rowKey={(record, index) => (index !== undefined ? index.toString() : Math.random().toString())}
               pagination={false}
               className="w-full border-collapse border border-gray-300"
             />
@@ -777,9 +810,15 @@ const UpdateProduct: React.FC = () => {
                 <Upload
                   listType="picture"
                   multiple
-                  fileList={albumList}
-                  onChange={({ fileList }) => setAlbumList(fileList.map((file) => file.name))}
+                  onChange={({ fileList }) => {
+                    const filesToUpload = fileList.filter(file => file.originFileObj);
+                    setNewVariationAlbumImages(filesToUpload.map(file => file.originFileObj as File));
+                  }}
                   beforeUpload={() => false}
+                  showUploadList={true}
+                  onRemove={(file: any) => {
+                    setNewVariationAlbumImages(prev => prev.filter(f => f !== file.originFileObj));
+                  }}
                 >
                   <Button icon={<UploadOutlined />} className="bg-green-500 hover:bg-green-600 text-white">
                     Tải lên album ảnh
@@ -795,6 +834,7 @@ const UpdateProduct: React.FC = () => {
             type="primary"
             htmlType="submit"
             className="bg-indigo-600 hover:bg-indigo-700 text-white mt-5"
+            loading={isUpdating}
           >
             Cập nhật sản phẩm
           </Button>
