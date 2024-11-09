@@ -14,62 +14,220 @@ class OrderController extends Controller
 {
     public function index(Request $request)
     {
-        return $this->getOrdersByStatus(null, $request->input('per_page', 10));
+        $startDate = $request->input('start_date');
+        $endDate = $request->input('end_date');
+        $startTime = $request->input('start_time');
+        $endTime = $request->input('end_time');
+        $perPage = $request->input('per_page', 10);
+        $phone = $request->input('phone');
+        $paymentType = $request->input('payment_type');
+        $promotionCode = $request->input('promotion_code');
+    
+        if ($startDate && $startTime) {
+            $startDateTime = Carbon::parse("$startDate $startTime", 'Asia/Ho_Chi_Minh')->setTimezone('UTC');
+        } else {
+            $startDateTime = $startDate ? Carbon::parse($startDate)->startOfDay()->setTimezone('UTC') : null;
+        }
+    
+        if ($endDate && $endTime) {
+            $endDateTime = Carbon::parse("$endDate $endTime", 'Asia/Ho_Chi_Minh')->setTimezone('UTC');
+        } else {
+            $endDateTime = $endDate ? Carbon::parse($endDate)->endOfDay()->setTimezone('UTC') : null;
+        }
+    
+        return $this->getOrdersByStatus(null, $perPage, $startDateTime, $endDateTime, $phone, $paymentType, $promotionCode);
     }
+    
 
     public function pendingOrders(Request $request)
     {
-        return $this->getOrdersByStatus(Bill::STATUS_PENDING, $request->input('per_page', 10));
+        $startDate = $request->input('start_date');
+        $endDate = $request->input('end_date');
+        $startTime = $request->input('start_time');
+        $endTime = $request->input('end_time');
+        $perPage = $request->input('per_page', 10);
+        $phone = $request->input('phone');
+        $paymentType = $request->input('payment_type');
+        $promotionCode = $request->input('promotion_code');
+
+
+        if ($startDate && $startTime) {
+            $startDateTime = Carbon::parse("$startDate $startTime", 'Asia/Ho_Chi_Minh')->setTimezone('UTC');
+        } else {
+            $startDateTime = $startDate ? Carbon::parse($startDate)->startOfDay()->setTimezone('UTC') : null;
+        }
+
+        if ($endDate && $endTime) {
+            $endDateTime = Carbon::parse("$endDate $endTime", 'Asia/Ho_Chi_Minh')->setTimezone('UTC');
+        } else {
+            $endDateTime = $endDate ? Carbon::parse($endDate)->endOfDay()->setTimezone('UTC') : null;
+        }
+
+
+        return $this->getOrdersByStatus(Bill::STATUS_PENDING, $perPage, $startDateTime, $endDateTime, $phone, $paymentType, $promotionCode);
     }
+
 
     public function processedOrders(Request $request)
     {
-        return $this->getOrdersByStatus(Bill::STATUS_PROCESSED, $request->input('per_page', 10));
+        $startDate = $request->input('start_date');
+        $endDate = $request->input('end_date');
+        $startTime = $request->input('start_time');
+        $endTime = $request->input('end_time');
+        $perPage = $request->input('per_page', 10);
+        $phone = $request->input('phone');
+        $paymentType = $request->input('payment_type');
+        $promotionCode = $request->input('promotion_code');
+
+
+        if ($startDate && $startTime) {
+            $startDateTime = Carbon::parse("$startDate $startTime", 'Asia/Ho_Chi_Minh')->setTimezone('UTC');
+        } else {
+            $startDateTime = $startDate ? Carbon::parse($startDate)->startOfDay()->setTimezone('UTC') : null;
+        }
+
+        if ($endDate && $endTime) {
+            $endDateTime = Carbon::parse("$endDate $endTime", 'Asia/Ho_Chi_Minh')->setTimezone('UTC');
+        } else {
+            $endDateTime = $endDate ? Carbon::parse($endDate)->endOfDay()->setTimezone('UTC') : null;
+        }
+        return $this->getOrdersByStatus(Bill::STATUS_PROCESSED, $perPage, $startDateTime, $endDateTime, $phone, $paymentType, $promotionCode);
     }
 
     public function shippedOrders(Request $request)
     {
-        return $this->getOrdersByStatus(Bill::STATUS_SHIPPED, $request->input('per_page', 10));
+
+        $startDate = $request->input('start_date');
+        $endDate = $request->input('end_date');
+        $startTime = $request->input('start_time');
+        $endTime = $request->input('end_time');
+        $perPage = $request->input('per_page', 10);
+        $phone = $request->input('phone');
+        $paymentType = $request->input('payment_type');
+        $promotionCode = $request->input('promotion_code');
+
+
+        if ($startDate && $startTime) {
+            $startDateTime = Carbon::parse("$startDate $startTime", 'Asia/Ho_Chi_Minh')->setTimezone('UTC');
+        } else {
+            $startDateTime = $startDate ? Carbon::parse($startDate)->startOfDay()->setTimezone('UTC') : null;
+        }
+
+        if ($endDate && $endTime) {
+            $endDateTime = Carbon::parse("$endDate $endTime", 'Asia/Ho_Chi_Minh')->setTimezone('UTC');
+        } else {
+            $endDateTime = $endDate ? Carbon::parse($endDate)->endOfDay()->setTimezone('UTC') : null;
+        }
+        return $this->getOrdersByStatus(Bill::STATUS_SHIPPED, $perPage, $startDateTime, $endDateTime, $phone, $paymentType, $promotionCode);
     }
 
     public function deliveredOrders(Request $request)
     {
-        return $this->getOrdersByStatus(Bill::STATUS_DELIVERED, $request->input('per_page', 10));
+        $startDate = $request->input('start_date');
+        $endDate = $request->input('end_date');
+        $startTime = $request->input('start_time');
+        $endTime = $request->input('end_time');
+        $perPage = $request->input('per_page', 10);
+        $phone = $request->input('phone');
+        $paymentType = $request->input('payment_type');
+        $promotionCode = $request->input('promotion_code');
+
+
+        if ($startDate && $startTime) {
+            $startDateTime = Carbon::parse("$startDate $startTime", 'Asia/Ho_Chi_Minh')->setTimezone('UTC');
+        } else {
+            $startDateTime = $startDate ? Carbon::parse($startDate)->startOfDay()->setTimezone('UTC') : null;
+        }
+
+        if ($endDate && $endTime) {
+            $endDateTime = Carbon::parse("$endDate $endTime", 'Asia/Ho_Chi_Minh')->setTimezone('UTC');
+        } else {
+            $endDateTime = $endDate ? Carbon::parse($endDate)->endOfDay()->setTimezone('UTC') : null;
+        }
+        return $this->getOrdersByStatus(Bill::STATUS_DELIVERED, $perPage, $startDateTime, $endDateTime, $phone, $paymentType, $promotionCode);
     }
 
     public function canceledOrders(Request $request)
     {
-        return $this->getOrdersByStatus(Bill::STATUS_CANCELED, $request->input('per_page', 10));
+        $startDate = $request->input('start_date');
+        $endDate = $request->input('end_date');
+        $startTime = $request->input('start_time');
+        $endTime = $request->input('end_time');
+        $perPage = $request->input('per_page', 10);
+        $phone = $request->input('phone');
+        $paymentType = $request->input('payment_type');
+        $promotionCode = $request->input('promotion_code');
+
+
+        if ($startDate && $startTime) {
+            $startDateTime = Carbon::parse("$startDate $startTime", 'Asia/Ho_Chi_Minh')->setTimezone('UTC');
+        } else {
+            $startDateTime = $startDate ? Carbon::parse($startDate)->startOfDay()->setTimezone('UTC') : null;
+        }
+
+        if ($endDate && $endTime) {
+            $endDateTime = Carbon::parse("$endDate $endTime", 'Asia/Ho_Chi_Minh')->setTimezone('UTC');
+        } else {
+            $endDateTime = $endDate ? Carbon::parse($endDate)->endOfDay()->setTimezone('UTC') : null;
+        }
+        return $this->getOrdersByStatus(Bill::STATUS_CANCELED, $perPage, $startDateTime, $endDateTime, $phone, $paymentType, $promotionCode);
     }
 
 
-    private function getOrdersByStatus($status = null, $perPage = 10)
+
+
+    private function getOrdersByStatus($status = null, $perPage = 10, $startDateTime = null, $endDateTime = null, $phone = null, $paymentType = null, $promotionCode = null)
     {
         $query = Bill::with([
             'shippingAddress:id,address_line,city,district,ward,phone_number',
             'BillDetail'
-        ])
-        ->orderBy('created_at', 'desc');
-
+        ])->orderBy('created_at', 'desc');
+    
         if ($status) {
             $query->where('status_bill', $status);
         }
-
+    
+        if ($startDateTime && $endDateTime) {
+            $query->whereBetween('created_at', [$startDateTime, $endDateTime]);
+        }
+    
+        if ($phone) {
+            $query->whereHas('shippingAddress', function ($q) use ($phone) {
+                $q->where('phone_number', 'LIKE', "%$phone%");
+            });
+        }
+    
+        if ($paymentType) {
+            $query->where('payment_type', $paymentType);
+        }
+    
+        if ($promotionCode) {
+            $promotion = Promotion::where('code', $promotionCode)->first();
+            if ($promotion) {
+                // Sử dụng FIND_IN_SET để tìm ID khuyến mãi trong trường promotion_ids
+                $query->whereRaw("FIND_IN_SET(?, promotion_ids)", [$promotion->id]);
+            } else {
+                // Nếu không tìm thấy mã khuyến mãi, trả về danh sách rỗng
+                return response()->json(['bills' => [], 'pagination' => []], 200);
+            }
+        }
+    
         $bills = $query->paginate($perPage);
-
+    
         $bills->getCollection()->transform(function ($bill) {
             $bill->status_description = $bill->getTrangThaiDonHang();
             $bill->payment_type_description = $bill->getLoaiThanhToan();
-
+    
             $dateTime = Carbon::parse($bill->created_at)->timezone('Asia/Ho_Chi_Minh');
             $bill->order_date = $dateTime->format('d/m/Y');
             $bill->order_time = $dateTime->format('H:i:s');
-
+    
             $quantity = $bill->BillDetail->sum('quantity');
-
+    
             return [
                 'id' => $bill->id,
                 'code_orders' => $bill->code_orders,
+                'phone' => $bill->shippingAddress->phone_number,
                 'order_date' => $bill->order_date,
                 'order_time' => $bill->order_time,
                 'status_bill' => $bill->status_bill,
@@ -81,7 +239,7 @@ class OrderController extends Controller
                 'canceled_reason' => $bill->canceled_reason,
             ];
         });
-
+    
         return response()->json([
             'bills' => $bills->items(),
             'pagination' => [
@@ -92,7 +250,18 @@ class OrderController extends Controller
             ]
         ], 200);
     }
+    
+    
 
+
+
+
+
+
+
+
+
+    
     public function searchOrder(Request $request)
     {
         $orderCode = $request->input('order_code');
@@ -113,11 +282,11 @@ class OrderController extends Controller
         // Xử lý dữ liệu đơn hàng để trả về các thông tin cơ bản
         $bill->status_description = $bill->getTrangThaiDonHang();
         $bill->payment_type_description = $bill->getLoaiThanhToan();
-        
+
         $dateTime = Carbon::parse($bill->created_at)->timezone('Asia/Ho_Chi_Minh');
         $bill->order_date = $dateTime->format('d/m/Y');
         $bill->order_time = $dateTime->format('H:i:s');
-        
+
         $quantity = $bill->BillDetail->sum('quantity');
 
         // Chuẩn bị dữ liệu trả về
@@ -164,11 +333,11 @@ class OrderController extends Controller
         // Xử lý dữ liệu đơn hàng để trả về các thông tin cơ bản
         $bill->status_description = $bill->getTrangThaiDonHang();
         $bill->payment_type_description = $bill->getLoaiThanhToan();
-        
+
         $dateTime = Carbon::parse($bill->created_at)->timezone('Asia/Ho_Chi_Minh');
         $bill->order_date = $dateTime->format('d/m/Y');
         $bill->order_time = $dateTime->format('H:i:s');
-        
+
         $quantity = $bill->BillDetail->sum('quantity');
 
         // Chuẩn bị dữ liệu trả về
@@ -251,12 +420,12 @@ class OrderController extends Controller
                 unset($bill->shippingAddress); // Xóa shippingAddress để tránh lồng nhau
             }
 
-                 // Lấy thông tin từ bảng promotions
-                 $promotionIds = !empty($bill->promotion_ids) ? explode(',', $bill->promotion_ids) : [];
-                 $promotions = Promotion::whereIn('id', $promotionIds)->get(['code', 'discount_amount', 'description']);
-     
-                 // Thêm thông tin khuyến mãi vào kết quả trả về
-                 $bill->promotions = $promotions;
+            // Lấy thông tin từ bảng promotions
+            $promotionIds = !empty($bill->promotion_ids) ? explode(',', $bill->promotion_ids) : [];
+            $promotions = Promotion::whereIn('id', $promotionIds)->get(['code', 'discount_amount', 'description']);
+
+            // Thêm thông tin khuyến mãi vào kết quả trả về
+            $bill->promotions = $promotions;
 
             // Đưa thông tin từ product và productVariationValue lên cùng cấp trong mỗi BillDetail và sắp xếp lại các trường
             $bill->BillDetail->transform(function ($detail) {
@@ -343,13 +512,13 @@ class OrderController extends Controller
         $validatedData = $request->validate([
             'status' => 'required|string|in:pending,processed,shipped,delivered,canceled,returned',
         ]);
-    
+
         $newStatus = $validatedData['status'];
-    
+
         try {
             $bill = Bill::findOrFail($orderId);
             $currentStatus = $bill->status_bill;
-    
+
             // Kiểm tra nếu trạng thái mới giống với trạng thái hiện tại
             if ($currentStatus === $newStatus) {
                 $currentStatusDescription = $this->getStatusMessage($currentStatus);
@@ -357,20 +526,20 @@ class OrderController extends Controller
                     'message' => "Đơn hàng đã ở trạng thái '{$currentStatusDescription}', không thể cập nhật lại cùng trạng thái."
                 ], 400);
             }
-    
+
             // Kiểm tra xem trạng thái hiện tại có thể chuyển sang trạng thái mới không
             if ($this->canUpdateStatus($currentStatus, $newStatus)) {
                 $bill->update(['status_bill' => $newStatus]);
-    
+
                 // Lấy thông báo trạng thái từ hàm `getStatusMessage`
                 $message = $this->getStatusMessage($newStatus);
-    
+
                 return response()->json(['message' => $message, 'status' => $newStatus], 200);
             } else {
                 // Thêm thông báo chi tiết về trạng thái hiện tại và trạng thái muốn chuyển sang
                 $currentStatusDescription = $this->getStatusMessage($currentStatus);
                 $newStatusDescription = $this->getStatusMessage($newStatus);
-    
+
                 return response()->json([
                     'message' => "Không thể chuyển đổi từ trạng thái '{$currentStatusDescription}' sang trạng thái '{$newStatusDescription}'."
                 ], 400);
@@ -381,8 +550,8 @@ class OrderController extends Controller
             return response()->json(['message' => 'Đã xảy ra lỗi khi cập nhật trạng thái đơn hàng.', 'error' => $e->getMessage()], 500);
         }
     }
-    
-    
+
+
 
     private function canUpdateStatus($currentStatus, $newStatus)
     {
@@ -412,6 +581,4 @@ class OrderController extends Controller
 
         return $statusMessages[$status] ?? 'Trạng thái đơn hàng đã được cập nhật.';
     }
-
-
 }
