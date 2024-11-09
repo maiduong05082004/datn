@@ -21,7 +21,7 @@ interface TCheckout {
 }
 
 const statusDescriptions: { [key: string]: string } = {
-    ready_to_pick: "Chờ Lấy Hàng",
+    ready_to_pick: "Đã xử lý",
     picking: "Nhân viên đang lấy hàng",
     cancel: "Hủy đơn hàng",
     picked: "Nhân viên đã lấy hàng",
