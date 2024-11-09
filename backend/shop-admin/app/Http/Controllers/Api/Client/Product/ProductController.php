@@ -478,7 +478,7 @@ class ProductController extends Controller
         try {
             $bill = Bill::findOrFail($orderId);
     
-            if ($bill->isPending() || $bill->isProcessed()) {
+            if ($bill->isPending()) {
                 foreach ($bill->BillDetail as $billDetail) {
                     $variationValue = $billDetail->productVariationValue;
                     $variationValue->increment('stock', $billDetail->quantity);
@@ -493,7 +493,7 @@ class ProductController extends Controller
                     'canceled_at' => now(),
                 ]);
     
-                return response()->json(['message' => 'Đơn hàng đã được hủy thành công và tồn kho đã được cập nhật lại.'], 200);
+                return response()->json(['message' => 'Đơn hàng đã được hủy thành công'], 200);
             } elseif ($bill->isShipped()) {
                 return response()->json(['message' => 'Không thể hủy đơn hàng vì đơn hàng đã được giao cho vận chuyển.'], 400);
             } else {

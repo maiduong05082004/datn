@@ -512,34 +512,42 @@ class OrderController extends Controller
         $validatedData = $request->validate([
             'status' => 'required|string|in:pending,processed,shipped,delivered,canceled,returned',
         ]);
-
+    
         $newStatus = $validatedData['status'];
-
+    
         try {
             $bill = Bill::findOrFail($orderId);
             $currentStatus = $bill->status_bill;
-
-            // Kiểm tra nếu trạng thái mới giống với trạng thái hiện tại
+    
             if ($currentStatus === $newStatus) {
                 $currentStatusDescription = $this->getStatusMessage($currentStatus);
                 return response()->json([
                     'message' => "Đơn hàng đã ở trạng thái '{$currentStatusDescription}', không thể cập nhật lại cùng trạng thái."
                 ], 400);
             }
-
-            // Kiểm tra xem trạng thái hiện tại có thể chuyển sang trạng thái mới không
+    
             if ($this->canUpdateStatus($currentStatus, $newStatus)) {
+                if ($newStatus === Bill::STATUS_CANCELED) {
+                    foreach ($bill->BillDetail as $detail) {
+                        $variationValue = $detail->productVariationValue;
+                        
+                        $variationValue->increment('stock', $detail->quantity);
+                        
+                        $variationValue->productVariation->increment('stock', $detail->quantity);
+                        $detail->product->increment('stock', $detail->quantity);
+                    }
+                }
+    
                 $bill->update(['status_bill' => $newStatus]);
-
-                // Lấy thông báo trạng thái từ hàm `getStatusMessage`
+    
                 $message = $this->getStatusMessage($newStatus);
-
+    
                 return response()->json(['message' => $message, 'status' => $newStatus], 200);
             } else {
                 // Thêm thông báo chi tiết về trạng thái hiện tại và trạng thái muốn chuyển sang
                 $currentStatusDescription = $this->getStatusMessage($currentStatus);
                 $newStatusDescription = $this->getStatusMessage($newStatus);
-
+    
                 return response()->json([
                     'message' => "Không thể chuyển đổi từ trạng thái '{$currentStatusDescription}' sang trạng thái '{$newStatusDescription}'."
                 ], 400);
@@ -550,14 +558,14 @@ class OrderController extends Controller
             return response()->json(['message' => 'Đã xảy ra lỗi khi cập nhật trạng thái đơn hàng.', 'error' => $e->getMessage()], 500);
         }
     }
-
+    
 
 
     private function canUpdateStatus($currentStatus, $newStatus)
     {
         $allowedTransitions = [
             Bill::STATUS_PENDING => [Bill::STATUS_PROCESSED, Bill::STATUS_CANCELED],
-            Bill::STATUS_PROCESSED => [Bill::STATUS_SHIPPED, Bill::STATUS_CANCELED],
+            Bill::STATUS_PROCESSED => [Bill::STATUS_SHIPPED],
             Bill::STATUS_SHIPPED => [Bill::STATUS_DELIVERED],
             Bill::STATUS_DELIVERED => [],
             Bill::STATUS_CANCELED => [],
