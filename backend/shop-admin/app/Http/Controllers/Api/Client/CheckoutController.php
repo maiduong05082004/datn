@@ -92,8 +92,8 @@ class CheckoutController extends Controller
             $response = $provider->createOrder([
                 "intent" => "CAPTURE",
                 "application_context" => [
-                    "return_url" => "http://localhost:5173/payment-result?shipping_address_id={$shippingAddressId}",
-                    "cancel_url" => "http://localhost:5173/cancel"
+                    "return_url" => "http://localhost:8000/payment-result?shipping_address_id={$shippingAddressId}",
+                    "cancel_url" => "http://localhost:8000/api/client/checkout/cancel"
                 ],
                 "purchase_units" => [
                     [
