@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
-import axios from 'axios';
+import AxiosInstance from '@/configs/axios';
 import { Button, Form, Input, Select, message, Spin, Checkbox } from 'antd';
 import { useNavigate } from 'react-router-dom';
 
@@ -21,14 +21,14 @@ const AddCategories: React.FC = () => {
   const { data: categories, isLoading } = useQuery<Category[]>({
     queryKey: ['categories'],
     queryFn: async () => {
-      const response = await axios.get('http://127.0.0.1:8000/api/admins/categories');
+      const response = await AxiosInstance.get('http://127.0.0.1:8000/api/admins/categories');
       return response.data;
     },
   });
 
   const { mutate } = useMutation({
     mutationFn: async (categoryData: FormData) => {
-      return await axios.post('http://127.0.0.1:8000/api/admins/categories', categoryData, {
+      return await AxiosInstance.post('http://127.0.0.1:8000/api/admins/categories', categoryData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
     },
@@ -36,7 +36,7 @@ const AddCategories: React.FC = () => {
       messageApi.success('Thêm danh mục thành công!');
       form.resetFields();
       setFile(null);
-      navigate('/admin/listCategories');
+      navigate('/admin/category/list');
     },
     onError: (error: any) => {
       const errorMessage = error.response?.data?.message || `Lỗi: ${error.message}`;

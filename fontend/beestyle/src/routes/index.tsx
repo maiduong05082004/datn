@@ -84,7 +84,6 @@ const Router = () => {
                     {/* bills */}
                     <Route path="bill/list" element={<ListBill />} />
                     <Route path="bill/detail/:id" element={<DetailBill />} />
-                    <Route path="bill/shiping/:id" element={<Shiping />} />
                     {/* comments */}
                     <Route path="comment/list" element={<ListComments />} />
                     {/* banner */}

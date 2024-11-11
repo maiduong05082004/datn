@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
-import { useMutation, useQuery } from '@tanstack/react-query';
-import axios from 'axios';
+import React, { useState, useEffect } from 'react';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import AxiosInstance from '@/configs/axios';
 import { Button, Form, Input, Select, message, Spin, Checkbox } from 'antd';
 import { useNavigate, useParams } from 'react-router-dom';
 
@@ -18,41 +18,67 @@ const UpdateCategories: React.FC = () => {
   const [messageApi, contextHolder] = message.useMessage();
   const navigate = useNavigate();
   const { id } = useParams();
+  const queryClient = useQueryClient();
   const [file, setFile] = useState<File | null>(null);
+  const [isImageDeleted, setIsImageDeleted] = useState(false);
 
   const { data: categories, isLoading: isLoadingCategories } = useQuery<Category[]>({
     queryKey: ['categories'],
     queryFn: async () => {
-      const response = await axios.get('http://127.0.0.1:8000/api/admins/categories');
+      const response = await AxiosInstance.get('http://127.0.0.1:8000/api/admins/categories');
       return response.data;
     },
   });
 
-  const { data: categoriesUpdate, isLoading: isLoadingCategory } = useQuery({
+  const { data: categoriesUpdate, isLoading: isLoadingCategory, refetch } = useQuery({
     queryKey: ['categoriesUpdate', id],
     queryFn: async () => {
-      const response = await axios.get(`http://127.0.0.1:8000/api/admins/categories/${id}`);
+      const response = await AxiosInstance.get(`http://127.0.0.1:8000/api/admins/categories/${id}`);
       return response.data;
     },
   });
 
   const { mutate } = useMutation({
     mutationFn: async (categoryData: FormData) => {
-      return await axios.put(`http://127.0.0.1:8000/api/admins/categories/${id}`, categoryData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-      });
+      return await AxiosInstance.post(
+        `http://127.0.0.1:8000/api/admins/categories/${id}`, 
+        categoryData,
+        {
+          headers: { 
+            'Content-Type': 'multipart/form-data',
+          },
+          params: {
+            _method: 'PUT'
+          }
+        }
+      );
     },
     onSuccess: () => {
       messageApi.success('Cập nhật danh mục thành công!');
+      
+      // Làm mới lại dữ liệu sau khi cập nhật thành công
+      queryClient.invalidateQueries({ queryKey: ['categories'] });
+      queryClient.invalidateQueries({ queryKey: ['categoriesUpdate', id] });
+      
+      // Reset form và điều hướng về danh sách
       form.resetFields();
       setFile(null);
-      navigate('/admin/listCategories');
+      navigate('/admin/category/list');
     },
     onError: (error: any) => {
       const errorMessage = error.response?.data?.message || `Lỗi: ${error.message}`;
       messageApi.error(errorMessage);
     },
   });
+
+  useEffect(() => {
+    if (categoriesUpdate) {
+      form.setFieldsValue({
+        ...categoriesUpdate,
+        status: !!categoriesUpdate?.status,
+      });
+    }
+  }, [categoriesUpdate, form]);
 
   const onFinish = (values: any) => {
     const formData = new FormData();
@@ -64,16 +90,21 @@ const UpdateCategories: React.FC = () => {
     }
 
     if (values.parent_id) {
-      if (file) {
-        message.error('Không được thêm ảnh khi có danh mục cha.');
-        return;
-      }
+      formData.append('parent_id', values.parent_id);
     } else {
-      if (!file) {
+      if (file) {
+        formData.append('image', file);
+      } else if (!categoriesUpdate?.image || isImageDeleted) {
+        if (isImageDeleted) {
+          formData.append('delete_image', '1');
+        }
         message.error('Ảnh là bắt buộc nếu không có danh mục cha.');
         return;
       }
-      formData.append('image', file);
+    }
+
+    if (isImageDeleted) {
+      formData.append('delete_image', '1');
     }
 
     formData.append('status', values.status ? '1' : '0');
@@ -81,7 +112,15 @@ const UpdateCategories: React.FC = () => {
   };
 
   if (isLoadingCategories || isLoadingCategory) {
-    return <Spin tip="Đang tải..." className="flex justify-center items-center h-screen" />;
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <Spin>
+          <div className="p-12">
+            <p>Đang tải...</p>
+          </div>
+        </Spin>
+      </div>
+    );
   }
 
   return (
@@ -133,13 +172,34 @@ const UpdateCategories: React.FC = () => {
 
             <Form.Item
               label={<span className="font-medium text-gray-700">Ảnh</span>}
-              name="image"
             >
+              {categoriesUpdate?.image && !isImageDeleted && (
+                <div className="mb-2">
+                  <div className="relative w-32">
+                    <img 
+                      src={categoriesUpdate.image} 
+                      alt="Current category" 
+                      className="w-32 h-32 object-cover"
+                    />
+                    <Button 
+                      type="primary"
+                      danger
+                      size="small"
+                      className="absolute top-0 right-0"
+                      onClick={() => setIsImageDeleted(true)}
+                    >
+                      Xóa ảnh
+                    </Button>
+                  </div>
+                </div>
+              )}
               <input
                 type="file"
+                accept="image/*"
                 onChange={(e) => {
                   if (e.target.files && e.target.files[0]) {
                     setFile(e.target.files[0]);
+                    setIsImageDeleted(false);
                   }
                 }}
               />

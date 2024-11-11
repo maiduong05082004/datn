@@ -18,37 +18,37 @@ class CategoryController extends Controller
     }
 
     public function store(Request $request)
-{
-    $request->validate([
-        'name' => 'required|string|max:255',
-        'status' => 'required|in:0,1',
-        'parent_id' => 'nullable|exists:categories,id',
-        'image' => 'nullable|image|max:2048',
-    ]);
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'status' => 'required|in:0,1',
+            'parent_id' => 'nullable|exists:categories,id',
+            'image' => 'nullable|image|max:2048',
+        ]);
 
-    $data = $request->only('name', 'parent_id', 'status');
+        $data = $request->only('name', 'parent_id', 'status');
 
-    if (is_null($request->parent_id)) {
-        if ($request->hasFile('image')) {
-            $imageFile = $request->file('image');
-            $cloudinaryResponse = Cloudinary::upload($imageFile->getRealPath(), [
-                'folder' => 'categories',
-            ]);
-            $secureUrl = $cloudinaryResponse->getSecurePath();
-            $data['image'] = $secureUrl;
+        if (is_null($request->parent_id)) {
+            if ($request->hasFile('image')) {
+                $imageFile = $request->file('image');
+                $cloudinaryResponse = Cloudinary::upload($imageFile->getRealPath(), [
+                    'folder' => 'categories',
+                ]);
+                $secureUrl = $cloudinaryResponse->getSecurePath();
+                $data['image'] = $secureUrl;
+            } else {
+                return response()->json(['error' => 'Không có ảnh được tải lên.'], 400);
+            }
         } else {
-            return response()->json(['error' => 'Không có ảnh được tải lên.'], 400);
+            if ($request->hasFile('image')) {
+                $data['image'] = $request->file('image')->store('categories', 'public');
+            }
         }
-    } else {
-        if ($request->hasFile('image')) {
-            $data['image'] = $request->file('image')->store('categories', 'public');
-        }
+
+        $category = Category::create($data);
+
+        return response()->json($category, 201);
     }
-
-    $category = Category::create($data);
-
-    return response()->json($category, 201);
-}
 
     public function show($id)
     {
@@ -59,38 +59,50 @@ class CategoryController extends Controller
     public function update(Request $request, $id)
     {
         $category = Category::findOrFail($id);
-    
+
         $request->validate([
             'name' => 'required|string|max:255',
             'status' => 'required|boolean',
             'parent_id' => 'nullable|exists:categories,id',
-            'image' => 'nullable|image|max:2048',
+            'delete_image' => 'nullable|boolean',
         ]);
-    
+
         $data = $request->only('name', 'parent_id', 'status');
-    
+
+        // Kiểm tra nếu danh mục không có danh mục cha và cần có ảnh
         if (is_null($request->parent_id)) {
             if ($request->hasFile('image')) {
+                // Nếu có ảnh mới thì xóa ảnh cũ (nếu ảnh cũ không phải là URL)
                 if ($category->image && !filter_var($category->image, FILTER_VALIDATE_URL)) {
                     Storage::disk('public')->delete($category->image);
                 }
+                // Upload ảnh mới
                 $imageFile = $request->file('image');
                 $cloudinaryResponse = Cloudinary::upload($imageFile->getRealPath(), [
                     'folder' => 'categories',
                 ]);
                 $data['image'] = $cloudinaryResponse->getSecurePath();
-            } else {
-                return response()->json(['error' => 'Không có ảnh được tải lên.'], 400);
+            } elseif (!$category->image && !$request->delete_image) {
+                // Nếu không có ảnh mới và cũng không có ảnh cũ
+                return response()->json(['error' => 'Ảnh là bắt buộc nếu không có danh mục cha.'], 400);
             }
         } else {
             if ($request->hasFile('image')) {
                 $data['image'] = $request->file('image')->store('categories', 'public');
             }
         }
-    
+
+        if ($request->delete_image) {
+            if ($category->image && !filter_var($category->image, FILTER_VALIDATE_URL)) {
+                Storage::disk('public')->delete($category->image);
+            }
+            $data['image'] = null;
+        }
+
         $category->update($data);
         return response()->json($category, 200);
     }
+
 
 
     public function destroy($id)

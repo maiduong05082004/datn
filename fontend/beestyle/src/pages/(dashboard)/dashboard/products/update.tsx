@@ -34,13 +34,11 @@ const UpdateProduct: React.FC = () => {
   const [attributes, setAttributes] = useState<any[]>([]);
   const [variants, setVariants] = useState<Variant[]>([]);
   const [stock, setStock] = useState<number | null>(null);
-  const [albumList, setAlbumList] = useState<string[]>([]); // Lưu URL ảnh
   const [showVariantForm, setShowVariantForm] = useState<boolean>(true);
   const { id } = useParams();
   const [removedVariants, setRemovedVariants] = useState<number[]>([]);
   const [productData, setProductData] = useState<any>(null);
   const [selectedGroup, setSelectedGroup] = useState<any>(null);
-  const [isDeleting, setIsDeleting] = useState(false);
   const [deletingImage, setDeletingImage] = useState<{ [key: string]: boolean }>({});
 
   // State để lưu trữ các tệp ảnh mới
@@ -103,12 +101,22 @@ const UpdateProduct: React.FC = () => {
                 (img: any) => img.url !== imageUrl
               );
               setVariants(updatedVariants);
-              // Dừng loading chỉ cho ảnh cụ thể
+  
+              // Loại bỏ ảnh khỏi newColorImages nếu tồn tại trong đó
+              setNewColorImages((prev) => {
+                const updatedImages = { ...prev };
+                if (updatedImages[variants[variantIndex].colorId]) {
+                  updatedImages[variants[variantIndex].colorId] = updatedImages[variants[variantIndex].colorId].filter(
+                    (file) => file.name !== imageUrl
+                  );
+                }
+                return updatedImages;
+              });
+  
               setDeletingImage((prev) => ({ ...prev, [imageUrl]: false }));
               toast.success('Xóa ảnh thành công!');
             },
             onError: (error: any) => {
-              // Dừng loading chỉ cho ảnh cụ thể
               setDeletingImage((prev) => ({ ...prev, [imageUrl]: false }));
               toast.error(`Không thể xóa ảnh: ${error.message}`);
             },
@@ -321,35 +329,6 @@ const UpdateProduct: React.FC = () => {
     });
 
     setVariants(mergedVariants);
-  };
-
-  // Xử lý thay đổi upload cho biến thể
-  const handleUploadChangeForVariant = (index: number, key: string, fileList: any[]) => {
-    const updatedVariants = [...variants];
-    const variant = updatedVariants[index];
-
-    if (variant) {
-      variant[key] = fileList.map((file: any) => {
-        if (file.response && file.response.url) {
-          // Use the URL from the server response if available
-          return {
-            ...file,
-            url: file.response.url,
-            status: 'done',
-          };
-        } else if (file.originFileObj) {
-          // Generate a local preview URL for the image
-          return {
-            ...file,
-            url: URL.createObjectURL(file.originFileObj),
-            status: 'done',
-          };
-        }
-        return file;
-      });
-    }
-
-    setVariants(updatedVariants);
   };
 
   const columns = [
