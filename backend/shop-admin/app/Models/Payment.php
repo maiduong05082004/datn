@@ -18,7 +18,7 @@ class Payment extends Model
     // Các phương thức thanh toán (chỉ online)
     const METHOD_VNPAY = 'VNPAY';
     const METHOD_MOMO = 'MOMO';
-
+    const METHOD_PAYPAL = 'PAYPAL';
     // Các trường có thể điền hàng loạt (fillable)
     protected $fillable = [
         'bill_id',         // Liên kết với hóa đơn
@@ -33,6 +33,11 @@ class Payment extends Model
         'pay_type',        // Loại thanh toán (chỉ áp dụng cho MOMO)
         'pay_date',        // Ngày thanh toán
         'canceled_reason', // Lý do hủy thanh toán (nếu có)
+        'currency_code',
+        'payer_id',
+        'payer_email',
+        'transaction_fee',
+        'receipt_code'
     ];
 
     // Quan hệ với bảng bills (hóa đơn)
