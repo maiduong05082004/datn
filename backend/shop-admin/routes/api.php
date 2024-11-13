@@ -80,14 +80,11 @@ Route::prefix('client')->as('client.')->group(function () {
         Route::get('/', [WishlistController::class, 'index'])->name('wishlist.index');
         Route::delete('/remove/{id}', [WishlistController::class, 'destroy'])->name('wishlist.remove');
     });
-    Route::prefix('checkout')->as('checkout.')->middleware('auth:sanctum')->group(function () {
-        Route::post('/submit', [CheckoutController::class, 'submit'])->name('submit');
+    Route::prefix('checkout')->as('checkout.')->group(function () {
+        Route::post('/', [CheckoutController::class, 'submit'])->name('submit');
         Route::get('/success', [CheckoutController::class, 'success'])->name('success');
         Route::get('/cancel', [CheckoutController::class, 'cancel'])->name('cancel');
-    });
-    Route::prefix('payment')->as('payment.')->group(function () {
-        Route::post('/', [PaymentController::class, 'vnpayPayment'])->name('vn-pay');
-        Route::get('/callback', [PaymentController::class, 'vnpayCallback'])->name('payment.callback');
+        Route::get('/callback', [CheckoutController::class, 'vnpayCallback'])->name('callback');
     });
     Route::prefix('comment')->as('comment.')->group(function () {
         Route::post('/store', [CommentController::class, 'store'])->name('comment.store'); // Tạo 1 bình luận
@@ -150,24 +147,32 @@ Route::prefix('admins')
                 Route::post('/products/by-ids', [ProductController::class, 'getProductsByIds'])->name('products.by-ids');
             });
             Route::prefix('orders')->group(function () {
-             Route::get('/',[OrderController::class, 'index'])->name('orders.index');
-             Route::get('/pending', [OrderController::class, 'pendingOrders'])->name('orders.pending');
-             Route::get('/processed', [OrderController::class, 'processedOrders'])->name('orders.processed');
-             Route::get('/shipped', [OrderController::class, 'shippedOrders'])->name('orders.shipped');
-             Route::get('/delivered', [OrderController::class, 'deliveredOrders'])->name('orders.delivered');
-             Route::get('/canceled', [OrderController::class, 'canceledOrders'])->name('orders.canceled');
-             Route::post('/search_order', [OrderController::class, 'searchOrder'])->name('orders.searchorder');
-             Route::post('/search-pending', [OrderController::class, 'searchPendingOrder'])->name('orders.searchpending');
-             Route::post('/search-processed', [OrderController::class, 'searchProcessedOrder'])->name('orders.searchprocessed');
-             Route::post('/search-shipped', [OrderController::class, 'searchShippedOrder'])->name('orders.searchshipped');
-             Route::post('/search-delivered', [OrderController::class, 'searchDeliveredOrder'])->name('orders.searchdelivered');
-             Route::post('/search-canceled', [OrderController::class, 'searchCanceledOrder'])->name('orders.searchcanceled');
-             Route::get('/show_detailorder/{id}', [OrderController::class, 'showDetailOrder'])->name('orders.showdetailorder');
-             Route::post('/update_order/{id}', [OrderController::class, 'updateOrderStatus'])->name('orders.updateorder');
-             Route::post('/ghn-create/{billId}', [ProductShippingController::class, 'createGHNOrderFromBill'])->name('orders.createGHNOrder');
-             Route::post('/ghn-detail/{billId}', [ProductShippingController::class, 'getGHNOrderDetail'])->name('orders.getGHNOrderDetail');
-             Route::post('/ghn-cancel/{billId}', [ProductShippingController::class, 'cancelGHNOrder'])->name('orders.cancelGHNOrder');
-             Route::post('/ghn-update/{billId}', [ProductShippingController::class, 'updateGHNOrder'])->name('orders.updateGHNOrder');
+                Route::get('/', [OrderController::class, 'index'])->name('orders.index');
+                Route::get('/pending', [OrderController::class, 'pendingOrders'])->name('orders.pending');
+                Route::get('/processed', [OrderController::class, 'processedOrders'])->name('orders.processed');
+                Route::get('/shipped', [OrderController::class, 'shippedOrders'])->name('orders.shipped');
+                Route::get('/delivered', [OrderController::class, 'deliveredOrders'])->name('orders.delivered');
+                Route::get('/canceled', [OrderController::class, 'canceledOrders'])->name('orders.canceled');
+                Route::post('/search_order', [OrderController::class, 'searchOrder'])->name('orders.searchorder');
+                Route::post('/search-pending', [OrderController::class, 'searchPendingOrder'])->name('orders.searchpending');
+                Route::post('/search-processed', [OrderController::class, 'searchProcessedOrder'])->name('orders.searchprocessed');
+                Route::post('/search-shipped', [OrderController::class, 'searchShippedOrder'])->name('orders.searchshipped');
+                Route::post('/search-delivered', [OrderController::class, 'searchDeliveredOrder'])->name('orders.searchdelivered');
+                Route::post('/search-canceled', [OrderController::class, 'searchCanceledOrder'])->name('orders.searchcanceled');
+                Route::get('/show_detailorder/{id}', [OrderController::class, 'showDetailOrder'])->name('orders.showdetailorder');
+                Route::post('/update_order/{id}', [OrderController::class, 'updateOrderStatus'])->name('orders.updateorder');
+                Route::post('/ghn-create/{billId}', [ProductShippingController::class, 'createGHNOrderFromBill'])->name('orders.createGHNOrder');
+                Route::post('/ghn-detail/{billId}', [ProductShippingController::class, 'getGHNOrderDetail'])->name('orders.getGHNOrderDetail');
+                Route::post('/ghn-cancel/{billId}', [ProductShippingController::class, 'cancelGHNOrder'])->name('orders.cancelGHNOrder');
+                Route::post('/ghn-update/{billId}', [ProductShippingController::class, 'updateGHNOrder'])->name('orders.updateGHNOrder');
+            });
+            Route::prefix('comment')->as('comment.')->group(function () {
+                Route::get('/list', [CommentController::class, 'index'])->name('comment.list'); // Lấy list bình luận đã duyệt theo user_id & product_id
+                Route::post('approve', [CommentController::class, 'approve'])->name('comment.approve'); // Duyệt bình luận
+                Route::post('/reply', [CommentController::class, 'reply'])->name('comment.reply'); // Admin trả lời bình luận của user
+                Route::post('/hide', [CommentController::class, 'hideComment'])->name('comment.hide'); // Ẩn bình luận nếu vi phạm 
+                Route::post('/report', [CommentController::class, 'report'])->name('comment.report'); // Báo cáo bình luận
+                Route::post('/manageUser', [CommentController::class, 'manageUser'])->name('comment.manageUser'); // quản lý user (khóa nếu comment bị báo cáo nhiều)
             });
 
             Route::prefix('comment')->as('comment.')->group(function () {
