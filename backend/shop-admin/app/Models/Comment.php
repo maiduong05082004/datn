@@ -23,7 +23,9 @@ class Comment extends Model
         'is_visible',          // Thêm cột is_visible để kiểm soát hiển thị
         'parent_id',
         'bill_detail_id',
-        'stars'
+        'stars',
+        'like',
+        'is_anonymous'  // Bình luận ẩn danh
     ];
 
     // Liên kết với bảng User
@@ -46,5 +48,10 @@ class Comment extends Model
     public function billDetail()
     {
         return $this->belongsTo(BillDetail::class, 'bill_detail_id');
+    }
+
+    public function reports()
+    {
+        return $this->hasMany(ReportComment::class);
     }
 }
