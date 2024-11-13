@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\Bill;
 use App\Models\BillDetail;
 use App\Models\Comment;
+use App\Models\Product;
+use App\Models\ReportComment;
 use App\Models\User;
 use Auth;
 use Illuminate\Http\Request;
@@ -39,8 +41,10 @@ class CommentController extends Controller
     {
         $userId = Auth::id();
         $productId = $request->input('product_id'); // Lấy product_id từ request
-        $comments = $request->input('comments'); // Nhận mảng bình luận từ request
-
+        $billDetailId = $request->input('bill_detail_id');
+        $content = $request->input('content'); // Nhận mảng bình luận từ request
+        $stars = $request->input('stars', 5);
+        $isAnonymous = $request->input('is_anonymous', false);
         // Kiểm tra thông tin từng sản phẩm đã mua
         $productDetails = $this->hasPurchasedProduct($userId, $productId);
 
@@ -48,34 +52,47 @@ class CommentController extends Controller
             return response()->json(['message' => 'You can only comment on products you have purchased successfully.'], 403);
         }
 
-        foreach ($comments as $item) {
-            $billDetailId = $item['bill_detail_id']; // Lấy bill_detail_id từ dữ liệu
-            $content = $item['content']; // Lấy nội dung bình luận
-            $stars = $item['stars'] ?? null;
+        // foreach ($comments as $item) {
+        //     $billDetailId = $item['bill_detail_id']; // Lấy bill_detail_id từ dữ liệu
+        //     $content = $item['content']; // Lấy nội dung bình luận
+        //     $stars = $item['stars'] ?? null;
 
-            // Kiểm tra từng bình luận với bill_detail_id
-            $billDetail = BillDetail::find($billDetailId);
+        $existingComment = Comment::where('user_id', $userId)
+            ->where('product_id', $productId)
+            ->where('bill_detail_id', $billDetailId)
+            ->first();
+        if ($existingComment) {
+            return response()->json([
+                'message' => 'You have already commented on this product.'
+            ], 403);
+        }
+        // Kiểm tra từng bình luận với bill_detail_id
+        $billDetail = BillDetail::find($billDetailId);
 
-            if (!$billDetail || $billDetail->product_id !== $productDetails->product_id) {
-                return response()->json(['message' => 'Invalid bill detail for the product.'], 404);
-            }
-
-            // Tạo bình luận mới
-            $comment = Comment::create([
-                'user_id' => $userId,
-                'product_id' => $billDetail->product_id,
-                'bill_detail_id' => $billDetailId, // Lưu bill_detail_id
-                'content' => $content,
-                'stars' => $stars,
-                'commentDate' => now(),
-                'is_visible' => 1, // Hiển thị ngay lập tức
-                'moderation_status' => Comment::STATUS_APPROVED,
-                'is_reported' => 0,
-                'reported_count' => 0,
-            ]);
+        if (!$billDetail || $billDetail->product_id !== $productDetails->product_id) {
+            return response()->json(['message' => 'Invalid bill detail for the product.'], 404);
         }
 
-        return response()->json(['message' => 'Comments posted successfully.']);
+        // Tạo bình luận mới
+        $comment = Comment::create([
+            'user_id' => $userId,
+            'product_id' => $billDetail->product_id,
+            'bill_detail_id' => $billDetailId, // Lưu bill_detail_id
+            'content' => $content,
+            'stars' => $stars,
+            'commentDate' => now(),
+            'is_visible' => 1, // Hiển thị ngay lập tức
+            'moderation_status' => Comment::STATUS_APPROVED,
+            'is_reported' => 0,
+            'reported_count' => 0,
+            'is_anonymous' => $isAnonymous,
+        ]);
+
+
+        return response()->json([
+            'message' => 'Comments posted successfully.',
+            'comment' => $comment,
+        ]);
     }
 
     // API Tính trung bình đánh giá
@@ -99,15 +116,60 @@ class CommentController extends Controller
         ]);
     }
 
+    public function reportComment(Request $request)
+    {
+        $commentId = $request->input('comment_id');
+        $reason = $request->input('reason');
+        $userId = Auth::id();
+
+        $comment = Comment::find($commentId);
+        if (!$comment) {
+            return response()->json(['message' => 'Comment not found'], 404);
+        }
+
+        $product = Product::find($comment->product_id);
+        if (!$product) {
+            return response()->json(['message' => 'Product not found for this comment.'], 404);
+        }
+
+        $existingReport = ReportComment::where('comment_id', $commentId)
+            ->where('user_id', $userId)
+            ->first();
+        if ($existingReport) {
+            return response()->json(['message' => 'You have already reported this comment'], 403);
+        }
+        ReportComment::create([
+            'comment_id' => $commentId,
+            'user_id' => $userId,
+            'reason' => $reason,
+        ]);
+        $comment->increment('reported_count');
+
+        return response()->json([
+            'message' => 'Comment reported successfully',
+            'product' => [
+                'id' => $product->id,
+                'name' => $product->name,
+                'description' => $product->description,
+            ],
+            'comment' => [
+                'id' => $comment->id,
+                'content' => $comment->content,
+                'reported_count' => $comment->reported_count,
+                'is_visible' => $comment->is_visible,
+            ],
+        ]);
+    }
+
 
     // API lấy danh sách bình luận đã duyệt cho một sản phẩm
     public function index(Request $request)
     {
         $productId = $request->input('product_id');
+        $isAdmin = Auth::user()->role === 'admin';
 
         $comments = Comment::with(['BillDetail.productVariationValue.attributeValue'])
             ->where('product_id', $productId)
-            ->where('is_visible', 1)
             ->paginate(10);
 
         $commentList = [];
@@ -118,6 +180,7 @@ class CommentController extends Controller
                 'bill_detail_id' => $comment->bill_detail_id,
                 'product_id' => $comment->billDetail->product_id ?? null,
                 'commentDate' => $comment->commentDate,
+                'user_name' => $comment->is_anonymous && !$isAdmin ? 'Anonymous' : $comment->user->name,
                 'variation_value' => [
                     'product_variation_value_id' => $comment->billDetail->productVariationValue->id ?? null,
                     'size' => $comment->billDetail->productVariationValue->attributeValue->value ?? null,
@@ -125,6 +188,7 @@ class CommentController extends Controller
                 ],
             ];
         }
+        // 1 product,n comment=> list theo product (của user )
 
         return response()->json($commentList);
     }

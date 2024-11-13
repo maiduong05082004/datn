@@ -10,9 +10,9 @@ class Bill extends Model
     use HasFactory;
 
     // Các hằng số cho trạng thái của đơn hàng
-    const STATUS_PENDING = 'pending';
-    const STATUS_PROCESSED = 'processed';
-    const STATUS_SHIPPED = 'shipped';
+    const STATUS_PENDING = 'pending'; // đang chờ thanh toán
+    const STATUS_PROCESSED = 'processed'; // đang xử lý
+    const STATUS_SHIPPED = 'shipped'; // đã đặt hàng
     const STATUS_DELIVERED = 'delivered';
     const STATUS_CANCELED = 'canceled';
     const STATUS_RETURNED = 'returned';
@@ -53,7 +53,7 @@ class Bill extends Model
         return $this->hasMany(BillDetail::class);
     }
 
-  
+
 
     // Quan hệ với bảng payments để quản lý các giao dịch thanh toán
     public function payments()
