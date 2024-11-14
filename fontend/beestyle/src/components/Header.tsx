@@ -1,8 +1,10 @@
+import EventsAudio from "@/pages/(website)/events/eventsAudio";
+import EventsCanvas from "@/pages/(website)/events/eventsCanvas";
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
 import { values } from "lodash";
 import { Dispatch, SetStateAction, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 type Props = {
     isSearch: boolean
     // onClicks: () => void;
@@ -20,23 +22,17 @@ const Header = ({isSearch, setIsSearch}: Props) => {
         }
     })
 
-
-
     const token = localStorage.getItem("token")
-    // console.log(token);
 
-    // const { data: user } = useQuery({
-    //     queryKey: ['user', token],
-    //     queryFn: () => {
-    //         if (!token) return null;
-    //         return axios.get(`http://127.0.0.1:8000/api/client/auth/profile` , {
-    //             headers: { Authorization: `Bearer ${token}` }
-    //         })
-    //     }
-    // })
-    // console.log(user);
-    
-    
+    const { data: user } = useQuery({
+        queryKey: ['user', token],
+        queryFn: () => {
+            if (!token) return null;
+            return axios.get(`http://127.0.0.1:8000/api/client/auth/profile` , {
+                headers: { Authorization: `Bearer ${token}` }
+            })
+        }
+    })
     
     const { data: carts } = useQuery({
         queryKey: ['carts', token],
@@ -46,7 +42,8 @@ const Header = ({isSearch, setIsSearch}: Props) => {
                     Authorization: `Bearer ${token}`, // Truyền token vào header
                   }
             })
-        }
+        },
+        enabled:!!token,
     })
 
     return (
@@ -54,7 +51,7 @@ const Header = ({isSearch, setIsSearch}: Props) => {
             <div className="bg-black h-[42px] text-center flex">
                 <span className='text-white justify-center flex m-auto text-[11px] font-[600] lg:text-[14px]'>Ưu đãi 5% cho dơnd hàng đầu tiên* | Nhập mã: MLBWELCOM</span>
             </div>
-            <header className='py-[8px] h-[57px] sticky top-0 z-10 bg-white lg:h-[64px] mt-[0.1px] border-b-[1px] border-b-[##e8e8e8] lg:border-none'>
+            <header className='py-[8px] h-[57px] sticky top-0 bg-white lg:h-[64px] mt-[0.1px] border-b-[1px] border-b-[##e8e8e8] lg:border-none z-20'>
                 <div className="flex text-center justify-center h-[100%] px-[15px] pc:px-[48px]">
                     <div className="flex">
                         <div onClick={() => setOpenCategories(!openCategories)} className="flex items-center lg:hidden">
@@ -241,20 +238,25 @@ const Header = ({isSearch, setIsSearch}: Props) => {
                                 className='w-[40px] h-[40px] flex justify-center items-center text-center'>
                                 <img className=" ls-is-cached lazyloaded" src="https://file.hstatic.net/200000642007/file/icon-cart_d075fce117f74a07ae7f149d8943fc33.svg" data-src="https://file.hstatic.net/200000642007/file/icon-cart_d075fce117f74a07ae7f149d8943fc33.svg" alt="Icon cart" width={24} height={24} />
                             </div>
-                            <div className={`absolute w-[13px] h-[13px] text-[9px] rounded-[100%] top-[10px] right-[5px] bg-black text-white flex items-center justify-center`}>{carts?.data.total_quantity || 0}</div>
+                            {carts ? (
+                                <div className={`absolute w-[13px] h-[13px] text-[9px] rounded-[100%] top-[10px] right-[5px] bg-black text-white flex items-center justify-center`}>{carts?.data.total_quantity || 0}</div>
+
+                            ) : ""}
                         </Link>
-                        <Link to={`/account/wishlist`} className="items-center hidden lg:flex col-start-2 row-start-1 lg:col-start-3">
+                        <Link to={`${user ? "/account/wishlist" : "/signin"}`} className="items-center hidden lg:flex col-start-2 row-start-1 lg:col-start-3">
                             <div className='w-[40px] h-[40px] flex justify-center items-center text-center'>
                                 <img className=" ls-is-cached lazyloaded" src="	https://file.hstatic.net/200000642007/file/icon-wishlist_86d7262a56ae455fa531e6867655996d.svg" data-src="	https://file.hstatic.net/200000642007/file/icon-wishlist_86d7262a56ae455fa531e6867655996d.svg" alt="Icon cart" width={24} height={24} />
                             </div>
                         </Link>
-                        <Link to={`/account`} className="flex items-center col-start-2 row-start-1 lg:col-start-4">
+                        <Link to={`${user ? "/account" : "/signin"}`} className="flex items-center col-start-2 row-start-1 lg:col-start-4">
                             <div className='w-[40px] h-[40px] flex justify-center items-center text-center'>
                                 <img className=" ls-is-cached lazyloaded" src="https://file.hstatic.net/200000642007/file/icon-account_5d386c88832c4872b857c0da62a81bbc.svg" data-src="https://file.hstatic.net/200000642007/file/icon-account_5d386c88832c4872b857c0da62a81bbc.svg" alt="Icon account" width={24} height={24} />
                             </div>
                         </Link>
                     </div>
                 </div>
+                <EventsAudio />
+                <EventsCanvas />
             </header>
         </>
     )

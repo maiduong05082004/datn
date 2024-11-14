@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import Noel from "../events/eventsAudio";
 
 type Props = {}
 
@@ -61,31 +62,29 @@ const HomePage = (props: Props) => {
 
   return (
     <main>
+      <Noel />
       <section>
-        <div className="">
+        <div className="relative">
           {home?.data?.banners.map((item: any, index: any) => (
-
-            <a href="" className={`${index === currentIndex ? "" : "hidden"}`}>
+            <div className={`${index === currentIndex ? "" : "hidden"}`}>
               <picture className=''>
                 <img className='h-full w-full hidden lg:block' src={item.image_path} alt="" />
-                {/* <img className='h-full w-full lg:hidden' src="https://file.hstatic.net/200000642007/file/vn__1_.jpg" alt="" /> */}
               </picture>
-            </a>
-
+            </div>
           ))}
+          <button
+            onClick={goToPrev}
+            className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-black text-white p-5 rounded-full opacity-50 hidden lg:flex"
+          >
+            ❮
+          </button>
+          <button
+            onClick={goToNext}
+            className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-black text-white p-5 rounded-full opacity-50 hidden lg:flex"
+          >
+            ❯
+          </button>
         </div>
-        <button
-          onClick={goToPrev}
-          className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-black text-white p-5 rounded-full opacity-50"
-        >
-          ❮
-        </button>
-        <button
-          onClick={goToNext}
-          className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-black text-white p-5 rounded-full opacity-50"
-        >
-          ❯
-        </button>
       </section>
       <section>
         <div className="pt-[40px]">
