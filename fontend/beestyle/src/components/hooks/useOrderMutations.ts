@@ -2,8 +2,6 @@ import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { message } from "antd"
 import axios from "axios"
 import { useNavigate } from "react-router-dom"
-
-
 export const useOrderMutations = () => {
     const [messageApi, handleContext] = message.useMessage()
     const queryClient = useQueryClient()
@@ -43,18 +41,17 @@ export const useOrderMutations = () => {
             })
         }
     })
-
     const orderATM = useMutation({
         mutationFn: async (order: any) => {
             try {
-                const {data} = await axios.post(`http://localhost:8000/api/client/payment/`, order, {
+                const { data } = await axios.post(`http://localhost:8000/api/client/payment/`, order, {
                     headers: {
                         Authorization: `Bearer ${localStorage.getItem("token")}`,
                     }
                 })
                 console.log(data);
-                
-                // window.location.href = data.data
+                window.location.href = data.data
+
             } catch (error) {
                 throw new Error("Mua hàng thất bại!")
             }
