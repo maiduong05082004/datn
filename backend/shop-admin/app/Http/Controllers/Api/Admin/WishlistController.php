@@ -43,21 +43,21 @@ class WishlistController extends Controller
                 'user_id' => $userId,
                 'wishlist_items' => $items->map(function ($wishlistItems) {
                     $productResource = new ProductResource($wishlistItems->product);
-                    $selectedVariationValue = $wishlistItems->productVariationValue;
+                    // $selectedVariationValue = $wishlistItems->productVariationValue;
                     return [
                         'wishlist_item_id' => $wishlistItems->id,
                         'product' => $productResource,
-                        'variation_id' => $selectedVariationValue->product_variation_id ?? null,
-                        'album_images' => $selectedVariationValue->productVariation->variationImages->where('image_type', 'album')->pluck('image_path'),
-                        'variation_values' => [
-                            'id' => $selectedVariationValue->id,
-                            'attribute_value_id' => $selectedVariationValue->attribute_value_id,
-                            'value' => $selectedVariationValue->attributeValue->value ?? null,
-                            'sku' => $selectedVariationValue->sku,
-                            'stock' => $selectedVariationValue->stock,
-                            'price' => (float) $selectedVariationValue->price,
-                            'discount' => $selectedVariationValue->discount,
-                        ],
+                        // 'variation_id' => $selectedVariationValue->product_variation_id ?? null,
+                        // 'album_images' => $selectedVariationValue->productVariation->variationImages->where('image_type', 'album')->pluck('image_path'),
+                        // 'variation_values' => [
+                        //     'id' => $selectedVariationValue->id,
+                        //     'attribute_value_id' => $selectedVariationValue->attribute_value_id,
+                        //     'value' => $selectedVariationValue->attributeValue->value ?? null,
+                        //     'sku' => $selectedVariationValue->sku,
+                        //     'stock' => $selectedVariationValue->stock,
+                        //     'price' => (float) $selectedVariationValue->price,
+                        //     'discount' => $selectedVariationValue->discount,
+                        // ],
                     ];
                 }),
             ];
@@ -129,15 +129,15 @@ class WishlistController extends Controller
         // ], 201);
         $validated = $request->validate([
             'product_id' => 'required|exists:products,id',
-            'product_variation_value_id' => 'required|exists:product_variation_values,id',
+            // 'product_variation_value_id' => 'required|exists:product_variation_values,id',
         ]);
 
         $user = Auth::user();
         $productId = $validated['product_id'];
-        $variationId = $validated['product_variation_value_id'];
+        // $variationId = $validated['product_variation_value_id'];
 
         // Kiểm tra xem sản phẩm có trong wishlist chưa
-        if ($user->wishlistItems()->where('product_variation_value_id', $variationId)->exists()) {
+        if ($user->wishlistItems()->where('product_id', $productId)->exists()) {
             return response()->json([
                 'is_active' => 'info',
                 'message' => 'Sản phẩm đã có trong danh sách yêu thích',
@@ -147,7 +147,7 @@ class WishlistController extends Controller
         // Tạo wishlist item mới
         $wishlistItem = $user->wishlistItems()->create([
             'product_id' => $productId,
-            'product_variation_value_id' => $variationId,
+            // 'product_variation_value_id' => $variationId,
         ]);
 
         // Tải lại wishlist item với các mối quan hệ cần thiết để cấu trúc trả về như list wishlist
@@ -158,27 +158,27 @@ class WishlistController extends Controller
             'product.variations.variationValues',
             'product.variations.variationImages',
             'product.images',
-            'productVariationValue'
+            // 'productVariationValue'
         ]);
 
         $productResource = new ProductResource($wishlistItem->product);
-        $selectedVariationValue = $wishlistItem->productVariationValue;
+        // $selectedVariationValue = $wishlistItem->productVariationValue;
 
         // Chuẩn bị dữ liệu trả về
         $responseData = [
             'wishlist_item_id' => $wishlistItem->id,
             'product' => $productResource,
-            'variation_id' => $selectedVariationValue->product_variation_id ?? null,
-            'album_images' => $selectedVariationValue->productVariation->variationImages->where('image_type', 'album')->pluck('image_path'),
-            'variation_values' => [
-                'id' => $selectedVariationValue->id,
-                'attribute_value_id' => $selectedVariationValue->attribute_value_id,
-                'value' => $selectedVariationValue->attributeValue->value ?? null,
-                'sku' => $selectedVariationValue->sku,
-                'stock' => $selectedVariationValue->stock,
-                'price' => (float) $selectedVariationValue->price,
-                'discount' => $selectedVariationValue->discount,
-            ],
+            // 'variation_id' => $selectedVariationValue->product_variation_id ?? null,
+            // 'album_images' => $selectedVariationValue->productVariation->variationImages->where('image_type', 'album')->pluck('image_path'),
+            // 'variation_values' => [
+            //     'id' => $selectedVariationValue->id,
+            //     'attribute_value_id' => $selectedVariationValue->attribute_value_id,
+            //     'value' => $selectedVariationValue->attributeValue->value ?? null,
+            //     'sku' => $selectedVariationValue->sku,
+            //     'stock' => $selectedVariationValue->stock,
+            //     'price' => (float) $selectedVariationValue->price,
+            //     'discount' => $selectedVariationValue->discount,
+
         ];
 
         return response()->json([
@@ -190,18 +190,22 @@ class WishlistController extends Controller
     }
 
     // delete
-    public function destroy($productId, $variationId)
+    public function destroy($productId)
     {
         $user = Auth::user();
 
-        if (!$user->wishlist()->where('product_id', $productId)->where('product_variation_value_id', $variationId)->exists()) {
+        if (!$user->wishlist()->where('product_id', $productId)
+            // ->where('product_variation_value_id', $variationId)
+            ->exists()) {
             return response()->json([
                 'is_active' => 'error',
                 'message' => 'Sản phẩm không có trong wishlist'
             ], 404);
         }
 
-        $user->wishlist()->where('product_id', $productId)->where('product_variation_value_id', $variationId)->delete();
+        $user->wishlist()->where('product_id', $productId)
+            // ->where('product_variation_value_id', $variationId)
+            ->delete();
 
         return response()->json([
             'status' => 'success',
