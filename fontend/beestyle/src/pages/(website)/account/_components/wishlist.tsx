@@ -69,7 +69,7 @@ const WishlistPage = (props: Props) => {
             {contextHodle}
             <div className="">
                 <div className="text-[16px] font-[700] lg:text-[20px] border-b-black lg:border-b-[3px] py-[10px] lg:mb-[16px]">
-                    Có <span>{favorite?.data?.data?.length}</span> sản phẩm trong danh sách yêu thích
+                    Có <span>{favorite?.data?.data?.length || 0}</span> sản phẩm trong danh sách yêu thích
                 </div>
                 {favorite?.data?.data?.length <= 0 ?
                     <div className="pt-[150px] pb-[70px] flex flex-col items-center text-center">
@@ -116,7 +116,7 @@ const WishlistPage = (props: Props) => {
                     </div>
                 }
             </div>
-
+            
         </div >
     )
 }

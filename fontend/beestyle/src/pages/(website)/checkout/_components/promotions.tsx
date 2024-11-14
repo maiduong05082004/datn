@@ -99,7 +99,7 @@ const Promotions = ({ isPromotion, setPromotion, setPromotionAdd }: Props) => {
                                     <div className="p-[10px_16px] flex justify-between items-end">
                                         <div>
                                             <ul className='text-[14px]'>
-                                                <li>Giảm {item.discount_amount} sản phẩm</li>
+                                                <li>Giảm {new Intl.NumberFormat('vi-VN').format(item.discount_amount)} VND sản phẩm</li>
                                                 <li>Nhóm khách hàng được chỉ định</li>
                                                 <li>Nhóm sản phẩm</li>
                                                 <li>Hàng mới về</li>

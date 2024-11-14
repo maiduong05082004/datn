@@ -1,11 +1,12 @@
 import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
 import React from 'react'
-import { Link, Outlet } from 'react-router-dom';
+import { Link, Outlet, useNavigate } from 'react-router-dom';
 
 type Props = {}
 
 const AccountPage = (props: Props) => {
+    
 
     return (
         <main className='px-[15px] lg:py-[64px]'>

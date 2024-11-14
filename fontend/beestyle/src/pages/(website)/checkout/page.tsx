@@ -11,6 +11,7 @@ import { joiResolver } from '@hookform/resolvers/joi';
 import Promotions from './_components/promotions';
 import ItemProducts from './_components/itemProducts';
 import LoadingPage from '../loading/page';
+import { useOrderMutations } from '@/components/hooks/useOrderMutations';
 interface TCheckout {
     address: any,
     note: string,
@@ -159,18 +160,21 @@ const CheckOutPage = () => {
         setValue("address", address.check)
     }
 
+    const { handleContext, orderCod} = useOrderMutations()
+    
     const onSubmit = (data: any) => {
+        const cart_id = checkouts.products.map((item: any) => item.cart_item_id)
         const { note, paymentMethod, address } = data
-        const promotion_ship = Math.round(Number(promotionShip));
-        const promotion_product = Math.round(Number(promotionProduct));
+        const discounted_shipping_fee = Math.round(Number(promotionShip));
+        const discounted_amount = Math.round(Number(promotionProduct));
         const promotion_ids = promotionAdd.map((item: any) => item.id)
         if (paymentMethod === "cod") {
             if (checkouts) {
-                const pr = {promotion_ids, note, payment_type: paymentMethod, address_id: address, shipping_fee: priceShip, promotion_product, promotion_ship, totalPrice: checkouts.totalPrice }
-                console.log(pr);
+                const order = {cart_id ,promotion_ids, note, payment_type: paymentMethod, shipping_address_id: address, shipping_fee: priceShip, discounted_amount, discounted_shipping_fee, total: checkouts.totalPrice }
+                orderCod.mutate(order)
             }
         } else {
-            const pr = {promotion_ids, note, payment_type: "online",payment_method: paymentMethod, address_id: address, shipping_fee: priceShip, promotion_product, promotion_ship, totalPrice: checkouts.totalPrice }
+            const pr = {cart_id ,promotion_ids, note, payment_type: "online",payment_method: paymentMethod, shipping_address_id: address, shipping_fee: priceShip, discounted_amount, discounted_shipping_fee, totalPrice: checkouts.totalPrice }
             console.log(pr);
         }
     }

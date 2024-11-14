@@ -8,7 +8,6 @@ type Props = {}
 const Favorite = (props: Props) => {
     const { id } = useParams()
 
-    console.log(id);
     
 
     const [favoriteStatus, setFavoriteStatus] = useState<boolean>();
@@ -20,11 +19,13 @@ const Favorite = (props: Props) => {
         try {
             if (status) {
                 // Thêm sản phẩm vào danh sách yêu thích
-                await axios.post(`http://127.0.0.1:8000/api/client/wishlist/add`, { product_id: id }, {
+                const data = await axios.post(`http://127.0.0.1:8000/api/client/wishlist/add`, { product_id: id }, {
                     headers: {
                         Authorization: `Bearer ${token}`,
                     },
                 });
+                console.log(data);
+                
             } else {
                 // Xóa sản phẩm khỏi danh sách yêu thích
                 await axios.delete(`http://127.0.0.1:8000/api/client/wishlist/remove/${id}`, {
@@ -50,14 +51,11 @@ const Favorite = (props: Props) => {
         enabled: !!token,
     });
 
-    console.log(favorite);
     
     useEffect(() => {
         if (favorite) {
             const isFavorite = favorite?.data?.data?.some((item: any) => item?.id == id);
-            setFavoriteStatus(isFavorite);
-            console.log(isFavorite);
-                    
+            setFavoriteStatus(isFavorite);                    
         }
     }, [favorite]);
 

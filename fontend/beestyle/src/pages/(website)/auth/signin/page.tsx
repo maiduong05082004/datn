@@ -1,9 +1,9 @@
 import { useMutation } from '@tanstack/react-query'
 import { message } from 'antd'
 import axios from 'axios'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 
 type Props = {}
 
@@ -13,6 +13,10 @@ const PageSignin = (props: Props) => {
     const [messageApi, contextHolder] = message.useMessage()
     const navigater = useNavigate()
     const { register, handleSubmit, formState: { errors }, reset } = useForm<any>()
+    
+    useEffect(() => {
+        window.scrollTo(0, 0);
+    }, []);
 
     const { mutate } = useMutation({
         mutationFn: async (auth: any) => {
@@ -85,7 +89,7 @@ const PageSignin = (props: Props) => {
                                     <span className='mx-[10px]'>
                                         <svg xmlns="http://www.w3.org/2000/svg" width="2" height="10" viewBox="0 0 2 10" fill="none"> <rect x="0.5" width="1" height="10" fill="#D0D0D0"></rect> </svg>
                                     </span>
-                                    <a href="">Đăng ký</a>
+                                    <Link to={`/signup`}>Đăng ký</Link>
                                 </div>
                             </div>
                         </div>
