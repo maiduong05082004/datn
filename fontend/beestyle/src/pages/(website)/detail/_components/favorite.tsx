@@ -55,9 +55,7 @@ const Favorite = (props: Props) => {
     
     useEffect(() => {
         if (favorite) {
-            const isFavorite = favorite?.data?.wishlist_items?.some((item: any) => item?.product?.id == id);
-            console.log(isFavorite);
-            
+            const isFavorite = favorite?.data?.data?.some((item: any) => item?.id == id);
             setFavoriteStatus(isFavorite);                    
         }
     }, [favorite]);
