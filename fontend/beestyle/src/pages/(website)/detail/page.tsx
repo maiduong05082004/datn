@@ -9,9 +9,6 @@ import { useForm } from 'react-hook-form';
 import InfoProduct from './_components/infoProduct';
 import CommentEvaluate from './_components/commentEvaluate';
 
-type Props = {
-    //   onClicks: () => void;
-}
 interface Product {
     products_id: number;
     product_variation_value_id: number;
@@ -131,6 +128,9 @@ const DetailPage = () => {
                 navigater(`/carts`)
             }
         }
+    }
+    interface TReport {
+        report: string
     }
 
     return (

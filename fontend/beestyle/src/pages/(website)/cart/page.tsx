@@ -8,7 +8,7 @@ import { useProductMutations } from '@/components/hooks/useProductMutations';
 import NavigationButton from './_components/navigationButton';
 import Slider from 'react-slick';
 import { Link, useNavigate } from 'react-router-dom';
-import LoadingPage from '../loading/page';
+import LoadingPage from '../loading/loadPage';
 
 type Props = {
 

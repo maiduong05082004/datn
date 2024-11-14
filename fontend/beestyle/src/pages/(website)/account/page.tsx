@@ -1,11 +1,12 @@
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
-import React, { useEffect } from 'react'
+import { useEffect } from 'react';
 import { Link, Outlet, useNavigate } from 'react-router-dom';
 
 type Props = {}
 
 const AccountPage = (props: Props) => {
+    
 
     const navigate = useNavigate()
 

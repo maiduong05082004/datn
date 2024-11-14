@@ -5,7 +5,7 @@ import LoadingPage from "@/pages/(website)/loading/page";
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
 import { Dispatch, SetStateAction, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 type Props = {
     isSearch: boolean
     setIsSearch: Dispatch<SetStateAction<boolean>>;
