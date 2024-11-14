@@ -253,23 +253,23 @@ class CommentController extends Controller
         return response()->json(['message' => 'Comment deleted successfully.']);
     }
 
-    public function report(Request $request)
-    {
-        $id = $request->input('id');
-        $comment = Comment::find($id);
-        if (!$comment) {
-            return response()->json([
-                'message' => "Comment not found"
-            ], 404);
-        }
-        $comment->reported_count += 1;
+    // public function report(Request $request)
+    // {
+    //     $id = $request->input('id');
+    //     $comment = Comment::find($id);
+    //     if (!$comment) {
+    //         return response()->json([
+    //             'message' => "Comment not found"
+    //         ], 404);
+    //     }
+    //     $comment->reported_count += 1;
 
-        if ($comment->reported_count >= 5) {
-            $comment->is_visible = 0;
-        }
-        $comment->save();
-        return response()->json(['message' => 'Thank for report.', 'reported_count' => $comment->reported_count]);
-    }
+    //     if ($comment->reported_count >= 5) {
+    //         $comment->is_visible = 0;
+    //     }
+    //     $comment->save();
+    //     return response()->json(['message' => 'Thank for report.', 'reported_count' => $comment->reported_count]);
+    // }
 
 
 

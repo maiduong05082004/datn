@@ -11,6 +11,7 @@ use App\Models\Product;
 use App\Models\ProductVariationValue;
 use Illuminate\Http\Request;
 use App\Mail\OrderConfirmationMail;
+use DB;
 use Illuminate\Support\Facades\Mail;
 
 class PaymentController extends Controller
@@ -25,14 +26,17 @@ class PaymentController extends Controller
     }
     public function vnpayPayment(Request $request)
     {
-        $request->validate([
+        $validatedData = $request->validate([
             'total' => 'required|numeric',
             'promotion_ids' => 'nullable|array',
             'note' => 'nullable|string',
             'payment_type' => 'required|string',
             'payment_method' => 'required|string', // Xác định cổng thanh toán
             'shipping_address_id' => 'required|integer',
-            'cart_id' => 'required|array'
+            'cart_id' => 'required|array',
+            'shipping_fee' => 'nullable|numeric|min:0',
+            'discounted_amount' => 'nullable|numeric|min:0',
+            'discounted_shipping_fee' => 'nullable|numeric|min:0',
         ]);
 
         $vnp_Url = "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html";
@@ -40,124 +44,137 @@ class PaymentController extends Controller
         $vnp_TmnCode = "943CGXVQ";
         $vnp_HashSecret = "WLQHP1MXDBOCOQZ56YQHESM95GC25M81";
 
-        $codeOrders = $this->generateUniqueOrderCode();
+        DB::beginTransaction();
+        try {
 
+            $codeOrders = $this->generateUniqueOrderCode();
 
-        // Tạo hóa đơn (Bill)
-        $bill = Bill::create([
-            'user_id' => auth()->user()->id,
-            'code_orders' => $codeOrders,
-            'email_receiver' => auth()->user()->email,
-            'note' => $request->input('note'),
-            'status_bill' => 'pending',
-            'payment_type' => $request->input('payment_type'),
-            'subtotal' => $request->input('total'),
-            'total' => $request->input('total'),
-            'shipping_address_id' => $request->input('shipping_address_id'),
-            'promotion_ids' => json_encode($request->input('promotion_ids')),
-        ]);
-
-        // Lấy danh sách cart_items dựa vào cart_id và thêm vào bill_details
-        $cartItems = CartItem::whereIn('id', $request->input('cart_id'))->get();
-        $subtotal = 0;
-        $orderItems = [];
-
-        foreach ($cartItems as $item) {
-            $variationValue = ProductVariationValue::findOrFail($item->product_variation_value_id);
-
-            // Kiểm tra tồn kho
-            if ($variationValue->stock < $item->quantity) {
-                return response()->json([
-                    'message' => "Số lượng tồn kho không đủ cho biến thể ID {$variationValue->id}. Yêu cầu: {$item->quantity}, Tồn kho: {$variationValue->stock}"
-                ], 400);
-            }
-
-            $totalAmount = $variationValue->price * $item->quantity;
-            $subtotal += $totalAmount;
-
-            // Tạo bản ghi BillDetail
-            BillDetail::create([
-                'bill_id' => $bill->id,
-                'product_id' => $item->product_id,
-                'quantity' => $item->quantity,
-                'don_gia' => $variationValue->price,
-                'product_variation_value_id' => $item->product_variation_value_id,
-                'total_amount' => $totalAmount, // Thêm giá trị total_amount vào đây
+            $shippingFee = $validatedData['shipping_fee'] ?? 0;
+            $discountedAmount = $validatedData['discounted_amount'] ?? 0;
+            $discountedShippingFee = $validatedData['discounted_shipping_fee'] ?? 0;
+            // Tạo hóa đơn (Bill)
+            $bill = Bill::create([
+                'user_id' => auth()->user()->id,
+                'code_orders' => $codeOrders,
+                'email_receiver' => auth()->user()->email,
+                'note' => $request->input('note'),
+                'status_bill' => 'pending',
+                'payment_type' => $request->input('payment_type'),
+                'subtotal' => $request->input('total'),
+                'total' => $request->input('total'),
+                'shipping_address_id' => $request->input('shipping_address_id'),
+                'promotion_ids' => json_encode($request->input('promotion_ids')),
+                'shipping_fee' => $shippingFee,
+                'discounted_amount' => $discountedAmount,
+                'discounted_shipping_fee' => $discountedShippingFee,
             ]);
 
-            $variationValue->decrement('stock', $item->quantity);
-            $variationValue->productVariation->decrement('stock', $item->quantity);
-            Product::findOrFail($item->product_id)->decrement('stock', $item->quantity);
+            // Lấy danh sách cart_items dựa vào cart_id và thêm vào bill_details
+            $cartItems = CartItem::whereIn('id', $request->input('cart_id'))->get();
+            $subtotal = 0;
+            $orderItems = [];
 
-            $orderItems[] = [
-                'productName' => $item->product->name,
-                'size' => $variationValue->attributeValue->value,
-                'color' => $variationValue->productVariation->attributeValue->value,
-                'quantity' => $item->quantity,
-                'unitPrice' => $variationValue->price,
-                'total' => $totalAmount,
-                'image' => $item->productVariationValue->productVariation->variationImages()
-                    ->where('image_type', 'album')
-                    ->first()?->image_path,
+            foreach ($cartItems as $item) {
+                $variationValue = ProductVariationValue::findOrFail($item->product_variation_value_id);
+
+                // Kiểm tra tồn kho
+                if ($variationValue->stock < $item->quantity) {
+                    return response()->json([
+                        'message' => "Số lượng tồn kho không đủ cho biến thể ID {$variationValue->id}. Yêu cầu: {$item->quantity}, Tồn kho: {$variationValue->stock}"
+                    ], 400);
+                }
+
+                $totalAmount = $variationValue->price * $item->quantity;
+                $subtotal += $totalAmount;
+
+                // Tạo bản ghi BillDetail
+                BillDetail::create([
+                    'bill_id' => $bill->id,
+                    'product_id' => $item->product_id,
+                    'quantity' => $item->quantity,
+                    'don_gia' => $variationValue->price,
+                    'product_variation_value_id' => $item->product_variation_value_id,
+                    'total_amount' => $totalAmount, // Thêm giá trị total_amount vào đây
+                ]);
+
+                $variationValue->decrement('stock', $item->quantity);
+                $variationValue->productVariation->decrement('stock', $item->quantity);
+                Product::findOrFail($item->product_id)->decrement('stock', $item->quantity);
+
+                $orderItems[] = [
+                    'productName' => $item->product->name,
+                    'size' => $variationValue->attributeValue->value,
+                    'color' => $variationValue->productVariation->attributeValue->value,
+                    'quantity' => $item->quantity,
+                    'unitPrice' => $variationValue->price,
+                    'total' => $totalAmount,
+                    'image' => $item->productVariationValue->productVariation->variationImages()
+                        ->where('image_type', 'album')
+                        ->first()?->image_path,
+                ];
+            }
+
+            $bill->subtotal = $subtotal;
+            $bill->total = $subtotal;
+            $bill->save();
+
+            // Gửi email xác nhận đơn hàng qua hàng đợi
+            $orderData = $this->prepareOrderData($request, $bill, $orderItems);
+            Mail::to($request->user()->email)->queue(new OrderConfirmationMail($orderData));
+
+            // Tạo bản ghi Payment
+            Payment::create([
+                'bill_id' => $bill->id,
+                'user_id' => auth()->user()->id,
+                'payment_method' => $request->input('payment_method'), // Lấy request để xác định cổng thanh toán
+                'amount' => $request->input('total'),
+                'status' => 'pending',
+                'transaction_id' => null,
+                'bank_code' => 'NCB',
+                'order_info' => 'Thanh toán đơn hàng #' . $bill->id,
+                'pay_type' => 'online',
+                'pay_date' => null,
+                'canceled_reason' => null,
+            ]);
+
+            // Chuẩn bị URL cho VNPay
+            $inputData = [
+                "vnp_Version" => "2.1.0",
+                "vnp_TmnCode" => $vnp_TmnCode,
+                "vnp_Amount" => $request->input('total') * 100,
+                "vnp_Command" => "pay",
+                "vnp_CreateDate" => date('YmdHis'),
+                "vnp_CurrCode" => "VND",
+                "vnp_IpAddr" => $_SERVER['REMOTE_ADDR'],
+                "vnp_Locale" => 'vn',
+                "vnp_OrderInfo" => 'Thanh toán đơn hàng #' . $codeOrders,
+                "vnp_OrderType" => 'bill payment',
+                "vnp_ReturnUrl" => $vnp_Returnurl,
+                "vnp_TxnRef" => $bill->id
             ];
+
+            ksort($inputData);
+            $hashdata = http_build_query($inputData);
+            $vnp_Url .= '?' . $hashdata;
+
+            if ($vnp_HashSecret) {
+                $vnpSecureHash = hash_hmac('sha512', $hashdata, $vnp_HashSecret);
+                $vnp_Url .= '&vnp_SecureHash=' . $vnpSecureHash;
+            }
+
+            // // Xóa các mục trong giỏ hàng sau khi tạo bill
+            CartItem::whereIn('id', $request->input('cart_id'))->delete();
+
+            DB::commit();
+            return response()->json([
+                'code' => '00',
+                'message' => 'success',
+                'data' => $vnp_Url
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json(['code' => '99', 'message' => 'Transaction failed', 'error' => $e->getMessage()]);
         }
-
-        $bill->subtotal = $subtotal;
-        $bill->total = $subtotal;
-        $bill->save();
-
-        // Gửi email xác nhận đơn hàng qua hàng đợi
-        $orderData = $this->prepareOrderData($request, $bill, $orderItems);
-        Mail::to($request->user()->email)->queue(new OrderConfirmationMail($orderData));
-
-        // Tạo bản ghi Payment
-        Payment::create([
-            'bill_id' => $bill->id,
-            'user_id' => auth()->user()->id,
-            'payment_method' => $request->input('payment_method'), // Lấy request để xác định cổng thanh toán
-            'amount' => $request->input('total'),
-            'status' => 'pending',
-            'transaction_id' => null,
-            'bank_code' => 'NCB',
-            'order_info' => 'Thanh toán đơn hàng #' . $bill->id,
-            'pay_type' => 'online',
-            'pay_date' => null,
-            'canceled_reason' => null,
-        ]);
-
-        // Chuẩn bị URL cho VNPay
-        $inputData = [
-            "vnp_Version" => "2.1.0",
-            "vnp_TmnCode" => $vnp_TmnCode,
-            "vnp_Amount" => $request->input('total') * 100,
-            "vnp_Command" => "pay",
-            "vnp_CreateDate" => date('YmdHis'),
-            "vnp_CurrCode" => "VND",
-            "vnp_IpAddr" => $_SERVER['REMOTE_ADDR'],
-            "vnp_Locale" => 'vn',
-            "vnp_OrderInfo" => 'Thanh toán đơn hàng #' . $bill->code_orders,
-            "vnp_OrderType" => 'bill payment',
-            "vnp_ReturnUrl" => $vnp_Returnurl,
-            "vnp_TxnRef" => $bill->id
-        ];
-
-        ksort($inputData);
-        $hashdata = http_build_query($inputData);
-        $vnp_Url .= '?' . $hashdata;
-
-        if ($vnp_HashSecret) {
-            $vnpSecureHash = hash_hmac('sha512', $hashdata, $vnp_HashSecret);
-            $vnp_Url .= '&vnp_SecureHash=' . $vnpSecureHash;
-        }
-
-        // Xóa các mục trong giỏ hàng sau khi tạo bill
-        CartItem::whereIn('id', $request->input('cart_id'))->delete();
-
-        return response()->json([
-            'code' => '00',
-            'message' => 'success',
-            'data' => $vnp_Url
-        ]);
     }
 
 
@@ -227,9 +244,7 @@ class PaymentController extends Controller
                 ]);
                 $bill->status_bill = Bill::STATUS_PENDING;
                 $bill->save();
-
-                $userId = $bill->user_id;
-                CartItem::where('user_id', $userId)->delete();
+                // CartItem::whereIn('id', $validatedData['cart_id'])->delete();
                 return response()->json([
                     'code' => '00',
                     'total' => $bill->total,
@@ -239,6 +254,9 @@ class PaymentController extends Controller
                     'payment_method' => $payment->payment_method, // Trả về cổng thanh toán đã chọn
                     'shipping_address_id' => $bill->shipping_address_id, // Nếu có trường này trong bảng bills
                     'order_details' => $orderDetails,
+                    'shipping_fee' => $bill->shippingFee,
+                    'discounted_amount' => $bill->discountedAmount,
+                    'discounted_shipping_fee' => $bill->discountedShippingFee,
                     'message' => 'Payment processed successfully, cart items cleared'
                 ]);
                 // foreach ($bill->billDentail as $dentails) {
