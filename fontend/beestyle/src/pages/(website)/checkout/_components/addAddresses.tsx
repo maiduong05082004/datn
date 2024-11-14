@@ -176,7 +176,7 @@ const AddAddresses = ({ isCheckAddresses, isAddAddresses, setCheckAddresses, set
         <>
             {contextHolder}
             {isAddAddresses && (
-                <div className={`fixed z-10 flex-col top-0`}>
+                <div className={`fixed z-20 flex-col top-0`}>
                     <div className="fixed overflow-hidden rounded-[5px] bg-white z-20 flex top-[50%] translate-y-[-50%] left-[50%] translate-x-[-50%] min-w-[300px] max-w-[600px] w-[100%] p-[20px]">
                         <form onSubmit={handleSubmit(onSubmit)} className='w-[100%]'>
                             <h2 className='font-[700] text-[20px]'>Địa chỉ mới</h2>

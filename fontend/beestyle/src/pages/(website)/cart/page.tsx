@@ -180,7 +180,7 @@ const CartPage = () => {
                         </div>
 
 
-                        {carts?.data?.cart_items.length !== 0 ? (
+                        {carts?.data?.cart_items.length !== 0 && carts ? (
                             <div className="px-[20px]">
                                 {carts?.data?.cart_items.map((item: any, index: any) => (
                                     <div key={index + 1} className="flex flex-wrap items-center justify-between mt-[24px] lg:justify-between lg:flex-nowrap">
@@ -233,7 +233,7 @@ const CartPage = () => {
                                         </div>
                                     </div>
                                 ))}
-                                <div className="hidden lg:flex justify-center mt-[12px] pt-[48px] border-t-[1px] border-t-[#E8E8E8]">
+                                <div className="hidden lg:flex justify-center mt-[24px] pt-[48px] border-t-[1px] border-t-[#E8E8E8]">
                                     <NavigationButton />
                                 </div>
                             </div>
