@@ -550,48 +550,35 @@ class ProductController extends Controller
 
 
 
-
     public function destroy(string $id)
     {
         DB::beginTransaction();
-
+    
         try {
-            $product = Product::withTrashed()->findOrFail($id);
+            $product = Product::findOrFail($id);
+    
             $variations = ProductVariation::where('product_id', $product->id)->get();
-
-
             foreach ($variations as $variation) {
+                // Xóa mềm các hình ảnh của biến thể
                 $variationImages = ProductVariationImage::where('product_variation_id', $variation->id)->get();
-
-
                 foreach ($variationImages as $variationImage) {
-                    if (Storage::disk('public')->exists($variationImage->image_path)) {
-                        Storage::disk('public')->delete($variationImage->image_path);
-                    }
-
-                    $directoryPath = dirname($variationImage->image_path);
-                    $this->deleteDirectoryIfEmpty($directoryPath);
-
-                    $variationImage->delete();
+                    $variationImage->delete(); 
                 }
+    
                 ProductVariationValue::where('product_variation_id', $variation->id)->delete();
-                $variation->forceDelete();
+                $variation->delete(); 
             }
+    
 
             $productImages = ProductImage::where('product_id', $product->id)->get();
             foreach ($productImages as $productImage) {
-                if (Storage::disk('public')->exists($productImage->image_path)) {
-                    Storage::disk('public')->delete($productImage->image_path);
-                }
-
-                $directoryPath = dirname($productImage->image_path);
-                $this->deleteDirectoryIfEmpty($directoryPath);
-                $productImage->delete();
+                $productImage->delete(); 
             }
-            $product->forceDelete();
-
+    
+            $product->delete();
+    
             DB::commit();
-
+    
             return response()->json([
                 'success' => true,
                 'message' => 'Xóa sản phẩm thành công'
@@ -604,7 +591,7 @@ class ProductController extends Controller
             ], 500);
         }
     }
-
+    
 
 
 
