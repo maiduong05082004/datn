@@ -59,12 +59,18 @@ class CheckoutController extends Controller
                 'shipping_address_id' => 'required|exists:shipping_addresses,id',
                 'cart_id' => 'required|array',
                 'cart_id.*' => 'integer|exists:cart_items,id',
+                'shipping_fee' => 'nullable|numeric|min:0',
+                'discounted_amount' => 'nullable|numeric|min:0',
+                'discounted_shipping_fee' => 'nullable|numeric|min:0',
             ]);
 
             if ($validator->fails()) {
                 return response()->json(['errors' => $validator->errors()], 422);
             }
 
+            $shippingFee = $validatedData['shipping_fee'] ?? 0;
+            $discountedAmount = $validatedData['discounted_amount'] ?? 0;
+            $discountedShippingFee = $validatedData['discounted_shipping_fee'] ?? 0;
             // Tạo hóa đơn tạm thời với trạng thái pending
             $bill = Bill::create([
                 'user_id' => Auth::id(),
@@ -77,6 +83,9 @@ class CheckoutController extends Controller
                 'shipping_address_id' => $request->shipping_address_id,
                 'promotion_ids' => json_encode($request->promotion_ids),
                 'note' => $request->note,
+                'shipping_fee' => $shippingFee,
+                'discounted_amount' => $discountedAmount,
+                'discounted_shipping_fee' => $discountedShippingFee,
             ]);
 
             $cartIdParam = urlencode(json_encode($request->cart_id));
@@ -273,7 +282,7 @@ class CheckoutController extends Controller
             return response()->json(['error' => 'Lỗi trong quá trình xác nhận thanh toán.'], 500);
         }
 
-        if (isset($response['status']) && $response['status'] === 'COMPLETED') {
+        if (isset($response['status']) && $response['status'] === 'completed') {
             $bill = Bill::find($billId);
             if (!$bill) {
                 return response()->json(['error' => 'Không tìm thấy hóa đơn.'], 404);
@@ -307,7 +316,7 @@ class CheckoutController extends Controller
             $payment->save();
 
             // Cập nhật trạng thái hóa đơn
-            $bill->status_bill = "COMPLETED";
+            $bill->status_bill = "completed";
             $bill->save();
 
             // Xóa các mục trong giỏ hàng theo cart_id từ URL nếu thanh toán thành công
@@ -373,7 +382,7 @@ class CheckoutController extends Controller
                     'transaction_id' => $vnp_TxnRef,
                     'pay_date' => now(),
                 ]);
-                $bill->status_bill = 'COMPLETED';
+                $bill->status_bill = 'completed';
                 $bill->save();
 
                 if ($bill->promotion_ids !== null) {
