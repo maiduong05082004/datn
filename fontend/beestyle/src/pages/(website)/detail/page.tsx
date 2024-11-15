@@ -2,7 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { message } from 'antd';
 import axios from 'axios';
 import { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import LoadingPage from '../loading/page';
 import Favorite from './_components/favorite';
 import { useForm } from 'react-hook-form';
@@ -24,6 +24,7 @@ const DetailPage = () => {
     const [quantity, setQuantity] = useState<number>(1)
 
     const { id } = useParams();
+    const navigater = useNavigate()
 
     useEffect(() => {
         if (quantity <= 0) return setQuantity(1)
@@ -101,7 +102,7 @@ const DetailPage = () => {
                 type: 'error',
                 content: error.message
             })
-        },
+        }
     })
 
     const copyURL = () => {
@@ -115,14 +116,19 @@ const DetailPage = () => {
             });
     };
 
-    const handleSubmitCart = async (id: string | undefined) => {
+    const handleSubmitCart = async (id: string | undefined, indexItem: number) => {
         if (!variationValues) {
             messageApi.error("Vui lòng chọn size")
         } if (!variations) {
             messageApi.error("Vui lòng chọn màu sắc")
         }
         if (id) {
-            mutate({ product_id: parseInt(id), product_variation_value_id: variationValues.id, quantity: quantity })
+            if (indexItem == 0) {
+                mutate({ product_id: parseInt(id), product_variation_value_id: variationValues.id, quantity: quantity })
+            } else {
+                mutate({ product_id: parseInt(id), product_variation_value_id: variationValues.id, quantity: quantity })
+                navigater(`/carts`)
+            }
         }
     }
     interface TReport {
@@ -290,8 +296,12 @@ const DetailPage = () => {
 
                                 <div className={` flex items-end px-[20px] my-[18px] lg:px-0`} >
                                     <span className="text-[20px] font-[500]">{new Intl.NumberFormat('vi-VN').format(variationValues?.price)} VND</span>
-                                    <del className={` ml-[8px] text-[16px] text-[#808080]`}>{new Intl.NumberFormat('vi-VN').format(products?.data?.product?.price)} VND</del>
-                                    <span className={` bg-[#FF0000] rounded-[3px] text-white text-[14px] font-[500] p-[2px_5px] ml-[5px]`}>-{variationValues?.discount}%</span>
+                                    {variationValues?.discount !== 0 ? (
+                                        <>
+                                            <del className={` ml-[8px] text-[16px] text-[#808080]`}>{new Intl.NumberFormat('vi-VN').format(products?.data?.product?.price)} VND</del>
+                                            <span className={` bg-[#FF0000] rounded-[3px] text-white text-[14px] font-[500] p-[2px_5px] ml-[5px]`}>-{variationValues?.discount}%</span>
+                                        </>
+                                    ) : ""}
                                 </div>
 
 
@@ -364,8 +374,8 @@ const DetailPage = () => {
                                 </div>
 
                                 <div className="*:h-[56px] flex fixed bottom-0 w-[100%] left-0 z-10 lg:relative">
-                                    <button onClick={() => handleSubmitCart(id)} className='text-white bg-black w-[50%]'>THÊM VÀO GIỎ HÀNG</button>
-                                    <button className='w-[50%] text-white bg-[#b01722]'>MUA NGAY</button>
+                                    <button onClick={() => handleSubmitCart(id, 0)} className='text-white bg-black w-[50%]'>THÊM VÀO GIỎ HÀNG</button>
+                                    <button onClick={() => handleSubmitCart(id, 1)} className='w-[50%] text-white bg-[#b01722]'>MUA NGAY</button>
                                     <div className="absolute right-[-20px] top-[-30px]">
                                         <div className="w-[50px] h-[60px] bg-cover bg-center bg-no-repeat z-40" style={{ backgroundImage: `url(https://png.pngtree.com/png-clipart/20220125/original/pngtree-snowflake-icon-png-image_7221622.png)` }}></div>
                                     </div>
@@ -382,8 +392,8 @@ const DetailPage = () => {
                             </div>
                         </div>
 
-                        
-                        <InfoProduct/>
+
+                        <InfoProduct />
 
                     </div>
 
