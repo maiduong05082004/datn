@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\Client\CategoryController;
 use App\Http\Controllers\Api\Client\Product\ProductController as ClientProductController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\Admin\CategoryController as AdminCategoryController;
+use App\Http\Controllers\Api\Admin\InventoryController;
 use App\Http\Controllers\Api\Admin\Product\AttributeController;
 use App\Http\Controllers\Api\Admin\Product\AttributeGroupController;
 use App\Http\Controllers\Api\Admin\Product\AttributeValueController;
@@ -109,7 +110,6 @@ Route::prefix('admins')
             Route::apiResource('products', ProductController::class)
                 ->names('products');
             Route::delete('images/{type}/{encodedPath}', [ProductController::class, 'deleteImageByPath'])->name('images.deleteByPath');
-            Route::post('/products/by-ids', [ProductController::class, 'getProductsByIds'])->name('products.by-ids');
             Route::apiResource('attributes', AttributeController::class)
                 ->names('attributes');
 
@@ -173,6 +173,10 @@ Route::prefix('admins')
                 Route::post('/hide', [CommentController::class, 'hideComment'])->name('comment.hide'); // Ẩn bình luận nếu vi phạm 
                 Route::post('/report', [CommentController::class, 'report'])->name('comment.report'); // Báo cáo bình luận
                 Route::post('/manageUser', [CommentController::class, 'manageUser'])->name('comment.manageUser'); // quản lý user (khóa nếu comment bị báo cáo nhiều)
+            });
+
+            Route::prefix('inventory')->as('inventory.')->group(function () {
+                Route::post('/', [InventoryController::class, 'getObsoleteProducts'])->name('obsolete');
             });
         });
     });

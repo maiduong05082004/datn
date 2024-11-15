@@ -79,6 +79,8 @@ class CheckoutController extends Controller
                 'note' => $request->note,
             ]);
 
+            $cartIdParam = urlencode(json_encode($request->cart_id));
+
             // Khởi tạo thanh toán PayPal
             if (strtolower($request->payment_method) === 'paypal') {
                 $provider = new PayPalClient;
@@ -93,7 +95,7 @@ class CheckoutController extends Controller
                 $response = $provider->createOrder([
                     "intent" => "CAPTURE",
                     "application_context" => [
-                        "return_url" => "http://localhost:8000/api/client/checkout/success?bill_id={$bill->id}",
+                        "return_url" => "http://localhost:8000/api/client/checkout/success?bill_id={$bill->id}&cart_id={$cartIdParam}",
                         "cancel_url" => "http://localhost:8000/api/client/checkout/cancel"
                     ],
                     "purchase_units" => [
@@ -251,6 +253,7 @@ class CheckoutController extends Controller
         $token = $request->input('token');
         $payerID = $request->input('PayerID');
         $billId = $request->input('bill_id');
+        $cartIds = json_decode(urldecode($request->input('cart_id')), true); // Decode cart_id from URL
 
         if (!$token || !$payerID || !$billId) {
             Log::error("Thiếu thông tin thanh toán.");
@@ -275,9 +278,10 @@ class CheckoutController extends Controller
             if (!$bill) {
                 return response()->json(['error' => 'Không tìm thấy hóa đơn.'], 404);
             }
+
             // Xử lý promotion_ids nếu có
-            if ($bill->promotion_ids) {
-                $promotionIds = json_decode($bill->promotion_ids);
+            $promotionIds = json_decode($bill->promotion_ids);
+            if (is_array($promotionIds)) {
                 foreach ($promotionIds as $promotionId) {
                     UserPromotion::create([
                         'user_id' => $bill->user_id,
@@ -306,20 +310,10 @@ class CheckoutController extends Controller
             $bill->status_bill = "COMPLETED";
             $bill->save();
 
-            // Lưu chi tiết hóa đơn và xóa giỏ hàng
-            $cartItems = CartItem::where('user_id', $bill->user_id)->whereIn('id', json_decode($bill->promotion_ids))->get();
-            foreach ($cartItems as $item) {
-                BillDetail::create([
-                    'bill_id' => $bill->id,
-                    'product_id' => $item->product_id,
-                    'quantity' => $item->quantity,
-                    'don_gia' => $item->productVariationValue->price ?? $item->product->price,
-                    'total_amount' => $item->quantity * ($item->productVariationValue->price ?? $item->product->price),
-                    'product_variation_value_id' => $item->product_variation_value_id,
-                ]);
+            // Xóa các mục trong giỏ hàng theo cart_id từ URL nếu thanh toán thành công
+            if (is_array($cartIds)) {
+                CartItem::whereIn('id', $cartIds)->delete();
             }
-
-            CartItem::where('user_id', $bill->user_id)->delete();
 
             return response()->json(['message' => 'Thanh toán thành công và đơn hàng đã được tạo.', 'bill_id' => $bill->id]);
         } else {
@@ -382,19 +376,21 @@ class CheckoutController extends Controller
                 $bill->status_bill = 'COMPLETED';
                 $bill->save();
 
-                // Xử lý promotion_ids nếu có
-                if ($bill && $bill->promotion_ids) {
+                if ($bill->promotion_ids !== null) {
                     $promotionIds = json_decode($bill->promotion_ids);
-                    foreach ($promotionIds as $promotionId) {
-                        UserPromotion::create([
-                            'user_id' => $bill->user_id,
-                            'promotion_id' => $promotionId,
-                        ]);
+
+                    // Kiểm tra nếu $promotionIds là mảng trước khi duyệt
+                    if (is_array($promotionIds)) {
+                        foreach ($promotionIds as $promotionId) {
+                            UserPromotion::create([
+                                'user_id' => $bill->user_id,
+                                'promotion_id' => $promotionId,
+                            ]);
+                        }
                     }
                 }
 
                 $userId = $bill->user_id;
-                CartItem::where('user_id', $userId)->delete();
                 return response()->json([
                     'code' => '00',
                     'total' => $bill->total,
