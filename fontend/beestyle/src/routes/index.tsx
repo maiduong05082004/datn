@@ -49,6 +49,7 @@ import InfoPage from "@/pages/(website)/account/_components/info";
 import RecentlyPage from "@/pages/(website)/account/_components/recently";
 import AddressesPage from "@/pages/(website)/account/_components/addresses";
 // import CartPage from "@/pages/(website)/cart/page";
+import InventoryManagement from "@/pages/(dashboard)/dashboard/Inventory/list";
 
 const Router = () => {
 
@@ -122,6 +123,8 @@ const Router = () => {
                     <Route path="promotions/list" element={<ListPromotions />} />
                     <Route path="promotions/add" element={<AddPromotion />} />
                     <Route path="promotions/update/:id" element={<UpdatePromotion />} />
+                    {/* Inventory */}
+                    <Route path="inventory/list" element={<InventoryManagement />} />
                 </Route>
 
             </Routes>

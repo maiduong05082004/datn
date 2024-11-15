@@ -121,6 +121,14 @@ const items1: MenuProps['items'] = [
       { key: 'sub9-2', label: 'Tải Xuống Thống Kê' },
     ],
   },
+  {
+    key: 'inventory',
+    icon: React.createElement(BarChartOutlined),
+    label: 'Quản lý tồn kho',
+    children: [
+        { key: 'inventory-1', label: <NavLink to="/admin/inventory/list">Danh sách tồn kho</NavLink> },
+    ],
+},
 ];
 
 const DashboardPage: React.FC<{ isDarkMode: boolean }> = ({ isDarkMode }) => {
