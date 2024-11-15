@@ -98,7 +98,6 @@ const CartPage = ({}: any) => {
     }, [selectedProducts, carts?.data?.cart_items]);
 
 
-
     useEffect(() => {
         if (carts?.data?.cart_items) {
             const allProductIds = carts?.data?.cart_items
