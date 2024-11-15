@@ -56,6 +56,7 @@
     "zod": "^3.22.4"
   },
   "devDependencies": {
+    "@types/pusher-js": "^5.1.0",
     "@types/react": "^18.2.64",
     "@types/react-dom": "^18.2.21",
     "@types/react-slick": "^0.23.13",

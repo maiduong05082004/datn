@@ -29,7 +29,6 @@ const ListAttribute: React.FC = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedAttribute, setSelectedAttribute] = useState<AttributeWithValues | null>(null);
 
-    // Lấy danh sách các thuộc tính
     const { data: attributes = [], isLoading, error } = useQuery({
         queryKey: ['attributes'],
         queryFn: async () => {
@@ -38,7 +37,6 @@ const ListAttribute: React.FC = () => {
         },
     });
 
-    // Lấy danh sách các giá trị của thuộc tính
     const { data: attributeValues = [] } = useQuery({
         queryKey: ['attributesvalue'],
         queryFn: async () => {
@@ -118,6 +116,7 @@ const ListAttribute: React.FC = () => {
                     <Button
                         type="default"
                         icon={<EditOutlined />}
+                        className="bg-yellow-500 text-white hover:bg-yellow-600"
                         onClick={() => navigate(`/admin/attribute/update/${attribute.id}`)}
                     />
                     <Popconfirm
@@ -146,18 +145,16 @@ const ListAttribute: React.FC = () => {
     return (
         <>
             {contextHolder}
-            <div className="w-full mx-auto px-6 py-8">
+            <div className="w-full mx-auto px-5 py-8">
                 <div className="flex gap-5 items-center mb-6">
                     <Button
-                        className="bg-indigo-600 hover:bg-indigo-700 text-white"
-                        type="primary"
+                        type="default"
                         icon={<PlusCircleFilled />}
                     >
                         <Link to={`/admin/attribute/add`}>Thêm Attribute</Link>
                     </Button>
                     <Button
-                        className="bg-indigo-600 hover:bg-indigo-700 text-white"
-                        type="primary"
+                        type="default"
                         icon={<PlusCircleFilled />}
                     >
                         <Link to={`/admin/attribute_value/add`}>Thêm Giá Trị Attribute</Link>

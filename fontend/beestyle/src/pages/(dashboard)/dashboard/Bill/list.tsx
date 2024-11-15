@@ -1,11 +1,16 @@
-import { DeleteOutlined, EditOutlined, EyeOutlined, PlusOutlined } from '@ant-design/icons';
+import { ShoppingCartOutlined, EyeOutlined, FilterOutlined } from '@ant-design/icons';
 import { useMutation, useQuery } from '@tanstack/react-query';
-import { Button, Spin, Table } from 'antd';
+import { Button, Spin, Table, DatePicker, Input, Select, Drawer } from 'antd';
 import axiosInstance from '@/configs/axios';
 import React, { useState } from 'react';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { useNavigate } from 'react-router-dom';
+import useMessage from 'antd/es/message/useMessage';
+import { CheckCircle } from 'lucide-react';
+
+const { RangePicker } = DatePicker;
+const { Option } = Select;
 
 type BillRecord = {
   id: number;
@@ -17,14 +22,24 @@ type BillRecord = {
   total: string;
   order_date: string;
   order_time: string;
+  phone: string;
   isHighlighted?: boolean;
 };
 
 const ListBill: React.FC = () => {
   const [filterStatus, setFilterStatus] = useState<string>('all');
   const [searchCode, setSearchCode] = useState<string>('');
+  const [startDate, setStartDate] = useState<string | null>(null);
+  const [endDate, setEndDate] = useState<string | null>(null);
+  const [phone, setPhone] = useState<string>('');
+  const [paymentType, setPaymentType] = useState<string>('');
+  const [promoCode, setPromoCode] = useState<string>('');
   const [billData, setBillData] = useState<BillRecord[]>([]);
+  const [isFilterVisible, setIsFilterVisible] = useState<boolean>(false);
+  const [messageApi, contextHolder] = useMessage();
   const navigate = useNavigate();
+
+  
 
   const getApiUrl = (status: string): string => {
     switch (status) {
@@ -67,14 +82,68 @@ const ListBill: React.FC = () => {
     return baseUrl;
   };
 
-  const { data: BillData, isLoading, refetch } = useQuery({
+  const handleAssignShipping = async (billId: number) => {
+    try {
+      await axiosInstance.post(`http://127.0.0.1:8000/api/admins/orders/ghn-create/${billId}`);
+      toast.success('Đã bàn giao đơn hàng cho đơn vị vận chuyển thành công.');
+      refetch();
+    } catch (error : any) {
+      const errorMessage = error.response?.data?.message || 'Không thể bàn giao đơn hàng cho đơn vị vận chuyển.';
+      toast.error(errorMessage);
+    }
+  };
+  const handleDeleteShipping = async (billId: number) => {
+    try {
+      await axiosInstance.post(`http://127.0.0.1:8000/api/admins/orders/ghn-cancel/${billId}`);
+      toast.success('Đơn hàng đã được hủy thành công.');
+      refetch();
+    } catch (error : any) {
+      const errorMessage = error.response?.data?.message || 'Không thể bàn giao đơn hàng cho đơn vị vận chuyển.';
+      toast.error(errorMessage);
+    }
+  };
+
+  const { data, isLoading, refetch } = useQuery({
     queryKey: ['products', filterStatus],
     queryFn: async () => {
       const response = await axiosInstance.get(getApiUrl(filterStatus));
       setBillData(response.data.bills);
       return response.data;
-    }
+    },
   });
+
+  const filterBill = (status: string) => {
+    let baseUrl = `http://127.0.0.1:8000/api/admins/orders/${status !== 'all' ? status : ''}?`;
+    if (startDate && endDate) {
+      baseUrl += `start_date=${startDate.split(' ')[0]}&start_time=${startDate.split(' ')[1]}&`;
+      baseUrl += `end_date=${endDate.split(' ')[0]}&end_time=${endDate.split(' ')[1]}&`;
+    }
+    if (phone) {
+      baseUrl += `phone=${phone}&`;
+    }
+    if (paymentType) {
+      baseUrl += `payment_type=${paymentType}&`;
+    }
+    if (promoCode) {
+      baseUrl += `promotion_code=${promoCode}&`;
+    }
+    return baseUrl;
+  };
+
+
+  const fetchFilteredBills = async () => {
+    try {
+      const response = await axiosInstance.get(filterBill(filterStatus));
+      setBillData(response.data.bills);
+    } catch (error) {
+      toast.error('Không thể lấy dữ liệu hóa đơn!');
+    }
+  };
+
+  const handleFilterApply = () => {
+    fetchFilteredBills();
+    setIsFilterVisible(false);
+  };
 
   const searchBill = async () => {
     if (searchCode) {
@@ -86,7 +155,7 @@ const ListBill: React.FC = () => {
             .map((bill) =>
               bill.id === response.data.bill.id ? { ...bill, isHighlighted: true } : { ...bill, isHighlighted: false }
             )
-            .sort((a, b) => (b.isHighlighted ? 1 : 0) - (a.isHighlighted ? 1 : 0)); // Move highlighted bills to the top
+            .sort((a, b) => (b.isHighlighted ? 1 : 0) - (a.isHighlighted ? 1 : 0));
           setBillData(updatedBillData);
         } else if (response.data.bills) {
           const highlightedIds = response.data.bills.map((bill: BillRecord) => bill.id);
@@ -94,7 +163,7 @@ const ListBill: React.FC = () => {
             .map((bill) =>
               highlightedIds.includes(bill.id) ? { ...bill, isHighlighted: true } : { ...bill, isHighlighted: false }
             )
-            .sort((a, b) => (b.isHighlighted ? 1 : 0) - (a.isHighlighted ? 1 : 0)); // Move highlighted bills to the top
+            .sort((a, b) => (b.isHighlighted ? 1 : 0) - (a.isHighlighted ? 1 : 0));
           setBillData(updatedBillData);
         }
       } catch (error) {
@@ -104,7 +173,6 @@ const ListBill: React.FC = () => {
       toast.warning('Vui lòng nhập mã đơn hàng để tìm kiếm.');
     }
   };
-
 
   const handleFilterStatusChange = (status: string) => {
     setFilterStatus(status);
@@ -124,6 +192,12 @@ const ListBill: React.FC = () => {
       render: (text: string) => <span className="text-blue-600 font-semibold">{text}</span>,
     },
     {
+      title: 'Số Điện Thoại',
+      dataIndex: 'phone',
+      key: 'phone',
+      render: (text: string) => <span className="text-gray-700 font-medium">{text}</span>,
+    },
+    {
       title: 'Hình Thức Thanh Toán',
       dataIndex: 'payment_type_description',
       key: 'payment_type_description',
@@ -141,12 +215,14 @@ const ListBill: React.FC = () => {
       title: 'Số Lượng',
       dataIndex: 'quantity',
       key: 'quantity',
+      sorter: (a: any, b: any) => parseFloat(a.quantity) - parseFloat(b.quantity),
       render: (text: number) => <span className="text-gray-700 font-medium">{text}</span>,
     },
     {
       title: 'Tổng Thanh Toán',
       dataIndex: 'total',
       key: 'total',
+      sorter: (a: any, b: any) => parseFloat(a.total) - parseFloat(b.total),
       render: (text: string) => <span className="text-green-600 font-bold">{parseFloat(text).toLocaleString()} đ</span>,
     },
     {
@@ -166,9 +242,15 @@ const ListBill: React.FC = () => {
             onChange={async (e) => {
               const newStatus = e.target.value;
               try {
-                await axiosInstance.post(`http://127.0.0.1:8000/api/admins/orders/update_order/${record.id}`, { status: newStatus });
-                toast.success('Trạng thái đơn hàng đã được cập nhật thành công.');
-                refetch();
+                if (newStatus === 'shipping') {
+                  await handleAssignShipping(record.id);
+                } else if (newStatus === 'remove') {
+                  await handleDeleteShipping(record.id);
+                } else {
+                  await axiosInstance.post(`http://127.0.0.1:8000/api/admins/orders/update_order/${record.id}`, { status: newStatus });
+                  toast.success('Trạng thái đơn hàng đã được cập nhật thành công.');
+                  refetch();
+                }
               } catch (error) {
                 toast.error('Không thể cập nhật trạng thái đơn hàng.');
               }
@@ -186,15 +268,16 @@ const ListBill: React.FC = () => {
             {record.status_bill === 'processed' && (
               <>
                 <option value="processed">Đã Xác Nhận Đơn Hàng</option>
-                <option value="shipping">Đang Vận Chuyển</option>
+                <option value="shipping">Bàn Giao Nhanh</option>
                 <option value="canceled">Hủy Đơn Hàng</option>
                 <option value="remove">Xóa Đơn Hàng</option>
               </>
             )}
-            {record.status_bill === 'shipping' && (
+            {record.status_bill === 'shipped' && (
               <>
-                <option value="shipping">Đang Vận Chuyển</option>
+                <option value="shipping">Bàn Giao Nhanh</option>
                 <option value="delivered">Đã Giao Hàng</option>
+                <option value="remove">Hủy Đơn Hàng</option>
               </>
             )}
             {record.status_bill === 'delivered' && (
@@ -210,13 +293,13 @@ const ListBill: React.FC = () => {
           <span className="absolute inset-y-0 right-3 flex items-center pointer-events-none text-gray-500">▼</span>
         </div>
       ),
-    },
+    }
+,    
     {
       title: 'Thao Tác',
       key: 'action',
       render: (record: BillRecord) => (
         <div className="relative w-[180px] flex gap-2">
-          {/* Display "Xem Chi Tiết" button for specific statuses */}
           {['pending', 'shipping', 'confirmed'].includes(record.status_bill) && (
             <Button
               type="default"
@@ -227,21 +310,51 @@ const ListBill: React.FC = () => {
               Xem Chi Tiết
             </Button>
           )}
-    
-          {['processed'].includes(record.status_bill) && (
+
+          {['shipped'].includes(record.status_bill) && (
             <Button
+              icon={<ShoppingCartOutlined />}
               type="default"
               onClick={() => navigate(`/admin/bill/shiping/${record.id}`)}
-              className="bg-yellow-500 text-white hover:bg-yellow-600 focus:bg-yellow-700 rounded-md shadow-md"
+              className="bg-yellow-500 text-white hover:bg-yellow-600 focus:bg-yellow-700 rounded-md shadow-md h-[50px]"
+              style={{
+                whiteSpace: 'normal',
+                padding: '8px',
+                textAlign: 'center'
+              }}
             >
-              Gửi Đơn Hàng Sang GHN
+              Xem Chi Tiết Vận Chuyển
             </Button>
           )}
+          {['processed'].includes(record.status_bill) && (
+            <Button
+              icon={<CheckCircle />}
+              type="default"
+              onClick={() => navigate(`/admin/bill/detailConfirm/${record.id}`)}
+              className="bg-yellow-500 text-white hover:bg-yellow-600 focus:bg-yellow-700 rounded-md shadow-md h-[50px]"
+              style={{
+                whiteSpace: 'normal',
+                padding: '8px',
+                textAlign: 'center'
+              }}
+            >
+              Xem Chi Tiết Đơn Xác Nhận
+            </Button>
+          )}
+          {['delivered'].includes(record.status_bill) && (
+            <Button
+              icon={<ShoppingCartOutlined />}
+              type="default"
+              onClick={() => navigate(`/admin/bill/detailship/${record.id}`)}
+              className="bg-yellow-500 text-white hover:bg-yellow-600 focus:bg-yellow-700 rounded-md shadow-md"
+            >
+              Xem Đơn Hàng
+            </Button>
+          )}
+
         </div>
       ),
-    }
-    
-
+    },
   ];
 
   if (isLoading) return <Spin tip="Loading..." className="flex justify-center items-center h-screen" />;
@@ -249,7 +362,7 @@ const ListBill: React.FC = () => {
   return (
     <>
       <ToastContainer />
-      <div className="w-[95%] mx-auto p-6 bg-slate-100 rounded-md shadow-md">
+      <div className="w-[100%] mx-auto p-5 bg-slate-100">
         <div className="flex justify-between items-center mb-6 pt-5">
           <div className="flex gap-4">
             {['all', 'pending', 'processing', 'shipping', 'delivered', 'canceled'].map((status, index) => (
@@ -266,28 +379,91 @@ const ListBill: React.FC = () => {
                           status === 'shipping' ? 'Đang Vận Chuyển' :
                             status === 'delivered' ? 'Đã Giao Hàng' : 'Đã Hủy'}
                   </h2>
-                  <p className="text-gray-600">
+                  {/* <p className="text-gray-600">
                     {BillData?.bills?.filter((bill: BillRecord) => status === 'all' || bill.status_bill === status).length || 0} Đơn Hàng
-                  </p>
+                  </p> */}
                 </div>
               </button>
             ))}
           </div>
         </div>
         <div className="w-[100%] h-auto bg-white p-6 rounded-md shadow">
-          <div className="flex items-center gap-4 mb-4">
-            <input
-              type="text"
-              className="border p-2 rounded-lg w-[500px] focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+          <div className="flex gap-4 items-center">
+            <Input
               placeholder="Nhập mã đơn hàng để tìm kiếm..."
               value={searchCode}
               onChange={(e) => setSearchCode(e.target.value)}
+              className="w-[300px]"
             />
             <Button type="primary" onClick={searchBill} className="bg-blue-500 text-white hover:bg-blue-600 focus:bg-blue-700 rounded-md">
               Tìm Kiếm
             </Button>
+            <Button
+              type="default"
+              icon={<FilterOutlined />}
+              onClick={() => setIsFilterVisible(true)}
+              className="bg-blue-500 text-white hover:bg-blue-600 focus:bg-blue-700 rounded-md shadow-md"
+            >
+              Lọc
+            </Button>
           </div>
         </div>
+
+        <Drawer
+          title={<span className="text-lg font-bold text-gray-800">Lọc Hóa Đơn</span>}
+          placement="right"
+          onClose={() => setIsFilterVisible(false)}
+          visible={isFilterVisible}
+          width={400}
+          className="bg-gray-50 shadow-lg"
+        >
+          <div className="p-4 space-y-4">
+            <RangePicker
+              showTime
+              className="w-full rounded-lg border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+              onChange={(dates) => {
+                if (dates) {
+                  setStartDate(dates[0]?.format('YYYY-MM-DD HH:mm:ss') || null);
+                  setEndDate(dates[1]?.format('YYYY-MM-DD HH:mm:ss') || null);
+                } else {
+                  setStartDate(null);
+                  setEndDate(null);
+                }
+              }}
+            />
+
+
+            <Input
+              className="w-full rounded-lg border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+              placeholder="Số điện thoại"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+            />
+            <Select
+              className="w-full rounded-lg border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+              placeholder="Hình thức thanh toán"
+              onChange={(value) => setPaymentType(value)}
+              allowClear
+            >
+              <Option value="online">Online</Option>
+              <Option value="cod">COD</Option>
+            </Select>
+            <Input
+              className="w-full rounded-lg border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+              placeholder="Mã khuyến mãi"
+              value={promoCode}
+              onChange={(e) => setPromoCode(e.target.value)}
+            />
+            <Button
+              onClick={handleFilterApply}
+              className="w-full bg-blue-500 text-white font-semibold py-2 rounded-lg shadow-md hover:bg-blue-600 focus:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:outline-none transition duration-150 ease-in-out"
+            >
+              Áp dụng
+            </Button>
+          </div>
+        </Drawer>
+
+
         <div className="overflow-x-auto pt-5">
           <div className='bg-white pt-5 rounded-md shadow-md pb-5'>
             <div className='w-[97%] mx-auto'>
@@ -303,7 +479,6 @@ const ListBill: React.FC = () => {
                 }}
                 className="rounded-lg shadow-lg"
               />
-
             </div>
           </div>
         </div>

@@ -69,8 +69,7 @@ const AddPromotion: React.FC = () => {
     };
 
     return (
-        <div className="container mx-auto px-4 py-8">
-            <h2 className="text-2xl font-bold mb-6">Thêm Khuyến Mãi Mới</h2>
+        <div className="min-h-screen p-5">
             <Form form={form} layout="vertical" onFinish={onFinish}>
                 <Form.Item
                     label="Mã Khuyến Mãi"
@@ -258,10 +257,17 @@ const AddPromotion: React.FC = () => {
                 </Form.Item>
 
                 <Form.Item>
-                    <Button type="default" className='bg-black hover:bg-slate-300 text-white' htmlType="submit" loading={isPending}>
-                        Thêm Khuyến Mãi
-                    </Button>
-                </Form.Item>
+              <div className='flex justify-end space-x-4'>
+                <Button type="primary" htmlType="submit">
+                  Submit
+                </Button>
+                <Button
+                  onClick={() => navigate('/admin/promotions/list')}
+                >
+                  Back
+                </Button>
+              </div>
+            </Form.Item>
             </Form>
         </div>
     );

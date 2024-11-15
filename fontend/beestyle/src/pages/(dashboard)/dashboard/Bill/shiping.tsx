@@ -47,6 +47,18 @@ type OrderDetail = {
 
 type Props = {};
 
+const statusDescriptions: { [key: string]: string } = {
+    ready_to_pick: "Chờ Lấy Hàng",
+    picking: "Nhân viên đang lấy hàng",
+    cancel: "Hủy đơn hàng",
+    picked: "Nhân viên đã lấy hàng",
+    storing: "Hàng đang nằm ở kho",
+    transporting: "Đang luân chuyển hàng",
+    waiting_to_return: "Đang đợi trả hàng về cho người gửi",
+    return: "Trả hàng",
+    returned: "Nhân viên trả hàng thành công",
+};
+
 const Shipping = (props: Props) => {
     const { id } = useParams();
     const { data: orderDetail, isLoading } = useQuery<OrderDetail>({
@@ -61,12 +73,11 @@ const Shipping = (props: Props) => {
 
     return (
         <div className="p-8">
-            <h1 className="text-4xl font-bold text-blue-600 mb-5">Chi Tiết Shipping</h1>
             {orderDetail && (
                 <div className="bg-white p-8 rounded-lg shadow-lg">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                         {/* Thông tin đơn hàng */}
-                        <div className="p-4 rounded-md border border-gray-200 shadow-sm">
+                        <div className="p-4">
                             <h2 className="text-lg font-semibold text-gray-800 mb-4 bg-slate-100 rounded-lg h-[50px] flex items-center px-5 border-b border-gray-300">
                                 Thông Tin Đơn Hàng
                             </h2>
@@ -85,16 +96,17 @@ const Shipping = (props: Props) => {
                                 </p>
                                 <p className="flex">
                                     <strong className="text-gray-600 w-[150px]">Trạng Thái Hiện Tại:</strong>
-                                    <div className="w-[120px] h-[30px] border flex justify-center items-center rounded-md bg-blue-700 text-white">
-                                    <span className="text-white font-semibold">{orderDetail.status}</span>
+                                    <div className="w-[200px] h-[30px] border flex justify-center items-center rounded-md bg-blue-700 text-white">
+                                        <span className="text-white font-semibold">
+                                            {statusDescriptions[orderDetail.status] || "Trạng thái không xác định"}
+                                        </span>
                                     </div>
-
                                 </p>
                             </div>
                         </div>
 
                         {/* Thông tin người nhận */}
-                        <div className="p-4 rounded-md border border-gray-200 shadow-sm">
+                        <div className="p-4">
                             <h2 className="text-lg font-semibold text-gray-800 mb-4 bg-slate-100 rounded-lg h-[50px] flex items-center px-5 border-b border-gray-300">
                                 Thông Tin Chi Tiết
                             </h2>
@@ -118,7 +130,7 @@ const Shipping = (props: Props) => {
                     {/* Thông tin chi tiết */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                         {/* Người Nhận */}
-                        <div className="p-4 rounded-md border border-gray-200 shadow-sm">
+                        <div className="p-4">
                             <h2 className="text-lg font-semibold text-gray-800 mb-4 bg-slate-100 rounded-lg h-[50px] flex items-center px-5 border-b border-gray-300">
                                 Người Nhận
                             </h2>
@@ -139,7 +151,7 @@ const Shipping = (props: Props) => {
                         </div>
 
                         {/* Chi phí */}
-                        <div className="p-4 rounded-md border border-gray-200 shadow-sm">
+                        <div className="p-4">
                             <h2 className="text-lg font-semibold text-gray-800 mb-4 bg-slate-100 rounded-lg h-[50px] flex items-center px-5 border-b border-gray-300">
                                 Chi Phí
                             </h2>

@@ -163,14 +163,14 @@ const UpdateAttributeValues: React.FC = () => {
                                         size="large"
                                         className="bg-indigo-600 hover:bg-indigo-700 text-white rounded-md px-6"
                                     >
-                                        Thêm mới
+                                        Submit
                                     </Button>
                                     <Button
                                         onClick={() => navigate('/admin/listattribute_value')}
                                         size="large"
                                         className="bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-md px-6"
                                     >
-                                        Quay lại
+                                        Back
                                     </Button>
                                 </div>
                             </Form.Item>
