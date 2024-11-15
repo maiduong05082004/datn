@@ -2,10 +2,12 @@ import { useMutation } from '@tanstack/react-query';
 import { Form, Input, Button, message, Card, Select } from 'antd';
 import axiosInstance from '@/configs/axios';
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 
 const { Option } = Select;
 
 const AddAttribute: React.FC = () => {
+    const navigate = useNavigate();
     const [messageApi, contextHolder] = message.useMessage();
     const [form] = Form.useForm();
 
@@ -31,8 +33,8 @@ const AddAttribute: React.FC = () => {
     return (
         <>
             {contextHolder}
-            <div className="min-h-screen flex items-center justify-center p-8">
-                <Card className="w-full max-w-8xl p-10 rounded-xl shadow-lg">
+            <div className="min-h-screen p-5">
+                <div className="w-full max-w-8xl">
                     <Form
                         form={form}
                         layout="vertical"
@@ -57,12 +59,19 @@ const AddAttribute: React.FC = () => {
                             </Select>
                         </Form.Item>
                         <Form.Item>
-                            <Button className='bg-indigo-600 hover:bg-indigo-700 text-white rounded-md px-6' type="primary" htmlType="submit">
-                                Thêm thuộc tính
-                            </Button>
+                            <div className='flex justify-end space-x-4'>
+                                <Button type="primary" htmlType="submit">
+                                    Submit
+                                </Button>
+                                <Button
+                                    onClick={() => navigate('/admin/attribute/list')}
+                                >
+                                    Back
+                                </Button>
+                            </div>
                         </Form.Item>
                     </Form>
-                </Card>
+                </div>
             </div>
         </>
     );

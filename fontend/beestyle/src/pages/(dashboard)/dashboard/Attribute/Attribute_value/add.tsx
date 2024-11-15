@@ -57,13 +57,9 @@ const AddAttributeValues: React.FC = () => {
     return (
         <>
             {contextHolder}
-            <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 p-6">
+            <div className="min-h-screen p-5">
                 <div className="w-full max-w-8xl">
-                    <Card bordered={false} className="shadow-lg rounded-xl p-8 bg-white">
-                        <Title level={3} className="text-center mb-6 text-gray-700">
-                            Thêm mới giá trị thuộc tính
-                        </Title>
-
+                    <div className="">
                         <Form
                             form={form}
                             layout="vertical"
@@ -138,22 +134,18 @@ const AddAttributeValues: React.FC = () => {
                                     <Button
                                         type="primary"
                                         htmlType="submit"
-                                        size="large"
-                                        className="bg-indigo-600 hover:bg-indigo-700 text-white rounded-md px-6"
                                     >
-                                        Thêm mới
+                                        Submit
                                     </Button>
                                     <Button
-                                        onClick={() => navigate('/admin/listattribute_value')}
-                                        size="large"
-                                        className="bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-md px-6"
+                                        onClick={() => navigate('/admin/attribute/list')}
                                     >
-                                        Quay lại
+                                        Back
                                     </Button>
                                 </div>
                             </Form.Item>
                         </Form>
-                    </Card>
+                    </div>
                 </div>
             </div>
         </>

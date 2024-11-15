@@ -134,13 +134,12 @@ const ListCategories: React.FC = () => {
   return (
     <>
       {contextHolder}
-      <div className="w-full mx-auto px-6 py-8">
+      <div className="w-full mx-auto p-5">
         <div className="flex justify-between items-center mb-6">
           <Button
-            type="primary"
+            type="default"
             icon={<PlusOutlined />}
             onClick={() => navigate('/admin/category/add')}
-            className="bg-indigo-600 hover:bg-indigo-700 text-white"
           >
             Thêm danh mục
           </Button>

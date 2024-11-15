@@ -56,7 +56,7 @@ const ListAttributeGroup = (props: Props) => {
         {
             title: 'Action',
             width: 200,
-            
+
             key: 'action',
             render: (attribute_group: any) => (
                 <div className="flex space-x-4 justify-center">
@@ -85,17 +85,17 @@ const ListAttributeGroup = (props: Props) => {
         },
     ];
 
-    const expandedRowRender = (record : any) => {
+    const expandedRowRender = (record: any) => {
         return (
             <div className="space-y-6 px-5 py-3">
-                {record.attributes.map((attr : any, index : any) => (
+                {record.attributes.map((attr: any, index: any) => (
                     <div
                         key={index}
                         className="p-4 border border-gray-300 rounded-lg bg-white shadow-md hover:shadow-lg transition-shadow duration-300 ease-in-out"
                     >
                         <strong className="text-blue-700 text-lg">{attr.name}:</strong>
                         <div className="flex flex-wrap gap-2 mt-2">
-                            {attr.attribute_values.map((value : any, idx : any) => (
+                            {attr.attribute_values.map((value: any, idx: any) => (
                                 <span
                                     key={idx}
                                     className="px-3 py-1 bg-blue-200 text-blue-500 rounded-full text-sm font-medium shadow-sm"
@@ -109,21 +109,20 @@ const ListAttributeGroup = (props: Props) => {
             </div>
         );
     };
-    
+
 
     return (
-        <div className="list-attribute-group-container w-full mx-auto px-6 py-8 bg-gray-50">
+        <div className="list-attribute-group-container w-full mx-auto p-5">
             {contextHolder}
             <Button
-                className="bg-indigo-600 hover:bg-indigo-700 text-white text-lg font-semibold px-6 py-3 mb-6 rounded-lg shadow-md transition-all duration-200 ease-in-out transform hover:scale-105"
                 icon={<PlusOutlined />}
-                type="primary"
+                type="default"
                 onClick={() => navigate('/admin/attribute_group/add')}
             >
                 Thêm mới
             </Button>
             <Table
-                className="bg-white rounded-xl shadow-lg overflow-hidden"
+                className='pt-5'
                 dataSource={dataSource}
                 columns={columns}
                 loading={isLoading}

@@ -110,11 +110,10 @@ const ListPromotions: React.FC = () => {
     if (isError) return <div>Lỗi khi tải danh sách khuyến mãi</div>;
 
     return (
-        <div className="mx-auto px-4 py-8">
+        <div className="mx-auto p-5">
             <div className="flex justify-between items-center mb-4">
                 <Button
                     type="default"
-                    className="bg-black hover:bg-slate-300 text-white"
                     icon={<PlusOutlined />}
                     onClick={() => navigate('/admin/promotions/add')}
                 >

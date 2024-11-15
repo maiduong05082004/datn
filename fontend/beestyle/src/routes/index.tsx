@@ -49,6 +49,10 @@ import ViewAccount from "@/pages/(website)/account/_components/view";
 import InfoPage from "@/pages/(website)/account/_components/info";
 import RecentlyPage from "@/pages/(website)/account/_components/recently";
 import AddressesPage from "@/pages/(website)/account/_components/addresses";
+import App from "@/pages/(dashboard)/dashboard/Bill/app";
+import Detailship from "@/pages/(dashboard)/dashboard/Bill/detailship";
+import DeatilConfirm from "@/pages/(dashboard)/dashboard/Bill/detailConfirm"
+import Comments from "@/pages/(dashboard)/dashboard/Products/comments";
 // import CartPage from "@/pages/(website)/cart/page";
 import InventoryManagement from "@/pages/(dashboard)/dashboard/Inventory/list";
 
@@ -84,8 +88,11 @@ const Router = () => {
                     <Route path="profile" element={<MyProfile />} />
                     <Route index element={<DashboardPage />} />
                     {/* bills */}
+                    <Route path="bill/app" element={<App />} />
                     <Route path="bill/list" element={<ListBill />} />
                     <Route path="bill/detail/:id" element={<DetailBill />} />
+                    <Route path="bill/detailship/:id" element={<Detailship />} />
+                    <Route path="bill/detailConfirm/:id" element={<DeatilConfirm />} />
                     <Route path="bill/shiping/:id" element={<Shiping />} />
                     {/* comments */}
                     <Route path="comment/list" element={<ListComments />} />
@@ -99,6 +106,7 @@ const Router = () => {
                     <Route path="user/update/:id" element={<UpdateUser />} />
                     {/* products */}
                     <Route path="products/list" element={<ListProducts />} />
+                    <Route path="comments/list/:id" element={<Comments />} />
                     <Route path="products/add" element={<AddProduct />} />
                     <Route path="products/update/:id" element={<UpdateProduct />} />
                     <Route path="products/detail/:id" element={<DetailProduct />} />

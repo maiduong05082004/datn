@@ -89,7 +89,8 @@ const items1: MenuProps['items'] = [
     icon: React.createElement(ProductOutlined),
     label: 'Bill',
     children: [
-      { key: 'sub6-1', label: <NavLink to="/admin/bill/list">Danh sách đơn hàng</NavLink> },
+      // { key: 'sub6-1', label: <NavLink to="/admin/bill/list">Danh sách đơn hàng</NavLink> },
+      { key: 'sub6-1', label: <NavLink to="/admin/bill/app">Danh sách đơn hàng</NavLink> },
     ],
   },
   {
@@ -173,7 +174,7 @@ const App: React.FC = () => {
         {/* Sidebar logo */}
         <div className='flex justify-center items-center' style={{ height: '64px', padding: '16px', background: '#001529', display: 'flex', alignItems: 'center' }}>
           <div className='pt-5'>
-            <img src="https://bizweb.dktcdn.net/100/446/974/themes/849897/assets/logo.png?1725442106829" alt="" />
+            <img src="https://res.cloudinary.com/dg4yxsmhs/image/upload/v1730021939/yukhkav8xga7cwvn3jcd.png" alt="" />
           </div>
         </div>
 

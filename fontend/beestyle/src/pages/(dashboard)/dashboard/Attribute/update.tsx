@@ -20,8 +20,8 @@ const UpdateAttribute: React.FC = () => {
       return response.data;
     },
   });
-  
-  
+
+
   const updateAttributeMutation = useMutation({
     mutationFn: async (updatedAttribute: { name: string; attribute_type: number }) => {
       return await axiosInstance.put(
@@ -31,7 +31,7 @@ const UpdateAttribute: React.FC = () => {
     },
     onSuccess: () => {
       messageApi.success('Cập nhật thuộc tính thành công!');
-      queryClient.invalidateQueries({ queryKey: ['attribute'] }); 
+      queryClient.invalidateQueries({ queryKey: ['attribute'] });
     },
     onError: (error: any) => {
       messageApi.error(
@@ -52,13 +52,13 @@ const UpdateAttribute: React.FC = () => {
   return (
     <>
       {contextHolder}
-      <div className="min-h-screen flex items-center justify-center p-8">
-        <Card className="w-full max-w-8xl p-10 rounded-xl shadow-lg">
+      <div className="min-h-screen p-5">
+        <div className="w-full max-w-8xl">
           <Form
             form={form}
             layout="vertical"
             onFinish={onFinish}
-            initialValues={{...attribute?.data}}
+            initialValues={{ ...attribute?.data }}
           >
             <Form.Item
               label="Tên thuộc tính"
@@ -78,12 +78,19 @@ const UpdateAttribute: React.FC = () => {
               </Select>
             </Form.Item>
             <Form.Item>
-              <Button className='bg-indigo-600 hover:bg-indigo-700 text-white rounded-md px-6' type="primary" htmlType="submit">
-                Cập nhật thuộc tính
-              </Button>
+              <div className='flex justify-end space-x-4'>
+                <Button type="primary" htmlType="submit">
+                  Submit
+                </Button>
+                <Button
+                  onClick={() => navigate('/admin/attribute/list')}
+                >
+                  Back
+                </Button>
+              </div>
             </Form.Item>
           </Form>
-        </Card>
+        </div>
       </div>
     </>
   );

@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
-import { Table, message, Button, Image, Tag, Modal, Popconfirm, Spin } from 'antd';
+import { Table, message, Button, Image, Tag, Modal, Popconfirm, Spin, Tooltip } from 'antd';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { format } from 'date-fns';
 import { DeleteOutlined, EditOutlined, EyeOutlined, PlusOutlined } from '@ant-design/icons';
-import { useNavigate } from 'react-router-dom';
 import AxiosInstance from '@/configs/axios';
+import { useNavigate, useParams } from 'react-router-dom';
 
 interface Product {
   id: number;
@@ -42,6 +42,7 @@ const ListProducts = () => {
   const [messageApi, contextHolder] = message.useMessage();
   const queryClient = useQueryClient();
   const navigate = useNavigate();
+  const { id } = useParams();
 
   const { data: productsData, isLoading } = useQuery({
     queryKey: ['products'],
@@ -63,47 +64,7 @@ const ListProducts = () => {
       messageApi.error('Xóa sản phẩm thất bại');
     },
   });
-
   // Hàm mở rộng để render danh sách các biến thể
-  const expandedRowRender = (record: Product) => {
-    return (
-      <div className="">
-        {record.variations.map((variant, index) => (
-          <div key={index} className="bg-white p-4 rounded-lg shadow-md">
-            <h4 className="font-semibold text-indigo-600">Màu: {variant.attribute_value_image_variant.value}</h4>
-            <Image
-              className="rounded-lg mb-2"
-              width={200}
-              src={variant.attribute_value_image_variant.image_path}
-              alt={variant.attribute_value_image_variant.value}
-            />
-            <h4 className="font-semibold text-gray-700">Số lượng tồn kho: {variant.stock}</h4>
-
-            {variant.variation_values.map((value) => (
-              <div key={value.attribute_value_id} className="ml-4 mt-2 flex gap-10">
-                <p className='w-20 flex'><h2 className='font-bold'>Size</h2>: {value.value}</p>
-                <p className='flex'><h2 className='font-bold'>Giá</h2>: {parseFloat(value.price).toLocaleString()} VND</p>
-                {value.discount > 0 && <Tag color="red" className="mt-2">Giảm giá: {value.discount}%</Tag>}
-              </div>
-            ))}
-
-            <h4 className="font-semibold text-gray-700 mt-4">Album ảnh:</h4>
-            <div className="flex space-x-2 mt-2">
-              {variant.variation_album_images.map((image, imgIndex) => (
-                <Image
-                  key={imgIndex}
-                  width={100}
-                  className="rounded-lg"
-                  src={image}
-                  alt={`Album image ${imgIndex + 1}`}
-                />
-              ))}
-            </div>
-          </div>
-        ))}
-      </div>
-    );
-  };
 
   const columns: Array<any> = [
     {
@@ -139,12 +100,21 @@ const ListProducts = () => {
       dataIndex: 'description',
       key: 'description',
       render: (text: string) => (
-        <div className="truncate max-w-xs">
-          {text.length > 20 ? (
-            <>
-              {text.slice(0, 20)}...
-              <Button type="link" onClick={() => messageApi.info(text)}>Xem chi tiết</Button>
-            </>
+        <div className="max-w-xs truncate">
+          {text.length > 30 ? ( 
+            <Tooltip title={text}>  
+              <span>
+                {text.slice(0, 30)}...{' '}
+                <Button
+                  type="link"
+                  onClick={() => messageApi.info(text)}
+                  className="text-indigo-600 p-0"
+                  style={{ fontSize: '0.875rem' }}  
+                >
+                  Xem chi tiết
+                </Button>
+              </span>
+            </Tooltip>
           ) : (
             text
           )}
@@ -169,6 +139,21 @@ const ListProducts = () => {
       render: (text: string) => <span>{text}</span>,
     },
     {
+      title: 'Bình Luận',
+      key: 'comments',
+      render: (product: Product) => (
+        <div className="flex space-x-2">
+          <Button
+            type="link"
+            icon={<EyeOutlined />}
+            className="text-white bg-blue-500 hover:bg-blue-600"
+            onClick={() => navigate(`/admin/comments/list/${product.id}`)}
+          />
+        </div>
+      ),
+    }
+    ,
+    {
       title: 'Action',
       key: 'action',
       render: (product: Product) => (
@@ -179,6 +164,7 @@ const ListProducts = () => {
             className="text-white bg-blue-500 hover:bg-blue-600"
             onClick={() => navigate(`/admin/products/detail/${product.id}`)}
           />
+
           <Button
             type="default"
             icon={<EditOutlined />}
@@ -207,9 +193,8 @@ const ListProducts = () => {
       <div className="w-full mx-auto px-6 py-8">
         <div className="flex justify-between items-center mb-6">
           <Button
-            className="bg-indigo-600 hover:bg-indigo-700 text-white"
             icon={<PlusOutlined />}
-            type="primary"
+            type="default"
             onClick={() => navigate('/admin/products/add')}
           >
             Thêm mới
@@ -220,9 +205,6 @@ const ListProducts = () => {
           dataSource={productsData?.data}
           bordered
           rowKey="id"
-          expandable={{
-            expandedRowRender: expandedRowRender, 
-          }}
           pagination={{
             pageSize: 7,
             showTotal: (total) => `Tổng ${total} sản phẩm`,

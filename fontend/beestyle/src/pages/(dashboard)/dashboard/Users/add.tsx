@@ -3,6 +3,7 @@ import { Form, Input, Button, Select, message, DatePicker } from 'antd';
 import axiosInstance from '@/configs/axios';
 
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 interface Users {
   id?: number;
@@ -24,6 +25,7 @@ interface Users {
 const AddUser: React.FC = () => {
   const [form] = Form.useForm();
   const [messageApi, contextHolder] = message.useMessage();
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
 
   const mutation = useMutation({
@@ -84,8 +86,8 @@ const AddUser: React.FC = () => {
   return (
     <>
       {contextHolder}
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 p-8">
-        <div className="w-full max-w-7xl bg-white p-10 rounded-xl shadow-lg">
+      <div className="min-h-screen p-5">
+        <div className="w-full max-w-8xl">
           <Form
             form={form}
             name="addUser"
@@ -192,22 +194,14 @@ const AddUser: React.FC = () => {
             </Form.Item>
 
             <Form.Item>
-              <div className="flex justify-end space-x-4">
-                <Button
-                  type="primary"
-                  htmlType="submit"
-                  size="large"
-                  loading={loading}
-                  className="bg-indigo-600 hover:bg-indigo-700 text-white rounded-md px-6"
-                >
-                  Thêm Người Dùng
+              <div className='flex justify-end space-x-4'>
+                <Button type="primary" htmlType="submit">
+                  Submit
                 </Button>
                 <Button
-                  size="large"
-                  className="bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-md px-6"
-                  onClick={() => form.resetFields()}
+                  onClick={() => navigate('/admin/promotions/list')}
                 >
-                  Đặt Lại
+                  Back
                 </Button>
               </div>
             </Form.Item>
