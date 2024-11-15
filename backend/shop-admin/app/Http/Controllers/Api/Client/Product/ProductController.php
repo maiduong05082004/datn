@@ -196,14 +196,18 @@ class ProductController extends Controller
     private function prepareOrderData($request, $bill, $orderItems)
     {
         return [
-            'customerName' => $request->user()->name,
+            'customerName' => $bill->shippingAddress->full_name,
             'orderId' => $bill->code_orders,
             'orderDate' => now()->format('d/m/Y H:i'),
             'paymentType' => $bill->getLoaiThanhToan(),
             'shippingAddress' => $bill->shippingAddress->address_line,
             'phoneNumber' => $bill->shippingAddress->phone_number,
             'orderItems' => $orderItems,
-            'totalAmount' => $bill->total,
+            'subtotal' => $bill->subtotal,
+            'shipping_fee' => $bill->shipping_fee,
+            'discounted_amount' => $bill->discounted_amount,
+            'discounted_shipping_fee' => $bill->discounted_shipping_fee,
+            'totalAmount' => (int) ($bill->total + ($bill->shipping_fee ?? 0) - ($bill->discounted_amount ?? 0) - ($bill->discounted_shipping_fee ?? 0)),
         ];
     }
 
