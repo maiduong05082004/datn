@@ -78,7 +78,7 @@ const ViewAccount = (props: Props) => {
 
             <div className="border-t-[#F8F8F8] border-t-[8px] mt-[24px] lg:border-t-black lg:border-t-[3px]">
 
-                {order?.data.bills.length < 0 ?
+                {order?.data.bills.length > 0 ?
                     order?.data?.bills.map((item: any, index: any) => (
                         <div key={index + 1} className="">
                             <div className="flex p-[15px] -mx-[15px] lg:m-0 lg:p-[16px_20px] border-t-[#dadada] border-t-[1px] border-b-[#dadada] border-b-[1px] justify-between bg-slate-100">

@@ -1,17 +1,16 @@
-import { useEffect, useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import AddAddresses from './_components/addAddresses';
-import CheckAddresses from './_components/checkAddresses';
+import { useOrderMutations } from '@/components/hooks/useOrderMutations';
+import { joiResolver } from '@hookform/resolvers/joi';
 import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
-import UpdateAddresses from './_components/updateAddresses';
+import Joi from 'joi';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
-import Joi, { number } from 'joi';
-import { joiResolver } from '@hookform/resolvers/joi';
-import Promotions from './_components/promotions';
-import ItemProducts from './_components/itemProducts';
+import { Link, useLocation } from 'react-router-dom';
 import LoadingPage from '../loading/page';
-import { useOrderMutations } from '@/components/hooks/useOrderMutations';
+import AddAddresses from './_components/addAddresses';
+import CheckAddresses from './_components/checkAddresses';
+import ItemProducts from './_components/itemProducts';
+import UpdateAddresses from './_components/updateAddresses';
 interface TCheckout {
     address: any,
     note: string,
@@ -63,7 +62,6 @@ const CheckOutPage = () => {
     const { register, handleSubmit, watch, setValue, formState: { errors } } = useForm<TCheckout>({
         resolver: joiResolver(checkoutSchema),
         defaultValues: {
-            // address: 0,
             note: "",
             paymentMethod: "cod",
         }
@@ -160,7 +158,7 @@ const CheckOutPage = () => {
         setValue("address", address.check)
     }
 
-    const { handleContext, orderCod} = useOrderMutations()
+    const { handleContext, orderCod, orderATM} = useOrderMutations()
     
     const onSubmit = (data: any) => {
         const cart_id = checkouts.products.map((item: any) => item.cart_item_id)
@@ -174,8 +172,9 @@ const CheckOutPage = () => {
                 orderCod.mutate(order)
             }
         } else {
-            const pr = {cart_id ,promotion_ids, note, payment_type: "online",payment_method: paymentMethod, shipping_address_id: address, shipping_fee: priceShip, discounted_amount, discounted_shipping_fee, totalPrice: checkouts.totalPrice }
-            console.log(pr);
+            const order = {cart_id ,promotion_ids, note, payment_type: "online",payment_method: paymentMethod, shipping_address_id: address, shipping_fee: priceShip, discounted_amount, discounted_shipping_fee, totalPrice: checkouts.totalPrice }
+            console.log(order);
+            // orderATM.mutate(order)
         }
     }
 
@@ -183,6 +182,7 @@ const CheckOutPage = () => {
 
     return (
         <main>
+            {handleContext}
             <div className="px-[15px] lg:flex pc:px-[80px] pc:py-[64px]">
                 <ItemProducts promotionAdd={promotionAdd} promotionShip={promotionShip} promotionProduct={promotionProduct} checkouts={checkouts} selectedAddress={selectedAddress} setPriceShip={setPriceShip} priceShip={priceShip} setPromotionShip={setPromotionShip} setPromotionProduct={setPromotionProduct} setPromotionAdd={setPromotionAdd}/>
                 <div className="lg:w-[65%] lg:pr-[80px] lg:order-1">
@@ -294,10 +294,10 @@ const CheckOutPage = () => {
                         </div>
 
                         <div className="flex fixed bottom-0 left-0 w-[100%] justify-center lg:py-[32px] bg-[#F0F0F0] *:w-[50%] *:flex *:justify-center *:py-[18px] *:font-[600] *:text-[16px] lg:h-[126px] *:lg:w-[330px] *:lg:items-center ">
-                            <Link to={`/carts`} className="bg-white lg:mr-[25px]">
+                            <Link to={`/carts`} className="bg-white lg:mr-[25px] select-none">
                                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"> <path d="M11.4375 18.75L4.6875 12L11.4375 5.25M5.625 12H19.3125" stroke="#2E2E2E" strokeLinecap="round" strokeLinejoin="round"></path> </svg>
                                 QUAY LẠI GIỎ HÀNG</Link>
-                            <button type='submit' className="bg-black text-white">HOÀN TẤT ĐƠN HÀNG</button>
+                            <button type='submit' className={`${orderCod.isPending || orderATM.isPending || !districtId || !checkouts ? "pointer-events-none bg-opacity-50" : ""} select-none bg-black text-white`}>HOÀN TẤT ĐƠN HÀNG</button>
                         </div>
                     </form>
 

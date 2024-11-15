@@ -34,7 +34,6 @@ const CartPage = () => {
             });
         },
     })
-    console.log(carts);
 
     useEffect(() => {
         if (variationId !== variationIdDf) {
@@ -94,19 +93,24 @@ const CartPage = () => {
         }
     }, [selectedProducts, carts?.data?.cart_items]);
 
+    
+
     useEffect(() => {
         if (carts?.data?.cart_items) {
-            const allProductIds = carts?.data?.cart_items?.map((item: any) => item.cart_item_id);
+            const allProductIds = carts?.data?.cart_items
+            ?.filter((item: any) => item.variation_values.stock >= item.quantity)
+            .map((item: any) => item.cart_item_id);
             setSelectedProducts([...allProductIds]);
 
             // Tính tổng tiền của tất cả sản phẩm khi tự động tích
-            // const total = carts?.data?.cartData?.products.reduce(
-            //     (sum: any, item: any) => sum + (item.price * item.quantity),
-            //     0
-            // );
-            // setTotalPrice(total);
+            const total = carts?.data?.cartData?.filter((item: any) => item.variation_values.stock >= item.quantity)?.products.reduce(
+                (sum: any, item: any) => sum + (item.price * item.quantity),
+                0
+            );
+            setTotalPrice(total);
         }
     }, [carts?.data?.cart_items]);
+
 
     const handleDelete = (productId: any) => {
         deleteProductMutation.mutate(
@@ -132,7 +136,7 @@ const CartPage = () => {
 
     const handleSelectAll = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.checked) {
-            const allProductIds = carts?.data?.cart_items.map((item: any) => item.cart_item_id) || [];
+            const allProductIds = carts?.data?.cart_items?.filter((item: any) => item.variation_values.stock >= item.quantity).map((item: any) => item.cart_item_id ) || [];
             setSelectedProducts(allProductIds);
         } else {
             setSelectedProducts([]);
@@ -154,6 +158,7 @@ const CartPage = () => {
         );
         navigate("/checkouts", { state: { products: selectedItems, totalPrice } });
     };
+
 
     return (
         <main>
@@ -180,22 +185,28 @@ const CartPage = () => {
                         </div>
 
 
+
+
                         {carts?.data?.cart_items.length !== 0 && carts ? (
                             <div className="px-[20px]">
                                 {carts?.data?.cart_items.map((item: any, index: any) => (
                                     <div key={index + 1} className="flex flex-wrap items-center justify-between mt-[24px] lg:justify-between lg:flex-nowrap">
                                         <div className='flex items-start w-[100%]'>
-                                            <div className="w-[120px]">
+                                            <div className="w-[120px] relative">
                                                 <input className='absolute w-[20px] h-[20px]'
                                                     type="checkbox"
-                                                    checked={selectedProducts.includes(item?.cart_item_id)}
+                                                    checked={item.variation_values.stock >= item.quantity && selectedProducts.includes(item?.cart_item_id)}
                                                     onChange={() => handleSelectProduct(item?.cart_item_id)}
-
                                                 />
 
                                                 <div className="pt-[123.5%] bg-cover bg-center bg-no-repeat"
                                                     style={{ backgroundImage: `url(${item.album_images[0]})` }}
                                                 ></div>
+                                                {item.variation_values.stock < item.quantity ? (
+                                                    <div className="bg-black absolute z-10 w-[100%] h-[100%] top-0 bg-opacity-30 flex items-center justify-center text-white font-[600] text-[16px] select-none">
+                                                        Hết hàng
+                                                    </div>
+                                                ) : ""}
                                             </div>
 
                                             <div className='w-[calc(100%-120px)]'>
@@ -267,7 +278,7 @@ const CartPage = () => {
 
                         </div>
 
-                        <button onClick={() => handleProceedToCheckout()} className={`${carts?.data?.cart_items.length === 0 || selectedProducts.length === 0 ? "pointer-events-none opacity-50" : ""} outline-none bg-black text-white text-[16px] font-[600] w-full fixed bottom-0 h-[56px] -tracking-wide lg:static lg:rounded-[0_0_8px_8px]`}>
+                        <button onClick={() => handleProceedToCheckout()} className={`${carts?.data?.cart_items.length === 0 || selectedProducts.length === 0 ? "pointer-events-none bg-[#787878]" : ""} select-none outline-none bg-black text-white text-[16px] font-[600] w-full fixed bottom-0 h-[56px] -tracking-wide lg:static lg:rounded-[0_0_8px_8px]`}>
                             THANH TOÁN
                         </button>
                     </div>

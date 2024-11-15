@@ -62,7 +62,6 @@ const HomePage = (props: Props) => {
 
   return (
     <main>
-      <Noel />
       <section>
         <div className="relative">
           {home?.data?.banners.map((item: any, index: any) => (
