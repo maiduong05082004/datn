@@ -4,10 +4,12 @@ import axiosInstance from '@/configs/axios';
 import { Button, message, Modal, Popconfirm, Spin, Table } from 'antd';
 import { Link, useNavigate } from 'react-router-dom';
 import { PlusCircleFilled, DeleteOutlined, EyeOutlined, EditOutlined } from '@ant-design/icons';
+import { ColumnsType } from 'antd/es/table';
 
 type AttributeValue = {
     value_id: number;
     value: string;
+    image_path: string;
 };
 
 type AttributeWithValues = {
@@ -54,6 +56,7 @@ const ListAttribute: React.FC = () => {
             queryClient.invalidateQueries({
                 queryKey: ['attributes'],
             })
+
         },
         onError: (error: any) => {
             messageApi.error(`Lỗi: ${error.message}`);
@@ -67,7 +70,7 @@ const ListAttribute: React.FC = () => {
         onSuccess: () => {
             messageApi.success('Xóa giá trị thành công');
             queryClient.invalidateQueries({
-                queryKey: ['attributesWithValues'],
+                queryKey: ['attributesvalue'],
             })
         },
         onError: (error: any) => {
@@ -75,7 +78,6 @@ const ListAttribute: React.FC = () => {
         },
     });
 
-    // Xử lý sự kiện "Xem chi tiết"
     const handleViewDetails = (attribute: Attribute) => {
         const attributeDetail = attributeValues.find(
             (attr: AttributeWithValues) => attr.attribute_id === attribute.id
@@ -89,12 +91,13 @@ const ListAttribute: React.FC = () => {
         setSelectedAttribute(null);
     };
 
-    const columns = [
+    const columns: ColumnsType<any> = [
         {
             title: 'STT',
             dataIndex: 'index',
             key: 'index',
-            width: 80,
+            width: "50px",
+            align: 'center',
             render: (_: any, __: any, index: number) => <span>{index + 1}</span>,
         },
         {
@@ -103,20 +106,19 @@ const ListAttribute: React.FC = () => {
             key: 'name',
         },
         {
-            title: 'Action',
+            title: 'Hành Động',
             key: 'action',
-            width: 200,
+            align: 'center',
+            width: "50px",
             render: (attribute: Attribute) => (
-                <div className="flex space-x-2">
+                <div className="flex justify-center gap-2">
                     <Button
                         icon={<EyeOutlined />}
-                        className='rounded-full'
                         onClick={() => handleViewDetails(attribute)}
                     />
                     <Button
                         type="default"
                         icon={<EditOutlined />}
-                        className='rounded-full'
                         onClick={() => navigate(`/admin/dashboard/attribute/update/${attribute.id}`)}
                     />
                     <Popconfirm
@@ -125,10 +127,89 @@ const ListAttribute: React.FC = () => {
                         onConfirm={() => deleteAttributeMutation.mutate(attribute.id)}
                         okText="Yes"
                         cancelText="No"
-                        icon={<DeleteOutlined className='rounded-full'
+                        icon={<DeleteOutlined
                         />}
                     >
-                        <Button className='rounded-full' type="default" danger icon={<DeleteOutlined />} />
+                        <Button type="default" danger icon={<DeleteOutlined />} />
+                    </Popconfirm>
+                </div>
+            ),
+        },
+    ];
+    const dataSource = selectedAttribute?.values.map((value, index) => ({
+        key: value.value_id,
+        stt: index + 1,
+        value: value.value,
+        image_path: value.image_path,
+        value_id: value.value_id,
+    }));
+    const columns2: ColumnsType<any> = [
+        {
+            title: 'STT',
+            dataIndex: 'key',
+            key: 'key',
+            width: "50px",
+            align: 'center'
+        },
+        {
+            title: 'Giá Trị',
+            dataIndex: 'value',
+            key: 'value',
+        },
+        ...(selectedAttribute?.attribute_id == 9 ? [{
+            title: 'Ảnh Màu Sắc',
+            dataIndex: 'image_path',
+            key: 'image_path',
+            render: (image_path: any) => (
+                <div className="flex justify-center items-center">
+                    {image_path ? (
+                        <img
+                            src={image_path}
+                            alt="Attribute"
+                            className="w-16 h-16 rounded-full object-cover"
+                        />
+                    ) : (
+                        <div className="w-16 h-16 rounded-full bg-gray-300 flex items-center justify-center text-gray-500">
+                            No Image
+                        </div>
+                    )}
+                </div>
+            ),
+        }] : []),
+        {
+            title: 'Action',
+            key: 'action',
+            align: 'center',
+            width: "50px",
+            render: (text: any, record: any) => (
+                <div className="flex justify-center gap-4">
+                    <Button
+                        type="default"
+                        icon={<EditOutlined />}
+                        className="rounded-full"
+                        onClick={() =>
+                            navigate(
+                                `/admin/dashboard/attribute_value/update/${record.value_id}`
+                            )
+                        }
+                    />
+                    <Popconfirm
+                        title="Xóa giá trị"
+                        description="Bạn có chắc muốn xóa giá trị này không?"
+                        onConfirm={() =>
+                            deleteAttributeValueMutation.mutate(
+                                record.value_id
+                            )
+                        }
+                        okText="Yes"
+                        cancelText="No"
+                    >
+                        <Button
+                            type="default"
+                            danger
+                            icon={<DeleteOutlined />}
+                            className="rounded-full"
+                        />
                     </Popconfirm>
                 </div>
             ),
@@ -152,13 +233,13 @@ const ListAttribute: React.FC = () => {
                         type="default"
                         icon={<PlusCircleFilled />}
                     >
-                        <Link to={`/admin/dashboard/attribute/add`}>Thêm Attribute</Link>
+                        <Link to={`/admin/dashboard/attribute/add`}>Thêm Thuộc Tính</Link>
                     </Button>
                     <Button
                         type="default"
                         icon={<PlusCircleFilled />}
                     >
-                        <Link to={`/admin/dashboard/attribute_value/add`}>Thêm Giá Trị Attribute</Link>
+                        <Link to={`/admin/dashboard/attribute_value/add`}>Thêm Giá Trị Thuộc Tính</Link>
                     </Button>
                 </div>
 
@@ -195,66 +276,13 @@ const ListAttribute: React.FC = () => {
 
                         {/* Table Layout */}
                         <div className="overflow-x-auto mt-6">
-                            <table className="table-auto w-full border-collapse border border-gray-300 rounded-lg shadow-lg">
-                                <thead className="bg-gray-200">
-                                    <tr>
-                                        <th className="border border-gray-300 px-4 py-2 text-left text-gray-800">
-                                            STT
-                                        </th>
-                                        <th className="border border-gray-300 px-4 py-2 text-left text-gray-800">
-                                            Giá Trị
-                                        </th>
-                                        <th className="border border-gray-300 px-4 py-2 text-center text-gray-800">
-                                            Action
-                                        </th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {selectedAttribute.values.map((value, index) => (
-                                        <tr
-                                            key={value.value_id}
-                                            className="hover:bg-gray-100 transition-colors"
-                                        >
-                                            <td className="border border-gray-300 px-4 py-2">
-                                                {index + 1}
-                                            </td>
-                                            <td className="border border-gray-300 px-4 py-2 text-gray-700">
-                                                {value.value}
-                                            </td>
-                                            <td className="border border-gray-300 px-4 py-2 flex justify-center gap-4">
-                                                <Button
-                                                    type="default"
-                                                    icon={<EditOutlined />}
-                                                    className="rounded-full"
-                                                    onClick={() =>
-                                                        navigate(
-                                                            `/admin/dashboard/attribute_value/update/${value.value_id}`
-                                                        )
-                                                    }
-                                                />
-                                                <Popconfirm
-                                                    title="Xóa giá trị"
-                                                    description="Bạn có chắc muốn xóa giá trị này không?"
-                                                    onConfirm={() =>
-                                                        deleteAttributeValueMutation.mutate(
-                                                            value.value_id
-                                                        )
-                                                    }
-                                                    okText="Yes"
-                                                    cancelText="No"
-                                                >
-                                                    <Button
-                                                        type="default"
-                                                        danger
-                                                        icon={<DeleteOutlined />}
-                                                        className="rounded-full"
-                                                    />
-                                                </Popconfirm>
-                                            </td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
+                            <Table
+                                dataSource={dataSource}
+                                columns={columns2}
+                                rowKey="key"
+                                bordered
+                                pagination={false} 
+                            />
                         </div>
                     </div>
                 )}
