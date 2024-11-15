@@ -104,7 +104,7 @@ class Bill extends Model
         $statuses = [
             self::STATUS_PENDING => 'Đang chờ xử lý',
             self::STATUS_PROCESSED => 'Đã xử lý',
-            self::STATUS_SHIPPED => 'Đang bàn giao cho vận chuyển',
+            self::STATUS_SHIPPED => 'Đã giao hàng',
             self::STATUS_DELIVERED => 'Đã giao hàng',
             self::STATUS_CANCELED => 'Đã hủy đơn hàng',
             self::STATUS_RETURNED => 'Hủy đơn và trả hàng',

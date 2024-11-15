@@ -26,7 +26,10 @@ class OrderConfirmationMail extends Mailable
                         'paymentType' => $this->orderData['paymentType'],
                         'shippingAddress' => $this->orderData['shippingAddress'],
                         'phoneNumber' => $this->orderData['phoneNumber'],
-                        'orderItems' => $this->orderData['orderItems'],  // Danh sách sản phẩm
+                        'orderItems' => $this->orderData['orderItems'],  
+                        'shipping_fee' => $this->orderData['shipping_fee'],  
+                        'discounted_amount' => $this->orderData['discounted_amount'],  
+                        'discounted_shipping_fee' => $this->orderData['discounted_shipping_fee'],  
                         'totalAmount' => $this->orderData['totalAmount'],
                     ])
                     ->subject('Xác Nhận Đơn Hàng');

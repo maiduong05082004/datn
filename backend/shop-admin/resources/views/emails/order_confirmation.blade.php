@@ -84,6 +84,10 @@
             font-weight: bold;
             margin-top: 10px;
         }
+        .strikethrough {
+            color: #777;
+            text-decoration: line-through;
+        }
         .footer {
             margin-top: 20px;
             text-align: center;
@@ -170,6 +174,9 @@
                     </tr>
                 @endforeach
             </table>
+            <p class="order-summary">Phí vận chuyển: {{ number_format($shipping_fee, 0, ',', '.') }} VNĐ</p>
+            <p class="order-summary">Phiếu Giảm giá phí vận chuyển của Beestyle: <span class="strikethrough">{{ number_format($discounted_amount, 0, ',', '.') }} VNĐ</span></p>
+            <p class="order-summary">Phiếu Giảm giá voucher của Beestyle: <span class="strikethrough">{{ number_format($discounted_shipping_fee, 0, ',', '.') }} VNĐ</span></p>
             <p class="order-summary">Tổng giá trị đơn hàng: {{ number_format($totalAmount, 0, ',', '.') }} VNĐ</p>
         </div>
         
