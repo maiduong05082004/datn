@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Table, Spin, message, Button, Popconfirm, Space, Image } from 'antd';
 import { DeleteOutlined, EditOutlined, PlusOutlined } from '@ant-design/icons';
+import { ColumnsType } from 'antd/es/table';
 
 type Category = {
   id: number;
@@ -70,27 +71,32 @@ const ListCategories: React.FC = () => {
       : `http://127.0.0.1:8000/storage/${image}`;
   };
 
-  const columns = [
+  const columns: ColumnsType<any> = [
     {
       title: 'Tên danh mục',
       dataIndex: 'name',
       key: 'name',
+      align: 'center',
     },
     {
       title: 'Danh mục cha',
       dataIndex: 'parent_id',
+      align: 'center',
       key: 'parent_id',
       render: (parent_id: number | null) => getCategoryNameById(parent_id),
     },
     {
       title: 'Trạng thái',
       dataIndex: 'status',
-      key: 'status',
+      align: 'center',
+      key: 'status',            
+      width: "150px",
       render: (status: boolean) => (status ? 'Hoạt động' : 'Không hoạt động'),
     },
     {
       title: 'Ảnh',
       dataIndex: 'image',
+      align: 'center',
       key: 'image',
       render: (image: string | null) =>
         image ? (
@@ -105,12 +111,14 @@ const ListCategories: React.FC = () => {
     },
     {
       title: 'Hành động',
+      align: 'center',
       key: 'action',
+      width: "50px",
+
       render: (_: any, category: Category) => (
         <Space size="middle">
           <Button
             type="default"
-            className='rounded-full'
             icon={<EditOutlined />}
             onClick={() => navigate(`/admin/dashboard/category/update/${category.id}`)}
           />
@@ -121,7 +129,7 @@ const ListCategories: React.FC = () => {
             okText="Có"
             cancelText="Không"
           >
-            <Button className='rounded-full' type="default" danger icon={<DeleteOutlined />} />
+            <Button  type="default" danger icon={<DeleteOutlined />} />
           </Popconfirm>
         </Space>
       ),

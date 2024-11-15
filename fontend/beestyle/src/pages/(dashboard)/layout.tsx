@@ -13,6 +13,7 @@ import {
   SettingOutlined,
   TagOutlined,
   DatabaseOutlined,
+  InfoCircleOutlined,
 } from '@ant-design/icons';
 import {
   Badge,
@@ -20,13 +21,13 @@ import {
   Layout,
   Switch,
   MenuProps,
+  Button,
 } from 'antd';
 import { Link, Outlet } from 'react-router-dom';
 import { NavLink } from 'react-router-dom'; // Import NavLink for navigation
 
 const { Header, Content, Sider } = Layout;
 
-// Sidebar items
 const items1: MenuProps['items'] = [
   {
     key: '1',
@@ -34,17 +35,19 @@ const items1: MenuProps['items'] = [
     label: "Tài Khoản",
     children: [
       { key: 'sub1-1', label: <NavLink to="/admin/dashboard/user/list">Danh sách tài Khoản</NavLink> },
-      { key: 'sub1-2', label: <NavLink to="/admin/dashboard/user/add">Thêm Tài Khoản</NavLink> },
+      // { key: 'sub1-2', label: <NavLink to="/admin/dashboard/user/add">Thêm Tài Khoản</NavLink> },
     ],
   },
   {
     key: '2',
-    icon: <UserOutlined />,
+    icon: <InfoCircleOutlined  />,
     label: "Banners",
     children: [
 
-      { key: 'sub2-1', label: <NavLink to="/admin/dashboard/banner/add">Danh sách Banners</NavLink> },
-      { key: 'sub2-2', label: <NavLink to="/admin/dashboard/banner/list">Thêm Banners</NavLink> },
+      { key: 'sub2-1', label: <NavLink to="/admin/dashboard/banner/list/custom">Banners Tự Do</NavLink> },
+      { key: 'sub2-2', label: <NavLink to="/admin/dashboard/banner/list/main">Banners Chính</NavLink> },
+      { key: 'sub2-4', label: <NavLink to="/admin/dashboard/banner/list/category">Banners Danh Mục</NavLink> },
+      { key: 'sub2-5', label: <NavLink to="/admin/dashboard/banner/add">Thêm Banners</NavLink> },
     ],
   },
   {
@@ -60,21 +63,21 @@ const items1: MenuProps['items'] = [
   {
     key: 'sub10',
     icon: React.createElement(SettingOutlined),
-    label: 'Attribute_Group',
+    label: 'Nhóm Thuộc Tính',
     children: [
-      { key: 'sub10-1', label: <NavLink to="/admin/dashboard/attribute_group/list">Danh sách Attribute_Group</NavLink> },
-      { key: 'sub10-2', label: <NavLink to="/admin/dashboard/attribute_group/add">Thêm Sản Attribute_Group</NavLink> },
+      { key: 'sub10-1', label: <NavLink to="/admin/dashboard/attribute_group/list">Danh sách Nhóm Thuộc Tính</NavLink> },
+      { key: 'sub10-2', label: <NavLink to="/admin/dashboard/attribute_group/add">Thêm Sản Nhóm Thuộc Tính</NavLink> },
 
     ],
   },
   {
     key: 'sub4',
     icon: React.createElement(TagOutlined),
-    label: 'Attributes',
+    label: 'Thuộc Tính',
     children: [
-      { key: 'sub4-1', label: <NavLink to="/admin/dashboard/attribute/list">Danh sách Attribute</NavLink> },
-      { key: 'sub4-4', label: <NavLink to="/admin/dashboard/attribute/add">Thêm Atrribute</NavLink> },
-      { key: 'sub4-2', label: <NavLink to="/admin/dashboard/attribute_value/add">Thêm Attribute_values</NavLink> },
+      { key: 'sub4-1', label: <NavLink to="/admin/dashboard/attribute/list">Danh sách Thuộc Tính</NavLink> },
+      { key: 'sub4-4', label: <NavLink to="/admin/dashboard/attribute/add">Thêm Thuộc Tính</NavLink> },
+      { key: 'sub4-2', label: <NavLink to="/admin/dashboard/attribute_value/add">Thêm Giá Trị Thuộc Tính</NavLink> },
 
     ],
   },
@@ -90,10 +93,10 @@ const items1: MenuProps['items'] = [
   {
     key: 'sub6',
     icon: React.createElement(ProductOutlined),
-    label: 'Bill',
+    label: 'Đơn Hàng',
     children: [
       // { key: 'sub6-1', label: <NavLink to="/admin/bill/list">Danh sách đơn hàng</NavLink> },
-      { key: 'sub6-1', label: <NavLink to="/admin/dashboard/bill/app">Danh sách đơn hàng</NavLink> },
+      { key: 'sub6-1', label: <NavLink to="/admin/dashboard/bill/list">Danh sách đơn hàng</NavLink> },
     ],
   },
   {
@@ -110,8 +113,7 @@ const items1: MenuProps['items'] = [
     icon: React.createElement(BarChartOutlined),
     label: 'Thống Kê',
     children: [
-      { key: 'sub9-1', label: 'Xem Thống Kê' },
-      { key: 'sub9-2', label: 'Tải Xuống Thống Kê' },
+      { key: 'sub9-1', label: <NavLink to="/admin/dashboard/statistic/list">Xem Thống Kê</NavLink> },
     ],
   },
   {
@@ -119,9 +121,20 @@ const items1: MenuProps['items'] = [
     icon: React.createElement(DatabaseOutlined),
     label: 'Quản lý tồn kho',
     children: [
-        { key: 'inventory-1', label: <NavLink to="/admin/dashboard/inventory/list">Danh sách tồn kho</NavLink> },
+      { key: 'inventory-1', label: <NavLink to="/admin/dashboard/inventory/list">Danh sách tồn kho</NavLink> },
     ],
-},
+  },
+
+  {
+    key: 'sub12',
+    icon: React.createElement(TagOutlined),
+    label: 'Chat',
+    children: [
+      { key: 'sub12-1', label: <NavLink to="/admin/dashboard/chat">ChatRealTime</NavLink> },
+
+    ],
+  },
+
 ];
 
 const DashboardPage: React.FC<{ isDarkMode: boolean }> = ({ isDarkMode }) => {
@@ -151,6 +164,7 @@ const App: React.FC = () => {
     setIsDarkMode((prevMode) => !prevMode);
   };
 
+
   return (
     <Layout style={{ minHeight: '100vh' }}>
       {/* Sidebar Navigation */}
@@ -170,14 +184,13 @@ const App: React.FC = () => {
           </div>
         </div>
 
-        {/* Sidebar Menu */}
-        <Menu theme="dark" mode="inline" defaultSelectedKeys={['dashboard']} items={items1} style={{ marginTop: '16px' }} />
+        <Menu theme="dark" mode="inline" defaultSelectedKeys={['dashboard']} className='font-bold text-[14px]' items={items1} style={{ marginTop: '16px' }} />
       </Sider>
 
       <Layout>
         {/* Top Header */}
         <Header
-          className='h-[80px]'
+          className='h-[50px]'
           style={{
             background: isDarkMode ? '#001529' : '#fff',
             padding: '0 16px',
@@ -192,13 +205,13 @@ const App: React.FC = () => {
             className={`w-[448px] h-[50px] border-none px-3 rounded-md flex items-center justify-center gap-2 ${isDarkMode ? 'bg-[#001529] text-white placeholder-white' : 'bg-white text-black placeholder-gray-400'
               }`}
           >
-            <SearchOutlined style={{ fontSize: '20px' }} />
+            {/* <SearchOutlined style={{ fontSize: '20px' }} />
             <input
               type="text"
               className={`w-full text-xl bg-transparent focus:outline-none placeholder-${isDarkMode ? 'white' : 'gray-400'
                 }`}
               placeholder="Type to search..."
-            />
+            /> */}
           </div>
 
           {/* Notifications, Messages, and Profile */}
@@ -240,10 +253,13 @@ const App: React.FC = () => {
                 fontSize: '12px',
               }}
             >
-              <button className={`bg-transparent bg-[#eef3fb] hover:bg-slate-500 p-2 rounded-full ${isDarkMode ? 'bg-[#313d4a]' : 'text-black'}`}>
+              <button
+                className={`flex items-center justify-center bg-transparent bg-[#eef3fb] hover:bg-slate-500 p-2 rounded-full ${isDarkMode ? "bg-[#313d4a]" : "text-black"
+                  }`}
+              >
                 <MessageOutlined
-                  className={`${isDarkMode ? 'text-white' : 'text-black'}`}
-                  style={{ fontSize: '24px' }} // Adjust the size to 34px
+                  className={`${isDarkMode ? "text-white" : "text-black"}`}
+                  style={{ fontSize: "24px" }} // Adjust the size as needed
                 />
               </button>
             </Badge>
@@ -302,7 +318,7 @@ const App: React.FC = () => {
                       My Profile
                     </Link>
 
-                    <a
+                    {/* <a
                       href="#contacts"
                       className="flex items-center px-4 py-2 text-sm text-white hover:bg-gray-700 hover:translate-x-1 transform transition-transform duration-300 ease-in-out"
                       role="menuitem"
@@ -322,9 +338,9 @@ const App: React.FC = () => {
                         />
                       </svg>
                       My Contacts
-                    </a>
+                    </a> */}
 
-                    <a
+                    {/* <a
                       href="#settings"
                       className="flex items-center px-4 py-2 text-sm text-white hover:bg-gray-700 hover:translate-x-1 transform transition-transform duration-300 ease-in-out"
                       role="menuitem"
@@ -344,7 +360,7 @@ const App: React.FC = () => {
                         />
                       </svg>
                       Account Settings
-                    </a>
+                    </a> */}
 
                     <div className="border-t border-gray-600 my-1"></div>
 

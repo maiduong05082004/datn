@@ -1,4 +1,4 @@
-import { Category, Product } from '@/common/types/promotion';
+// import { Category, Product } from '@/common/types/promotion';
 import { createPromotion, fetchCategories, fetchProductsByCategory } from '@/services/promotions';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { Button, DatePicker, Form, Input, InputNumber, Radio, Select, Switch, message } from 'antd';
@@ -10,46 +10,46 @@ const { Option } = Select;
 const AddPromotion: React.FC = () => {
     const navigate = useNavigate();
     const [form] = Form.useForm();
-    const [promotionScope, setPromotionScope] = useState<'category' | 'product' | 'none'>('category');
+    // const [promotionScope, setPromotionScope] = useState<'category' | 'product' | 'none'>('category');
     const [discountType, setDiscountType] = useState<'amount' | 'percent'>('percent');
-    const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
-    const [products, setProducts] = useState<Product[]>([]);
+    // const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
+    // const [products, setProducts] = useState<Product[]>([]);
 
-    const { data: categories = [], isLoading: isLoadingCategories } = useQuery<Category[]>({
-        queryKey: ['categories'],
-        queryFn: fetchCategories,
-    });
+    // const { data: categories = [], isLoading: isLoadingCategories } = useQuery<Category[]>({
+    //     queryKey: ['categories'],
+    //     queryFn: fetchCategories,
+    // });
 
     const { mutate: addPromotion, isPending } = useMutation({
         mutationFn: createPromotion,
         onSuccess: () => {
             message.success('Khuyến mãi đã được tạo thành công!');
             form.resetFields();
-            navigate('/admin/promotions/list');
+            navigate('/admin/dashboard/promotions/list');
         },
         onError: () => {
             message.error('Có lỗi xảy ra. Vui lòng thử lại!');
         },
     });
 
-    useEffect(() => {
-        const fetchProducts = async () => {
-            if (selectedCategory && promotionScope === 'product') {
-                try {
-                    const fetchedProducts = await fetchProductsByCategory(selectedCategory);
-                    setProducts(fetchedProducts || []);
-                } catch (error) {
-                    console.error('Lỗi khi tải sản phẩm:', error);
-                    message.error('Không thể tải sản phẩm. Vui lòng thử lại sau.');
-                    setProducts([]);
-                }
-            } else {
-                setProducts([]);
-            }
-        };
+    // useEffect(() => {
+    //     const fetchProducts = async () => {
+    //         if (selectedCategory && promotionScope === 'product') {
+    //             try {
+    //                 const fetchedProducts = await fetchProductsByCategory(selectedCategory);
+    //                 setProducts(fetchedProducts || []);
+    //             } catch (error) {
+    //                 console.error('Lỗi khi tải sản phẩm:', error);
+    //                 message.error('Không thể tải sản phẩm. Vui lòng thử lại sau.');
+    //                 setProducts([]);
+    //             }
+    //         } else {
+    //             setProducts([]);
+    //         }
+    //     };
 
-        fetchProducts();
-    }, [selectedCategory, promotionScope]);
+    //     fetchProducts();
+    // }, [selectedCategory, promotionScope]);
 
     const onFinish = (values: any) => {
         let promotionType = '';
@@ -75,32 +75,36 @@ const AddPromotion: React.FC = () => {
                     label="Mã Khuyến Mãi"
                     name="code"
                     rules={[{ required: true, message: 'Vui lòng nhập mã khuyến mãi!' }]}
+                    className='mb-[10px]'
                 >
-                    <Input />
+                    <Input className='h-10' />
                 </Form.Item>
 
                 <Form.Item
                     label="Mô tả"
                     name="description"
                     rules={[{ required: true, message: 'Vui lòng nhập mô tả!' }]}
+                    className='mb-[10px]'
                 >
-                    <Input.TextArea rows={4} />
+                    <Input.TextArea rows={5} />
                 </Form.Item>
 
                 <Form.Item
                     label="Ngày Bắt Đầu"
                     name="start_date"
+                    className='mb-[10px]'
                     rules={[{ required: true, message: 'Vui lòng chọn ngày bắt đầu!' }]}
                 >
-                    <DatePicker format="YYYY-MM-DD" style={{ width: '100%' }} />
+                    <DatePicker format="YYYY-MM-DD" style={{ width: '100%' }} className='h-10' />
                 </Form.Item>
 
                 <Form.Item
                     label="Ngày Kết Thúc"
                     name="end_date"
+                    className='mb-[10px]'
                     rules={[{ required: true, message: 'Vui lòng chọn ngày kết thúc!' }]}
                 >
-                    <DatePicker format="YYYY-MM-DD" style={{ width: '100%' }} />
+                    <DatePicker format="YYYY-MM-DD" style={{ width: '100%' }} className='h-10' />
                 </Form.Item>
 
                 <Form.Item
@@ -116,22 +120,24 @@ const AddPromotion: React.FC = () => {
                         <Radio value="amount">Giảm theo số tiền</Radio>
                     </Radio.Group>
                 </Form.Item>
-                
+
                 {discountType === 'percent' && (
                     <>
                         <Form.Item
                             label="Số Phần Trăm Giảm"
                             name="discount_amount"
+                            className='mb-[10px]'
                             rules={[{ required: true, message: 'Vui lòng nhập số tiền giảm!' }]}
                         >
-                            <InputNumber min={0} max={100} style={{ width: '100%' }} />
+                            <InputNumber min={0} max={100} style={{ width: '100%' }} className='h-10' />
                         </Form.Item>
                         <Form.Item
-                            label="Giảm Tối Đa"
+                            label="Triết Khấu Tối Đa"
                             name="max_discount_amount"
-                            rules={[{ required: true, message: 'Vui lòng nhập giá trị giảm tối đa!' }]}
+                            className='mb-[10px]'
+                            rules={[{ required: true, message: 'Trường số tiền chiết khấu tối đa là bắt buộc khi loại giảm giá là phần trăm!' }]}
                         >
-                            <InputNumber min={0} style={{ width: '100%' }} />
+                            <InputNumber min={0} style={{ width: '100%' }} className='h-10' />
                         </Form.Item>
                     </>
                 )}
@@ -140,26 +146,29 @@ const AddPromotion: React.FC = () => {
                         <Form.Item
                             label="Số Tiền Giảm"
                             name="discount_amount"
+                            className='mb-[10px]'
                             rules={[{ required: true, message: 'Vui lòng nhập số tiền giảm!' }]}
                         >
-                            <InputNumber min={0} style={{ width: '100%' }} />
+                            <InputNumber min={0} style={{ width: '100%' }} className='p-1' />
                         </Form.Item>
                     </>
                 )}
-                <Form.Item label="Tổng Số Lượng Voucher" name="usage_limit">
-                    <InputNumber min={1} style={{ width: '100%' }} />
+                <Form.Item label="Tổng Số Lượng Voucher" name="usage_limit" className='mb-[10px]'>
+                    <InputNumber min={1} style={{ width: '100%' }} className='p-1' />
                 </Form.Item>
 
-                <Form.Item label="Giá Trị Đơn Hàng Tối Thiểu" name="min_order_value">
-                    <InputNumber min={0} style={{ width: '100%' }} />
+                <Form.Item label="Giá Trị Đơn Hàng Tối Thiểu" name="min_order_value" className='mb-[10px]'
+                >
+                    <InputNumber min={0} style={{ width: '100%' }} className='p-1'/>
                 </Form.Item>
 
                 <Form.Item
                     label="Loại Khuyến Mãi"
                     name="promotion_subtype"
+                    className='mb-[10px]'
                     rules={[{ required: true, message: 'Vui lòng chọn loại khuyến mãi!' }]}
                 >
-                    <Select placeholder="Chọn loại khuyến mãi">
+                    <Select placeholder="Chọn loại khuyến mãi" className='h-10'>
                         <Option value="shipping">Miễn phí vận chuyển</Option>
                         <Option value="product_discount">Giảm giá sản phẩm</Option>
                         <Option value="voucher_discount">Giảm giá bằng voucher</Option>
@@ -167,7 +176,7 @@ const AddPromotion: React.FC = () => {
                     </Select>
                 </Form.Item>
 
-                <Form.Item label="Phạm Vi Khuyến Mãi" name="promotion_scope">
+                {/* <Form.Item label="Phạm Vi Khuyến Mãi" name="promotion_scope">
                     <Radio.Group
                         onChange={(e) => {
                             setPromotionScope(e.target.value);
@@ -183,8 +192,8 @@ const AddPromotion: React.FC = () => {
                 </Form.Item>
 
                 {promotionScope === 'category' && (
-                    <Form.Item label="Danh Mục" name="category_ids" rules={[{ required: true, message: 'Vui lòng chọn danh mục!' }]}>
-                        <Select mode="multiple" placeholder="Chọn danh mục" loading={isLoadingCategories} allowClear>
+                    <Form.Item label="Danh Mục" className='mb-[10px]' name="category_ids" rules={[{ required: true, message: 'Vui lòng chọn danh mục!' }]}>
+                        <Select mode="multiple" placeholder="Chọn danh mục" loading={isLoadingCategories} className='h-10' allowClear>
                             {categories.map((category) => (
                                 <Option key={category.id} value={category.id}>
                                     {category.name}
@@ -196,9 +205,10 @@ const AddPromotion: React.FC = () => {
 
                 {promotionScope === 'product' && (
                     <>
-                        <Form.Item label="Chọn Danh Mục" name="filter_category">
+                        <Form.Item label="Chọn Danh Mục" name="filter_category" className='mb-[10px]'>
                             <Select
                                 placeholder="Chọn danh mục để lọc sản phẩm"
+                                className='h-10'
                                 onChange={(value) => {
                                     setSelectedCategory(value);
                                     form.setFieldsValue({ product_ids: [] });
@@ -217,9 +227,11 @@ const AddPromotion: React.FC = () => {
                         <Form.Item
                             label="Chọn Sản Phẩm"
                             name="product_ids"
+                            className='mb-[10px]'
                             rules={[{ required: true, message: 'Vui lòng chọn sản phẩm!' }]}
                         >
                             <Select
+                            className='h-10'
                                 mode="multiple"
                                 placeholder={products.length > 0 ? "Chọn sản phẩm" : "Không có sản phẩm"}
                                 allowClear
@@ -237,9 +249,9 @@ const AddPromotion: React.FC = () => {
                             </Select>
                         </Form.Item>
                     </>
-                )}
+                )} */}
 
-                <Form.Item label="Kích Hoạt" name="is_active" valuePropName="checked">
+                <Form.Item label="Kích Hoạt" name="is_active" valuePropName="checked" className='mb-[10px]'>
                     <Switch />
                 </Form.Item>
 
@@ -248,7 +260,7 @@ const AddPromotion: React.FC = () => {
                     name="status"
                     rules={[{ required: true, message: 'Vui lòng chọn trạng thái!' }]}
                 >
-                    <Select placeholder="Chọn trạng thái">
+                    <Select placeholder="Chọn trạng thái" className='h-10'>
                         <Option value="active">Đang diễn ra</Option>
                         <Option value="expired">Đã hết hạn</Option>
                         <Option value="upcoming">Sắp diễn ra</Option>
@@ -257,17 +269,17 @@ const AddPromotion: React.FC = () => {
                 </Form.Item>
 
                 <Form.Item>
-              <div className='flex justify-end space-x-4'>
-                <Button type="primary" htmlType="submit">
-                  Submit
-                </Button>
-                <Button
-                  onClick={() => navigate('/admin/dashboard/promotions/list')}
-                >
-                  Back
-                </Button>
-              </div>
-            </Form.Item>
+                    <div className='flex justify-end space-x-4'>
+                        <Button type="primary" htmlType="submit">
+                            Submit
+                        </Button>
+                        <Button
+                            onClick={() => navigate('/admin/dashboard/promotions/list')}
+                        >
+                            Back
+                        </Button>
+                    </div>
+                </Form.Item>
             </Form>
         </div>
     );
