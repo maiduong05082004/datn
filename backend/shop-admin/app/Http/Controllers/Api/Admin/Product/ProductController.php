@@ -86,7 +86,6 @@ class ProductController extends Controller
                         throw new \Exception("Thuộc tính không hợp lệ cho nhóm đã chọn.");
                     }
 
-                    // Lưu biến thể sản phẩm
                     $productVariation = ProductVariation::create([
                         'product_id' => $product->id,
                         'group_id' => $request->group_id,
@@ -121,7 +120,6 @@ class ProductController extends Controller
                     $totalProductStock += $totalVariationStock;
                 }
 
-                // Cập nhật tổng tồn kho của sản phẩm
                 $product->update(['stock' => $totalProductStock]);
             }
 

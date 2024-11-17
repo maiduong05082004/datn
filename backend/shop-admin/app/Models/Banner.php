@@ -12,14 +12,42 @@ class Banner extends Model
     // Tên bảng
     protected $table = 'banners';
 
-    // Các trường có thể điền
     protected $fillable = [
         'category_id',
         'title',
         'image_path',
         'link',
+        'type', 
     ];
 
+    // Định nghĩa các hằng số cho loại banner
+    const TYPE_MAIN = 'main'; // banner chính nhé 
+    const TYPE_CATEGORY = 'category'; // banner danh mục
+    const TYPE_COLLECTION = 'collection'; // banner bộ siêu tập
+    const TYPE_CUSTOM = 'custom'; // banner tự do
+
+    // Hàm kiểm tra loại banner
+    public function isMain()
+    {
+        return $this->type === self::TYPE_MAIN;
+    }
+
+    public function isCategory()
+    {
+        return $this->type === self::TYPE_CATEGORY;
+    }
+
+    public function isCollection()
+    {
+        return $this->type === self::TYPE_COLLECTION;
+    }
+
+    public function isCustom()
+    {
+        return $this->type === self::TYPE_CUSTOM;
+    }
+
+    // Quan hệ với bảng Category
     public function category()
     {
         return $this->belongsTo(Category::class);
