@@ -22,22 +22,22 @@ class OrderController extends Controller
         $phone = $request->input('phone');
         $paymentType = $request->input('payment_type');
         $promotionCode = $request->input('promotion_code');
-    
+
         if ($startDate && $startTime) {
             $startDateTime = Carbon::parse("$startDate $startTime", 'Asia/Ho_Chi_Minh')->setTimezone('UTC');
         } else {
             $startDateTime = $startDate ? Carbon::parse($startDate)->startOfDay()->setTimezone('UTC') : null;
         }
-    
+
         if ($endDate && $endTime) {
             $endDateTime = Carbon::parse("$endDate $endTime", 'Asia/Ho_Chi_Minh')->setTimezone('UTC');
         } else {
             $endDateTime = $endDate ? Carbon::parse($endDate)->endOfDay()->setTimezone('UTC') : null;
         }
-    
+
         return $this->getOrdersByStatus(null, $perPage, $startDateTime, $endDateTime, $phone, $paymentType, $promotionCode);
     }
-    
+
 
     public function pendingOrders(Request $request)
     {
@@ -182,25 +182,25 @@ class OrderController extends Controller
             'shippingAddress:id,address_line,city,district,ward,phone_number',
             'BillDetail'
         ])->orderBy('created_at', 'desc');
-    
+
         if ($status) {
             $query->where('status_bill', $status);
         }
-    
+
         if ($startDateTime && $endDateTime) {
             $query->whereBetween('created_at', [$startDateTime, $endDateTime]);
         }
-    
+
         if ($phone) {
             $query->whereHas('shippingAddress', function ($q) use ($phone) {
                 $q->where('phone_number', 'LIKE', "%$phone%");
             });
         }
-    
+
         if ($paymentType) {
             $query->where('payment_type', $paymentType);
         }
-    
+
         if ($promotionCode) {
             $promotion = Promotion::where('code', $promotionCode)->first();
             if ($promotion) {
@@ -211,19 +211,19 @@ class OrderController extends Controller
                 return response()->json(['bills' => [], 'pagination' => []], 200);
             }
         }
-    
+
         $bills = $query->paginate($perPage);
-    
+
         $bills->getCollection()->transform(function ($bill) {
             $bill->status_description = $bill->getTrangThaiDonHang();
             $bill->payment_type_description = $bill->getLoaiThanhToan();
-    
+
             $dateTime = Carbon::parse($bill->created_at)->timezone('Asia/Ho_Chi_Minh');
             $bill->order_date = $dateTime->format('d/m/Y');
             $bill->order_time = $dateTime->format('H:i:s');
-    
+
             $quantity = $bill->BillDetail->sum('quantity');
-    
+
             return [
                 'id' => $bill->id,
                 'code_orders' => $bill->code_orders,
@@ -239,7 +239,7 @@ class OrderController extends Controller
                 'canceled_reason' => $bill->canceled_reason,
             ];
         });
-    
+
         return response()->json([
             'bills' => $bills->items(),
             'pagination' => [
@@ -250,8 +250,6 @@ class OrderController extends Controller
             ]
         ], 200);
     }
-    
-    
 
 
 
@@ -261,7 +259,9 @@ class OrderController extends Controller
 
 
 
-    
+
+
+
     public function searchOrder(Request $request)
     {
         $orderCode = $request->input('order_code');
@@ -396,7 +396,9 @@ class OrderController extends Controller
                 'BillDetail.productVariationValue.attributeValue:id,value',
                 'BillDetail.productVariationValue.productVariation.variationImages' => function ($query) {
                     $query->select('product_variation_id', 'image_path'); // Lấy ảnh của biến thể
-                }
+                },
+                'payments'
+
             ])->findOrFail($orderId);
 
             // Xử lý dữ liệu đơn hàng để hiển thị chi tiết hơn
@@ -464,6 +466,29 @@ class OrderController extends Controller
                 ];
             });
 
+
+            // Lấy thông tin payment nếu có
+            $paymentInfo = $bill->payments->map(function ($payment) {
+                $payDateTime = Carbon::parse($payment->pay_date)->timezone('Asia/Ho_Chi_Minh');
+
+                return [
+                    'id' => $payment->id,
+                    'method' => $payment->payment_method,
+                    'status' => $payment->getPaymentStatus(),
+                    'amount' => $payment->amount,
+                    'transaction_id' => $payment->transaction_id,
+                    'bank_code' => $payment->bank_code,
+                    'pay_date' => $payDateTime->format('d/m/Y'), // Ngày theo định dạng Việt Nam
+                    'pay_time' => $payDateTime->format('H:i:s'), // Giờ theo định dạng Việt Nam
+                    'currency_code' => $payment->currency_code,
+                    'payer_email' => $payment->payer_email,
+                    'transaction_fee' => $payment->transaction_fee,
+                    'receipt_code' => $payment->receipt_code,
+                ];
+            })->toArray();
+
+            $canceledReasonTime = $bill->canceled_at ? Carbon::parse($bill->canceled_at)->timezone('Asia/Ho_Chi_Minh') : null;
+
             // Re-order the fields for bill
             return response()->json([
                 'id' => $bill->id,
@@ -471,10 +496,14 @@ class OrderController extends Controller
                 'user_id' => $bill->user_id,
                 'name' => $bill->user->name,
                 'note' => $bill->note,
+                'canceled_reason' => $bill->canceled_reason??null,
+                'canceled_date' => $canceledReasonTime ? $canceledReasonTime->format('d/m/Y') : null,
+                'canceled_time' => $canceledReasonTime ? $canceledReasonTime->format('H:i:s') : null,
                 'payment_type' => $bill->payment_type,
                 'payment_type_description' => $bill->payment_type_description,
                 'status_bill' => $bill->status_bill,
                 'status_description' => $bill->status_description,
+                'payment_info' => $paymentInfo,
                 'order_date' => $bill->order_date,
                 'order_time' => $bill->order_time,
                 'canceled_at' => $bill->canceled_at,
@@ -512,42 +541,42 @@ class OrderController extends Controller
         $validatedData = $request->validate([
             'status' => 'required|string|in:pending,processed,shipped,delivered,canceled,returned',
         ]);
-    
+
         $newStatus = $validatedData['status'];
-    
+
         try {
             $bill = Bill::findOrFail($orderId);
             $currentStatus = $bill->status_bill;
-    
+
             if ($currentStatus === $newStatus) {
                 $currentStatusDescription = $this->getStatusMessage($currentStatus);
                 return response()->json([
                     'message' => "Đơn hàng đã ở trạng thái '{$currentStatusDescription}', không thể cập nhật lại cùng trạng thái."
                 ], 400);
             }
-    
+
             if ($this->canUpdateStatus($currentStatus, $newStatus)) {
                 if ($newStatus === Bill::STATUS_CANCELED) {
                     foreach ($bill->BillDetail as $detail) {
                         $variationValue = $detail->productVariationValue;
-                        
+
                         $variationValue->increment('stock', $detail->quantity);
-                        
+
                         $variationValue->productVariation->increment('stock', $detail->quantity);
                         $detail->product->increment('stock', $detail->quantity);
                     }
                 }
-    
+
                 $bill->update(['status_bill' => $newStatus]);
-    
+
                 $message = $this->getStatusMessage($newStatus);
-    
+
                 return response()->json(['message' => $message, 'status' => $newStatus], 200);
             } else {
                 // Thêm thông báo chi tiết về trạng thái hiện tại và trạng thái muốn chuyển sang
                 $currentStatusDescription = $this->getStatusMessage($currentStatus);
                 $newStatusDescription = $this->getStatusMessage($newStatus);
-    
+
                 return response()->json([
                     'message' => "Không thể chuyển đổi từ trạng thái '{$currentStatusDescription}' sang trạng thái '{$newStatusDescription}'."
                 ], 400);
@@ -558,7 +587,7 @@ class OrderController extends Controller
             return response()->json(['message' => 'Đã xảy ra lỗi khi cập nhật trạng thái đơn hàng.', 'error' => $e->getMessage()], 500);
         }
     }
-    
+
 
 
     private function canUpdateStatus($currentStatus, $newStatus)

@@ -57,7 +57,11 @@ Route::prefix('client')->as('client.')->group(function () {
         Route::get('/product/{productId}', [PromotionController::class, 'getProductPromotions']);
     });
     Route::prefix('home')->as('home.')->group(function () {
-        Route::get('/', [HomeController::class, 'index'])->name('index');
+        // Route::get('/', [HomeController::class, 'index'])->name('index');
+        Route::get('/bannermain', [HomeController::class, 'bannerMain'])->name('bannerMain');
+        Route::get('/productnew', [HomeController::class, 'productNew'])->name('productNew');
+        Route::get('/productnewhot', [HomeController::class, 'productNewHot'])->name('productNewHot');
+        Route::get('/bannercustom', [HomeController::class, 'bannerCustom'])->name('bannerCustom');
         Route::get('search', [HomeController::class, 'search'])->name('search');
     });
     Route::apiResource('shippingaddress', ShippingController::class)
@@ -66,7 +70,7 @@ Route::prefix('client')->as('client.')->group(function () {
         Route::get('/showDetail/{id}', [ProductProductController::class, 'showDetail'])->name('showDetail');
         Route::post('/purchase', [ProductProductController::class, 'purchase'])->name('purchase')->middleware('auth:sanctum');
         Route::get('/', [ProductProductController::class, 'index'])->name('index');
-        Route::get('/showDetailOrder/{oderId}', [ProductProductController::class, 'showDetailOrder'])->name('showDetailOrder');
+        Route::get('/showDetailOrder/{oderId}', [ProductProductController::class, 'showDetailOrder'])->name('showDetailOrder')->middleware('auth:sanctum');
         Route::post('orders/cancel/{orderId}', [ProductProductController::class, 'cancelOrder']);
         Route::post('orders/confirm/{orderId}', [ProductProductController::class, 'confirmOrder']);
     });
