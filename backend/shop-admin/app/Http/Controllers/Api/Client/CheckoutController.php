@@ -190,7 +190,7 @@ class CheckoutController extends Controller
                     'code_orders' => $codeOrders,
                     'email_receiver' => auth()->user()->email,
                     'note' => $request->input('note'),
-                    'status_bill' => 'pending',
+                    'status_bill' => Bill::STATUS_PENDING,
                     'payment_type' => $request->input('payment_type'),
                     'subtotal' => $request->input('total'),
                     'total' => $request->input('total'),
@@ -361,7 +361,7 @@ class CheckoutController extends Controller
             ]);
 
             // Cập nhật trạng thái hóa đơn
-            $bill->status_bill = 'completed';
+            $bill->status_bill =Bill::STATUS_PENDING;
             $bill->save();
 
             // Lấy danh sách sản phẩm từ billDetails
@@ -515,17 +515,17 @@ class CheckoutController extends Controller
 
         // Cập nhật trạng thái hóa đơn thành "canceled"
         $bill->update([
-            'status_bill' => 'canceled',
+            'status_bill' => Bill::STATUS_CANCELED,
         ]);
 
         // Lấy hoặc tạo bản ghi Payment tương ứng
         $payment = Payment::firstOrCreate(
-            ['bill_id' => $billId], // Điều kiện để tìm bản ghi
+            ['bill_id' => $billId],
             [
                 'user_id' => $bill->user_id,
                 'payment_method' => Payment::METHOD_PAYPAL,
                 'amount' => $bill->total,
-                'status' => Payment::STATUS_PENDING, // Trạng thái mặc định nếu mới tạo
+                'status' => Bill::STATUS_CANCELED,
                 'transaction_id' => null,
                 'bank_code' => null,
                 'order_info' => "Thanh toán hóa đơn #{$billId}",
