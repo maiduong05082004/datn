@@ -4,6 +4,7 @@ use App\Http\Controllers\Api\Admin\Product\ProductController;
 use App\Http\Controllers\Api\Admin\UserController;
 use App\Http\Controllers\Api\Client\AuthController;
 use App\Http\Controllers\Api\Admin\AuthController as AdminAuthController;
+use App\Http\Controllers\Api\Admin\BannerController;
 use App\Http\Controllers\Api\Client\CategoryController;
 use App\Http\Controllers\Api\Client\Product\ProductController as ClientProductController;
 use Illuminate\Support\Facades\Route;
@@ -181,6 +182,17 @@ Route::prefix('admins')
 
             Route::prefix('inventory')->as('inventory.')->group(function () {
                 Route::post('/', [InventoryController::class, 'getObsoleteProducts'])->name('obsolete');
+            });
+
+
+            Route::prefix('banners')->as('banner')->group(function () {
+                Route::get('/', [BannerController::class, 'index'])->name('index');
+                Route::get('/{id}', [BannerController::class, 'show'])->name('show'); 
+                Route::post('/', [BannerController::class, 'store'])->name('store'); 
+                Route::put('/{id}', [BannerController::class, 'update'])->name('update'); 
+                Route::delete('/{id}', [BannerController::class, 'destroy'])->name('destroy'); 
+                Route::delete('/{id}/image', [BannerController::class, 'deleteImage'])->name('banners.deleteImage');
+
             });
         });
     });
