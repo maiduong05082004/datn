@@ -23,7 +23,6 @@ class Banner extends Model
     // Định nghĩa các hằng số cho loại banner
     const TYPE_MAIN = 'main'; // banner chính nhé 
     const TYPE_CATEGORY = 'category'; // banner danh mục
-    const TYPE_COLLECTION = 'collection'; // banner bộ siêu tập
     const TYPE_CUSTOM = 'custom'; // banner tự do
 
     // Hàm kiểm tra loại banner
@@ -37,10 +36,6 @@ class Banner extends Model
         return $this->type === self::TYPE_CATEGORY;
     }
 
-    public function isCollection()
-    {
-        return $this->type === self::TYPE_COLLECTION;
-    }
 
     public function isCustom()
     {
