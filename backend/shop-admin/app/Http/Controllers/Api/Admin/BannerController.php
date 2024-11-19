@@ -38,7 +38,8 @@ class BannerController extends Controller
                 'title' => $banner->title,
                 'image_path' => $banner->image_path,
                 'link' => $banner->link,
-                'type' => $banner->type
+                'type' => $banner->type,
+                'status' => $banner->status,
             ];
         }));
     }
@@ -53,7 +54,9 @@ class BannerController extends Controller
                 'title' => $banner->title,
                 'image_path' => $banner->image_path,
                 'link' => $banner->link,
-                'type' => $banner->type
+                'type' => $banner->type,
+                'status' => $banner->status,
+
             ]
         );
     }
@@ -67,7 +70,8 @@ class BannerController extends Controller
             'title' => 'string|max:255',
             'image_path' => 'file|mimes:jpeg,png,jpg,gif,jfif|max:5120',
             'link' => 'string|max:255',
-            'type' => 'in:' . implode(',', [Banner::TYPE_MAIN, Banner::TYPE_CATEGORY, Banner::TYPE_CUSTOM]),
+            'type' => 'required|in:' . implode(',', [Banner::TYPE_MAIN, Banner::TYPE_CATEGORY, Banner::TYPE_CUSTOM]),
+            'status' => 'integer|in:0,1',
         ]);
 
 
@@ -111,7 +115,8 @@ class BannerController extends Controller
             'title' => 'string|max:255',
             'image_path' => 'file|mimes:jpeg,png,jpg,gif,jfif|max:5120', // Để `nullable` cho ảnh
             'link' => 'string|max:255',
-            'type' => 'in:' . implode(',', [Banner::TYPE_MAIN, Banner::TYPE_CATEGORY, Banner::TYPE_CUSTOM]),
+            'type' => 'required|in:' . implode(',', [Banner::TYPE_MAIN, Banner::TYPE_CATEGORY, Banner::TYPE_CUSTOM]),
+            'status' => 'required|integer|in:0,1', // Chỉ cho phép giá trị là số 0 hoặc 1
         ]);
 
         try {
@@ -175,20 +180,16 @@ class BannerController extends Controller
         if ($banner->image_path) {
             try {
                 $publicId = basename($banner->image_path, '.' . pathinfo($banner->image_path, PATHINFO_EXTENSION));
-                    Cloudinary::destroy("banners/$publicId");
-                    $banner->image_path = null;
+                Cloudinary::destroy("banners/$publicId");
+                $banner->image_path = null;
                 $banner->save();
-    
+
                 return response()->json(['message' => 'Image deleted successfully']);
             } catch (\Exception $e) {
                 return response()->json(['error' => 'Failed to delete image from Cloudinary', 'details' => $e->getMessage()], 500);
             }
         }
-    
+
         return response()->json(['message' => 'No image to delete'], 200);
     }
-    
-
-
-
 }
