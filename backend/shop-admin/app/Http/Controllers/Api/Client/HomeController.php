@@ -17,6 +17,7 @@ class HomeController extends Controller
     public function bannerMain()
     {
         $bannerMain = Banner::where('type', Banner::TYPE_MAIN)
+            ->where('status', 1)
             ->orderBy('id', 'desc')
             ->take(3)
             ->pluck('image_path');
@@ -43,6 +44,7 @@ class HomeController extends Controller
 
             $banner = Banner::where('type', Banner::TYPE_CATEGORY)
                 ->where('category_id', $parentCategory->id)
+                ->where('status', 1)
                 ->orderBy('id', 'desc')
                 ->first();
 
@@ -101,6 +103,7 @@ class HomeController extends Controller
     {
         $banners = Banner::where('type', Banner::TYPE_CUSTOM)
             ->orderBy('id', 'desc')
+            ->where('status', 1)
             ->take(8)
             ->pluck('image_path');
 

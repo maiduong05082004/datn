@@ -18,6 +18,7 @@ class Banner extends Model
         'image_path',
         'link',
         'type', 
+        'status'
     ];
 
     // Định nghĩa các hằng số cho loại banner
