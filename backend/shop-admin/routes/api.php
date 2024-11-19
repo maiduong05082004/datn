@@ -97,8 +97,9 @@ Route::prefix('client')->as('client.')->group(function () {
     });
     Route::prefix('payment')->as('payment.')->group(function () {
         Route::post('/', [PaymentController::class, 'vnpayPayment'])->name('vn-pay');
-        Route::get('/callback', [PaymentController::class, 'vnpayCallback'])->name('payment.callback');
+        Route::get('/callback', [PaymentController::class, 'vnpayCallback'])->name('callback');
     });
+    
     Route::prefix('comment')->as('comment.')->group(function () {
         Route::post('/list', [CommentController::class, 'index'])->name('comment.list'); // Lấy list bình luận đã duyệt theo user_id & product_id
         Route::post('/store', [CommentController::class, 'store'])->name('comment.store')->middleware('auth:sanctum'); // Tạo 1 bình luận
