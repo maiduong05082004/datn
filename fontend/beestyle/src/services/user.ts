@@ -1,5 +1,6 @@
 import baseAPI from '@/configs/axios';
-
+import axios from 'axios';
+const BASE_URL = 'http://localhost:8000/api/client/auth';
 export const registerUser = async (userData: { name: string; email: string; password: string; password_confirmation: string; date_of_birth: string; sex: string; }) => {
     try {
         const response = await baseAPI.post('api/signup', userData);
@@ -51,3 +52,12 @@ export const deleteUser = async (userId: string) => {
         throw error;
     }
 };
+
+export const sendForgotPasswordEmail = async (email: string) => {
+    return axios.post(`${BASE_URL}/forgot-password`, { email });
+};
+
+export const resetPassword = async (data: { token: string; password: string; password_confirmation: string}) => {
+    return axios.post(`${BASE_URL}/reset-password`, data);
+};
+
