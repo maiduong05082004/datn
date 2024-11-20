@@ -1,34 +1,24 @@
 import { useMutation } from '@tanstack/react-query';
-import { Form, Input, Button, Select, message, DatePicker } from 'antd';
+import { Form, Input, Button, message, FormProps } from 'antd';
 import axiosInstance from '@/configs/axios';
 
-import React, { useState } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
 
 interface Users {
-  id?: number;
   name: string;
   email: string;
-  role: 'admin' | 'user' | 'moderator';
-  is_active: boolean;
-  date_of_birth: string;
-  sex: 'male' | 'female';
   phone: string;
-  password: string;
   address: string;
-  provider_name?: string | null;
-  provider_id?: string | null;
-  email_verified_at?: string | null;
-  last_login_at?: string | null;
+  password: string;
 }
 
 const AddUser: React.FC = () => {
   const [form] = Form.useForm();
   const [messageApi, contextHolder] = message.useMessage();
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(false);
 
-  const mutation = useMutation({
+  const { mutate } = useMutation({
     mutationFn: async (user: Users) => {
       try {
         const response = await axiosInstance.post(
@@ -57,30 +47,8 @@ const AddUser: React.FC = () => {
     },
   });
 
-  const onFinish = (values: any) => {
-    setLoading(true);
-    const payload: Users = {
-      name: values.name.trim(),
-      email: values.email.trim(),
-      role: values.role,
-      is_active: true,
-      date_of_birth: values.date_of_birth
-        ? values.date_of_birth.format('YYYY-MM-DD')
-        : null,
-      sex: values.sex || null,
-      phone: values.phone.trim(),
-      password: values.password,
-      address: values.address.trim(),
-      provider_name: null,
-      provider_id: null,
-      email_verified_at: null,
-      last_login_at: null,
-    };
-    mutation.mutate(payload, {
-      onSettled: () => {
-        setLoading(false);
-      },
-    });
+  const onFinish: FormProps<Users>["onFinish"] = (values) => {
+    mutate(values);
   };
 
   return (
@@ -149,57 +117,13 @@ const AddUser: React.FC = () => {
               <Input placeholder="Nhập địa chỉ" size="large" />
             </Form.Item>
 
-            <Form.Item
-              label="Ngày sinh"
-              name="date_of_birth"
-              rules={[{ required: true, message: 'Ngày sinh là bắt buộc' }]}
-            >
-              <DatePicker
-                format="YYYY-MM-DD"
-                size="large"
-                className="w-full"
-                placeholder="Chọn ngày sinh"
-              />
-            </Form.Item>
-
-            <Form.Item
-              label="Giới tính"
-              name="sex"
-              rules={[{ required: true, message: 'Giới tính là bắt buộc' }]}
-            >
-              <Select
-                placeholder="Chọn giới tính"
-                size="large"
-                options={[
-                  { value: 'male', label: 'Nam' },
-                  { value: 'female', label: 'Nữ' },
-                ]}
-              />
-            </Form.Item>
-
-            <Form.Item
-              label="Vai trò"
-              name="role"
-              rules={[{ required: true, message: 'Vai trò là bắt buộc' }]}
-            >
-              <Select
-                placeholder="Chọn vai trò"
-                size="large"
-                options={[
-                  { value: 'admin', label: 'Admin' },
-                  { value: 'user', label: 'User' },
-                  { value: 'moderator', label: 'Moderator' },
-                ]}
-              />
-            </Form.Item>
-
             <Form.Item>
               <div className='flex justify-end space-x-4'>
                 <Button type="primary" htmlType="submit">
                   Submit
                 </Button>
                 <Button
-                  onClick={() => navigate('/admin/promotions/list')}
+                  onClick={() => navigate('/admin/dashboard/promotions/list')}
                 >
                   Back
                 </Button>

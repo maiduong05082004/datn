@@ -46,7 +46,7 @@ const DetailBill: React.FC = () => {
     },
   });
 
-  const { data: provinces  } = useQuery({
+  const { data: provinces } = useQuery({
     queryKey: ['provinces '],
     queryFn: async () => {
       const response = await axios.get(`https://dev-online-gateway.ghn.vn/shiip/public-api/master-data/province`, {
@@ -153,43 +153,84 @@ const DetailBill: React.FC = () => {
   ];
 
   return (
-    <div className="px-6 py-8">
-      <h2 className="text-3xl font-bold text-black mb-6">
-        Đơn Hàng: <span className="text-black">{detailBill?.code_orders}</span>
+    <div className="px-6 py-8 bg-gray-50 min-h-screen">
+      <h2 className="text-3xl font-bold text-gray-800 mb-6 border-b pb-4">
+        Đơn Hàng: <span className="text-blue-500">{detailBill?.code_orders}</span>
       </h2>
-      <div className="mb-6 p-6 bg-white rounded-lg shadow-lg">
+
+      {/* Thông tin chi tiết */}
+      <div className="mb-6 p-6 bg-white rounded-xl shadow-lg border border-gray-200">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <p className="text-lg text-black font-medium"><strong className="text-black">Người Nhận:</strong> {detailBill?.full_name}</p>
-          <p className="text-lg text-black font-medium">
-            <strong className="text-black">Địa Chỉ:</strong> {`${detailBill?.address_line}, ${districtName}, ${provinceName}`}
+          <p className="text-lg text-gray-700 font-medium">
+            <strong className="text-gray-800">Người Nhận:</strong> {detailBill?.full_name}
           </p>
-          <p className="text-lg text-black font-medium"><strong className="text-black">Email:</strong> {detailBill?.email_receiver}</p>
-          <p className="text-lg text-black font-medium"><strong className="text-black">Số Điện Thoại:</strong> {detailBill?.phone_number}</p>
-          <p className="text-lg text-black font-medium"><strong className="text-black">Ghi Chú:</strong> {detailBill?.note}</p>
-          <p className="text-lg text-black font-medium"><strong className="text-black">Hình Thức Thanh Toán:</strong> {detailBill?.payment_type_description}</p>
-          <p className="text-lg text-black font-medium">
-            <strong className="text-black">Trạng Thái Đơn Hàng:</strong> <span className={`text-lg font-semibold ${detailBill?.status_description === 'Đã hủy đơn hàng' ? 'text-red-500' : 'text-green-500'}`}>{detailBill?.status_description}</span>
+          <p className="text-lg text-gray-700 font-medium">
+            <strong className="text-gray-800">Địa Chỉ:</strong> {`${detailBill?.address_line}, ${districtName}, ${provinceName}`}
           </p>
-          <p className="text-lg text-black font-medium"><strong className="text-black">Ngày Đặt Hàng:</strong> {detailBill?.order_date} {detailBill?.order_time}</p>
-          <p className="text-lg text-black font-medium"><strong className="text-black">Tổng Phụ:</strong> {parseFloat(detailBill?.subtotal).toLocaleString()} đ</p>
-          <p className="text-lg text-black font-medium"><strong className="text-black">Phí Vận Chuyển:</strong> {parseFloat(detailBill?.shipping_fee).toLocaleString()} đ</p>
-          <p className="text-lg text-black font-medium"><strong className="text-black">Giảm Giá Đã Áp Dụng:</strong> {parseFloat(detailBill?.discounted_amount).toLocaleString()} đ</p>
-          <p className="text-lg text-black font-medium"><strong className="text-black">Giảm Giá Phí Vận Chuyển:</strong> {parseFloat(detailBill?.discounted_shipping_fee).toLocaleString()} đ</p>
-          <p className="text-lg font-bold text-black"><strong className="text-black">Tổng Cộng:</strong> <span className="text-red-500">{parseFloat(detailBill?.total).toLocaleString()} đ</span></p>
-        </div>
-        <div className="mt-8 bg-gray-100 p-4 rounded-lg shadow-inner">
-          <p className="text-xl font-bold text-black mb-4">Khuyến Mãi Đã Áp Dụng:</p>
-          <ul className="list-disc list-inside pl-4 text-lg text-black space-y-2">
-            {detailBill?.promotions?.map((promotion: any, index: number) => (
-              <li key={index}>
-                <strong className="text-black">{promotion.code}:</strong> {promotion.description} - Giảm {promotion.discount_amount}%
-              </li>
-            ))}
-          </ul>
+          <p className="text-lg text-gray-700 font-medium">
+            <strong className="text-gray-800">Email:</strong> {detailBill?.email_receiver}
+          </p>
+          <p className="text-lg text-gray-700 font-medium">
+            <strong className="text-gray-800">Số Điện Thoại:</strong> {detailBill?.phone_number}
+          </p>
+          <p className="text-lg text-gray-700 font-medium">
+            <strong className="text-gray-800">Ghi Chú:</strong> {detailBill?.note}
+          </p>
+          <p className="text-lg text-gray-700 font-medium">
+            <strong className="text-gray-800">Hình Thức Thanh Toán:</strong> {detailBill?.payment_type_description}
+          </p>
+          <p className="text-lg text-gray-700 font-medium">
+            <strong className="text-gray-800">Trạng Thái Đơn Hàng:</strong>
+            <span className={`ml-2 text-lg font-semibold ${detailBill?.status_description === 'Đã hủy đơn hàng' ? 'text-red-500' : 'text-green-500'}`}>
+              {detailBill?.status_description}
+            </span>
+          </p>
+          <p className="text-lg text-gray-700 font-medium">
+            <strong className="text-gray-800">Ngày Đặt Hàng:</strong> {detailBill?.order_date} {detailBill?.order_time}
+          </p>
+          <p className="text-lg text-gray-700 font-medium">
+            <strong className="text-gray-800">Tổng Phụ:</strong> {parseFloat(detailBill?.subtotal).toLocaleString()} đ
+          </p>
+          <p className="text-lg text-gray-700 font-medium">
+            <strong className="text-gray-800">Phí Vận Chuyển:</strong> {parseFloat(detailBill?.shipping_fee).toLocaleString()} đ
+          </p>
+          <p className="text-lg text-gray-700 font-medium">
+            <strong className="text-gray-800">Giảm Giá Đã Áp Dụng:</strong> {parseFloat(detailBill?.discounted_amount).toLocaleString()} đ
+          </p>
+          <p className="text-lg text-gray-700 font-medium">
+            <strong className="text-gray-800">Giảm Giá Phí Vận Chuyển:</strong> {parseFloat(detailBill?.discounted_shipping_fee).toLocaleString()} đ
+          </p>
+          <p className="text-lg font-bold text-gray-800">
+            <strong className="text-gray-800">Tổng Cộng:</strong>
+            <span className="text-red-500 ml-2">{parseFloat(detailBill?.total).toLocaleString()} đ</span>
+          </p>
         </div>
       </div>
-      <Table dataSource={dataSource} columns={columns} bordered pagination={false} className="mt-8 rounded-lg shadow-md" />
+
+      {/* Khuyến mãi */}
+      <div className="mt-6 bg-white p-6 rounded-xl shadow-lg border border-gray-200">
+        <p className="text-xl font-bold text-gray-800 mb-4">Khuyến Mãi Đã Áp Dụng:</p>
+        <ul className="list-disc list-inside pl-4 text-lg text-gray-700 space-y-2">
+          {detailBill?.promotions?.map((promotion: any, index: number) => (
+            <li key={index}>
+              <strong className="text-gray-800">{promotion.code}:</strong> {promotion.description} - Giảm {promotion.discount_amount}%
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      {/* Bảng sản phẩm */}
+      <div className="mt-8">
+        <Table
+          dataSource={dataSource}
+          columns={columns}
+          bordered
+          pagination={false}
+          className="rounded-lg shadow-lg overflow-hidden"
+        />
+      </div>
     </div>
+
   );
 };
 

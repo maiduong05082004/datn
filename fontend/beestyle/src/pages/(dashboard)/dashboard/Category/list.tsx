@@ -108,6 +108,12 @@ const ListCategories: React.FC = () => {
       key: 'action',
       render: (_: any, category: Category) => (
         <Space size="middle">
+          <Button
+            type="default"
+            className='rounded-full'
+            icon={<EditOutlined />}
+            onClick={() => navigate(`/admin/dashboard/category/update/${category.id}`)}
+          />
           <Popconfirm
             title="Xóa danh mục"
             description="Bạn có chắc muốn xóa danh mục này không?"
@@ -115,13 +121,8 @@ const ListCategories: React.FC = () => {
             okText="Có"
             cancelText="Không"
           >
-            <Button type="primary" danger icon={<DeleteOutlined />} />
+            <Button className='rounded-full' type="default" danger icon={<DeleteOutlined />} />
           </Popconfirm>
-          <Button
-            type="default"
-            icon={<EditOutlined />}
-            onClick={() => navigate(`/admin/category/update/${category.id}`)}
-          />
         </Space>
       ),
     },
@@ -139,7 +140,7 @@ const ListCategories: React.FC = () => {
           <Button
             type="default"
             icon={<PlusOutlined />}
-            onClick={() => navigate('/admin/category/add')}
+            onClick={() => navigate('/admin/dashboard/category/add')}
           >
             Thêm danh mục
           </Button>

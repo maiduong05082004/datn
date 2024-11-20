@@ -42,7 +42,7 @@ const ListProducts = () => {
   const [messageApi, contextHolder] = message.useMessage();
   const queryClient = useQueryClient();
   const navigate = useNavigate();
-  const { id } = useParams();
+  // const { id } = useParams();
 
   const { data: productsData, isLoading } = useQuery({
     queryKey: ['products'],
@@ -144,11 +144,14 @@ const ListProducts = () => {
       render: (product: Product) => (
         <div className="flex space-x-2">
           <Button
-            type="link"
+            type="default"
             icon={<EyeOutlined />}
-            className="text-white bg-blue-500 hover:bg-blue-600"
-            onClick={() => navigate(`/admin/comments/list/${product.id}`)}
-          />
+            onClick={() => navigate(`/admin/dashboard/comments/list/${product.id}`)}
+          >
+            Xem Bình Luận
+          </Button>
+
+          
         </div>
       ),
     }
@@ -159,17 +162,17 @@ const ListProducts = () => {
       render: (product: Product) => (
         <div className="flex space-x-2">
           <Button
-            type="link"
+            type="default"
             icon={<EyeOutlined />}
-            className="text-white bg-blue-500 hover:bg-blue-600"
-            onClick={() => navigate(`/admin/products/detail/${product.id}`)}
+            className='rounded-full'
+            onClick={() => navigate(`/admin/dashboard/products/detail/${product.id}`)}
           />
 
           <Button
             type="default"
             icon={<EditOutlined />}
-            className="bg-yellow-500 text-white hover:bg-yellow-600"
-            onClick={() => navigate(`/admin/products/update/${product.id}`)}
+            className='rounded-full'
+            onClick={() => navigate(`/admin/dashboard/products/update/${product.id}`)}
           />
           <Popconfirm
             title="Xóa sản phẩm"
@@ -178,7 +181,8 @@ const ListProducts = () => {
             okText="Yes"
             cancelText="No"
           >
-            <Button icon={<DeleteOutlined />} type="primary" danger className="bg-red-500 text-white hover:bg-red-600" />
+            <Button icon={<DeleteOutlined />} danger type="default"className='rounded-full'
+            />
           </Popconfirm>
         </div>
       ),
@@ -195,7 +199,7 @@ const ListProducts = () => {
           <Button
             icon={<PlusOutlined />}
             type="default"
-            onClick={() => navigate('/admin/products/add')}
+            onClick={() => navigate('/admin/dashboard/products/add')}
           >
             Thêm mới
           </Button>

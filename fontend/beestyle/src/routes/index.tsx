@@ -53,8 +53,13 @@ import App from "@/pages/(dashboard)/dashboard/Bill/app";
 import Detailship from "@/pages/(dashboard)/dashboard/Bill/detailship";
 import DeatilConfirm from "@/pages/(dashboard)/dashboard/Bill/detailConfirm"
 import Comments from "@/pages/(dashboard)/dashboard/Products/comments";
+import DetailUser from "@/pages/(dashboard)/dashboard/Users/detail";
+import PrivateRouter from "./PrivateRoute";
 // import CartPage from "@/pages/(website)/cart/page";
 import InventoryManagement from "@/pages/(dashboard)/dashboard/Inventory/list";
+import Signin from "@/pages/(dashboard)/dashboard/auth.tsx/signin";
+import AddAddresses from "@/pages/(dashboard)/dashboard/Bill/haha";
+import ParentComponent from "@/pages/(dashboard)/dashboard/Bill/parent";
 
 const Router = () => {
 
@@ -68,10 +73,10 @@ const Router = () => {
                     <Route index element={<HomePage />} />
                     <Route path="categories/:id" element={<ListPage />} />
                     <Route path="products/:id" element={<DetailPage />} />
-                    <Route path="checkouts" element={<CheckOutPage/>} />
+                    <Route path="checkouts" element={<CheckOutPage />} />
                     <Route path="signin" element={<PageSignin />} />
                     <Route path="signup" element={<PageSignup />} />
-                    <Route path="search" element={<SearchPage isKeySearch={isKeySearch}/>} />
+                    <Route path="search" element={<SearchPage isKeySearch={isKeySearch} />} />
                     <Route path="carts" element={<CartPage />} />
                     <Route path="account" element={<AccountPage />}>
                         <Route index element={<ViewAccount />} />
@@ -84,9 +89,11 @@ const Router = () => {
                 </Route>
 
                 {/* Admin Routes */}
-                <Route path="admin" element={<LayoutAdmin />}>
-                    <Route path="profile" element={<MyProfile />} />
+                <Route path="admin" element={<Signin />} />
+                {/* <Route path="admin/dashboard" element={<PrivateRouter><LayoutAdmin /></PrivateRouter>}> */}
+                <Route path="admin/dashboard" element={<LayoutAdmin />}>
                     <Route index element={<DashboardPage />} />
+                    <Route path="profile" element={<MyProfile />} />
                     {/* bills */}
                     <Route path="bill/app" element={<App />} />
                     <Route path="bill/list" element={<ListBill />} />
@@ -94,15 +101,18 @@ const Router = () => {
                     <Route path="bill/detailship/:id" element={<Detailship />} />
                     <Route path="bill/detailConfirm/:id" element={<DeatilConfirm />} />
                     <Route path="bill/shiping/:id" element={<Shiping />} />
+                    {/* <Route path="bill/address" element={<AddAddresses />} /> */}
+                    <Route path="bill/address" element={<ParentComponent />} />
                     {/* comments */}
                     <Route path="comment/list" element={<ListComments />} />
-                    {/* banner */}
+                    {/* banners */}
                     <Route path="banner/add" element={<AddBanners />} />
                     <Route path="banner/list" element={<ListBanners />} />
                     <Route path="banner/update/:id" element={<UpdateBanners />} />
                     {/* users */}
                     <Route path="user/add" element={<AddUser />} />
                     <Route path="user/list" element={<ListUser />} />
+                    <Route path="user/detail/:id" element={<DetailUser />} />
                     <Route path="user/update/:id" element={<UpdateUser />} />
                     {/* products */}
                     <Route path="products/list" element={<ListProducts />} />
@@ -110,22 +120,18 @@ const Router = () => {
                     <Route path="products/add" element={<AddProduct />} />
                     <Route path="products/update/:id" element={<UpdateProduct />} />
                     <Route path="products/detail/:id" element={<DetailProduct />} />
-                    {/* banner */}
-                    <Route path="banner/list" element={<ListBanners />} />
-                    <Route path="banner/add" element={<AddBanners />} />
-                    <Route path="banner/update/:id" element={<UpdateBanners />} />
                     {/* attribute_group */}
                     <Route path="attribute_group/add" element={<AddtributeGroup />} />
                     <Route path="attribute_group/list" element={<ListAttributeGroup />} />
-                    <Route path="attribute_group/update/:id" element={< UpdateAttributeGroup />} />
+                    <Route path="attribute_group/update/:id" element={<UpdateAttributeGroup />} />
                     {/* attribute */}
                     <Route path="attribute/add" element={<AddAttribute />} />
                     <Route path="attribute/list" element={<ListAttribute />} />
-                    <Route path="attribute/update/:id" element={< UpdateAttribute />} />
-                    {/*giá trị attribute */}
+                    <Route path="attribute/update/:id" element={<UpdateAttribute />} />
+                    {/* attribute_value */}
                     <Route path="attribute_value/add" element={<AddAttributeValues />} />
                     <Route path="attribute_value/update/:id" element={<UpdateAttributeValues />} />
-                    {/* Danh Mục */}
+                    {/* categories */}
                     <Route path="category/list" element={<ListCategories />} />
                     <Route path="category/add" element={<AddCategories />} />
                     <Route path="category/update/:id" element={<UpdateCategories />} />
@@ -133,12 +139,11 @@ const Router = () => {
                     <Route path="promotions/list" element={<ListPromotions />} />
                     <Route path="promotions/add" element={<AddPromotion />} />
                     <Route path="promotions/update/:id" element={<UpdatePromotion />} />
-                    {/* Inventory */}
+                    {/* inventory */}
                     <Route path="inventory/list" element={<InventoryManagement />} />
                 </Route>
-
             </Routes>
-            <Search isSearch={isSearch} setIsSearch={setIsSearch} setKeySearch={setKeySearch}/>
+            <Search isSearch={isSearch} setIsSearch={setIsSearch} setKeySearch={setKeySearch} />
         </>
     );
 };

@@ -7,9 +7,11 @@ import { useParams } from 'react-router-dom';
 const { Title, Text, Paragraph } = Typography;
 
 const DetailProduct = () => {
-  const { id } = useParams(); // Lấy ID sản phẩm từ URL
-  const [selectedVariantIndex, setSelectedVariantIndex] = useState(0); // Chọn biến thể
-  const [selectedImageIndex, setSelectedImageIndex] = useState(0); // Chọn ảnh trong album
+  const { id } = useParams();
+  const [selectedVariantIndex, setSelectedVariantIndex] = useState(0);
+  const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+  const [selectedSize, setSelectedSize] = useState(null);
+
 
   const { data, isLoading, isError } = useQuery({
     queryKey: ['detailProduct', id],
@@ -48,7 +50,7 @@ const DetailProduct = () => {
   const selectedVariation = variations[selectedVariantIndex] || {};
 
   return (
-    <div className="mx-auto px-8 py-12 bg-gray-50 rounded-lg shadow-md">
+    <div className="mx-auto px-5 py-12 bg-gray-50 rounded-lg shadow-md">
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
         <div className="col-span-1 flex gap-4">
           {/* Album ảnh của biến thể */}
@@ -56,23 +58,21 @@ const DetailProduct = () => {
             {selectedVariation.variation_album_images?.map((img: string, index: number) => (
               <div
                 key={index}
-                className={`w-20 h-20 overflow-hidden rounded-lg border cursor-pointer transition-transform duration-300 ease-in-out transform hover:scale-105 ${
-                  index === selectedImageIndex ? 'border-blue-600 shadow-lg' : 'border-gray-300'
-                }`}
+                className={`w-20 h-20 overflow-hidden rounded-lg border cursor-pointer transition-transform duration-300 ease-in-out transform hover:scale-105 ${index === selectedImageIndex ? 'border-blue-600 shadow-lg' : 'border-gray-300'
+                  }`}
                 onClick={() => setSelectedImageIndex(index)}
               >
-                <Image src={img} className="object-cover w-full h-full" />
+                <Image src={img} className="object-cover w-full h-full" preview={false} />
               </div>
             ))}
           </div>
 
           {/* Ảnh lớn */}
-          <div className="h-[500px] w-full overflow-hidden rounded-xl shadow-xl border border-gray-300">
             <Image
               src={selectedVariation.variation_album_images?.[selectedImageIndex]}
-              className="object-cover w-full h-full"
+              className="object-cover w-full border rounded-xl shadow-xl"
+              preview={false}
             />
-          </div>
         </div>
 
         {/* Thông tin sản phẩm */}
@@ -92,9 +92,18 @@ const DetailProduct = () => {
             {is_collection && <Badge.Ribbon text="Bộ sưu tập" color="blue" />}
           </div>
 
+          {product.rating && (
+            <div className="flex items-center gap-2 mb-6">
+              <Text className="text-lg text-gray-700">Đánh giá:</Text>
+              <div className="flex items-center">
+                <Text className="text-xl text-yellow-500 font-bold">{product.rating.average}</Text>
+                <Text className="text-sm text-gray-600 ml-2">({product.rating.reviews} đánh giá)</Text>
+              </div>
+            </div>
+          )}
+
           <Divider className="my-8" />
 
-          {/* Thông tin biến thể */}
           {group && (
             <div className="bg-white p-6 rounded-xl border border-gray-300 mb-8 shadow-sm">
               <h4 className="text-xl font-semibold text-gray-800 mb-2">Nhóm biến thể</h4>
@@ -108,15 +117,14 @@ const DetailProduct = () => {
               {variations.map((variation: any, index: number) => (
                 <div
                   key={index}
-                  className={`relative p-0.5 rounded-full border-2 ${
-                    index === selectedVariantIndex ? 'border-blue-500 shadow-md' : 'border-gray-300'
-                  } cursor-pointer transition-transform duration-300 hover:scale-105`}
+                  className={`relative p-1.5  rounded-full border ${index === selectedVariantIndex ? 'border-1 border-black' : 'border-gray-300'
+                    } cursor-pointer transition-transform duration-300 hover:scale-105`}
                   onClick={() => setSelectedVariantIndex(index)}
                 >
                   <img
                     src={variation.attribute_value_image_variant.image_path}
                     alt={variation.attribute_value_image_variant.value}
-                    className="w-14 h-14 rounded-full object-cover"
+                    className="w-10 h-10 rounded-full object-cover"
                   />
                 </div>
               ))}
@@ -124,27 +132,41 @@ const DetailProduct = () => {
           </div>
 
           <div className="mb-8">
-            <h4 className="text-xl font-semibold text-gray-800 mb-4">Thông Tin</h4>
+            <h4 className="text-xl font-semibold text-gray-800 mb-4">Chọn Kích Cỡ</h4>
             <div className="flex flex-wrap gap-4">
               {selectedVariation.variation_values?.map((value: any, index: number) => (
                 <button
                   key={index}
-                  className="w-24 h-12 border border-gray-300 rounded-lg text-gray-800 font-medium transition-all duration-300 hover:border-blue-500 hover:shadow-md"
+                  className={`px-7 py-2 border rounded-3xl text-gray-800 font-medium transition-all duration-300 hover:bg-black hover:text-white hover:shadow-md ${selectedSize === value.value ? 'bg-black text-white shadow-md' : 'border-gray-300'
+                    }`}
+                  onClick={() => setSelectedSize(value.value)}
                 >
                   {value.value}
                 </button>
               ))}
             </div>
           </div>
+          <div className="mb-6 p-4 border rounded-lg shadow-md">
+            <Text className="text-lg font-medium text-gray-800 mb-2">
+              Số Lượng Biến Thể:
+              <span className="text-xl font-semibold text-blue-600 ml-1">
+                {selectedSize
+                  ? selectedVariation.variation_values?.find((v: any) => v.value === selectedSize)?.stock || 'Không có thông tin'
+                  : selectedVariation.stock || 'Không có thông tin'}
+              </span>
+              sản phẩm
+            </Text>
 
-          <div className="mb-6">
-            <Text className="text-xl text-gray-900">
-              Tồn kho: <span className="font-semibold">{stock}</span> sản phẩm (Biến thể:
-              <span className="font-semibold"> {selectedVariation.stock}</span>)
+            {/* Hiển thị tổng số lượng */}
+            <Divider className="" />
+            <Text className="text-lg font-medium text-gray-800">
+              Tổng Số Lượng:
+              <span className="text-xl font-semibold text-green-600 ml-1">
+                {data.stock}
+              </span>
+              sản phẩm
             </Text>
           </div>
-
-          {/* Mô tả và nội dung sản phẩm */}
           <div className="mt-8 p-10 bg-white shadow-2xl rounded-lg border border-gray-300">
             <h2 className="text-3xl font-semibold text-gray-900 border-b-2 border-gray-300 pb-4 mb-8">
               Mô tả

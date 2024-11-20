@@ -45,13 +45,13 @@ const ListAttributeGroup = (props: Props) => {
             title: 'STT',
             dataIndex: 'stt',
             key: 'stt',
-            className: 'w-[10px]',
+            className: 'w-12',
         },
         {
             title: 'Tên nhóm thuộc tính',
             dataIndex: 'name',
             key: 'name',
-            className: 'text-left text-lg font-semibold text-blue-700 p-3',
+            className: 'text-left text-lg font-semibold p-3',
         },
         {
             title: 'Action',
@@ -63,8 +63,8 @@ const ListAttributeGroup = (props: Props) => {
                     <Button
                         type="default"
                         icon={<EditOutlined />}
-                        className="bg-yellow-400 text-white hover:bg-yellow-500 rounded-lg px-4 py-2 shadow-md"
-                        onClick={() => navigate(`/admin/attribute_group/update/${attribute_group.id}`)}
+                        className='rounded-full hover:bg-gray-200 transition duration-300 ease-in-out'
+                        onClick={() => navigate(`/admin/dashboard/attribute_group/update/${attribute_group.id}`)}
                     />
                     <Popconfirm
                         title="Xóa nhóm thuộc tính"
@@ -75,9 +75,8 @@ const ListAttributeGroup = (props: Props) => {
                     >
                         <Button
                             icon={<DeleteOutlined />}
-                            type="primary"
-                            danger
-                            className="bg-red-400 text-white hover:bg-red-500 rounded-lg px-4 py-2 shadow-md"
+                            type="default"
+                            className='rounded-full hover:bg-gray-200 transition duration-300 ease-in-out'
                         />
                     </Popconfirm>
                 </div>
@@ -93,12 +92,12 @@ const ListAttributeGroup = (props: Props) => {
                         key={index}
                         className="p-4 border border-gray-300 rounded-lg bg-white shadow-md hover:shadow-lg transition-shadow duration-300 ease-in-out"
                     >
-                        <strong className="text-blue-700 text-lg">{attr.name}:</strong>
+                        <strong className="text-lg">{attr.name}:</strong>
                         <div className="flex flex-wrap gap-2 mt-2">
                             {attr.attribute_values.map((value: any, idx: any) => (
                                 <span
                                     key={idx}
-                                    className="px-3 py-1 bg-blue-200 text-blue-500 rounded-full text-sm font-medium shadow-sm"
+                                    className="px-3 py-1 bg-gray-200 rounded-full text-sm font-medium shadow-sm hover:bg-gray-300 transition duration-300 ease-in-out"
                                 >
                                     {value.value}
                                 </span>
@@ -117,7 +116,7 @@ const ListAttributeGroup = (props: Props) => {
             <Button
                 icon={<PlusOutlined />}
                 type="default"
-                onClick={() => navigate('/admin/attribute_group/add')}
+                onClick={() => navigate('/admin/dashboard/attribute_group/add')}
             >
                 Thêm mới
             </Button>

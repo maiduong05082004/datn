@@ -90,7 +90,8 @@ const ListPromotions: React.FC = () => {
                     <Button
                         type="default"
                         icon={<EditOutlined />}
-                        onClick={() => navigate(`/admin/promotions/update/${record.id}`)}
+                        className='rounded-full'
+                        onClick={() => navigate(`/admin/dashboard/promotions/update/${record.id}`)}
                     />
                     <Popconfirm
                         title="Xóa khuyến mãi?"
@@ -99,7 +100,7 @@ const ListPromotions: React.FC = () => {
                         cancelText="Không"
                         okButtonProps={{ type: 'default' }}
                     >
-                        <Button type="default" danger icon={<DeleteOutlined />} />
+                        <Button className='rounded-full' type="default" danger  icon={<DeleteOutlined />} />
                     </Popconfirm>
                 </Space>
             ),
@@ -115,7 +116,7 @@ const ListPromotions: React.FC = () => {
                 <Button
                     type="default"
                     icon={<PlusOutlined />}
-                    onClick={() => navigate('/admin/promotions/add')}
+                    onClick={() => navigate('/admin/dashboard/promotions/add')}
                 >
                     Thêm Khuyến Mãi
                 </Button>

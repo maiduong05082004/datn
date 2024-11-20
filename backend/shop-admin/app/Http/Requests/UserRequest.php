@@ -21,13 +21,13 @@ class UserRequest extends FormRequest
      */
     public function rules(): array
     {
-        return [
-            'name' => 'required|string|min:2|max:50|regex:/^[a-zA-Z\s\-]+$/',
+        $rules = [
+            'name' => 'nullable|string|min:2|max:50|regex:/^[a-zA-Z\s\-]+$/',
             'address' => 'nullable|string|max:255',
-            'email' => 'required|email|max:255|unique:users,email',
-            'phone' => 'required|regex:/^([0-9\s\-\+\(\)]*)$/|min:10|max:15',
+            'email' => 'nullable|email|max:255|unique:users,email',
+            'phone' => 'nullable|regex:/^([0-9\s\-\+\(\)]*)$/|min:10|max:15',
             'password' => [
-                'required',
+                'nullable',
                 'string',
                 'min:8',
                 'regex:/[a-z]/',
@@ -36,6 +36,31 @@ class UserRequest extends FormRequest
                 'regex:/[@$!%*#?&]/',
             ]
         ];
+
+        // Kiểm tra xem phương thức là POST (thêm người dùng mới)
+        if ($this->isMethod('post')) {
+            // Nếu là POST, thì tất cả các trường cần có `required`
+            $rules['name'] = 'required|string|min:2|max:50|regex:/^[a-zA-Z\s\-]+$/';
+            $rules['email'] = 'required|email|max:255|unique:users,email';
+            $rules['phone'] = 'required|regex:/^([0-9\s\-\+\(\)]*)$/|min:10|max:15';
+            $rules['password'] = [
+                'required',
+                'string',
+                'min:8',
+                'regex:/[a-z]/',
+                'regex:/[A-Z]/',
+                'regex:/[0-9]/',
+                'regex:/[@$!%*#?&]/',
+            ];
+        }
+
+        // Nếu là phương thức PUT/PATCH (cập nhật thông tin người dùng)
+        if ($this->isMethod('put') || $this->isMethod('patch')) {
+            // Khi cập nhật, email sẽ không cần phải `unique` nữa, chỉ cần kiểm tra định dạng
+            $rules['email'] = 'nullable|email|max:255|unique:users,email,' . $this->route('id');
+        }
+
+        return $rules;
     }
 
     public function messages()
