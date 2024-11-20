@@ -35,6 +35,8 @@ Route::prefix('client')->as('client.')->group(function () {
             Route::post('/signin', [AuthController::class, 'login'])->name('signin');
             Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth:sanctum')->name('logout');
             Route::get('/profile', [AuthController::class, 'user'])->middleware('auth:sanctum')->name('profile');
+            Route::put('/update', [AuthController::class, 'updateUserInfo'])->name('user.update');
+            Route::post('/add-points', [AuthController::class, 'addPoints']);
             Route::post('/forgot-password', [AuthController::class, 'forgotPassword'])->name('password.email');
             Route::post('/reset-password', [AuthController::class, 'resetPassword'])->name('password.update');
             Route::get('/reset-password/{token}', function ($token) {
