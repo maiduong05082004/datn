@@ -58,9 +58,6 @@ import PrivateRouter from "./PrivateRoute";
 // import CartPage from "@/pages/(website)/cart/page";
 import InventoryManagement from "@/pages/(dashboard)/dashboard/Inventory/list";
 import Signin from "@/pages/(dashboard)/dashboard/auth.tsx/signin";
-import AddAddresses from "@/pages/(dashboard)/dashboard/Bill/haha";
-import ParentComponent from "@/pages/(dashboard)/dashboard/Bill/parent";
-
 const Router = () => {
 
     const [isSearch, setIsSearch] = useState<boolean>(false)
@@ -102,7 +99,6 @@ const Router = () => {
                     <Route path="bill/detailConfirm/:id" element={<DeatilConfirm />} />
                     <Route path="bill/shiping/:id" element={<Shiping />} />
                     {/* <Route path="bill/address" element={<AddAddresses />} /> */}
-                    <Route path="bill/address" element={<ParentComponent />} />
                     {/* comments */}
                     <Route path="comment/list" element={<ListComments />} />
                     {/* banners */}
