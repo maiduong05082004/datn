@@ -96,7 +96,6 @@ const ListBill: React.FC = () => {
     try {
       await axiosInstance.post(`http://127.0.0.1:8000/api/admins/orders/ghn-cancel/${billId}`);
       toast.success('Đơn hàng đã được hủy thành công.');
-      refetch();
     } catch (error : any) {
       const errorMessage = error.response?.data?.message || 'Không thể bàn giao đơn hàng cho đơn vị vận chuyển.';
       toast.error(errorMessage);
@@ -304,7 +303,7 @@ const ListBill: React.FC = () => {
             <Button
               type="default"
               icon={<EyeOutlined />}
-              onClick={() => navigate(`/admin/bill/detail/${record.id}`)}
+              onClick={() => navigate(`/admin/dashboard/bill/detail/${record.id}`)}
               className="bg-blue-500 text-white hover:bg-blue-600 focus:bg-blue-700 rounded-md shadow-md"
             >
               Xem Chi Tiết
@@ -315,7 +314,7 @@ const ListBill: React.FC = () => {
             <Button
               icon={<ShoppingCartOutlined />}
               type="default"
-              onClick={() => navigate(`/admin/bill/shiping/${record.id}`)}
+              onClick={() => navigate(`/admin/dashboard/bill/shiping/${record.id}`)}
               className="bg-yellow-500 text-white hover:bg-yellow-600 focus:bg-yellow-700 rounded-md shadow-md h-[50px]"
               style={{
                 whiteSpace: 'normal',
@@ -330,7 +329,7 @@ const ListBill: React.FC = () => {
             <Button
               icon={<CheckCircle />}
               type="default"
-              onClick={() => navigate(`/admin/bill/detailConfirm/${record.id}`)}
+              onClick={() => navigate(`/admin/dashboard/bill/detailConfirm/${record.id}`)}
               className="bg-yellow-500 text-white hover:bg-yellow-600 focus:bg-yellow-700 rounded-md shadow-md h-[50px]"
               style={{
                 whiteSpace: 'normal',
@@ -345,7 +344,7 @@ const ListBill: React.FC = () => {
             <Button
               icon={<ShoppingCartOutlined />}
               type="default"
-              onClick={() => navigate(`/admin/bill/detailship/${record.id}`)}
+              onClick={() => navigate(`/admin/dashboard/bill/detailship/${record.id}`)}
               className="bg-yellow-500 text-white hover:bg-yellow-600 focus:bg-yellow-700 rounded-md shadow-md"
             >
               Xem Đơn Hàng

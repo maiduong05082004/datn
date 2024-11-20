@@ -110,14 +110,14 @@ const ListAttribute: React.FC = () => {
                 <div className="flex space-x-2">
                     <Button
                         icon={<EyeOutlined />}
-                        className="bg-blue-400 text-white hover:bg-gray-800"
+                        className='rounded-full'
                         onClick={() => handleViewDetails(attribute)}
                     />
                     <Button
                         type="default"
                         icon={<EditOutlined />}
-                        className="bg-yellow-500 text-white hover:bg-yellow-600"
-                        onClick={() => navigate(`/admin/attribute/update/${attribute.id}`)}
+                        className='rounded-full'
+                        onClick={() => navigate(`/admin/dashboard/attribute/update/${attribute.id}`)}
                     />
                     <Popconfirm
                         title="Xóa thuộc tính"
@@ -125,9 +125,10 @@ const ListAttribute: React.FC = () => {
                         onConfirm={() => deleteAttributeMutation.mutate(attribute.id)}
                         okText="Yes"
                         cancelText="No"
-                        icon={<DeleteOutlined style={{ color: 'red' }} />}
+                        icon={<DeleteOutlined className='rounded-full'
+                        />}
                     >
-                        <Button type="primary" danger icon={<DeleteOutlined />} />
+                        <Button className='rounded-full' type="default" danger icon={<DeleteOutlined />} />
                     </Popconfirm>
                 </div>
             ),
@@ -151,13 +152,13 @@ const ListAttribute: React.FC = () => {
                         type="default"
                         icon={<PlusCircleFilled />}
                     >
-                        <Link to={`/admin/attribute/add`}>Thêm Attribute</Link>
+                        <Link to={`/admin/dashboard/attribute/add`}>Thêm Attribute</Link>
                     </Button>
                     <Button
                         type="default"
                         icon={<PlusCircleFilled />}
                     >
-                        <Link to={`/admin/attribute_value/add`}>Thêm Giá Trị Attribute</Link>
+                        <Link to={`/admin/dashboard/attribute_value/add`}>Thêm Giá Trị Attribute</Link>
                     </Button>
                 </div>
 
@@ -182,50 +183,82 @@ const ListAttribute: React.FC = () => {
                         Đóng
                     </Button>,
                 ]}
+                centered
+                width={'50%'}
             >
                 {selectedAttribute && (
-                    <div className="p-8 bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 rounded-2xl shadow-xl text-white mb-8">
-                        <h2 className="text-3xl font-bold mb-6 border-b border-white/30 pb-3">
+                    <div className="bg-slate-200 p-5">
+                        <h2 className="text-3xl font-bold mb-6 border-b border-gray-300 pb-3">
                             Thông tin Thuộc Tính
                         </h2>
                         <h3 className="text-xl font-semibold mt-6">Giá trị:</h3>
 
-                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 mt-6">
-                            {selectedAttribute.values.map((value) => (
-                                <div
-                                    key={value.value_id}
-                                    className="relative border border-gray-100 bg-white text-gray-900 rounded-xl p-6 shadow-lg hover:shadow-2xl transition-transform duration-300 hover:scale-105"
-                                >
-                                    <p className="text-xl font-semibold text-gray-800">{value.value}</p>
-
-                                    <div className="flex justify-between items-center mt-6">
-                                        <Button
-                                            type="default"
-                                            icon={<EditOutlined />}
-                                            className="text-blue-500 hover:text-blue-600 transition-colors"
-                                            onClick={() => navigate(`/admin/attribute_value/update/${value.value_id}`)}
-                                        />
-                                        <Popconfirm
-                                            title="Xóa giá trị"
-                                            description="Bạn có chắc muốn xóa giá trị này không?"
-                                            onConfirm={() => deleteAttributeValueMutation.mutate(value.value_id)}
-                                            okText="Yes"
-                                            cancelText="No"
+                        {/* Table Layout */}
+                        <div className="overflow-x-auto mt-6">
+                            <table className="table-auto w-full border-collapse border border-gray-300 rounded-lg shadow-lg">
+                                <thead className="bg-gray-200">
+                                    <tr>
+                                        <th className="border border-gray-300 px-4 py-2 text-left text-gray-800">
+                                            STT
+                                        </th>
+                                        <th className="border border-gray-300 px-4 py-2 text-left text-gray-800">
+                                            Giá Trị
+                                        </th>
+                                        <th className="border border-gray-300 px-4 py-2 text-center text-gray-800">
+                                            Action
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {selectedAttribute.values.map((value, index) => (
+                                        <tr
+                                            key={value.value_id}
+                                            className="hover:bg-gray-100 transition-colors"
                                         >
-                                            <Button
-                                                type="default"
-                                                danger
-                                                icon={<DeleteOutlined />}
-                                                className="text-red-500 hover:text-red-600 transition-colors"
-                                            />
-                                        </Popconfirm>
-                                    </div>
-                                </div>
-                            ))}
+                                            <td className="border border-gray-300 px-4 py-2">
+                                                {index + 1}
+                                            </td>
+                                            <td className="border border-gray-300 px-4 py-2 text-gray-700">
+                                                {value.value}
+                                            </td>
+                                            <td className="border border-gray-300 px-4 py-2 flex justify-center gap-4">
+                                                <Button
+                                                    type="default"
+                                                    icon={<EditOutlined />}
+                                                    className="rounded-full"
+                                                    onClick={() =>
+                                                        navigate(
+                                                            `/admin/dashboard/attribute_value/update/${value.value_id}`
+                                                        )
+                                                    }
+                                                />
+                                                <Popconfirm
+                                                    title="Xóa giá trị"
+                                                    description="Bạn có chắc muốn xóa giá trị này không?"
+                                                    onConfirm={() =>
+                                                        deleteAttributeValueMutation.mutate(
+                                                            value.value_id
+                                                        )
+                                                    }
+                                                    okText="Yes"
+                                                    cancelText="No"
+                                                >
+                                                    <Button
+                                                        type="default"
+                                                        danger
+                                                        icon={<DeleteOutlined />}
+                                                        className="rounded-full"
+                                                    />
+                                                </Popconfirm>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
                         </div>
                     </div>
-
                 )}
+
             </Modal>
         </>
     );

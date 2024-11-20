@@ -172,7 +172,7 @@ Route::prefix('admins')
                 Route::post('/ghn-update/{billId}', [ProductShippingController::class, 'updateGHNOrder'])->name('orders.updateGHNOrder');
             });
             Route::prefix('comment')->as('comment.')->group(function () {
-                Route::get('/list', [CommentController::class, 'index'])->name('comment.list'); // Lấy list bình luận đã duyệt theo user_id & product_id
+                Route::post('/list', [CommentController::class, 'index'])->name('comment.list'); // Lấy list bình luận đã duyệt theo user_id & product_id
                 Route::post('approve', [CommentController::class, 'approve'])->name('comment.approve'); // Duyệt bình luận
                 Route::post('/reply', [CommentController::class, 'reply'])->name('comment.reply'); // Admin trả lời bình luận của user
                 Route::post('/hide', [CommentController::class, 'hideComment'])->name('comment.hide'); // Ẩn bình luận nếu vi phạm 

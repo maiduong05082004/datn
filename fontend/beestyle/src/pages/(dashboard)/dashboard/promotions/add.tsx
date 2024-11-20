@@ -262,7 +262,7 @@ const AddPromotion: React.FC = () => {
                   Submit
                 </Button>
                 <Button
-                  onClick={() => navigate('/admin/promotions/list')}
+                  onClick={() => navigate('/admin/dashboard/promotions/list')}
                 >
                   Back
                 </Button>

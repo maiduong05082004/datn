@@ -6,6 +6,7 @@ import { useMutation, useQuery } from '@tanstack/react-query';
 import { Button, Checkbox, DatePicker, Form, Input, InputNumber, Select, Spin, Table, Upload } from 'antd';
 import moment from 'moment';
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 const { Option } = Select;
@@ -35,7 +36,7 @@ interface Variant {
   combinations: Combination[];
   colorImage: any[];
   albumImages: any[];
-  attributes?: { 
+  attributes?: {
     stock: number;
     discount: number;
     attributeId: number;
@@ -58,6 +59,7 @@ const AddProduct: React.FC = () => {
   const [variants, setVariants] = useState<Variant[]>([]);
   const [albumList, setAlbumList] = useState<any[]>([]);
   const [stock, setStock] = useState<number | null>(null);
+  const navigate = useNavigate();
   const [showVariantForm, setShowVariantForm] = useState<boolean>(true);
 
   const { data: variantgroup, isLoading: isLoadingVariantGroup } = useQuery({
@@ -143,16 +145,16 @@ const AddProduct: React.FC = () => {
   const generateVariants = () => {
     const primaryAttribute = attributes.find((attr) => attr.attribute_type === 0);
     const otherAttributes = attributes.filter((attr) => attr.attribute_type !== 0);
-  
+
     if (!primaryAttribute || otherAttributes.length === 0) {
       toast.error('Thiếu thuộc tính chính hoặc các thuộc tính khác để tạo biến thể');
       return;
     }
-  
+
     const newVariants: Variant[] = primaryAttribute.selectedValues.flatMap((primaryValueId) => {
       const primaryValue = primaryAttribute.attribute_values.find((val) => val.id === primaryValueId);
       if (!primaryValue) return [];
-  
+
       const combinations: Combination[] = otherAttributes.flatMap((attribute) => {
         return attribute.selectedValues.map((valueId) => {
           const value = attribute.attribute_values.find((val) => val.id === valueId);
@@ -164,7 +166,7 @@ const AddProduct: React.FC = () => {
           };
         });
       });
-  
+
       return {
         attributeName: primaryAttribute.name,
         attributeValue: primaryValue.value,
@@ -174,10 +176,10 @@ const AddProduct: React.FC = () => {
         albumImages: [],
       };
     });
-  
+
     setVariants(newVariants);
   };
-  
+
 
   const handleUploadChangeForVariant = (index: number, key: 'colorImage' | 'albumImages', { fileList }: any) => {
     const updatedVariants = [...variants];
@@ -189,7 +191,7 @@ const AddProduct: React.FC = () => {
     setShowVariantForm(!showVariantForm);
   };
 
-  
+
   const onFinish = async (values: any) => {
     const formData = new FormData();
     const formattedInputDay = moment(values.input_day).format("YYYY-MM-DD");
@@ -207,48 +209,48 @@ const AddProduct: React.FC = () => {
     formData.append('group_id', values.variant_group ? values.variant_group.toString() : '');
 
     albumList.forEach((file: any) => {
-        formData.append('album_images[]', file.originFileObj);
+      formData.append('album_images[]', file.originFileObj);
     });
 
     const variantData = variants.map((variant) => {
       const attributeValueId = variant.attributeValueId;
-        const colorImageFile = variant.colorImage.length ? variant.colorImage[0].originFileObj : null;
-        const albumImages = variant.albumImages.map((file: any) => file.originFileObj);
+      const colorImageFile = variant.colorImage.length ? variant.colorImage[0].originFileObj : null;
+      const albumImages = variant.albumImages.map((file: any) => file.originFileObj);
 
-        const sizes = variant.combinations.reduce((acc: { [key: number]: { stock: number; discount: number } }, combination) => {
-            acc[combination.sizeId] = {
-                stock: combination.stock,
-                discount: combination.discount,
-            };
-            return acc;
-        }, {});
+      const sizes = variant.combinations.reduce((acc: { [key: number]: { stock: number; discount: number } }, combination) => {
+        acc[combination.sizeId] = {
+          stock: combination.stock,
+          discount: combination.discount,
+        };
+        return acc;
+      }, {});
 
-        if (colorImageFile) {
-            formData.append(`color_image_${attributeValueId}`, colorImageFile);
-        }
-        albumImages.forEach((file: any) => {
-            formData.append(`album_images_${attributeValueId}[]`, file);
-        });
+      if (colorImageFile) {
+        formData.append(`color_image_${attributeValueId}`, colorImageFile);
+      }
+      albumImages.forEach((file: any) => {
+        formData.append(`album_images_${attributeValueId}[]`, file);
+      });
 
-        return {
-          attribute_value_id: attributeValueId,
-          colorImage: colorImageFile ? colorImageFile.name : null,
-          albumImages: albumImages.map((file: any) => file.name),
-          sizes: sizes,
+      return {
+        attribute_value_id: attributeValueId,
+        colorImage: colorImageFile ? colorImageFile.name : null,
+        albumImages: albumImages.map((file: any) => file.name),
+        sizes: sizes,
       };
     });
 
     formData.append('variations', JSON.stringify(variantData));
     mutate(formData);
-};
+  };
 
-  
-  
-  
-  
-  
-  
-  
+
+
+
+
+
+
+
   if (isLoadingVariantGroup || isLoadingCategories) {
     return <Spin tip="Loading..." className="flex justify-center items-center h-screen" />;
   }
@@ -537,9 +539,16 @@ const AddProduct: React.FC = () => {
           )}
 
           <Form.Item>
-            <Button type="primary" htmlType="submit" className="bg-indigo-600 hover:bg-indigo-700 text-white mt-5">
-              Thêm sản phẩm
-            </Button>
+            <div className='flex justify-end space-x-4 pt-5'>
+              <Button type="primary" htmlType="submit">
+                Submit
+              </Button>
+              <Button
+                onClick={() => navigate('/admin/dashboard/products/list')}
+              >
+                Back
+              </Button>
+            </div>
           </Form.Item>
         </Form>
       </div>

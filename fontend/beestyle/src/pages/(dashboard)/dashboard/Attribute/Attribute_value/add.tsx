@@ -138,7 +138,7 @@ const AddAttributeValues: React.FC = () => {
                                         Submit
                                     </Button>
                                     <Button
-                                        onClick={() => navigate('/admin/attribute/list')}
+                                        onClick={() => navigate('/admin/dashboard/attribute/list')}
                                     >
                                         Back
                                     </Button>

@@ -10,6 +10,9 @@ import {
   UserOutlined,
   BellOutlined,
   SearchOutlined,
+  SettingOutlined,
+  TagOutlined,
+  DatabaseOutlined,
 } from '@ant-design/icons';
 import {
   Badge,
@@ -30,8 +33,8 @@ const items1: MenuProps['items'] = [
     icon: <UserOutlined />,
     label: "Tài Khoản",
     children: [
-      { key: 'sub1-1', label: <NavLink to="/admin/user/list">Danh sách tài Khoản</NavLink> },
-      { key: 'sub1-2', label: <NavLink to="/admin/user/add">Thêm Tài Khoản</NavLink> },
+      { key: 'sub1-1', label: <NavLink to="/admin/dashboard/user/list">Danh sách tài Khoản</NavLink> },
+      { key: 'sub1-2', label: <NavLink to="/admin/dashboard/user/add">Thêm Tài Khoản</NavLink> },
     ],
   },
   {
@@ -40,8 +43,8 @@ const items1: MenuProps['items'] = [
     label: "Banners",
     children: [
 
-      { key: 'sub2-1', label: <NavLink to="/admin/banner/add">Danh sách Banners</NavLink> },
-      { key: 'sub2-2', label: <NavLink to="/admin/banner/list">Thêm Banners</NavLink> },
+      { key: 'sub2-1', label: <NavLink to="/admin/dashboard/banner/add">Danh sách Banners</NavLink> },
+      { key: 'sub2-2', label: <NavLink to="/admin/dashboard/banner/list">Thêm Banners</NavLink> },
     ],
   },
   {
@@ -49,29 +52,29 @@ const items1: MenuProps['items'] = [
     icon: React.createElement(ShoppingCartOutlined),
     label: 'Sản Phẩm',
     children: [
-      { key: 'sub3-1', label: <NavLink to="/admin/products/list">Danh sách sản phẩm</NavLink> },
-      { key: 'sub3-2', label: <NavLink to="/admin/products/add">Thêm Sản phẩm</NavLink> },
+      { key: 'sub3-1', label: <NavLink to="/admin/dashboard/products/list">Danh sách sản phẩm</NavLink> },
+      { key: 'sub3-2', label: <NavLink to="/admin/dashboard/products/add">Thêm Sản phẩm</NavLink> },
 
     ],
   },
   {
     key: 'sub10',
-    icon: React.createElement(ShoppingCartOutlined),
+    icon: React.createElement(SettingOutlined),
     label: 'Attribute_Group',
     children: [
-      { key: 'sub10-1', label: <NavLink to="/admin/attribute_group/list">Danh sách sản phẩm</NavLink> },
-      { key: 'sub10-2', label: <NavLink to="/admin/attribute_group/add">Thêm Sản phẩm</NavLink> },
+      { key: 'sub10-1', label: <NavLink to="/admin/dashboard/attribute_group/list">Danh sách Attribute_Group</NavLink> },
+      { key: 'sub10-2', label: <NavLink to="/admin/dashboard/attribute_group/add">Thêm Sản Attribute_Group</NavLink> },
 
     ],
   },
   {
     key: 'sub4',
-    icon: React.createElement(ShoppingCartOutlined),
+    icon: React.createElement(TagOutlined),
     label: 'Attributes',
     children: [
-      { key: 'sub4-1', label: <NavLink to="/admin/attribute/list">Danh sách Attribute</NavLink> },
-      { key: 'sub4-4', label: <NavLink to="/admin/attribute/add">Thêm Atrribute</NavLink> },
-      { key: 'sub4-2', label: <NavLink to="/admin/attribute_value/add">Thêm Attribute_values</NavLink> },
+      { key: 'sub4-1', label: <NavLink to="/admin/dashboard/attribute/list">Danh sách Attribute</NavLink> },
+      { key: 'sub4-4', label: <NavLink to="/admin/dashboard/attribute/add">Thêm Atrribute</NavLink> },
+      { key: 'sub4-2', label: <NavLink to="/admin/dashboard/attribute_value/add">Thêm Attribute_values</NavLink> },
 
     ],
   },
@@ -80,8 +83,8 @@ const items1: MenuProps['items'] = [
     icon: React.createElement(LaptopOutlined),
     label: 'Danh Mục',
     children: [
-      { key: 'sub5-1', label: <NavLink to="/admin/category/list">Danh sách danh mục</NavLink> },
-      { key: 'sub5-2', label: <NavLink to="/admin/category/add">Thêm mới danh mục</NavLink> },
+      { key: 'sub5-1', label: <NavLink to="/admin/dashboard/category/list">Danh sách danh mục</NavLink> },
+      { key: 'sub5-2', label: <NavLink to="/admin/dashboard/category/add">Thêm mới danh mục</NavLink> },
     ],
   },
   {
@@ -90,17 +93,7 @@ const items1: MenuProps['items'] = [
     label: 'Bill',
     children: [
       // { key: 'sub6-1', label: <NavLink to="/admin/bill/list">Danh sách đơn hàng</NavLink> },
-      { key: 'sub6-1', label: <NavLink to="/admin/bill/app">Danh sách đơn hàng</NavLink> },
-    ],
-  },
-  {
-    key: 'sub7',
-    icon: React.createElement(MessageOutlined),
-    label: 'Bình Luận',
-    children: [
-      { key: 'sub7-1', label: <NavLink to="/admin/comment/list">Danh sách bình luận</NavLink> },
-      { key: 'sub7-2', label: 'Phê Duyệt Bình Luận' },
-      { key: 'sub7-3', label: 'Xóa Bình Luận' },
+      { key: 'sub6-1', label: <NavLink to="/admin/dashboard/bill/app">Danh sách đơn hàng</NavLink> },
     ],
   },
   {
@@ -108,9 +101,8 @@ const items1: MenuProps['items'] = [
     icon: React.createElement(GiftOutlined),
     label: 'Khuyến Mại',
     children: [
-      { key: 'sub8-1', label: <NavLink to="/admin/promotions/list">Danh sách</NavLink> },
-      { key: 'sub8-2', label: <NavLink to="/admin/promotions/add">Thêm mới</NavLink> },
-      { key: 'sub8-4', label: 'Xóa Khuyến Mại' },
+      { key: 'sub8-1', label: <NavLink to="/admin/dashboard/promotions/list">Danh sách</NavLink> },
+      { key: 'sub8-2', label: <NavLink to="/admin/dashboard/promotions/add">Thêm mới</NavLink> },
     ],
   },
   {
@@ -124,10 +116,10 @@ const items1: MenuProps['items'] = [
   },
   {
     key: 'inventory',
-    icon: React.createElement(BarChartOutlined),
+    icon: React.createElement(DatabaseOutlined),
     label: 'Quản lý tồn kho',
     children: [
-        { key: 'inventory-1', label: <NavLink to="/admin/inventory/list">Danh sách tồn kho</NavLink> },
+        { key: 'inventory-1', label: <NavLink to="/admin/dashboard/inventory/list">Danh sách tồn kho</NavLink> },
     ],
 },
 ];
@@ -174,7 +166,7 @@ const App: React.FC = () => {
         {/* Sidebar logo */}
         <div className='flex justify-center items-center' style={{ height: '64px', padding: '16px', background: '#001529', display: 'flex', alignItems: 'center' }}>
           <div className='pt-5'>
-            <img src="https://res.cloudinary.com/dg4yxsmhs/image/upload/v1730021939/yukhkav8xga7cwvn3jcd.png" alt="" />
+            <img src="https://res.cloudinary.com/dpaig88n6/image/upload/v1732032276/Remove-bg.ai_1732032149065_f3naqx.png" alt="" />
           </div>
         </div>
 

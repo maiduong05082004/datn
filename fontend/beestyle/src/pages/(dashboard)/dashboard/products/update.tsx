@@ -6,7 +6,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { Form, Input, Button, Checkbox, InputNumber, Upload, DatePicker, Spin, Select, Table, Modal } from 'antd';
 import { DeleteOutlined, PlusOutlined, UploadOutlined } from '@ant-design/icons';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import moment from 'moment';
 import AxiosInstance from '@/configs/axios';
 
@@ -36,6 +36,7 @@ const UpdateProduct: React.FC = () => {
   const [stock, setStock] = useState<number | null>(null);
   const [showVariantForm, setShowVariantForm] = useState<boolean>(true);
   const { id } = useParams();
+  const navigate = useNavigate();
   const [removedVariants, setRemovedVariants] = useState<number[]>([]);
   const [productData, setProductData] = useState<any>(null);
   const [selectedGroup, setSelectedGroup] = useState<any>(null);
@@ -101,7 +102,7 @@ const UpdateProduct: React.FC = () => {
                 (img: any) => img.url !== imageUrl
               );
               setVariants(updatedVariants);
-  
+
               // Loại bỏ ảnh khỏi newColorImages nếu tồn tại trong đó
               setNewColorImages((prev) => {
                 const updatedImages = { ...prev };
@@ -112,7 +113,7 @@ const UpdateProduct: React.FC = () => {
                 }
                 return updatedImages;
               });
-  
+
               setDeletingImage((prev) => ({ ...prev, [imageUrl]: false }));
               toast.success('Xóa ảnh thành công!');
             },
@@ -191,14 +192,14 @@ const UpdateProduct: React.FC = () => {
         })),
         colorImage: variation.attribute_value_image_variant.image_path
           ? [
-              {
-                name: variation.attribute_value_image_variant.image_path,
-                uid: variation.attribute_value_image_variant.image_path,
-                status: 'done',
-                url: variation.attribute_value_image_variant.image_path,
-                isExisting: true,
-              },
-            ]
+            {
+              name: variation.attribute_value_image_variant.image_path,
+              uid: variation.attribute_value_image_variant.image_path,
+              status: 'done',
+              url: variation.attribute_value_image_variant.image_path,
+              isExisting: true,
+            },
+          ]
           : [],
         albumImages: variation.variation_album_images.map((image: string) => ({
           name: image,
@@ -446,43 +447,43 @@ const UpdateProduct: React.FC = () => {
           ))}
           {(!record.albumImages || record.albumImages.length < 3) && (
             <Upload
-            listType="picture-card"
-            multiple
-            onChange={({ fileList }) => {
-              const filesToUpload = fileList.filter(file => file.originFileObj);
-              
-              setNewAlbumImages(prev => ({
-                ...prev,
-                [record.colorId]: [
-                  ...(prev[record.colorId] || []), // giữ lại các ảnh cũ trong album
-                  ...filesToUpload.map(file => file.originFileObj as File),
-                ],
-              }));
-          
-              // Cập nhật giao diện hiển thị ảnh nếu cần
-              const updatedAlbumImages = [
-                ...(record.albumImages || []), // giữ lại các ảnh cũ
-                ...fileList.map((file) => ({
-                  ...file,
-                  url: file.url || (file.originFileObj ? URL.createObjectURL(file.originFileObj) : ''),
-                })),
-              ];
-          
-              const updatedRecord = { ...record, albumImages: updatedAlbumImages };
-              setVariants((prev) => {
-                const updatedVariants = [...prev];
-                updatedVariants[index] = updatedRecord;
-                return updatedVariants;
-              });
-            }}
-            beforeUpload={() => false}
-            showUploadList={false}
-            className="upload-inline"
-          >
-            <div className="w-20 h-20 border border-dashed border-gray-300 rounded-md flex items-center justify-center cursor-pointer">
-              <UploadOutlined className="text-green-500 text-xl" />
-            </div>
-          </Upload>
+              listType="picture-card"
+              multiple
+              onChange={({ fileList }) => {
+                const filesToUpload = fileList.filter(file => file.originFileObj);
+
+                setNewAlbumImages(prev => ({
+                  ...prev,
+                  [record.colorId]: [
+                    ...(prev[record.colorId] || []), // giữ lại các ảnh cũ trong album
+                    ...filesToUpload.map(file => file.originFileObj as File),
+                  ],
+                }));
+
+                // Cập nhật giao diện hiển thị ảnh nếu cần
+                const updatedAlbumImages = [
+                  ...(record.albumImages || []), // giữ lại các ảnh cũ
+                  ...fileList.map((file) => ({
+                    ...file,
+                    url: file.url || (file.originFileObj ? URL.createObjectURL(file.originFileObj) : ''),
+                  })),
+                ];
+
+                const updatedRecord = { ...record, albumImages: updatedAlbumImages };
+                setVariants((prev) => {
+                  const updatedVariants = [...prev];
+                  updatedVariants[index] = updatedRecord;
+                  return updatedVariants;
+                });
+              }}
+              beforeUpload={() => false}
+              showUploadList={false}
+              className="upload-inline"
+            >
+              <div className="w-20 h-20 border border-dashed border-gray-300 rounded-md flex items-center justify-center cursor-pointer">
+                <UploadOutlined className="text-green-500 text-xl" />
+              </div>
+            </Upload>
           )}
         </div>
       ),
@@ -505,20 +506,20 @@ const UpdateProduct: React.FC = () => {
 
   const onFinish = async (values: any) => {
     const formattedDate = values.input_day ? moment(values.input_day).format('YYYY-MM-DD') : null;
-  
+
     if (!formattedDate) {
       toast.error('Ngày nhập không hợp lệ. Vui lòng chọn một ngày!');
       return;
     }
-  
+
     if (!values.name || !values.price || !values.category_id) {
       toast.error('Vui lòng điền đầy đủ các trường bắt buộc.');
       return;
     }
-  
+
     // Prepare variations, excluding removed variants
     const variations: Record<number, Record<number, { stock: number; discount: number }>> = {};
-  
+
     variants.forEach((variant: Variant) => {
       if (!removedVariants.includes(variant.colorId)) {
         variations[variant.colorId] = {};
@@ -530,7 +531,7 @@ const UpdateProduct: React.FC = () => {
         });
       }
     });
-  
+
     // Tạo FormData
     const formData = new FormData();
     formData.append('name', values.name);
@@ -541,29 +542,29 @@ const UpdateProduct: React.FC = () => {
     formData.append('description', values.description || '');
     formData.append('content', content || '');
     formData.append('input_day', formattedDate);
-  
-  
+
+
     // Kiểm tra và append ảnh colorImage
     Object.keys(newColorImages).forEach(colorId => {
       newColorImages[Number(colorId)].forEach(file => {
         formData.append(`color_image_${colorId}`, file);
       });
     });
-  
+
     // Kiểm tra và append ảnh albumImages
     Object.keys(newAlbumImages).forEach(colorId => {
       newAlbumImages[Number(colorId)].forEach(file => {
         formData.append(`album_images_${colorId}[]`, file);
       });
     });
-  
+
     // Kiểm tra và append ảnh variation_album_images
     newVariationAlbumImages.forEach(file => {
       formData.append('variation_album_images[]', file);
     });
-  
+
     console.log('Final FormData:', formData); // Debugging log
-  
+
     // Gọi mutation để cập nhật sản phẩm
     try {
       await updateProductMutation(formData); // Sử dụng mutateAsync
@@ -572,7 +573,7 @@ const UpdateProduct: React.FC = () => {
       toast.error(`Cập nhật sản phẩm thất bại: ${error.message}`);
     }
   };
-  
+
 
   const handleGroupChange = (groupId: number) => {
     const group = variantgroup?.find((g: any) => g.group_id === groupId);
@@ -809,14 +810,16 @@ const UpdateProduct: React.FC = () => {
         )}
 
         <Form.Item>
-          <Button
-            type="primary"
-            htmlType="submit"
-            className="bg-indigo-600 hover:bg-indigo-700 text-white mt-5"
-            loading={isUpdating}
-          >
-            Cập nhật sản phẩm
-          </Button>
+          <div className='flex justify-end space-x-4'>
+            <Button type="primary" htmlType="submit">
+              Submit
+            </Button>
+            <Button
+              onClick={() => navigate('/admin/dashboard/attribute/list')}
+            >
+              Back
+            </Button>
+          </div>
         </Form.Item>
       </Form>
     </div>

@@ -1,10 +1,18 @@
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
 import { Button, Input, Spin, Select } from 'antd';
 import { useForm } from 'react-hook-form';
-import { BoxPlotFilled, CloseOutlined, DropboxOutlined, EnvironmentOutlined, HomeOutlined, InboxOutlined, MenuOutlined, MessageOutlined } from '@ant-design/icons';
+import axiosInstance from '@/configs/axios';
+import { toast, ToastContainer } from 'react-toastify';
+import {
+  CloseOutlined,
+  EnvironmentOutlined,
+  InboxOutlined,
+  MenuOutlined,
+  MessageOutlined,
+} from '@ant-design/icons';
 
 const { Option } = Select;
 
@@ -37,14 +45,20 @@ const DetailConfirm: React.FC = () => {
 
   const { id } = useParams();
   const token = localStorage.getItem('token');
-  const { setValue, watch } = useForm<TCheckout>({
+  const {
+    register,
+    setValue,
+    watch,
+    getValues,
+    formState: { errors },
+  } = useForm<TCheckout>({
     defaultValues: {
-      full_name: "",
-      address_line: "",
-      city: "",
-      district: "",
-      ward: "",
-      phone_number: "",
+      full_name: '',
+      address_line: '',
+      city: '',
+      district: '',
+      ward: '',
+      phone_number: '',
       is_default: false,
     },
   });
@@ -52,60 +66,103 @@ const DetailConfirm: React.FC = () => {
   const { data: detailConfirm, isLoading } = useQuery({
     queryKey: ['detailbill', id],
     queryFn: async () => {
-      const response = await axios.get(`http://127.0.0.1:8000/api/admins/orders/show_detailorder/${id}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      return response.data;
-    },
-  });
-
-  const { data: provinces } = useQuery({
-    queryKey: ['provinces '],
-    queryFn: async () => {
-      const response = await axios.get(`https://dev-online-gateway.ghn.vn/shiip/public-api/master-data/province`, {
-        headers: {
-          token: '4bd9602e-9ad5-11ef-8e53-0a00184fe694',
+      const response = await axios.get(
+        `http://127.0.0.1:8000/api/admins/orders/show_detailorder/${id}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
         }
-      });
+      );
       return response.data;
-
     },
   });
 
-  const cityId = detailConfirm?.city;
+  const assignShippingMutation = useMutation({
+    mutationFn: async (billId: string) => {
+      const addressData = getValues();
+      await axiosInstance.post(
+        `http://127.0.0.1:8000/api/admins/orders/ghn-create/${billId}`,
+        addressData
+      );
+    },
+    onSuccess: () => {
+      toast.success('Đã bàn giao đơn hàng cho đơn vị vận chuyển thành công.');
+    },
+    onError: (error: any) => {
+      const errorMessage =
+        error.response?.data?.message ||
+        'Không thể bàn giao đơn hàng cho đơn vị vận chuyển.';
+      toast.error(errorMessage);
+    },
+  });
 
-  const { data: districts } = useQuery({
-    queryKey: ['districts', cityId],
+  const handleAssignShipping = () => {
+    if (id) {
+      assignShippingMutation.mutate(id);
+    }
+  };
+
+  const { data: province, isLoading: isLoadingProvinces } = useQuery({
+    queryKey: ['province'],
     queryFn: async () => {
-      const response = await axios.get(`https://dev-online-gateway.ghn.vn/shiip/public-api/master-data/district`, {
-        headers: { token: '4bd9602e-9ad5-11ef-8e53-0a00184fe694' }
-      });
-      return response.data;
+      return await axios.get(
+        'https://dev-online-gateway.ghn.vn/shiip/public-api/master-data/province',
+        {
+          headers: {
+            token: '4bd9602e-9ad5-11ef-8e53-0a00184fe694',
+          },
+        }
+      );
     },
   });
 
+  const cityId: any = watch('city');
+  const { data: district } = useQuery({
+    queryKey: ['district', cityId],
+    queryFn: async () => {
+      return await axios.get(
+        'https://dev-online-gateway.ghn.vn/shiip/public-api/master-data/district',
+        {
+          params: { province_id: parseInt(cityId) },
+          headers: {
+            token: '4bd9602e-9ad5-11ef-8e53-0a00184fe694',
+          },
+        }
+      );
+    },
+    enabled: !!cityId,
+  });
+
+  const districtId: any = watch('district');
   const { data: ward } = useQuery({
-    queryKey: ['ward'],
+    queryKey: ['ward', districtId],
     queryFn: async () => {
-      return await axios.get(`https://dev-online-gateway.ghn.vn/shiip/public-api/master-data/ward`, {
-        headers: {
-          token: '4bd9602e-9ad5-11ef-8e53-0a00184fe694',
+      return await axios.get(
+        'https://dev-online-gateway.ghn.vn/shiip/public-api/master-data/ward',
+        {
+          params: { district_id: parseInt(districtId) },
+          headers: {
+            token: '4bd9602e-9ad5-11ef-8e53-0a00184fe694',
+          },
         }
-      });
+      );
     },
+    enabled: !!districtId,
   });
-
 
   useEffect(() => {
-    setValue("district", '');
-  }, [watch("city")]);
-  const provinceName = provinces?.data?.find((p: any) => p.ProvinceID === parseInt(detailConfirm?.city))?.ProvinceName || "Không có tỉnh";
-  const districtName = districts?.data?.find((d: any) => d.DistrictID === parseInt(detailConfirm?.district))?.DistrictName || "Không có quận";
+    setValue('district', '');
+  }, [cityId, setValue]);
 
-  if (isLoading) return <Spin tip="Loading..." className="flex justify-center items-center h-screen" />;
+  useEffect(() => {
+    setValue('ward', '');
+  }, [districtId, setValue]);
+
+  if (isLoading)
+    return <Spin tip="Loading..." className="flex justify-center items-center h-screen" />;
 
   return (
     <>
+      <ToastContainer />
       <div className="flex min-h-screen pb-20 px-5">
         <div className={`${visible ? 'w-2/3' : 'w-full'} transition-all duration-300`}>
           <div className="bg-white shadow-md flex items-center justify-between px- py-2">
@@ -122,74 +179,35 @@ const DetailConfirm: React.FC = () => {
             </div>
 
             <div className="flex items-center space-x-4">
-              <HomeOutlined className="text-2xl cursor-pointer" onClick={() => navigate('/home')} />
-              <div className="p-2 rounded-full cursor-pointer hover:bg-gray-200">
-                <MessageOutlined className="text-2xl text-gray-800" onClick={openChatDrawer} />
-              </div>
+              <MessageOutlined className="text-2xl cursor-pointer" onClick={openChatDrawer} />
             </div>
           </div>
 
           <div className="bg-white shadow-lg mb-4">
-            <div className="flex items-center justify-between mb-4 p-4 border-b bg-slate-100">
-              <div className="flex items-center gap-2">
-                <InboxOutlined style={{ fontSize: '1.5rem', color: '#333' }} />
-                <h3 className="text-lg font-bold">Thông Tin</h3>
+            <div className="w-full p-5">
+              <h3 className="text-lg font-bold mb-6 text-gray-900 border-b pb-4">Thông Tin Sản Phẩm</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                {detailConfirm?.bill_detail?.map((item: any) => (
+                  <div
+                    key={item.id}
+                    className="flex flex-col md:flex-row items-start md:items-center justify-between p-6 border border-gray-200 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200 bg-white"
+                  >
+                    <div className="w-full md:w-2/3 md:ml-6">
+                      <h4 className="text-lg font-semibold text-gray-900 mb-3">{item.name}</h4>
+                      <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm text-gray-700">
+                        <p><strong>Giá:</strong> {parseFloat(item.price).toLocaleString()} đ</p>
+                        <p><strong>Màu sắc:</strong> {item.attribute_value_color}</p>
+                        <p><strong>Kích cỡ:</strong> {item.attribute_value_size}</p>
+                        <p><strong>Số lượng:</strong> {item.quantity}</p>
+                        <p className="col-span-2 mt-3"><strong>Tổng tiền:</strong> <span className="text-lg font-bold text-red-500">{parseFloat(item.total_amount).toLocaleString()} đ</span></p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-white">
-              <p className="text-base text-black">
-                <strong className="text-black">Người Nhận:</strong> {detailConfirm?.name || 'Không có thông tin'}
-              </p>
-              <p className="text-base text-black">
-                <strong className="text-black">Địa Chỉ:</strong> {detailConfirm?.address_line || 'Không có thông tin'}
-              </p>
-              <p className="text-base text-black">
-                <strong className="text-black">Email người nhận:</strong> {detailConfirm?.email_receiver || 'Không có thông tin'}
-              </p>
-              <p className="text-base text-black">
-                <strong className="text-black">Số Điện Thoại:</strong> {detailConfirm?.phone_number || 'Không có thông tin'}
-              </p>
-              <p className="text-base text-black">
-                <strong className="text-black">Ghi Chú:</strong> {detailConfirm?.note || 'Không có ghi chú'}
-              </p>
-              <p className="text-base text-black">
-                <strong className="text-black">Hình Thức Thanh Toán:</strong> {detailConfirm?.payment_type_description || 'Không có thông tin'}
-              </p>
-              <p className="text-base text-black">
-                <strong className="text-black">Ngày Đặt Hàng:</strong> {detailConfirm?.order_date && detailConfirm?.order_time ? `${detailConfirm.order_date} ${detailConfirm.order_time}` : 'Không có thông tin'}
-              </p>
-              <p className="text-base text-black">
-                <strong className="text-black">Tổng Phụ:</strong> {parseFloat(detailConfirm?.subtotal || 0).toLocaleString()} đ
-              </p>
-              <p className="text-base text-black">
-                <strong className="text-black">Phí Vận Chuyển:</strong> {parseFloat(detailConfirm?.shipping_fee || 0).toLocaleString()} đ
-              </p>
-              <p className="text-base text-black">
-                <strong className="text-black">Giảm Giá Đã Áp Dụng:</strong> {parseFloat(detailConfirm?.discounted_amount || 0).toLocaleString()} đ
-              </p>
-              <p className="text-base text-black">
-                <strong className="text-black">Giảm Giá Phí Vận Chuyển:</strong> {parseFloat(detailConfirm?.discounted_shipping_fee || 0).toLocaleString()} đ
-              </p>
-              <p className="text-lg font-bold text-black md:col-span-2">
-                <strong className="text-black">Tổng Cộng:</strong> <span className="text-red-500">{parseFloat(detailConfirm?.total || 0).toLocaleString()} đ</span>
-              </p>
-            </div>
-
-            <div className="mt-4 p-4 bg-slate-100 shadow-sm">
-              <p className="text-lg font-bold text-black mb-3">Khuyến Mãi Đã Áp Dụng:</p>
-              <ul className="list-disc list-inside pl-3 text-base text-black space-y-1">
-                {detailConfirm?.promotions?.length > 0 ? (
-                  detailConfirm?.promotions?.map((promotion: any, index: number) => (
-                    <li key={index}>
-                      <strong className="text-black">{promotion.code}:</strong> {promotion.description} - Giảm {promotion.discount_amount}%
-                    </li>
-                  ))
-                ) : (
-                  <li>Không có khuyến mãi áp dụng</li>
-                )}
-              </ul>
-            </div>
           </div>
+
           <div className="bg-white shadow-lg">
             <div className="flex items-center justify-between mb-4 p-4 border-b bg-slate-100">
               <div className="flex items-center gap-2">
@@ -206,17 +224,8 @@ const DetailConfirm: React.FC = () => {
                 <Option value="address2">Địa chỉ 2</Option>
               </Select>
             </div>
-            <div className="flex items-center justify-between mb-4 p-4 border-b">
-              <label className="font-medium text-gray-700">Dự kiến nhận hàng</label>
-              <Input
-                className='h-[38px]'
-                type="date"
-                placeholder="Chọn ngày"
-                style={{ width: 150 }}
-              />
-            </div>
             <div className='p-5'>
-              <div className='flex justify-center gap-5 pb-5'>
+            <div className='flex justify-center gap-5 pb-5'>
                 <div className='w-[50%]'>
                   <Input className='h-[38px]' value={detailConfirm?.full_name} placeholder='Người Nhận' />
                 </div>
@@ -227,56 +236,56 @@ const DetailConfirm: React.FC = () => {
               <div className='pb-5'>
                 <Input className='h-[38px]' value={detailConfirm?.address_line} placeholder='Địa Chỉ' />
               </div>
-              <div className='flex justify-center w-[100%] gap-2'>
-                <div className='w-full'>
-                  <Select className='w-full h-[38px]' defaultValue={detailConfirm?.city || 'Chọn tỉnh'}>
-                    <Option value="city">{detailConfirm?.city || 'Không có tỉnh'}</Option>
-                  </Select>
-                </div>
-                <div className='w-full '>
-                  <Select className='w-full h-[38px]' defaultValue={detailConfirm?.district || 'Chọn quận'}>
-                    <Option value="district">{detailConfirm?.district || 'Không có quận'}</Option>
-                  </Select>
-                </div>
-                <div className='w-full '>
-                  <Select className='w-full h-[38px]' defaultValue={detailConfirm?.ward || 'Chọn quận'}>
-                    <Option value="ward">{detailConfirm?.ward || 'Không có quận'}</Option>
-                  </Select>
-                </div>
+              <div className="mb-4">
+                <label>Tỉnh / Thành</label>
+                {isLoadingProvinces ? (
+                  <p>Đang tải tỉnh/thành...</p>
+                ) : (
+                  <select {...register('city')} className="w-full border rounded p-2">
+                    <option value="" disabled>-- Chọn Tỉnh / Thành --</option>
+                    {province?.data?.data.map((item: any) => (
+                      <option key={item.ProvinceID} value={item.ProvinceID}>
+                        {item.ProvinceName}
+                      </option>
+                    ))}
+                  </select>
+                )}
+                {errors.city && <p className="text-red-500 text-sm">{errors.city.message}</p>}
               </div>
-            </div>
 
-            {/* Phần Vận chuyển */}
-            <div className="flex items-center justify-between mb-4 p-4 border-b bg-slate-100 mt-5">
-              <div className="flex items-center gap-2">
-                <DropboxOutlined style={{ fontSize: '1.5rem', color: '#333' }} />
-                <h3 className="text-lg font-bold">Vận chuyển</h3>
+              <div className="mb-4">
+                <label>Quận / Huyện</label>
+                {district?.data && (
+                  <select {...register('district')} className="w-full border rounded p-2">
+                    <option value="" disabled>-- Chọn Quận / Huyện --</option>
+                    {district.data.data.map((item: any) => (
+                      <option key={item.DistrictID} value={item.DistrictID}>
+                        {item.DistrictName}
+                      </option>
+                    ))}
+                  </select>
+                )}
+                {errors.district && <p className="text-red-500 text-sm">{errors.district.message}</p>}
               </div>
-              <Select
-                className='h-[38px]'
-                placeholder="Đơn vị Vận Chuyển"
-                style={{ width: 150 }}
-                defaultValue="Đơn vị VC"
-              >
-                {/* Các tùy chọn đơn vị vận chuyển */}
-                <Option value="vc1">Đơn vị VC 1</Option>
-                <Option value="vc2">Đơn vị VC 2</Option>
-              </Select>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-5">
-              <div>
-                <label>Mã vận đơn</label>
-                <Input className='h-[38px]' value={detailConfirm?.tracking_code || 'Chưa có mã vận đơn'} disabled />
-              </div>
-              <div>
-                <label>Phí vận chuyển</label>
-                <Input className='h-[38px]' value={`${parseFloat(detailConfirm?.shipping_fee || '0').toLocaleString()} đ`} disabled />
+
+              <div className="mb-4">
+                <label>Phường / Xã</label>
+                {ward?.data && (
+                  <select {...register('ward')} className="w-full border rounded p-2">
+                    <option value="" disabled>-- Chọn Phường / Xã --</option>
+                    {ward.data.data.map((item: any) => (
+                      <option key={item.WardCode} value={item.WardCode}>
+                        {item.WardName}
+                      </option>
+                    ))}
+                  </select>
+                )}
+                {errors.ward && <p className="text-red-500 text-sm">{errors.ward.message}</p>}
               </div>
             </div>
           </div>
         </div>
 
-        {/* Phần chat realtime, chiếm 1/3 nếu chat mở */}
         {visible && (
           <div className="w-1/3 p-6 border-l border-gray-200 transition-all duration-300 flex flex-col">
             <div className="flex justify-between items-center mb-4">
@@ -290,7 +299,8 @@ const DetailConfirm: React.FC = () => {
               {messages.map((message, index) => (
                 <div key={index} className={`flex ${index % 2 === 0 ? 'justify-start' : 'justify-end'} mb-2`}>
                   <p
-                    className={`${index % 2 === 0 ? 'bg-blue-200 text-left' : 'bg-green-200 text-right'} p-2 rounded-lg max-w-xs`}
+                    className={`${index % 2 === 0 ? 'bg-blue-200 text-left' : 'bg-green-200 text-right'
+                      } p-2 rounded-lg max-w-xs`}
                   >
                     {message}
                   </p>
@@ -305,38 +315,33 @@ const DetailConfirm: React.FC = () => {
                 placeholder="Nhập tin nhắn..."
                 className="flex-grow rounded-lg mr-2"
               />
-              <Button
-                type="primary"
-                onClick={handleSendMessage}
-                className="rounded-lg"
-              >
+              <Button type="primary" onClick={handleSendMessage} className="rounded-lg">
                 Gửi
               </Button>
             </div>
           </div>
         )}
+      </div>
 
-      </div >
-      <div className="fixed bottom-0 w-full bg-white border-t border-gray-300 p-4 flex items-center justify-around shadow-lg z-50">
-        {/* Thông tin cần thanh toán */}
-        <div className="flex items-center space-x-2">
+      <div className="fixed bottom-0 w-full bg-white border-t border-gray-300 py-4 flex items-center justify-around shadow-lg">
+        <div>
           <p className="text-sm font-medium text-gray-700">Cần thanh toán:</p>
-          <span className="text-lg font-bold text-black">{parseFloat(detailConfirm?.total || 0).toLocaleString()} đ</span>
-        </div>
-
-        {/* Thông tin COD */}
-        <div className="flex items-center space-x-2">
-          <p className="text-sm font-medium text-red-500">COD:</p>
-          <span className="text-lg font-bold text-red-500">{parseFloat(detailConfirm?.cod || 0).toLocaleString()} đ</span>
+          <span className="text-lg font-bold text-black">
+            {parseFloat(detailConfirm?.total || 0).toLocaleString()} đ
+          </span>
         </div>
 
         <div className="flex space-x-3">
-          <Button type="primary" className="rounded-md px-4">Bàn Giao Đơn Vị Vận Chuyển</Button>
+          <button
+            className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-md px-4 w-[200px] transition duration-300 ease-in-out transform hover:scale-105"
+            onClick={handleAssignShipping}
+          >
+            Bàn Giao Đơn Vị Vận Chuyển
+          </button>
         </div>
       </div>
-
     </>
   );
-}
+};
 
 export default DetailConfirm;

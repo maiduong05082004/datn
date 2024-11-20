@@ -13,7 +13,6 @@ interface User {
   role: 'admin' | 'user' | 'moderator';
   is_active: boolean;
   date_of_birth: string | null;
-  sex: 'male' | 'female' | null;
   created_at: string;
   updated_at: string;
 }
@@ -35,18 +34,9 @@ const UserList: React.FC = () => {
     return <Spin tip="Đang tải dữ liệu..." className="flex justify-center items-center h-screen" />;
   }
 
-  const dataSource = userManager.map((item: User, index: number) => ({
-    key: item.id,
+  const dataSource = userManager.map((user: any, index: any) => ({
+    key: user.id, ...user,
     index: index + 1,
-    id: item.id,
-    name: item.name,
-    email: item.email,
-    role: item.role,
-    isActive: item.is_active ? 'Active' : 'Inactive',
-    dateOfBirth: item.date_of_birth,
-    sex: item.sex === 'male' ? 'Nam' : item.sex === 'female' ? 'Nữ' : '',
-    createdAt: new Date(item.created_at).toLocaleString(),
-    updatedAt: new Date(item.updated_at).toLocaleString(),
   }));
 
   const columns = [
@@ -57,9 +47,14 @@ const UserList: React.FC = () => {
       width: 50,
     },
     {
-      title: 'Tên',
+      title: 'Tên người dùng',
       dataIndex: 'name',
       key: 'name',
+    },
+    {
+      title: 'Ngày sinh',
+      dataIndex: 'date_of_birth',
+      key: 'date_of_birth',
     },
     {
       title: 'Email',
@@ -67,51 +62,52 @@ const UserList: React.FC = () => {
       key: 'email',
     },
     {
-      title: 'Vai trò',
-      dataIndex: 'role',
-      key: 'role',
+      title: 'Địa chỉ',
+      dataIndex: 'address',
+      key: 'address',
     },
     {
-      title: 'Trạng thái',
-      dataIndex: 'isActive',
-      key: 'isActive',
+      title: 'Số điện thoại',
+      dataIndex: 'phone',
+      key: 'phone',
     },
     {
-      title: 'Ngày sinh',
-      dataIndex: 'dateOfBirth',
-      key: 'dateOfBirth',
-    },
-    {
-      title: 'Giới tính',
-      dataIndex: 'sex',
-      key: 'sex',
+      title: 'Trạng thái hoạt động',
+      dataIndex: 'is_active',
+      key: 'is_active',
+      render: (isActive: boolean) => (isActive ? 'Hoạt động' : 'Không hoạt động'),
     },
     {
       title: 'Ngày tạo',
-      dataIndex: 'createdAt',
-      key: 'createdAt',
+      dataIndex: 'created_at',
+      key: 'created_at',
+      render: (date: string) => new Date(date).toLocaleDateString(),
     },
     {
       title: 'Ngày cập nhật',
-      dataIndex: 'updatedAt',
-      key: 'updatedAt',
+      dataIndex: 'updated_at',
+      key: 'updated_at',
+      render: (date: string) => new Date(date).toLocaleDateString(),
     },
     {
       title: 'Hành động',
-      key: 'actions',
-      width: 200,
-      render: (_: any, record: any) => (
+      key: 'action',
+      render: (_: any, record: User) => (
         <Space size="middle">
           <Button
             type="default"
             icon={<EyeOutlined />}
-            onClick={() => navigate(`/admin/viewUser/${record.id}`)} 
-          />
+            onClick={() => navigate(`/admin/dashboard/user/detail/${record.id}`)}
+            className='rounded-full'
+          >
+          </Button>
           <Button
             type="default"
             icon={<EditOutlined />}
-            onClick={() => navigate(`/admin/updateUser/${record.id}`)} 
-          />
+            onClick={() => navigate(`/admin/dashboard/user/update/${record.id}`)}
+            className='rounded-full'
+          >
+          </Button>
         </Space>
       ),
     },
@@ -125,7 +121,7 @@ const UserList: React.FC = () => {
           <Button
             type="default"
             icon={<PlusOutlined />}
-            onClick={() => navigate('/admin/user/add')}
+            onClick={() => navigate('/admin/dashboard/user/add')}
           >
             Thêm mới
           </Button>
@@ -133,6 +129,7 @@ const UserList: React.FC = () => {
         <Table
           columns={columns}
           dataSource={dataSource}
+          bordered
           rowKey="id"
           pagination={{
             pageSize: 7,
