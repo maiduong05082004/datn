@@ -58,6 +58,7 @@ import PrivateRouter from "./PrivateRoute";
 // import CartPage from "@/pages/(website)/cart/page";
 import InventoryManagement from "@/pages/(dashboard)/dashboard/Inventory/list";
 import Signin from "@/pages/(dashboard)/dashboard/auth.tsx/signin";
+import DetailBanner from "@/pages/(dashboard)/dashboard/Banner/detail";
 const Router = () => {
 
     const [isSearch, setIsSearch] = useState<boolean>(false)
@@ -105,6 +106,7 @@ const Router = () => {
                     <Route path="banner/add" element={<AddBanners />} />
                     <Route path="banner/list" element={<ListBanners />} />
                     <Route path="banner/update/:id" element={<UpdateBanners />} />
+                    <Route path="banner/detail/:id" element={<DetailBanner />} />
                     {/* users */}
                     <Route path="user/add" element={<AddUser />} />
                     <Route path="user/list" element={<ListUser />} />
