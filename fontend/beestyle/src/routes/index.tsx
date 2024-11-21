@@ -59,6 +59,9 @@ import PrivateRouter from "./PrivateRoute";
 import InventoryManagement from "@/pages/(dashboard)/dashboard/Inventory/list";
 import Signin from "@/pages/(dashboard)/dashboard/auth.tsx/signin";
 import DetailBanner from "@/pages/(dashboard)/dashboard/Banner/detail";
+import ForgotPasswordPage from "@/pages/(website)/ForgotPassword/page";
+import ResetPasswordPage from "@/pages/(website)/ResetPassword/page";
+
 const Router = () => {
 
     const [isSearch, setIsSearch] = useState<boolean>(false)
@@ -74,6 +77,8 @@ const Router = () => {
                     <Route path="checkouts" element={<CheckOutPage />} />
                     <Route path="signin" element={<PageSignin />} />
                     <Route path="signup" element={<PageSignup />} />
+                    <Route path="forgot-password" element={<ForgotPasswordPage />} />
+                    <Route path="reset-password/:token" element={<ResetPasswordPage />} />
                     <Route path="search" element={<SearchPage isKeySearch={isKeySearch} />} />
                     <Route path="carts" element={<CartPage />} />
                     <Route path="account" element={<AccountPage />}>

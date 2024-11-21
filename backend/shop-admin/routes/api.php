@@ -35,11 +35,13 @@ Route::prefix('client')->as('client.')->group(function () {
             Route::post('/signin', [AuthController::class, 'login'])->name('signin');
             Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth:sanctum')->name('logout');
             Route::get('/profile', [AuthController::class, 'user'])->middleware('auth:sanctum')->name('profile');
-            Route::post('/forgot-password', [AuthController::class, 'forgotPassword'])->middleware('guest')->name('password.email');
-            Route::post('/reset-password', [AuthController::class, 'resetPassword'])->middleware('guest')->name('password.update');
+            Route::put('/update', [AuthController::class, 'updateUserInfo'])->name('user.update');
+            Route::post('/add-points', [AuthController::class, 'addPoints']);
+            Route::post('/forgot-password', [AuthController::class, 'forgotPassword'])->name('password.email');
+            Route::post('/reset-password', [AuthController::class, 'resetPassword'])->name('password.update');
             Route::get('/reset-password/{token}', function ($token) {
                 return response()->json(['token' => $token]);
-            })->middleware('guest')->name('password.reset');
+            })->name('password.reset');
             Route::get('/google', [AuthController::class, 'redirectToGoogle'])->name('google.redirect');
             Route::get('/callback/google', [AuthController::class, 'handleGoogleCallback'])->name('google.callback');
         });
@@ -92,6 +94,11 @@ Route::prefix('client')->as('client.')->group(function () {
         Route::get('/cancel', [CheckoutController::class, 'cancel'])->name('cancel');
         Route::get('/callback', [CheckoutController::class, 'vnpayCallback'])->name('callback');
     });
+    Route::prefix('payment')->as('payment.')->group(function () {
+        Route::post('/', [PaymentController::class, 'vnpayPayment'])->name('vn-pay');
+        Route::get('/callback', [PaymentController::class, 'vnpayCallback'])->name('callback');
+    });
+    
     Route::prefix('comment')->as('comment.')->group(function () {
         Route::post('/store', [CommentController::class, 'store'])->name('comment.store'); // Tạo 1 bình luận
         Route::put('/update', [CommentController::class, 'update'])->name('comment.update'); // Cập nhật bình luận

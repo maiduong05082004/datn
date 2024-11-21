@@ -34,6 +34,8 @@ class User extends Authenticatable
         'role',             // Vai trò của người dùng (ví dụ: admin, user)
         'last_login_at',    // Thời gian người dùng đăng nhập lần cuối
         'is_active',        // Trạng thái kích hoạt tài khoản (true/false)
+        'points',
+        'tier',
     ];
 
 

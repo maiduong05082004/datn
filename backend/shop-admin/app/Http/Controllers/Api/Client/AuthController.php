@@ -13,6 +13,8 @@ use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Str;
 use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Crypt;
+use Illuminate\Support\Facades\Mail;
 
 class AuthController extends Controller
 {
@@ -20,23 +22,23 @@ class AuthController extends Controller
     {
         Log::info('Request data:', $request->all());
         $data = $request->all();
-        
+
         $requiredFields = ['name', 'email', 'password', 'sex', 'date_of_birth'];
         $missingFields = [];
-    
+
         foreach ($requiredFields as $field) {
             if (!isset($data[$field])) {
                 $missingFields[] = $field;
             }
         }
-    
+
         if (!empty($missingFields)) {
             return response()->json([
                 'error' => 'Missing required fields',
                 'missing_fields' => $missingFields
             ], 400);
         }
-    
+
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
@@ -44,7 +46,7 @@ class AuthController extends Controller
             'sex' => 'required|string|in:male,female,other',
             'date_of_birth' => 'required|date',
         ]);
-    
+
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
@@ -54,7 +56,7 @@ class AuthController extends Controller
             'role' => User::Role_User,
             'is_active' => true,
         ]);
-    
+
         return response()->json([
             'message' => 'User registered successfully',
         ], 201);
@@ -143,38 +145,117 @@ class AuthController extends Controller
     {
         $request->validate(['email' => 'required|email']);
 
-        $status = Password::sendResetLink(
-            $request->only('email')
-        );
+        $user = User::where('email', $request->email)->first();
 
-        return $status === Password::RESET_LINK_SENT
-            ? response()->json(['status' => __($status)], 200)
-            : response()->json(['email' => __($status)], 400);
+        if (!$user) {
+            return response()->json(['message' => 'User not found.'], 404);
+        }
+
+        // Tạo token chứa email mã hóa
+        $payload = [
+            'email' => $user->email,
+        ];
+        $token = Crypt::encrypt($payload);
+
+        // Link reset password chứa token
+        $resetLink = "http://localhost:5173/reset-password/{$token}";
+
+        // Gửi email quên mật khẩu
+        Mail::to($user->email)->send(new \App\Mail\ResetPasswordMail($resetLink));
+
+        return response()->json(['message' => 'Reset password email sent successfully.'], 200);
     }
 
     public function resetPassword(Request $request)
     {
         $request->validate([
             'token' => 'required',
-            'email' => 'required|email',
             'password' => 'required|min:8|confirmed',
         ]);
 
-        $status = Password::reset(
-            $request->only('email', 'password', 'password_confirmation', 'token'),
-            function (User $user, string $password) {
-                $user->forceFill([
-                    'password' => Hash::make($password)
-                ])->setRememberToken(Str::random(60));
+        try {
+            // Giải mã token
+            $payload = Crypt::decrypt($request->token);
+            $email = $payload['email'];
 
-                $user->save();
+            // Tìm người dùng qua email
+            $user = User::where('email', $email)->first();
 
-                event(new PasswordReset($user));
+            if (!$user) {
+                return response()->json(['message' => 'User not found.'], 404);
             }
-        );
 
-        return $status === Password::PASSWORD_RESET
-            ? response()->json(['message' => 'Password reset successfully'], 200)
-            : response()->json(['email' => [__($status)]], 400);
+            // Cập nhật mật khẩu người dùng
+            $user->forceFill([
+                'password' => Hash::make($request->password),
+            ])->setRememberToken(Str::random(60));
+
+            $user->save();
+
+            return response()->json(['message' => 'Password has been reset successfully.'], 200);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Invalid or expired token.'], 400);
+        }
     }
+    public function updateUserInfo(Request $request)
+    {
+        $user = $request->user(); // Lấy thông tin người dùng đang đăng nhập
+
+        // Xác thực dữ liệu đầu vào
+        $request->validate([
+            'name' => 'nullable|string|max:255',
+            'date_of_birth' => 'nullable|date',
+            'sex' => 'nullable|string|in:male,female,other',
+            'phone' => 'nullable|string|max:15',
+            'address' => 'nullable|string|max:500',
+        ]);
+
+        try {
+            // Cập nhật thông tin người dùng
+            $user->update($request->only(['name', 'date_of_birth', 'sex', 'phone', 'address']));
+
+            return response()->json([
+                'message' => 'User information updated successfully.',
+                'user' => $user,
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Failed to update user information.',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    public function addPoints(Request $request)
+    {
+        $user = $request->user();
+
+        $request->validate([
+            'amount' => 'required|numeric|min:0',
+        ]);
+
+        $pointsEarned = floor($request->amount / 10000);
+        $user->points += $pointsEarned;
+        $user->save();
+
+        return response()->json([
+            'message' => 'Points added successfully.',
+            'points_earned' => $pointsEarned,
+            'total_points' => $user->points,
+        ], 200);
+    }
+    // public function calculateTier()
+    // {
+    //     if ($this->points >= 2000) {
+    //         $this->tier = 'Diamond';
+    //     } elseif ($this->points >= 1000) {
+    //         $this->tier = 'Gold';
+    //     } elseif ($this->points >= 500) {
+    //         $this->tier = 'Silver';
+    //     } else {
+    //         $this->tier = 'Bronze';
+    //     }
+
+    //     $this->save(); // Cập nhật vào cơ sở dữ liệu
+    // }
 }
