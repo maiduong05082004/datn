@@ -57,33 +57,12 @@ class AttributeValueController extends Controller
     public function show($attribute_id)
     {
 
-        $attributeValues = AttributeValue::with('attribute')
-            ->where('attribute_id', $attribute_id)
-            ->get();
-    
+      $params = AttributeValue::query()->findOrFail($attribute_id);
 
-        if ($attributeValues->isEmpty()) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Không tìm thấy attribute_id trong dữ liệu bạn tìm kiếm',
-            ], 404);
-        }
-
-        $groupedResult = $attributeValues->groupBy('attribute_id')->map(function ($group) {
-            return [
-                'attribute_id' => $group->first()->attribute_id,
-                'attribute_name' => $group->first()->attribute->name,
-                'attribute_type' => $group->first()->attribute->attribute_type,
-                'values' => $group->map(function ($item) {
-                    return [
-                        'value_id' => $item->id,
-                        'value' => $item->value,
-                    ];
-                })->values(), 
-            ];
-        })->first(); 
-
-        return response()->json($groupedResult, 200);
+      return response()->json([
+        'attribute_id' => $params->attribute_id,
+        'value' => $params->value,
+      ]);
     }
     
 
