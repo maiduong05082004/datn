@@ -77,13 +77,15 @@ const CheckAddresses = ({ selectedAddress, handleSelectProduct, isCheckAddresses
 
 
     const getWard = async (districtId: any) => {
-        const { data } = await axios.get(`https://dev-online-gateway.ghn.vn/shiip/public-api/master-data/ward`, {
+        await axios.get(`https://dev-online-gateway.ghn.vn/shiip/public-api/master-data/ward`, {
             params: { district_id: districtId },
             headers: {
                 token: '4bd9602e-9ad5-11ef-8e53-0a00184fe694',
             }
+        }).then(({data}) =>{
+console.log(data);
+
         })
-        return data
     }
 
     const [districtId, setDistrictId] = useState<number | null>(null);
@@ -224,7 +226,11 @@ const CheckAddresses = ({ selectedAddress, handleSelectProduct, isCheckAddresses
                                                         <p className='text-[#787878]'>{item.phone_number}</p>
                                                     </div>
                                                     <div className="mt-[5px]">
+<<<<<<< HEAD
                                                         <div className="text-[#787878]"> {item.address_line} ,{wardsMap[item.district]?.[item.ward] || "Đang tải..."}, {getDistrictName(item.district)}, {getProvinceName(item.city)}</div>
+=======
+                                                        <div className="text-[#787878]"> {item.address_line} ,{getWard(item.ward)}, {getDistrictName(item.district)}, {getProvinceName(item.city)}</div>
+>>>>>>> eb1ce11 (Manager Banner Admin)
                                                         {item?.is_default && (
                                                             <div className="py-[5px] w-[70px] text-center rounded-[3px] text-[12px] mt-[5px] text-white bg-black">Mặc định</div>
                                                         )}
