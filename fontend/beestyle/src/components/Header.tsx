@@ -1,17 +1,17 @@
+import Support from "@/pages/(website)/_components/Support";
 import EventsAudio from "@/pages/(website)/events/eventsAudio";
 import EventsCanvas from "@/pages/(website)/events/eventsCanvas";
+import LoadingPage from "@/pages/(website)/loading/page";
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
-import { values } from "lodash";
 import { Dispatch, SetStateAction, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 type Props = {
     isSearch: boolean
-    // onClicks: () => void;
     setIsSearch: Dispatch<SetStateAction<boolean>>;
-  }
+}
 
-const Header = ({isSearch, setIsSearch}: Props) => {
+const Header = ({ isSearch, setIsSearch }: Props) => {
 
     const [openCategories, setOpenCategories] = useState<boolean>(false);
 
@@ -24,28 +24,29 @@ const Header = ({isSearch, setIsSearch}: Props) => {
 
     const token = localStorage.getItem("token")
 
-    const { data: user } = useQuery({
+    const { data: user, isLoading } = useQuery({
         queryKey: ['user', token],
         queryFn: () => {
-            if (!token) return null;
-            return axios.get(`http://127.0.0.1:8000/api/client/auth/profile` , {
-                headers: { Authorization: `Bearer ${token}` }
+            return axios.get(`http://127.0.0.1:8000/api/client/auth/profile`, {
+                headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
             })
         }
     })
-    
-    const { data: carts } = useQuery({
+
+    const { data: carts, isLoading: isLoadingCarts } = useQuery({
         queryKey: ['carts', token],
         queryFn: () => {
             return axios.get(`http://127.0.0.1:8000/api/client/cart`, {
                 headers: {
                     Authorization: `Bearer ${token}`, // Truyền token vào header
-                  }
+                }
             })
         },
-        enabled:!!token,
+        enabled: !!token,
     })
 
+    if(isLoadingCarts) {<LoadingPage />}
+    
     return (
         <>
             <div className="bg-black h-[42px] text-center flex">
@@ -61,11 +62,11 @@ const Header = ({isSearch, setIsSearch}: Props) => {
                         </div>
                         <div className="flex items-center">
                             <Link to={`/`} className='lg:hidden w-[100px] flex justify-center items-center text-center'>
-                            <img src="https://res.cloudinary.com/dg4yxsmhs/image/upload/v1730021939/yukhkav8xga7cwvn3jcd.png" alt="" />
+                                <img src="https://res.cloudinary.com/dg4yxsmhs/image/upload/v1730021939/yukhkav8xga7cwvn3jcd.png" alt="" />
                                 {/* <svg xmlns="http://www.w3.org/2000/svg" width="69.53" height="24" viewBox="0 0 84 24" fill="none"> <path fillRule="evenodd" clip-rule="evenodd" d="M27.6027 0L17.7745 10.585L14.1671 0H6.94734V0.005L5.41862 0L6.33686 2.365L1.14528 19.9L0 24H7.24501L10.6203 12.505L13.1177 18.435H17.8199L23.8036 12.505L20.4283 24H27.7742L34.8224 0H27.6027ZM75.8708 7.25C75.5933 8.195 74.67 9.205 72.6519 9.205H68.0758L69.2261 5.295H73.8022C75.8153 5.295 76.1483 6.305 75.8708 7.25ZM73.5499 16.585C73.2573 17.595 72.2583 18.71 70.2402 18.71H65.2908L66.5269 14.495H71.4814C73.4944 14.495 73.8526 15.575 73.555 16.585H73.5499ZM83.1208 7.04C84.3317 2.895 82.031 0 75.8203 0H61.86L62.7884 2.2L57.1831 21.68L54.7714 24H69.4078C74.7356 24 79.5336 23.5 80.8807 18.915C81.8696 15.545 80.8858 12.69 79.8464 12.08C80.916 11.575 82.3186 9.77 83.1208 7.04ZM41.1896 18.74H51.3709H51.376C51.418 18.7175 51.4112 18.7212 51.3897 18.733C51.2824 18.7916 50.8087 19.0503 54.2568 17.225L52.1984 23.995H30.6853L32.9961 21.69L38.7527 2.32L37.7891 0H46.694L41.1896 18.74Z" fill="black"></path> </svg> */}
                             </Link>
                             <Link to={`/`} className='hidden lg:flex w-[140px] justify-center items-center text-center'>
-                            <img src="https://res.cloudinary.com/dg4yxsmhs/image/upload/v1730021939/yukhkav8xga7cwvn3jcd.png" alt="" />
+                                <img src="https://res.cloudinary.com/dg4yxsmhs/image/upload/v1730021939/yukhkav8xga7cwvn3jcd.png" alt="" />
                                 {/* <svg xmlns="http://www.w3.org/2000/svg" width="84" height="24" viewBox="0 0 84 24" fill="none"> <path fillRule="evenodd" clip-rule="evenodd" d="M27.6027 0L17.7745 10.585L14.1671 0H6.94734V0.005L5.41862 0L6.33686 2.365L1.14528 19.9L0 24H7.24501L10.6203 12.505L13.1177 18.435H17.8199L23.8036 12.505L20.4283 24H27.7742L34.8224 0H27.6027ZM75.8708 7.25C75.5933 8.195 74.67 9.205 72.6519 9.205H68.0758L69.2261 5.295H73.8022C75.8153 5.295 76.1483 6.305 75.8708 7.25ZM73.5499 16.585C73.2573 17.595 72.2583 18.71 70.2402 18.71H65.2908L66.5269 14.495H71.4814C73.4944 14.495 73.8526 15.575 73.555 16.585H73.5499ZM83.1208 7.04C84.3317 2.895 82.031 0 75.8203 0H61.86L62.7884 2.2L57.1831 21.68L54.7714 24H69.4078C74.7356 24 79.5336 23.5 80.8807 18.915C81.8696 15.545 80.8858 12.69 79.8464 12.08C80.916 11.575 82.3186 9.77 83.1208 7.04ZM41.1896 18.74H51.3709H51.376C51.418 18.7175 51.4112 18.7212 51.3897 18.733C51.2824 18.7916 50.8087 19.0503 54.2568 17.225L52.1984 23.995H30.6853L32.9961 21.69L38.7527 2.32L37.7891 0H46.694L41.1896 18.74Z" fill="black"></path> </svg> */}
                             </Link>
                         </div>
@@ -80,7 +81,7 @@ const Header = ({isSearch, setIsSearch}: Props) => {
                                 {categorires?.data.map((item: any, index: any) => (
                                     <li key={index + 1} className="group mb-[10px] lg:m-0">
                                         <h4 className="flex justify-between items-center w-[100%] py-[10px] lg:py-0">
-                                            <Link onClick={() => setOpenCategories(!openCategories)} to={`categories/${item.id}`} className="w-full flex h-full lg:h-auto hover:text-[#BB9244] lg:hover:border-b-[1px] lg:hover:border-b-black lg:py-[15px] lg:px-[18px]">{item.name}</Link>
+                                            <Link onClick={() => setOpenCategories(false)} to={`categories/${item.id}`} className="w-full flex h-full lg:h-auto hover:text-[#BB9244] lg:hover:border-b-[1px] lg:hover:border-b-black lg:py-[15px] lg:px-[18px]">{item.name}</Link>
                                             <span className="lg:hidden">
                                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-4">
                                                     <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
@@ -90,40 +91,40 @@ const Header = ({isSearch, setIsSearch}: Props) => {
 
 
                                         {item.name === "GIẢM GIÁ" ? "" : (
-                                        <div className={` lg:group-hover:block lg:hidden lg:absolute lg:py-[30px] lg:w-[100%] lg:top-[100%] lg:bg-white lg:left-0 lg:z-10`}>
-                                            <div className="lg:flex lg:justify-center lg:max-w-[1200px] lg:m-[0_auto]">
-                                                <ul className={` p-[15px_0px_15px_15px] ml-[15px] mt-[15px] lg:p-0 lg:m-0 lg:flex lg:min-w-[700px] lg:*:text-[14px]`}>
-                                                    {item.children_recursive.map((value: any, index: any) => (
-                                                        <li key={index + 1} className={`${index == 0 ? "" : "pl-[40px]"} lg:block lg:text-left`}>
-                                                            <h4 className="flex justify-between items-center w-[100%] py-[10px] lg:py-0">
-                                                                <Link to={`categories/${value.id}`} className="w-full flex lg:mb-[12px]">
-                                                                    {value.name}
-                                                                </Link>
-                                                                <span className="lg:hidden">
-                                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-4">
-                                                                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-                                                                    </svg>
-                                                                </span>
-                                                            </h4>
-                                                            <ul className={` p-[15px_0px_15px_15px] ml-[15px] mt-[15px] lg:p-0 lg:m-0 lg:block lg:*:font-[500] lg:*:text-[#787878]`}>
-
-                                                            {value.children_recursive.map((values: any, index: any) => (
-                                                                <li key={index + 1} className="flex py-[10px] lg:p-0 lg:mt-[4px]">
-                                                                    <Link  to={`categories/${values.id}`} className="w-full flex">
-                                                                    {values.name}
+                                            <div className={` lg:group-hover:block lg:hidden lg:absolute lg:py-[30px] lg:w-[100%] lg:top-[100%] lg:bg-white lg:left-0 lg:z-10`}>
+                                                <div className="lg:flex lg:justify-center lg:max-w-[1200px] lg:m-[0_auto]">
+                                                    <ul className={` p-[15px_0px_15px_15px] ml-[15px] mt-[15px] lg:p-0 lg:m-0 lg:flex lg:min-w-[700px] lg:*:text-[14px]`}>
+                                                        {item.children_recursive.map((value: any, index: any) => (
+                                                            <li key={index + 1} className={`${index == 0 ? "" : "pl-[40px]"} lg:block lg:text-left`}>
+                                                                <h4 className="flex justify-between items-center w-[100%] py-[10px] lg:py-0">
+                                                                    <Link onClick={() => setOpenCategories(false)} to={`categories/${value.id}`} className="w-full flex lg:mb-[12px]">
+                                                                        {value.name}
                                                                     </Link>
-                                                                </li>
-                                                                 ))}
-                                                            </ul>
-                                                        </li>
-                                                    ))}
+                                                                    <span className="lg:hidden">
+                                                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-4">
+                                                                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                                                                        </svg>
+                                                                    </span>
+                                                                </h4>
+                                                                <ul className={` p-[15px_0px_15px_15px] ml-[15px] mt-[15px] lg:p-0 lg:m-0 lg:block lg:*:font-[500] lg:*:text-[#787878]`}>
 
-                                                </ul>
-                                                <div className="banner-submenu hidden lg:block pl-[45px] ml-[45px] mx-w-[355px] border-l-[1px] border-l-[#eeeeee]">
-                                                    <img className="" src={item.image} alt="QUẦN ÁO|APPAREL" width="309" height="309" />
+                                                                    {value.children_recursive.map((values: any, index: any) => (
+                                                                        <li key={index + 1} className="flex py-[10px] lg:p-0 lg:mt-[4px]">
+                                                                            <Link onClick={() => setOpenCategories(false)} to={`categories/${values.id}`} className="w-full flex">
+                                                                                {values.name}
+                                                                            </Link>
+                                                                        </li>
+                                                                    ))}
+                                                                </ul>
+                                                            </li>
+                                                        ))}
+
+                                                    </ul>
+                                                    <div className="banner-submenu hidden lg:block pl-[45px] ml-[45px] mx-w-[355px] border-l-[1px] border-l-[#eeeeee]">
+                                                        <img className="" src={item.image} alt="QUẦN ÁO|APPAREL" width="309" height="309" />
+                                                    </div>
                                                 </div>
                                             </div>
-                                        </div>
                                         )}
 
 
@@ -233,14 +234,13 @@ const Header = ({isSearch, setIsSearch}: Props) => {
                                 <img className=" ls-is-cached lazyloaded" src="https://file.hstatic.net/200000642007/file/icon-search_f3577f42c6314038a0636c20100bd8d9.svg" data-src="https://file.hstatic.net/200000642007/file/icon-search_f3577f42c6314038a0636c20100bd8d9.svg" alt="Icon search" width={24} height={24} />
                             </div>
                         </div>
-                        <Link to={`/carts`} className="relative flex items-center col-start-3 lg:col-start-2">
+                        <Link to={`${user ? "/carts" : "/signin"}`} className="relative flex items-center col-start-3 lg:col-start-2">
                             <div
                                 className='w-[40px] h-[40px] flex justify-center items-center text-center'>
                                 <img className=" ls-is-cached lazyloaded" src="https://file.hstatic.net/200000642007/file/icon-cart_d075fce117f74a07ae7f149d8943fc33.svg" data-src="https://file.hstatic.net/200000642007/file/icon-cart_d075fce117f74a07ae7f149d8943fc33.svg" alt="Icon cart" width={24} height={24} />
                             </div>
                             {carts ? (
                                 <div className={`absolute w-[13px] h-[13px] text-[9px] rounded-[100%] top-[10px] right-[5px] bg-black text-white flex items-center justify-center`}>{carts?.data.total_quantity || 0}</div>
-
                             ) : ""}
                         </Link>
                         <Link to={`${user ? "/account/wishlist" : "/signin"}`} className="items-center hidden lg:flex col-start-2 row-start-1 lg:col-start-3">
@@ -255,6 +255,7 @@ const Header = ({isSearch, setIsSearch}: Props) => {
                         </Link>
                     </div>
                 </div>
+                {user ? (<Support/>) : ""}
                 <EventsAudio />
                 <EventsCanvas />
             </header>

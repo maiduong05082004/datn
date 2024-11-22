@@ -23,9 +23,6 @@ const ListPage = (props: Props) => {
     const [color, setColor] = useState<string[]>([]);
     const [priceCheck, setPiceCheck] = useState<string>("");
 
-    console.log(priceCheck);
-
-
     const { data: products, isLoading } = useQuery({
         queryKey: ['products', id, categoryIds, sizeIds, priceCheck, color],
         queryFn: () => {
@@ -152,8 +149,8 @@ const ListPage = (props: Props) => {
 
             <ProductsList products={products} />
 
-            <div className={`${filter ? "flex" : "hidden"} fixed max-w-[440px] w-[100%] top-0 right-0 z-20 bg-white flex-col justify-between h-full`}>
-                <div className="relative bg-white z-20 h-full">
+            <div className={`${filter ? "flex" : "hidden"} step fixed max-w-[440px] w-[100%] top-0 right-0 z-20 flex-col justify-between h-full`}>
+                <div className="relative bg-white z-20 h-full filter">
                     <div className="flex justify-between items-center p-[8px_20px] shadow-sm">
                         <h2 className="text-lg font-semibold">Bộ lọc</h2>
                         <div onClick={() => setFilter(!filter)} className="flex cursor-pointer w-[40px] h-[40px] justify-center items-center">
@@ -285,20 +282,20 @@ const ListPage = (props: Props) => {
                             {isPriceMenuOpen && (
                                 <div className="flex flex-col mt-[26px] mb-[46px] ">
                                     <div className=" cursor-pointer select-none flex items-center mb-[5px]">
-                                        <input onClick={() => setPiceCheck("under_1m")} id="under_1m" className='w-[20px] h-[20px]' type="radio" name="otp" />
+                                        <input onClick={() => setPiceCheck("under_1m")} checked={priceCheck === "under_1m"} id="under_1m" className='w-[20px] h-[20px]' type="radio" name="otp" />
                                         <label htmlFor="under_1m" className='ml-[10px]'>Dưới 1.000.000 VND</label>
                                     </div>
                                     <div className="flex items-center mb-[5px]">
-                                        <input onClick={() => setPiceCheck("1m_to_2m")} id="1m_to_2m" className='w-[20px] h-[20px]' type="radio" name="otp" />
-                                        <label htmlFor="1m_to_2m" onClick={() => setPiceCheck("1m_to_2m")} className='ml-[10px]'>1.000.000 - 2.000.000 VND</label>
+                                        <input onClick={() => setPiceCheck("1m_to_2m")} checked={priceCheck === "1m_to_2m"} id="1m_to_2m" className='w-[20px] h-[20px]' type="radio" name="otp" />
+                                        <label htmlFor="1m_to_2m" className='ml-[10px]'>1.000.000 - 2.000.000 VND</label>
                                     </div>
                                     <div className="flex items-center mb-[5px]">
-                                        <input onClick={() => setPiceCheck("2m_to_3m")} id="2m_to_3m" className='w-[20px] h-[20px]' type="radio" name="otp" />
-                                        <label htmlFor="2m_to_3m" onClick={() => setPiceCheck("2m_to_3m")} className='ml-[10px]'>2.000.000 - 3.000.000 VND</label>
+                                        <input onClick={() => setPiceCheck("2m_to_3m")} checked={priceCheck === "2m_to_3m"} id="2m_to_3m" className='w-[20px] h-[20px]' type="radio" name="otp" />
+                                        <label htmlFor="2m_to_3m" className='ml-[10px]'>2.000.000 - 3.000.000 VND</label>
                                     </div>
                                     <div className="flex items-center mb-[5px]">
-                                        <input onClick={() => setPiceCheck("above_4m")} id="above_4m" className='w-[20px] h-[20px]' type="radio" name="otp" />
-                                        <label htmlFor="above_4m" onClick={() => setPiceCheck("above_4m")} className='ml-[10px]'>Trên 4.000.000 VND</label>
+                                        <input onClick={() => setPiceCheck("above_4m")} checked={priceCheck === "above_4m"} id="above_4m" className='w-[20px] h-[20px]' type="radio" name="otp" />
+                                        <label htmlFor="above_4m" className='ml-[10px]'>Trên 4.000.000 VND</label>
                                     </div>
                                 </div>)}
                         </div>

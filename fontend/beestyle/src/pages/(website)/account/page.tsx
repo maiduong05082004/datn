@@ -1,12 +1,43 @@
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import axios from 'axios';
-import React from 'react'
+import React, { useEffect } from 'react'
 import { Link, Outlet, useNavigate } from 'react-router-dom';
 
 type Props = {}
 
 const AccountPage = (props: Props) => {
-    
+
+    const navigate = useNavigate()
+
+    const token = localStorage.getItem("token")
+
+    const { data: user, isLoading } = useQuery({
+        queryKey: ['user', token],
+        queryFn: () => {
+            if (!token) return null;
+            return axios.get(`http://127.0.0.1:8000/api/client/auth/profile`, {
+                headers: { Authorization: `Bearer ${token}` }
+            })
+        }
+    })
+    const logout = async () => {
+        try {
+            await axios.post(`http://localhost:8000/api/client/auth/logout`, {}, {
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                }
+            });
+            localStorage.removeItem('token');
+            navigate(`/signin`)
+        } catch (error) {
+            console.error('Error logging out', error);
+        }
+    };
+
+    useEffect(() => {
+        if (token && isLoading) return
+        if (!user) navigate(`/signin`)
+    }, [user])
 
     return (
         <main className='px-[15px] lg:py-[64px]'>
@@ -21,9 +52,8 @@ const AccountPage = (props: Props) => {
                     <div className="mb-[20px]">
                         <p className='mb-[8px] text-[14px] font-[700] text-[#787878]'>Thông tin mua hàng |</p>
                         <ul>
-                            <li><a href="" className='text-[16px] font-[500]'>Thông tin thành viên</a></li>
-                            <li><a href="" className='text-[16px] font-[500]'>Thông tin đơn hàng</a></li>
-                            <li><a href="" className='text-[16px] font-[500]'>Theo dõi đơn hàng</a></li>
+                            <li><a className='text-[16px] font-[500]'>Thông tin thành viên</a></li>
+                            <li><Link to={`/account`} className='text-[16px] font-[500]'>Thông tin đơn hàng</Link></li>
                         </ul>
                     </div>
                     <div className="mb-[20px]">
@@ -39,7 +69,7 @@ const AccountPage = (props: Props) => {
                             <li><Link className='text-[16px] font-[500]' to={`/account/addresses`}>Địa chỉ giao hàng</Link></li>
                             <li><Link className='text-[16px] font-[500]' to={`/account/info`}>Thông tin của tôi</Link></li>
                             <li><a href="" className='text-[16px] font-[500]'>Xóa tài khoản</a></li>
-                            <li><a href="" className='text-[16px] font-[500]'>Đăng xuất</a></li>
+                            <li><div onClick={logout} className='text-[16px] font-[500] cursor-pointer'>Đăng xuất</div></li>
                         </ul>
 
                     </div>

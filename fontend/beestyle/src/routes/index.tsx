@@ -55,6 +55,8 @@ import DeatilConfirm from "@/pages/(dashboard)/dashboard/Bill/detailConfirm"
 import Comments from "@/pages/(dashboard)/dashboard/products/comments";
 import DetailUser from "@/pages/(dashboard)/dashboard/Users/detail";
 import PrivateRouter from "./PrivateRoute";
+import OrderDetail from "@/pages/(website)/account/_components/orderDetail";
+import ErrorPage from "@/pages/(website)/404/page";
 // import CartPage from "@/pages/(website)/cart/page";
 import InventoryManagement from "@/pages/(dashboard)/dashboard/Inventory/list";
 import Signin from "@/pages/(dashboard)/dashboard/auth.tsx/signin";
@@ -107,8 +109,6 @@ const Router = () => {
                     <Route path="categories/:id" element={<ListPage />} />
                     <Route path="products/:id" element={<DetailPage />} />
                     <Route path="checkouts" element={<CheckOutPage />} />
-                    <Route path="signin" element={<PageSignin />} />
-                    <Route path="signup" element={<PageSignup />} />
                     <Route path="forgot-password" element={<ForgotPasswordPage />} />
                     <Route path="reset-password/:token" element={<ResetPasswordPage />} />
                     <Route path="search" element={<SearchPage isKeySearch={isKeySearch} />} />
@@ -119,9 +119,12 @@ const Router = () => {
                         <Route path="info" element={<InfoPage />} />
                         <Route path="recently" element={<RecentlyPage />} />
                         <Route path="addresses" element={<AddressesPage />} />
+                        <Route path="orders/:oderId" element={<OrderDetail />} />
                     </Route>
-                    {/* <Route path="carts" element={<CartPage />} /> */}
+                    <Route path="*" element={<ErrorPage />} />
                 </Route>
+                <Route path="signin" element={<PageSignin />} />
+                <Route path="signup" element={<PageSignup />} />
 
                 {/* Admin Routes */}
                 <Route path="admin" element={<Signin />} />

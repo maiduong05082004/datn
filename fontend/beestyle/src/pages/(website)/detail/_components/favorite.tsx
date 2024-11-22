@@ -2,6 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
+import LoadingPage from '../../loading/page';
 
 type Props = {}
 
@@ -39,7 +40,7 @@ const Favorite = (props: Props) => {
         }
     };
 
-    const { data: favorite } = useQuery({
+    const { data: favorite, isLoading } = useQuery({
         queryKey: ['favorite', token],
         queryFn: () => {
             return axios.get(`http://127.0.0.1:8000/api/client/wishlist`, {
@@ -54,10 +55,14 @@ const Favorite = (props: Props) => {
     
     useEffect(() => {
         if (favorite) {
-            const isFavorite = favorite?.data?.data?.some((item: any) => item?.id == id);
+            const isFavorite = favorite?.data?.wishlist_items?.some((item: any) => item?.product?.id == id);
+            console.log(isFavorite);
+            
             setFavoriteStatus(isFavorite);                    
         }
     }, [favorite]);
+
+    if(isLoading) return(<LoadingPage/>)
 
     return (
         <button onClick={() => onSubmitFavorite(!favoriteStatus)}>

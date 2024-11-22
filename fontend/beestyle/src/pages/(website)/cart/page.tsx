@@ -8,9 +8,13 @@ import { useProductMutations } from '@/components/hooks/useProductMutations';
 import NavigationButton from './_components/navigationButton';
 import Slider from 'react-slick';
 import { Link, useNavigate } from 'react-router-dom';
+import LoadingPage from '../loading/page';
 
+type Props = {
 
-const CartPage = () => {
+}
+
+const CartPage = ({}: any) => {
 
     const [selectedProducts, setSelectedProducts] = useState<string[]>([]);
     const [totalPrice, setTotalPrice] = useState(0);
@@ -24,7 +28,7 @@ const CartPage = () => {
     const { contextHolder, updateProductMutation, deleteProductMutation } = useProductMutations();
 
     const token = localStorage.getItem("token")
-    const { data: carts } = useQuery({
+    const { data: carts, isLoading: isLoadingCarts } = useQuery({
         queryKey: ['carts', token],
         queryFn: async () => {
             return await axios.get('http://127.0.0.1:8000/api/client/cart', {
@@ -93,13 +97,13 @@ const CartPage = () => {
         }
     }, [selectedProducts, carts?.data?.cart_items]);
 
-    
+
 
     useEffect(() => {
         if (carts?.data?.cart_items) {
             const allProductIds = carts?.data?.cart_items
-            ?.filter((item: any) => item.variation_values.stock >= item.quantity)
-            .map((item: any) => item.cart_item_id);
+                ?.filter((item: any) => item.variation_values.stock >= item.quantity)
+                .map((item: any) => item.cart_item_id);
             setSelectedProducts([...allProductIds]);
 
             // Tính tổng tiền của tất cả sản phẩm khi tự động tích
@@ -136,7 +140,7 @@ const CartPage = () => {
 
     const handleSelectAll = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.checked) {
-            const allProductIds = carts?.data?.cart_items?.filter((item: any) => item.variation_values.stock >= item.quantity).map((item: any) => item.cart_item_id ) || [];
+            const allProductIds = carts?.data?.cart_items?.filter((item: any) => item.variation_values.stock >= item.quantity).map((item: any) => item.cart_item_id) || [];
             setSelectedProducts(allProductIds);
         } else {
             setSelectedProducts([]);
@@ -159,7 +163,7 @@ const CartPage = () => {
         navigate("/checkouts", { state: { products: selectedItems, totalPrice } });
     };
 
-
+    // if (isLoadingCarts) return (<LoadingPage />)
     return (
         <main>
             {contextHolder}
@@ -219,7 +223,7 @@ const CartPage = () => {
                                                     <div className='text-[12px] text-black font-[500] my-[4px]'> {item.variation_values.value} / {item.variation_values.sku} </div>
                                                     <div className='text-[12px] text-black font-[500]'>Số lượng: {item.quantity}</div>
 
-                                                    {item.stock === 0 ?
+                                                    {item.variation_values.discount === 0 ?
                                                         (<div className='mt-[24px] flex flex-col'>
                                                             <span className={` font-[700] text-[16px]`}>{new Intl.NumberFormat('vi-VN').format(item.variation_values.price)} VND</span>
                                                         </div>) : (<div className='mt-[24px] flex flex-col'>
@@ -286,10 +290,10 @@ const CartPage = () => {
             </div>
 
 
-            <div className={`${activeCart ? "" : "hidden"} fixed z-10 flex-col top-0`}>
+            <div className={`${activeCart ? "" : "hidden"} step fixed z-20 flex-col top-0`}>
                 <div className="">
                     <div className="fixed overflow-hidden rounded-[5px] bg-white z-20 flex top-[50%] translate-y-[-50%] left-[50%] translate-x-[-50%] max-w-[825px] w-[100%]">
-                        <div onClick={() => setActiveCart(!activeCart)} className="absolute right-0 cursor-pointer p-[5px]">
+                        <div onClick={() => setActiveCart(false)} className="absolute right-0 cursor-pointer p-[5px]">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
                             </svg>
@@ -379,7 +383,7 @@ const CartPage = () => {
                         </div>
                     </div>
                 </div>
-                <div className="block bg-black opacity-[0.7] fixed w-[100%] h-[100%] top-0 left-0 z-10"></div>
+                <div onClick={() => setActiveCart(false)} className="block bg-black opacity-[0.7] fixed w-[100%] h-[100%] top-0 left-0 z-10"></div>
             </div>
         </main>
     )

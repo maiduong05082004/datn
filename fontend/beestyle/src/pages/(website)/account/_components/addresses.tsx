@@ -1,9 +1,10 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { message } from "antd"
 import axios from "axios"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import AddAddresses from "../../checkout/_components/addAddresses"
 import UpdateAddresses from "../../checkout/_components/updateAddresses"
+import LoadingPage from "../../loading/page"
 
 type Props = {}
 
@@ -18,7 +19,7 @@ const AddressesPage = (props: Props) => {
     const [messageApi, handleContext] = message.useMessage()
     const queryClient = useQueryClient()
 
-    const { data: addresses } = useQuery({
+    const { data: addresses ,isLoading: isLoadingAddress } = useQuery({
         queryKey: ['addresses'],
         queryFn: async () => {
             return await axios.get(`http://127.0.0.1:8000/api/client/shippingaddress`, {
@@ -64,6 +65,67 @@ const AddressesPage = (props: Props) => {
 
     }
 
+      // Lấy tỉnh/thành phố
+      const { data: provinceData, isLoading: isLoadingProvinces } = useQuery({
+        queryKey: ['province'],
+        queryFn: async () => {
+            return await axios.get(`https://dev-online-gateway.ghn.vn/shiip/public-api/master-data/province`, {
+                headers: {
+                    token: '4bd9602e-9ad5-11ef-8e53-0a00184fe694', // replace with your API key
+                }
+            });
+        },
+    });
+
+    // Lấy quận/huyện
+    const { data: districtData, isLoading: isLoadingDistrict } = useQuery({
+        queryKey: ['district'],
+        queryFn: async () => {
+            return await axios.get(`https://dev-online-gateway.ghn.vn/shiip/public-api/master-data/district`, {
+                headers: {
+                    token: '4bd9602e-9ad5-11ef-8e53-0a00184fe694',
+                }
+            });
+        },
+    });
+
+    const [wardsMap, setWardsMap] = useState<Record<number, Record<string, string>>>({});
+    const fetchWardsByDistrict = async (districtId: number) => {
+        if (wardsMap[districtId]) {
+            return; // Nếu đã có dữ liệu, không cần gọi lại API
+        }
+        try {
+            const { data } = await axios.get(`https://dev-online-gateway.ghn.vn/shiip/public-api/master-data/ward`, {
+                params: { district_id: districtId },
+                headers: {
+                    token: '4bd9602e-9ad5-11ef-8e53-0a00184fe694',
+                },
+            });
+    
+            const wardDictionary = data?.data.reduce((acc: Record<string, string>, ward: any) => {
+                acc[ward.WardCode] = ward.WardName;
+                return acc;
+            }, {});
+    
+            setWardsMap((prev) => ({
+                ...prev,
+                [districtId]: wardDictionary,
+            }));
+        } catch (error) {
+            console.error("Error fetching wards:", error);
+        }
+    };
+    useEffect(() => {
+        addresses?.data?.data.forEach((item: any) => {
+            fetchWardsByDistrict(item.district);
+        });
+    }, [addresses]);
+    
+    const getProvinceName = (id: string) => provinceData?.data.data.find((item: any) => item.ProvinceID === parseInt(id))?.ProvinceName || 'Unknown Province';
+    const getDistrictName = (id: string) => districtData?.data.data.find((item: any) => item.DistrictID === parseInt(id))?.DistrictName || 'Unknown District';
+    
+
+    if(isLoadingAddress) return (<LoadingPage/>)
     return (
         <div className="">
             {handleContext}
@@ -90,7 +152,7 @@ const AddressesPage = (props: Props) => {
                                     </div>
                                 </div>
                                 <div className="*:text-[14px] font-[500]">
-                                    <div className="mt-[4px] lg:mt-[8px]">Địa chỉ: {item.address_line}, Hà Nội</div>
+                                    <div className="mt-[4px] lg:mt-[8px]">Địa chỉ: {item.address_line}, {wardsMap[item.district]?.[item.ward] || "Đang tải..."}, {getDistrictName(item.district)}, {getProvinceName(item.city)}</div>
                                     <div className="mt-[4px] lg:mt-[8px]">Số điện thoại: {item.phone_number}</div>
                                 </div>
                             </div>

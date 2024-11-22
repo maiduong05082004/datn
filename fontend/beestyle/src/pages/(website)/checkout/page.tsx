@@ -169,12 +169,11 @@ const CheckOutPage = () => {
         if (paymentMethod === "cod") {
             if (checkouts) {
                 const order = {cart_id ,promotion_ids, note, payment_type: paymentMethod, shipping_address_id: address, shipping_fee: priceShip, discounted_amount, discounted_shipping_fee, total: checkouts.totalPrice }
-                orderCod.mutate(order)
+                orderCod.mutate(order)                
             }
         } else {
-            const order = {cart_id ,promotion_ids, note, payment_type: "online",payment_method: paymentMethod, shipping_address_id: address, shipping_fee: priceShip, discounted_amount, discounted_shipping_fee, totalPrice: checkouts.totalPrice }
-            console.log(order);
-            // orderATM.mutate(order)
+            const order = {cart_id ,promotion_ids, note, payment_type: "online",payment_method: paymentMethod, shipping_address_id: address, shipping_fee: priceShip, discounted_amount, discounted_shipping_fee, total: checkouts.totalPrice }
+            orderATM.mutate(order)
         }
     }
 
@@ -256,7 +255,7 @@ const CheckOutPage = () => {
                                         </label>
                                     </div>
                                     <img src="https://file.hstatic.net/1000284478/file/vnpay-40_5dbcecd2b4eb4245a4527d357a0459fc.svg" alt="logo" width={40} height={40} />
-                                    <span className="ml-[10px] font-[600]">Thanh toán bằng </span>
+                                    <span className="ml-[10px] font-[600]">Thanh toán bằng VNPay</span>
                                 </div>
                                 <div className="flex items-center py-[8px]">
                                     <div className="flex items-center mr-[10px]">

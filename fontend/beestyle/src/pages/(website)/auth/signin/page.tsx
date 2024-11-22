@@ -104,7 +104,7 @@ const PageSignin = (props: Props) => {
                         </button>
                         <button>
                             <div className="mb-[5px] flex justify-center items-center">
-                                <img src="https://encrypted-tbn3.gstatic.com/images?q=tbn:ANd9GcTFPNc3va29d6z1y9PQDmou5b5VlkC7t2u0swQfnJBKsE3Im2wF" alt="" width={40} height={40} />
+                                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/05/Facebook_Logo_%282019%29.png/600px-Facebook_Logo_%282019%29.png" alt="" width={40} height={40} />
                             </div>
                             <span>ĐĂNG NHẬP FACEBOOK</span>
                         </button>
