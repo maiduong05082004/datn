@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
@@ -29,6 +29,13 @@ const ProductsList = ({ products }: any) => {
     const handleAddCart = (item: any) => {
         setCartItem(item);
     }
+
+    useEffect(() => {
+        if(products?.data.products) {
+            const firstTwoProducts = products?.data.products.slice(0, 8);
+            localStorage.setItem("suggest", JSON.stringify(firstTwoProducts));
+        }
+    }, [products])
 
 
     if (products?.data?.length === 0) return (

@@ -7,6 +7,7 @@ import LoadingPage from '../loading/page';
 import Favorite from './_components/favorite';
 import { useForm } from 'react-hook-form';
 import InfoProduct from './_components/infoProduct';
+import CommentEvaluate from './_components/commentEvaluate';
 
 type Props = {
     //   onClicks: () => void;
@@ -131,32 +132,8 @@ const DetailPage = () => {
             }
         }
     }
-    interface TReport {
-        report: string
-    }
 
-    const [isReport, setReport] = useState<boolean>(false)
-    const [isReportTab, setReportTab] = useState<boolean>(false)
 
-    const { register, handleSubmit, setValue, formState: { errors } } = useForm<TReport>()
-
-    const onSubmit = (report: any) => {
-        console.log(report);
-
-    }
-
-    const reasons = [
-        "Đánh giá thô tục phẩn cảm",
-        "Chứa hình ảnh phản cảm, khỏa thân, khiêu dâm",
-        "Đánh giá trùng lặp (thông tin rác)",
-        "Chứa thông tin cá nhân",
-        "Quảng cáo trái phép",
-        "Đánh giá không chính xác / gây hiểu lầm (ví dụ như đánh giá sản phẩm không khớp , ...)",
-        "Vi phạm khác"
-    ];
-
-    const [rating, setRating] = useState(3); // State to keep track of the current rating
-    const [hover, setHover] = useState(0)
 
     if (isLoading) return (<LoadingPage />)
     if (isError) return (<>{error}</>)
@@ -352,7 +329,7 @@ const DetailPage = () => {
                                                         onClick={() => setVariatonValues(value)}
                                                     />
 
-                                                    {value.stock < 0 ?
+                                                    {value.stock <= 0 ?
                                                         <label htmlFor={value.id} className="flex select-none pointer-events-none bg-[#F8F8F8] text-[#D0D0D0]">{value.value}</label> :
                                                         <label htmlFor={value.id} className={`${value?.attribute_value_id === variationValues?.attribute_value_id ? "bg-black text-white" : "bg-white text-black"} flex select-none`}>{value.value}</label>
                                                     }
@@ -397,7 +374,7 @@ const DetailPage = () => {
 
                     </div>
 
-                    <div style={{ display: 'flex' }}>
+                    {/* <div style={{ display: 'flex' }}>
                         {[...Array(5)].map((_, index) => {
                             const ratingValue = index + 1;
 
@@ -427,114 +404,9 @@ const DetailPage = () => {
                                 </svg>
                             );
                         })}
-                    </div>
+                    </div> */}
 
-                    <div className="">
-                        <div className="mt-[48px]">
-                            <div className="px-[15px] pc:px-[48px]">
-                                <h3 className='text-[18px] mb-[20px] font-[700]'>ĐÁNH GIÁ SẢN PHẨM</h3>
-                                <div className="p-[20px] bg-slate-100">
-                                    <div className="font-[600] mb-[30px] bg-slate-50 p-[20px]">
-                                        <span className='text-[30px] font-[700]'>5.0</span> trên 5
-                                        <div style={{ display: 'flex' }}>
-                                            {[...Array(5)].map((_, index) => {
-                                                const ratingValue = index + 1;
-                                                return (
-                                                    <svg xmlns="http://www.w3.org/2000/svg"
-                                                        fill={ratingValue <= rating ? "gold" : "gray"}
-                                                        viewBox="0 0 24 24"
-                                                        strokeWidth={1.5}
-                                                        stroke="none"
-                                                        className="size-6">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" d="M11.48 3.499a.562.562 0 0 1 1.04 0l2.125 5.111a.563.563 0 0 0 .475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 0 0-.182.557l1.285 5.385a.562.562 0 0 1-.84.61l-4.725-2.885a.562.562 0 0 0-.586 0L6.982 20.54a.562.562 0 0 1-.84-.61l1.285-5.386a.562.562 0 0 0-.182-.557l-4.204-3.602a.562.562 0 0 1 .321-.988l5.518-.442a.563.563 0 0 0 .475-.345L11.48 3.5Z" />
-                                                    </svg>
-                                                );
-                                            })}
-                                        </div>
-                                    </div>
-
-                                    <div className="flex justify-start items-start border-b-[1px] border-b-[#e8e8e8] pb-[10px] lg:py-[20px]">
-                                        <div className="overflow-hidden bg-slate-200 rounded-[50%] w-[40px] h-[40px] flex items-center justify-center mr-[15px]">
-                                            <img src="https://res.cloudinary.com/dg4yxsmhs/image/upload/v1731063630/inofawtiyxzwsfhjarre.jpg" alt="" />
-                                        </div>
-                                        <div className="w-[calc(100%-40px)]">
-                                            <span className='text-[16px]'>Nguyễn Minh Ngọc</span>
-                                            <div style={{ display: 'flex' }}>
-                                                {[...Array(5)].map((_, index) => {
-                                                    const ratingValue = index + 1;
-                                                    return (
-                                                        <svg xmlns="http://www.w3.org/2000/svg"
-                                                            fill={ratingValue <= 4 ? "gold" : "gray"}
-                                                            viewBox="0 0 24 24"
-                                                            strokeWidth={1.5}
-                                                            stroke="none"
-                                                            className="size-4">
-                                                            <path strokeLinecap="round" strokeLinejoin="round" d="M11.48 3.499a.562.562 0 0 1 1.04 0l2.125 5.111a.563.563 0 0 0 .475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 0 0-.182.557l1.285 5.385a.562.562 0 0 1-.84.61l-4.725-2.885a.562.562 0 0 0-.586 0L6.982 20.54a.562.562 0 0 1-.84-.61l1.285-5.386a.562.562 0 0 0-.182-.557l-4.204-3.602a.562.562 0 0 1 .321-.988l5.518-.442a.563.563 0 0 0 .475-.345L11.48 3.5Z" />
-                                                        </svg>
-                                                    );
-                                                })}
-                                            </div>
-                                            <div className="text-[16px]">
-                                                09/12/2022 21:00 | Phân loại hàng: SIZE XXL
-                                            </div>
-                                            <p className='mb-[20px] mt-[12px] text-[16px] font-[500]'>Shop nói chuyện nhiệt tình, chu đáo. Hàng to căng mọng, ngọt nước tí thì bị ngạt thở vì quá bự...</p>
-                                            <div className="flex gap-2.5">
-                                                <div className="w-[72px] h-[72px]">
-                                                    <div className="pt-[100%] bg-cover bg-center bg-no-repeat" style={{ backgroundImage: `url(https://res.cloudinary.com/dg4yxsmhs/image/upload/v1731063847/xryrmzghnjvo3ftcqdkp.jpg)` }}></div>
-                                                </div>
-                                                <div className="w-[72px] h-[72px]">
-                                                    <div className="pt-[100%] bg-cover bg-center bg-no-repeat" style={{ backgroundImage: `url(https://res.cloudinary.com/dg4yxsmhs/image/upload/v1731063847/zvn1vvwvue0ashste60n.jpg)` }}></div>
-                                                </div>
-                                            </div>
-                                            <div className="my-[20px] flex justify-between">
-                                                <div className="flex justify-center items-center">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="gray" viewBox="0 0 24 24" strokeWidth={1.5} stroke="none" className="size-5">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z" />
-                                                    </svg>
-                                                    <span className='text-[#787878] text-[14px] font-[500] ml-[3px]'>10k</span>
-                                                </div>
-                                                <div onClick={() => setReportTab(!isReportTab)} className="cursor-pointer px-[20px]">
-                                                    <svg width="4px" height="16px" viewBox="0 0 4 16" version="1.1" xmlns="http://www.w3.org/2000/svg"><defs></defs><g stroke="none" strokeWidth="1" fillRule="evenodd"><g transform="translate(-1301.000000, -550.000000)" fill="#CCCCCC"><g transform="translate(155.000000, 92.000000)"><g transform="translate(40.000000, 184.000000)"><g transform="translate(0.000000, 161.000000)"><g><g transform="translate(50.000000, 2.000000)"><path d="M1058,122.2 C1056.895,122.2 1056,123.096 1056,124.2 C1056,125.306 1056.895,126.202 1058,126.202 C1059.104,126.202 1060,125.306 1060,124.2 C1060,123.096 1059.104,122.2 1058,122.2 M1058,116.6 C1056.895,116.6 1056,117.496 1056,118.6 C1056,119.706 1056.895,120.602 1058,120.602 C1059.104,120.602 1060,119.706 1060,118.6 C1060,117.496 1059.104,116.6 1058,116.6 M1058,111 C1056.895,111 1056,111.896 1056,113 C1056,114.106 1056.895,115.002 1058,115.002 C1059.104,115.002 1060,114.106 1060,113 C1060,111.896 1059.104,111 1058,111"></path></g></g></g></g></g></g></g></svg>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                </div>
-
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className={`${isReportTab ? "" : "hidden"} fixed z-10 flex-col top-0`}>
-                        <div className="fixed overflow-hidden rounded-[5px] bg-white z-20 top-[50%] translate-y-[-50%] left-[50%] translate-x-[-50%] min-w-[300px] max-w-[500px] max-h-[600px] w-[100%] p-[20px]">
-                            <h3 className='font-[600] text-[20px] mb-[10px]'>Báo Cáo Đánh Giá Này</h3>
-                            <span className='text-[17px]'>Vui lòng chọn lý do báo cáo</span>
-                            <form onSubmit={handleSubmit(onSubmit)} action="">
-                                {reasons.map((reason, index) => (
-                                    <div key={index} className="flex justify-start items-center my-5">
-                                        <input
-                                            {...register("report", { required: true })}
-                                            value={reason}
-                                            className="w-[50px]"
-                                            type="radio"
-                                        />
-                                        <label className="ml-3 text-[16px] w-[calc(100%-50px)]">{reason}</label>
-                                    </div>
-                                ))}
-                                <div className="flex mt-5 justify-end">
-                                    <div onClick={() => setReportTab(!isReportTab)} className="cursor-pointer mr-5 text-black bg-slate-50 p-[10px_50px] rounded font-medium">
-                                        Hủy
-                                    </div>
-                                    <button type="submit" className="text-white bg-black p-[10px_50px] rounded font-medium">
-                                        Gửi
-                                    </button>
-                                </div>
-                            </form>
-                        </div>
-                        <div className="block bg-black opacity-[0.7] fixed w-[100%] h-[100%] top-0 left-0 z-10"></div>
-                    </div>
-
+                    <CommentEvaluate />
 
 
                     <div className="">
