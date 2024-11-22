@@ -548,4 +548,121 @@ class CommentController extends Controller
 
         return response()->json(['message' => 'Comment deleted successfully.']);
     }
+
+    // public function report(Request $request)
+    // {
+    //     $id = $request->input('id');
+    //     $comment = Comment::find($id);
+    //     if (!$comment) {
+    //         return response()->json([
+    //             'message' => "Comment not found"
+    //         ], 404);
+    //     }
+    //     $comment->reported_count += 1;
+
+    //     if ($comment->reported_count >= 5) {
+    //         $comment->is_visible = 0;
+    //     }
+    //     $comment->save();
+    //     return response()->json(['message' => 'Thank for report.', 'reported_count' => $comment->reported_count]);
+    // }
+
+
+
+    // API admin duyệt bình luận
+    public function approve(Request $request)
+    {
+        $id = $request->input('id');
+        $moderation_status = $request->input('moderation_status');
+        $comment = Comment::find($id);
+
+        if (!$comment) {
+            return response()->json(['message' => 'Comment not found.'], 404);
+        }
+
+        if (Auth::user()->role !== 'admin') {
+            return response()->json(['message' => 'Only admin can approve comments.'], 403);
+        }
+
+        if ($moderation_status === Comment::STATUS_APPROVED) {
+            $comment->moderation_status = Comment::STATUS_APPROVED;
+            $comment->is_visible  = 1;
+        } elseif ($moderation_status === Comment::STATUS_REJECTED) {
+            $comment->moderation_status = Comment::STATUS_REJECTED;
+            $comment->is_visible = 0;
+        } else {
+            return response()->json(['message' => 'Trạng thái không hợp lệ'], 400);
+        }
+        $comment->save();
+
+        return response()->json(['message' => 'Comment approved successfully.', 'comment' => $comment]);
+    }
+
+    public function hideComment(Request $request)
+    {
+        $id = $request->input('id');
+        $comment = Comment::find($id);
+        if (!$comment) {
+            return response()->json([
+                'message' => 'Comment not found',
+            ], 404);
+        }
+        if (Auth::user()->role !== 'admin') {
+            return response()->json([
+                'message' => 'Only admin can hide comments',
+            ], 404);
+        }
+        $comment->is_visible = 0;
+        $comment->hide_reason = $request->input('hide_reason') ?? 'Hidden by admin';
+        $comment->save();
+        return response()->json([
+            'message' => 'Comment hide successfully',
+        ]);
+    }
+
+    public function manageUser(Request $request)
+    {
+        $userId = $request->input('user_id');
+        $user = User::find($userId);
+        if (!$user) {
+            return response()->json(['message' => 'User not found.'], 404);
+        }
+
+        $reportedCount = Comment::where('user_id', $userId)->where('is_reported', 1)->count();
+        if ($reportedCount >= 5) {
+            $user->is_active = 0;
+            $user->save();
+            return response()->json(['message' => 'User has been locked due to excessive reports.']);
+        }
+
+        return response()->json(['message' => 'User is in good standing.']);
+    }
+
+
+    // API cho phép admin và user trả lời bình luận
+    public function reply(Request $request)
+    {
+        $parentId = $request->input('parent_id');
+        $parentComment = Comment::find($parentId);
+
+        if (!$parentComment || $parentComment->is_visible == 0) {
+            return response()->json(['message' => 'Parent comment not found or not approved.'], 404);
+        }
+
+        if (Auth::user()->role !== 'admin' && Auth::id() !== $parentComment->user_id) {
+            return response()->json(['message' => 'Permission denied.'], 403);
+        }
+
+        $comment = Comment::create([
+            'user_id' => Auth::id(),
+            'product_id' => $parentComment->product_id,
+            'content' => $request->input('content'),
+            'commentDate' => now(),
+            'is_visible' => 1,
+            'moderation_status' => Comment::STATUS_APPROVED,
+            'parent_id' => $parentId,
+        ]);
+
+        return response()->json(['message' => 'Reply submitted for approval.', 'comment' => $comment]);
+    }
 }
