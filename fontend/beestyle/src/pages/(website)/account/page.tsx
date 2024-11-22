@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import axios from 'axios';
 import { useEffect } from 'react';
 import { Link, Outlet, useNavigate } from 'react-router-dom';
@@ -6,7 +6,38 @@ import { Link, Outlet, useNavigate } from 'react-router-dom';
 type Props = {}
 
 const AccountPage = (props: Props) => {
-    
+
+    const navigate = useNavigate()
+
+    const token = localStorage.getItem("token")
+
+    const { data: user, isLoading } = useQuery({
+        queryKey: ['user', token],
+        queryFn: () => {
+            if (!token) return null;
+            return axios.get(`http://127.0.0.1:8000/api/client/auth/profile`, {
+                headers: { Authorization: `Bearer ${token}` }
+            })
+        }
+    })
+    const logout = async () => {
+        try {
+            await axios.post(`http://localhost:8000/api/client/auth/logout`, {}, {
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                }
+            });
+            localStorage.removeItem('token');
+            navigate(`/signin`)
+        } catch (error) {
+            console.error('Error logging out', error);
+        }
+    };
+
+    useEffect(() => {
+        if (token && isLoading) return
+        if (!user) navigate(`/signin`)
+    }, [user])
 
     const navigate = useNavigate()
 
