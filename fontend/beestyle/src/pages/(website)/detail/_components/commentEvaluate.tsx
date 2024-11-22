@@ -17,7 +17,6 @@ const CommentEvaluate = () => {
 
     const { id } = useParams()
     const product_id = id
-
     const { data: comment, isLoading } = useQuery({
         queryKey: ['comment', product_id],
         queryFn: async () => {

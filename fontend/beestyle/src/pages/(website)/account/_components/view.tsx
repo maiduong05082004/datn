@@ -68,9 +68,6 @@ const ViewAccount = (props: Props) => {
         cancelOrder.mutate(id);
     }
 
-    console.log(order);
-    
-
     if (isLoadingOrder) return (<LoadingPage />)
 
     return (
