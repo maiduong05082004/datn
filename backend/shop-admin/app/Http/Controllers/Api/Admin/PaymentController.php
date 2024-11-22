@@ -40,7 +40,7 @@ class PaymentController extends Controller
         ]);
 
         $vnp_Url = "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html";
-        $vnp_Returnurl = "http://localhost:8000/api/client/payment/callback";
+        $vnp_Returnurl = "http://localhost:5173/account?api/client/payment/callback";
         $vnp_TmnCode = "943CGXVQ";
         $vnp_HashSecret = "WLQHP1MXDBOCOQZ56YQHESM95GC25M81";
 
@@ -254,9 +254,9 @@ class PaymentController extends Controller
                     'payment_method' => $payment->payment_method, // Trả về cổng thanh toán đã chọn
                     'shipping_address_id' => $bill->shipping_address_id, // Nếu có trường này trong bảng bills
                     'order_details' => $orderDetails,
-                    'shipping_fee' => $bill->shippingFee,
-                    'discounted_amount' => $bill->discountedAmount,
-                    'discounted_shipping_fee' => $bill->discountedShippingFee,
+                    'shipping_fee' => $bill->shipping_fee,
+                    'discounted_amount' => $bill->discounted_amount,
+                    'discounted_shipping_fee' => $bill->discounted_shipping_fee,
                     'message' => 'Payment processed successfully, cart items cleared'
                 ]);
                 // foreach ($bill->billDentail as $dentails) {

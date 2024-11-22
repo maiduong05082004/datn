@@ -31,7 +31,7 @@ class Comment extends Model
     // Liên kết với bảng User
     public function user()
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class, 'user_id');
     }
 
     // Liên kết với bảng Product
@@ -53,5 +53,10 @@ class Comment extends Model
     public function reports()
     {
         return $this->hasMany(ReportComment::class);
+    }
+
+    public function parentComment()
+    {
+        return $this->belongsTo(Comment::class, 'parent_id');
     }
 }

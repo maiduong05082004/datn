@@ -10,12 +10,12 @@ class Bill extends Model
     use HasFactory;
 
     // Các hằng số cho trạng thái của đơn hàng
-    const STATUS_PENDING = 'pending'; // đang chờ thanh toán
-    const STATUS_PROCESSED = 'processed'; // đang xử lý
-    const STATUS_SHIPPED = 'shipped'; // đã đặt hàng
-    const STATUS_DELIVERED = 'delivered';
-    const STATUS_CANCELED = 'canceled';
-    const STATUS_RETURNED = 'returned';
+    const STATUS_PENDING = 'pending'; // đang xử lý
+    const STATUS_PROCESSED = 'processed'; // đã xử lý (Mục đích ko thể hủy đơn hàng)
+    const STATUS_SHIPPED = 'shipped'; // ship đang giao
+    const STATUS_DELIVERED = 'delivered'; // đã giao nhận
+    const STATUS_CANCELED = 'canceled'; // Đã hủy
+    const STATUS_RETURNED = 'returned'; // trả hàng
 
     // Các hằng số cho loại thanh toán
     const PAYMENT_TYPE_ONLINE = 'online';
@@ -37,8 +37,8 @@ class Bill extends Model
         'shipping_address_id',
         'order_code_shipping',
         'shipping_fee',
-        'discounted_amount',        
-        'discounted_shipping_fee'    
+        'discounted_amount',
+        'discounted_shipping_fee'
     ];
 
     // Quan hệ với bảng users
