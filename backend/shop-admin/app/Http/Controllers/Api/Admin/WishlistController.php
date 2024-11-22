@@ -41,7 +41,7 @@ class WishlistController extends Controller
         $groupedData = $wishlistItems->groupBy('user_id')->map(function ($items, $userId) {
             return [
                 'user_id' => $userId,
-                'wishlist_items' => $items->map(function ($wishlistItems) {
+                'data' => $items->map(function ($wishlistItems) {
                     $productResource = new ProductResource($wishlistItems->product);
                     // $selectedVariationValue = $wishlistItems->productVariationValue;
                     return [
@@ -194,7 +194,7 @@ class WishlistController extends Controller
     {
         $user = Auth::user();
 
-        if (!$user->wishlist()->where('product_id', $productId)
+        if (!$user->wishlistItems()->where('product_id', $productId)
             // ->where('product_variation_value_id', $variationId)
             ->exists()) {
             return response()->json([
@@ -203,7 +203,7 @@ class WishlistController extends Controller
             ], 404);
         }
 
-        $user->wishlist()->where('product_id', $productId)
+        $user->wishlistItems()->where('product_id', $productId)
             // ->where('product_variation_value_id', $variationId)
             ->delete();
 

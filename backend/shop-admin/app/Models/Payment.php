@@ -10,8 +10,8 @@ class Payment extends Model
     use HasFactory;
 
     // Các trạng thái thanh toán
-    const STATUS_PENDING = 'pending';    // Chưa thanh toán
-    const STATUS_PAID = 'paid';          // Đã thanh toán
+    const STATUS_PENDING = 'pending';    // Chưa thanh toán                    /// payment (trạng thái thanh toán) : if(status_bill == paid) {status(bill) == pending}
+    const STATUS_PAID = 'paid';          // Đã thanh toán                      /// payment if(thất bại) if(status(bill)->pending) status_bill(payment) failed 
     const STATUS_REFUNDED = 'refunded';  // Đã hoàn tiền
     const STATUS_FAILED = 'failed';      // Thất bại
 

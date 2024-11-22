@@ -14,11 +14,60 @@ use Illuminate\Http\Request;
 
 class CommentController extends Controller
 {
-    public function __construct()
+    public function index(Request $request)
     {
-        // Middleware kiểm tra user đã đăng nhập
-        $this->middleware('auth');
+        $productId = $request->input('product_id');
+        $isAdmin = Auth::user()->role === 'admin';
+        $ratingData = $this->getProductRating($request);
+
+        $comments = Comment::with([
+            'BillDetail.productVariationValue.attributeValue',
+            'parentComment',
+            'user'
+        ])
+            ->where('product_id', $productId)
+            ->where('is_visible', 1)
+            ->paginate(10);
+
+        $commentList = [];
+        foreach ($comments as $comment) {
+            $userName = $comment->is_anonymous && !$isAdmin ? 'Anonymous' : $comment->user->name;
+            $parentComment = $comment->parentComment;
+            $isAdminReply = !is_null($comment->parentComment) && $comment->user->is_admin;
+            $commentList[] = [
+                'comment_id' => $comment->id,
+                'content' => $comment->content,
+                'bill_detail_id' => $comment->bill_detail_id,
+                'product_id' => $comment->billDetail->product_id ?? null,
+                'commentDate' => $comment->commentDate,
+                'user_name' => $userName,
+                'variation_value' => $isAdminReply ? null : [
+                    'product_variation_value_id' => $comment->billDetail->productVariationValue->id ?? null,
+                    'size' => $comment->billDetail->productVariationValue->attributeValue->value ?? null,
+                    'color' => $comment->billDetail->productVariationValue->productVariation->attributeValue->value ?? null,
+                ],
+                'bill_detail_id' => $isAdminReply ? null : $comment->bill_detail_id,
+                'product_id' => $isAdminReply ? null : $comment->billDetail->product_id ?? null,
+                'parent_comment' => $comment->parentComment ? [
+                    'parent_id' => $comment->parentComment->id,
+                    'content' => $comment->parentComment->content,
+                    'user_name' => $comment->parentComment->user->name,
+                    'comment_date' => $comment->parentComment->commentDate,
+                ] : null,
+            ];
+        }
+        // 1 product,n comment=> list theo product (của user )
+
+        return response()->json([
+            'comment_list' => $commentList,
+            'product_rating' => $ratingData // Đưa thông tin đánh giá vào trong phản hồi
+        ]);
     }
+    // public function __construct()
+    // {
+    //     // Middleware kiểm tra user đã đăng nhập
+    //     $this->middleware('auth');
+    // }
 
     // Kiểm tra xem user đã mua sản phẩm chưa
     private function hasPurchasedProduct($userId, $productId)
@@ -31,7 +80,7 @@ class CommentController extends Controller
         return BillDetail::join('bills', 'bill_details.bill_id', '=', 'bills.id')
             ->where('bills.user_id', $userId)
             ->where('bill_details.product_id', $productId)
-            ->where('bills.status_bill', 'completed') // Chỉ kiểm tra hóa đơn đã thanh toán
+            ->where('bills.status_bill', Bill::STATUS_DELIVERED) // Chỉ kiểm tra hóa đơn đã thanh toán
             ->select('bill_details.id as bill_detail_id', 'bill_details.product_id', 'bill_details.product_variation_value_id') // Chọn các trường bạn cần
             ->first();
     }
@@ -163,35 +212,7 @@ class CommentController extends Controller
 
 
     // API lấy danh sách bình luận đã duyệt cho một sản phẩm
-    public function index(Request $request)
-    {
-        $productId = $request->input('product_id');
-        $isAdmin = Auth::user()->role === 'admin';
 
-        $comments = Comment::with(['BillDetail.productVariationValue.attributeValue'])
-            ->where('product_id', $productId)
-            ->paginate(10);
-
-        $commentList = [];
-        foreach ($comments as $comment) {
-            $commentList[] = [
-                'comment_id' => $comment->id,
-                'content' => $comment->content,
-                'bill_detail_id' => $comment->bill_detail_id,
-                'product_id' => $comment->billDetail->product_id ?? null,
-                'commentDate' => $comment->commentDate,
-                'user_name' => $comment->is_anonymous && !$isAdmin ? 'Anonymous' : $comment->user->name,
-                'variation_value' => [
-                    'product_variation_value_id' => $comment->billDetail->productVariationValue->id ?? null,
-                    'size' => $comment->billDetail->productVariationValue->attributeValue->value ?? null,
-                    'color' => $comment->billDetail->productVariationValue->productVariation->attributeValue->value ?? null,
-                ],
-            ];
-        }
-        // 1 product,n comment=> list theo product (của user )
-
-        return response()->json($commentList);
-    }
 
     // API cập nhật bình luận
     public function update(Request $request)
