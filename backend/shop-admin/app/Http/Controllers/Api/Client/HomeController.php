@@ -8,6 +8,7 @@ use App\Http\Resources\ProductResource;
 use App\Models\Product;
 use App\Models\Category;
 use App\Models\Banner;
+use DB;
 use Illuminate\Http\Request;
 
 
@@ -66,38 +67,48 @@ class HomeController extends Controller
         ]);
     }
 
+
+
+
     public function productNewHot()
     {
-        $productsNewHot = Category::whereNull('parent_id')
-            ->get()
-            ->map(function ($category) {
-                $categoryIds = collect([$category->id]);
-                $categoryIds = $categoryIds->merge($category->childrenRecursive->pluck('id'));
+        $categories = Category::whereNull('parent_id')
+            ->with('childrenRecursive')
+            ->get();
+        $hotProducts = Product::select('products.*', DB::raw('SUM(bill_details.quantity) as total_quantity'))
+            ->join('bill_details', 'products.id', '=', 'bill_details.product_id')
+            ->join('bills', 'bill_details.bill_id', '=', 'bills.id')
+            ->whereIn('bills.status_bill', ['delivered'])
+            ->groupBy('products.id')
+            ->orderByRaw('total_quantity DESC')
+            ->get();
 
-                // Lấy sản phẩm bán chạy
-                $hotProducts = Product::select('products.*')
-                    ->join('bill_details', 'products.id', '=', 'bill_details.product_id')
-                    ->join('bills', 'bill_details.bill_id', '=', 'bills.id')
-                    ->whereIn('bills.status_bill', ['delivered'])
-                    ->whereIn('products.category_id', $categoryIds) 
-                    ->groupBy('products.id', 'products.name', 'products.price', 'products.category_id', 'products.stock', 'products.is_hot', 'products.is_new', 'products.is_collection', 'products.created_at', 'products.updated_at')
-                    ->orderByRaw('SUM(bill_details.quantity) DESC') 
-                    ->take(12)
-                    ->get();
-
-                return [
-                    'category_id' => $category->id,
-                    'name' => $category->name,
-                    'products' => ProductResource::collection($hotProducts), // Chuyển sản phẩm sang resource
-                ];
-            });
-
+        $productsGroupedByCategory = $hotProducts->groupBy(function ($product) {
+            $category = Category::where('id', $product->category_id)
+                ->with('parent')
+                ->first();
+            // Duyệt qua cấp cha để lấy danh mục gốc
+            while ($category && $category->parent_id) {
+                $category = $category->parent;
+            }
+            // Trả về ID danh mục cha gốc
+            return $category ? $category->id : null;
+        });
+        $result = $categories->map(function ($category) use ($productsGroupedByCategory) {
+            // Lấy sản phẩm thuộc danh mục cha này (hoặc để trống nếu không có)
+            $products = $productsGroupedByCategory->get($category->id, collect());
+            return [
+                'category_id' => $category->id,
+                'name' => $category->name,
+                'products' => ProductResource::collection($products),
+            ];
+        });
         // Trả về kết quả
         return response()->json([
-            'data' => $productsNewHot,
-
+            'data' => $result->values(),
         ]);
     }
+
 
     public function bannerCustom()
     {

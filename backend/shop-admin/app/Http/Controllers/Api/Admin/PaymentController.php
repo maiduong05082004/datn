@@ -41,7 +41,7 @@ class PaymentController extends Controller
         ]);
 
         $vnp_Url = "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html";
-        $vnp_Returnurl = "http://localhost:8000/api/client/payment/callback";
+        $vnp_Returnurl = "http://localhost:5173/account?api/client/payment/callback";
         $vnp_TmnCode = "943CGXVQ";
         $vnp_HashSecret = "WLQHP1MXDBOCOQZ56YQHESM95GC25M81";
 
@@ -102,26 +102,26 @@ class PaymentController extends Controller
                 $variationValue->productVariation->decrement('stock', $item->quantity);
                 Product::findOrFail($item->product_id)->decrement('stock', $item->quantity);
 
-                // $orderItems[] = [
-                //     'productName' => $item->product->name,
-                //     'size' => $variationValue->attributeValue->value,
-                //     'color' => $variationValue->productVariation->attributeValue->value,
-                //     'quantity' => $item->quantity,
-                //     'unitPrice' => $variationValue->price,
-                //     'total' => $totalAmount,
-                //     'image' => $item->productVariationValue->productVariation->variationImages()
-                //         ->where('image_type', 'album')
-                //         ->first()?->image_path,
-                // ];
+                $orderItems[] = [
+                    'productName' => $item->product->name,
+                    'size' => $variationValue->attributeValue->value,
+                    'color' => $variationValue->productVariation->attributeValue->value,
+                    'quantity' => $item->quantity,
+                    'unitPrice' => $variationValue->price,
+                    'total' => $totalAmount,
+                    'image' => $item->productVariationValue->productVariation->variationImages()
+                        ->where('image_type', 'album')
+                        ->first()?->image_path,
+                ];
             }
 
             $bill->subtotal = $subtotal;
             $bill->total = $subtotal;
             $bill->save();
 
-            // // Gửi email xác nhận đơn hàng qua hàng đợi
-            // $orderData = $this->prepareOrderData($request, $bill, $orderItems);
-            // Mail::to($request->user()->email)->queue(new OrderConfirmationMail($orderData));
+            // Gửi email xác nhận đơn hàng qua hàng đợi
+            $orderData = $this->prepareOrderData($request, $bill, $orderItems);
+            Mail::to($request->user()->email)->queue(new OrderConfirmationMail($orderData));
 
             // Tạo bản ghi Payment
             Payment::create([
@@ -244,32 +244,7 @@ class PaymentController extends Controller
                     'pay_date' => now(),
                 ]);
 
-                $cartItems = CartItem::whereIn('id', $request->input('cart_id'))->get();
-                $subtotal = 0;
-                $orderItems = [];
-
-                foreach ($cartItems as $item) {
-                    $variationValue = ProductVariationValue::findOrFail($item->product_variation_value_id);
-                    $totalAmount = $variationValue->price * $item->quantity;
-                    $subtotal += $totalAmount;
-
-                    $orderItems[] = [
-                        'productName' => $item->product->name,
-                        'size' => $variationValue->attributeValue->value,
-                        'color' => $variationValue->productVariation->attributeValue->value,
-                        'quantity' => $item->quantity,
-                        'unitPrice' => $variationValue->price,
-                        'total' => $totalAmount,
-                        'image' => $item->productVariationValue->productVariation->variationImages()
-                            ->where('image_type', 'album')
-                            ->first()?->image_path,
-                    ];
-
-
-                    // Gửi email xác nhận đơn hàng qua hàng đợi
-                    $orderData = $this->prepareOrderData($request, $bill, $orderItems);
-                    Mail::to($request->user()->email)->queue(new OrderConfirmationMail($orderData));
-                }
+          
 
                 $bill->status_bill = Bill::STATUS_PENDING;
                 $bill->save();
