@@ -1,161 +1,86 @@
-
-
 {
-    "variation": [
+  "statistics": {
+    "overview": {
+      "totalRevenue": {
+        "value": 45231.89,
+        "trend": "up",
+        "percentage": 20.1,
+        "comparison": "last_month"
+      },
+      "totalOrders": {
+        "value": 1618,
+        "trend": "down",
+        "percentage": 5.2,
+        "comparison": "last_month"
+      },
+      "totalUsers": {
+        "value": 8942,
+        "trend": "up",
+        "percentage": 12.5,
+        "comparison": "last_month"
+      },
+      "activeUsers": {
+        "value": 573,
+        "trend": "up",
+        "percentage": 8.4,
+        "comparison": "last_month"
+      }
+    },
+    "salesData": [
       {
-        "group_id": 55,
-        "group_name": "Biến thể cho quần áo",
-        "attributes": [
-          {
-            "id": 8,
-            "name": "Kích Thước Quần Áo",
-            "attribute_type": 1,
-            "attribute_values": {
-              "value_27": "S",
-              "value_28": "M",
-              "value_29": "L",
-              "value_30": "XL",
-              "value_31": "XXL"
-            }
-          },
-          {
-            "id": 9,
-            "name": "Màu Sắc",
-            "attribute_type": 0,
-            "attribute_values": {
-              "value_32": "Xanh lá cây",
-              "value_33": "Xanh Nước biển",
-              "value_34": "Đỏ",
-              "value_35": "Vàng",
-              "value_36": "Cam",
-              "value_37": "Tím"
-            }
-          }
-        ]
+        "month": "Jan",
+        "sales": 4000,
+        "orders": 240,
+        "visitors": 1200
       },
       {
-        "group_id": 58,
-        "group_name": "Biến thể cho giày dép",
-        "attributes": [
-          {
-            "id": 9,
-            "name": "Màu Sắc",
-            "attribute_type": 0,
-            "attribute_values": {
-              "value_32": "Xanh lá cây",
-              "value_33": "Xanh Nước biển",
-              "value_34": "Đỏ",
-              "value_35": "Vàng",
-              "value_36": "Cam",
-              "value_37": "Tím"
-            }
-          },
-          {
-            "id": 10,
-            "name": "Kích Thước giày dép",
-            "attribute_type": 1,
-            "attribute_values": {
-              "value_39": "38",
-              "value_40": "38.5",
-              "value_41": "39",
-              "value_42": "40",
-              "value_43": "41",
-              "value_44": "42"
-            }
-          }
-        ]
+        "month": "Feb",
+        "sales": 3000,
+        "orders": 198,
+        "visitors": 1100
       },
       {
-        "group_id": 62,
-        "group_name": "Biến thể cho nước hoa",
-        "attributes": [
-          {
-            "id": 32,
-            "name": "Dung Tích",
-            "attribute_type": 1,
-            "attribute_values": {
-              "value_97": "10ml",
-              "value_98": "50ml",
-              "value_99": "100ml",
-              "value_100": "200ml"
-            }
-          },
-          {
-            "id": 33,
-            "name": "Loại Nước Hoa",
-            "attribute_type": 0,
-            "attribute_values": {
-              "value_101": "EDT",
-              "value_102": "EDP"
-            }
-          }
-        ]
+        "month": "Mar",
+        "sales": 5000,
+        "orders": 300,
+        "visitors": 1600
       },
       {
-        "group_id": 68,
-        "group_name": "Nhóm biến thể quần áo lần 5",
-        "attributes": [
-          {
-            "id": 8,
-            "name": "Kích Thước Quần Áo",
-            "attribute_type": 1,
-            "attribute_values": {
-              "value_27": "S",
-              "value_28": "M",
-              "value_29": "L",
-              "value_30": "XL",
-              "value_31": "XXL"
-            }
-          },
-          {
-            "id": 9,
-            "name": "Màu Sắc",
-            "attribute_type": 0,
-            "attribute_values": {
-              "value_32": "Xanh lá cây",
-              "value_33": "Xanh Nước biển",
-              "value_34": "Đỏ",
-              "value_35": "Vàng",
-              "value_36": "Cam",
-              "value_37": "Tím"
-            }
-          },
-          {
-            "id": 35,
-            "name": "Chất Liệu",
-            "attribute_type": 2,
-            "attribute_values": {
-              "value_105": "vải cotton",
-              "value_106": "vaỈ FE"
-            }
-          }
-        ]
+        "month": "Apr",
+        "sales": 4500,
+        "orders": 270,
+        "visitors": 1400
       },
       {
-        "group_id": 69,
-        "group_name": "Nhóm điện thoại",
-        "attributes": [
-          {
-            "id": 38,
-            "name": "Màu sắc điện thoại",
-            "attribute_type": 0,
-            "attribute_values": {
-              "value_108": "Xanh Đậm",
-              "value_121": "trắng",
-              "value_128": "Đỏ Nhạt",
-              "value_129": "Hồng mộng mơ1",
-              "value_143": "Màu Mới"
-            }
-          },
-          {
-            "id": 42,
-            "name": "tên thuộc tính",
-            "attribute_type": 0,
-            "attribute_values": [
-              
-            ]
-          }
-        ]
+        "month": "May",
+        "sales": 6000,
+        "orders": 320,
+        "visitors": 1800
+      },
+      {
+        "month": "Jun",
+        "sales": 5500,
+        "orders": 290,
+        "visitors": 1700
+      }
+    ],
+    "categoryDistribution": [
+      {
+        "name": "Áo",
+        "value": 400
+      },
+      {
+        "name": "Quần",
+        "value": 300
+      },
+      {
+        "name": "Giày",
+        "value": 300
+      },
+      {
+        "name": "Phụ kiện",
+        "value": 200
       }
     ]
   }
+}

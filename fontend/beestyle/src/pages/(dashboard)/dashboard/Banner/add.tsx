@@ -49,6 +49,8 @@ const AddBanners: React.FC = () => {
     const formData = new FormData();
     formData.append('title', values.title);
     formData.append('category_id', values.category_id);
+    formData.append('type', values.type);
+    formData.append('status', values.status);
     if (values.link) {
       formData.append('link', values.link);
     }
@@ -105,6 +107,29 @@ const AddBanners: React.FC = () => {
                   {category.name}
                 </Option>
               ))}
+            </Select>
+          </Form.Item>
+
+          <Form.Item
+            name="type"
+            label="Loại Banner"
+            rules={[{ required: true, message: 'Vui lòng chọn danh mục' }]}
+          >
+            <Select placeholder="Chọn Loạn Banner">
+              <option value="main">Banner Chính</option>
+              <option value="category">Banner Danh Mục</option>
+              <option value="custom">Banner Tự Do</option>
+            </Select>
+          </Form.Item>
+
+          <Form.Item
+            name="status"
+            label="Trạng thái"
+            rules={[{ required: true, message: 'Vui lòng chọn trạng thái' }]}
+          >
+            <Select placeholder="Chọn trạng thái">
+                <Option value={0}>Không hoạt động</Option>
+                <Option value={1}>Hoạt động</Option>
             </Select>
           </Form.Item>
 
