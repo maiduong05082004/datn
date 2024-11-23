@@ -11,6 +11,11 @@ const AccountPage = (props: Props) => {
 
     const token = localStorage.getItem("token")
 
+    // Load dau trang
+    useEffect(() => {
+        window.scrollTo(0, 0);
+    }, []);
+
     const { data: user, isLoading } = useQuery({
         queryKey: ['user', token],
         queryFn: () => {

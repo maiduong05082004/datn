@@ -2,14 +2,14 @@ import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import LoadingPage from '../../loading/page';
+import LoadingPage from '../../loading/loadPage';
 
 type Props = {}
 
 const Favorite = (props: Props) => {
     const { id } = useParams()
 
-    
+
 
     const [favoriteStatus, setFavoriteStatus] = useState<boolean>();
 
@@ -26,7 +26,7 @@ const Favorite = (props: Props) => {
                     },
                 });
                 console.log(data);
-                
+
             } else {
                 // Xóa sản phẩm khỏi danh sách yêu thích
                 await axios.delete(`http://127.0.0.1:8000/api/client/wishlist/remove/${id}`, {
@@ -52,13 +52,10 @@ const Favorite = (props: Props) => {
         enabled: !!token,
     });
 
-    
     useEffect(() => {
         if (favorite) {
-            const isFavorite = favorite?.data?.wishlist_items?.some((item: any) => item?.product?.id == id);
-            console.log(isFavorite);
-            
-            setFavoriteStatus(isFavorite);                    
+            const isFavorite = favorite?.data?.data?.some((item: any) => item?.product?.id == id);
+            setFavoriteStatus(isFavorite);
         }
     }, [favorite]);
 
