@@ -97,8 +97,9 @@ Route::prefix('client')->as('client.')->group(function () {
     });
     Route::prefix('payment')->as('payment.')->group(function () {
         Route::post('/', [PaymentController::class, 'vnpayPayment'])->name('vn-pay');
-        Route::get('/callback', [PaymentController::class, 'vnpayCallback'])->name('payment.callback');
+        Route::get('/callback', [PaymentController::class, 'vnpayCallback'])->name('callback');
     });
+    
     Route::prefix('comment')->as('comment.')->group(function () {
         Route::post('/list', [CommentController::class, 'index'])->name('comment.list'); // Lấy list bình luận đã duyệt theo user_id & product_id
         Route::post('/store', [CommentController::class, 'store'])->name('comment.store')->middleware('auth:sanctum'); // Tạo 1 bình luận
@@ -200,8 +201,12 @@ Route::prefix('admins')
             Route::prefix('statistics')->as('statistics')->group(function () {
                 Route::get('top-selling-products', [StatisticsController::class, 'getTopSellingProducts'])->name('statistics.top-selling-products');
                 Route::get('revenue-and-profit', [StatisticsController::class, 'getRevenueAndProfit'])->name('statistics.revenue-and-profit');
+                Route::get('delivered_product', [StatisticsController::class, 'getDeliveredOrderProducts'])->name('statistics.delivered_product');
+                Route::get('canceled_product', [StatisticsController::class, 'getCancelledOrderProducts'])->name('statistics.canceled_product');
+                Route::get('revenue-and-profit_with_categories', [StatisticsController::class, 'getRevenueAndProfitByCategory'])->name('statistics.revenue-and-profit_with_categories');
                 Route::get('new-users', [StatisticsController::class, 'getNewUsers'])->name('statistics.new-users');
                 Route::get('customer-behavior', [StatisticsController::class, 'getCustomerBehavior'])->name('statistics.customer-behavior');
+                Route::get('get_product_stock', [StatisticsController::class, 'getProductStock'])->name('statistics.get_product_stock');
                 Route::post('update-daily', [StatisticsController::class, 'updateDailyStatistics'])->name('statistics.update-daily');
             });
         });

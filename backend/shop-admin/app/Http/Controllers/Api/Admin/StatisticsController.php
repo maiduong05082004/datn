@@ -140,6 +140,84 @@ class StatisticsController extends Controller
         return response()->json($stats);
     }
 
+    public function getRevenueAndProfitByCategory(Request $request)
+    {
+        $isSummary = $request->get('summary', false); // Mặc định là false nếu không có tham số truyền vào
+        $date = $request->get('date');
+        $groupByType = $request->get('group_by', 'day'); // Mặc định là 'day'
+
+        // Chọn nhóm theo ngày, tháng, hoặc năm
+        switch ($groupByType) {
+            case 'month':
+                $groupBy = "CONCAT(YEAR(bills.created_at), '-', LPAD(MONTH(bills.created_at), 2, '0'))";
+                break;
+            case 'year':
+                $groupBy = "YEAR(bills.created_at)";
+                break;
+            case 'day':
+            default:
+                $groupBy = "DATE(bills.created_at)";
+                break;
+        }
+
+        if ($isSummary) {
+            // Tổng doanh thu và lợi nhuận theo danh mục
+            $stats = BillDetail::selectRaw("
+            $groupBy as period,
+            categories.name as category_name,
+            SUM(bill_details.quantity * bill_details.don_gia) as total_revenue,
+            SUM((bill_details.don_gia - 500000) * bill_details.quantity) as total_profit
+        ")
+                ->join('bills', 'bill_details.bill_id', '=', 'bills.id')
+                ->join('products', 'bill_details.product_id', '=', 'products.id')
+                ->join('categories', 'products.category_id', '=', 'categories.id')  // Tham gia bảng categories
+                ->when($date, function ($query, $date) {
+                    $query->whereBetween('bills.created_at', [$date['start'], $date['end']]);
+                })
+                ->groupBy('period', 'category_name')  // Nhóm theo ngày/tháng/năm và danh mục
+                ->get();
+        } else {
+            // Doanh thu và lợi nhuận theo từng sản phẩm trong từng danh mục
+            $stats = BillDetail::selectRaw("
+            products.name as product_name,
+            categories.name as category_name,
+            $groupBy as period,
+            SUM(bill_details.quantity * bill_details.don_gia) as total_revenue,
+            SUM((bill_details.don_gia - 500000) * bill_details.quantity) as total_profit
+        ")
+                ->join('bills', 'bill_details.bill_id', '=', 'bills.id')
+                ->join('products', 'bill_details.product_id', '=', 'products.id')
+                ->join('categories', 'products.category_id', '=', 'categories.id')  // Tham gia bảng categories
+                ->when($date, function ($query, $date) {
+                    $query->whereBetween('bills.created_at', [$date['start'], $date['end']]);
+                })
+                ->groupBy('period', 'product_name', 'category_name')  // Nhóm theo sản phẩm và danh mục
+                ->get();
+        }
+
+        return response()->json($stats);
+    }
+
+    public function getProductStock(Request $request)
+    {
+        $date = $request->get('date'); // Ngày, tháng, hoặc năm nếu có
+
+        $stockStats = Product::selectRaw("
+        products.name as product_name,
+        products.stock as stock
+    ")
+            ->when($date, function ($query, $date) {
+                // Nếu có tham số ngày tháng, lọc theo ngày
+                $query->whereDate('products.created_at', '>=', $date['start'])
+                    ->whereDate('products.created_at', '<=', $date['end']);
+            })
+            ->get();
+
+        return response()->json($stockStats);
+    }
+
+
+
     // Thống kê người dùng mới
     public function getNewUsers(Request $request)
     {
@@ -178,41 +256,65 @@ class StatisticsController extends Controller
     // Đơn hàng thành công
     public function getDeliveredOrderProducts(Request $request)
     {
-        $date = $request->get('date');
-        $completedOrderProducts = BillDetail::selectRaw('
-            product_id, 
-            SUM(quantity) as total_sold,
-            SUM(quantity * don_gia) as total_revenue
-        ')
-            ->join('bills', 'bill_details.bill_id', '=', 'bills.id')
-            ->where('bills.status', Bill::STATUS_DELIVERED)
-            ->applyDateFilter($date)  // Lọc theo ngày/tháng/năm nếu có
-            ->groupBy('product_id')
+        $date = $request->get('date'); // Nhận tham số ngày từ request
+
+        $completedOrderProducts = BillDetail::join('bills', 'bill_details.bill_id', '=', 'bills.id')
+            ->join('products', 'bill_details.product_id', '=', 'products.id')  // Join bảng sản phẩm
+            ->select(
+                'bill_details.product_id',
+                'products.name as product_name',
+                'products.price',
+                'products.category_id',
+                \DB::raw('SUM(bill_details.quantity) as total_sold'),
+                \DB::raw('SUM(bill_details.quantity * bill_details.don_gia) as total_revenue')
+            )
+            ->where('bills.status_bill', Bill::STATUS_DELIVERED) // Sửa lại tên cột `status_bill` nếu cần
+            ->when(
+                $date,
+                function ($query) use ($date) {
+                    // Kiểm tra nếu có tham số 'date' trong request
+                    $query->whereBetween('bills.created_at', [$date['start'], $date['end']]);
+                }
+            )
+            ->groupBy('bill_details.product_id', 'products.name', 'products.price', 'products.category_id')
             ->orderByDesc('total_sold')
             ->get();
 
         return response()->json($completedOrderProducts);
     }
 
+
+
     // đơn hàng bị hủy
     public function getCancelledOrderProducts(Request $request)
     {
-        $date = $request->get('date');
+        $date = $request->get('date'); // Nhận tham số ngày từ request
 
-        $cancelledOrderProducts = BillDetail::selectRaw('
-            product_id, 
-            SUM(quantity) as total_sold,
-            SUM(quantity * don_gia) as total_revenue
-        ')
-            ->join('bills', 'bill_details.bill_id', '=', 'bills.id')
-            ->where('bills.status', Bill::STATUS_CANCELED)
-            ->applyDateFilter($date)  // Lọc theo ngày/tháng/năm nếu có
-            ->groupBy('product_id')
+        $cancelledOrderProducts = BillDetail::join('bills', 'bill_details.bill_id', '=', 'bills.id')
+            ->join('products', 'bill_details.product_id', '=', 'products.id')  // Join bảng sản phẩm
+            ->select(
+                'bill_details.product_id',
+                'products.name as product_name',
+                'products.price',
+                'products.category_id',
+                \DB::raw('SUM(bill_details.quantity) as total_sold'),
+                \DB::raw('SUM(bill_details.quantity * bill_details.don_gia) as total_revenue')
+            )
+            ->where('bills.status_bill', Bill::STATUS_CANCELED) // Trạng thái đơn hàng hủy
+            ->when(
+                $date,
+                function ($query) use ($date) {
+                    // Kiểm tra nếu có tham số 'date' trong request
+                    $query->whereBetween('bills.created_at', [$date['start'], $date['end']]);
+                }
+            )
+            ->groupBy('bill_details.product_id', 'products.name', 'products.price', 'products.category_id')
             ->orderByDesc('total_sold')
             ->get();
 
         return response()->json($cancelledOrderProducts);
     }
+
 
     public function updateDailyStatistics(Request $request)
     {

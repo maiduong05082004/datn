@@ -34,30 +34,87 @@ class CommentController extends Controller
             $userName = $comment->is_anonymous && !$isAdmin ? 'Anonymous' : $comment->user->name;
             $parentComment = $comment->parentComment;
             $isAdminReply = !is_null($comment->parentComment) && $comment->user->is_admin;
-            $commentList[] = [
+            $variationValue = [
+                'product_variation_value_id' => $comment->billDetail->productVariationValue->id ?? null,
+                'size' => $comment->billDetail->productVariationValue->attributeValue->value ?? null,
+                'color' => $comment->billDetail->productVariationValue->productVariation->attributeValue->value ?? null
+            ];
+            $parentCommentDetails = null;
+            if ($comment->parentComment) {
+                $parentCommentDetails = [
+                    'parent_id' => $parentComment->id,
+                    'comment_id' => $comment->id,
+                    'content' => $parentComment->content,
+                    'bill_detail_id' => $parentComment->bill_detail_id,
+                    'product_id' => $parentComment->product_id,
+                    'commentDate' => $parentComment->commentDate,
+                    'user_name' => $parentComment->user->name,
+                ];
+            }
+            $commentData = [
                 'comment_id' => $comment->id,
                 'content' => $comment->content,
                 'bill_detail_id' => $comment->bill_detail_id,
                 'product_id' => $comment->billDetail->product_id ?? null,
                 'commentDate' => $comment->commentDate,
                 'user_name' => $userName,
-                'variation_value' => $isAdminReply ? null : [
-                    'product_variation_value_id' => $comment->billDetail->productVariationValue->id ?? null,
-                    'size' => $comment->billDetail->productVariationValue->attributeValue->value ?? null,
-                    'color' => $comment->billDetail->productVariationValue->productVariation->attributeValue->value ?? null,
-                ],
-                'bill_detail_id' => $isAdminReply ? null : $comment->bill_detail_id,
-                'product_id' => $isAdminReply ? null : $comment->billDetail->product_id ?? null,
-                'parent_comment' => $comment->parentComment ? [
-                    'parent_id' => $comment->parentComment->id,
-                    'content' => $comment->parentComment->content,
-                    'user_name' => $comment->parentComment->user->name,
-                    'comment_date' => $comment->parentComment->commentDate,
-                ] : null,
+                'product_variation_value_id' => $variationValue['product_variation_value_id'],
+                'size' => $variationValue['size'],
+                'color' => $variationValue['color'],
+                'parent_comment' => $parentCommentDetails ? $parentCommentDetails : null,  // Chỉ thêm bình luận cha nếu có
+                'reply_comment' => []  // Mảng chứa các bình luận trả lời
             ];
-        }
-        // 1 product,n comment=> list theo product (của user )
+            $replyComments = Comment::with('user')
+                ->where('parent_id', $comment->id)
+                ->where('is_visible', 1)
+                ->get();
 
+            // Thêm các bình luận trả lời vào mảng 'reply_comment' của bình luận chính
+            foreach ($replyComments as $reply) {
+                $commentData['reply_comment'][] = [
+                    'comment_id' => $reply->id,
+                    'content' => $reply->content,
+                    'bill_detail_id' => $reply->bill_detail_id,
+                    'product_id' => $reply->billDetail->product_id ?? null,
+                    'commentDate' => $reply->commentDate,
+                    'user_name' => $reply->user->name,
+                ];
+            }
+            $commentList[] = $commentData;
+            // $commentList[] = [
+            //     'comment_id' => $comment->id,
+            //     'content' => $comment->content,
+            //     'bill_detail_id' => $comment->bill_detail_id,
+            //     'product_id' => $comment->billDetail->product_id ?? null,
+            //     'commentDate' => $comment->commentDate,
+            //     'user_name' => $userName,
+            //     'product_variation_value_id' => $variationValue['product_variation_value_id'],
+            //     'size' => $variationValue['size'],
+            //     'color' => $variationValue['color'],
+            //     'parent_comment' => $parentCommentDetails ? [$parentCommentDetails] : null,
+            // 'variation_value' => $isAdminReply ? null : [
+            //     'product_variation_value_id' => $comment->billDetail->productVariationValue->id ?? null,
+            //     'size' => $comment->billDetail->productVariationValue->attributeValue->value ?? null,
+            //     'color' => $comment->billDetail->productVariationValue->productVariation->attributeValue->value ?? null,
+            // ],
+            // 'bill_detail_id' => $isAdminReply ? null : $comment->bill_detail_id,
+            // 'product_id' => $isAdminReply ? null : $comment->billDetail->product_id ?? null,
+            // 'parent_comment' => $comment->parentComment ? [
+            //     'parent_id' => $comment->parentComment->id,
+            //     'content' => $comment->parentComment->content,
+            //     'user_name' => $comment->parentComment->user->name,
+            //     'comment_date' => $comment->parentComment->commentDate,
+            // ] : null,
+            //     ];
+            // }
+            // // 1 product,n comment=> list theo product (của user )
+
+            // return response()->json([
+            //     'comment_list' => $commentList,
+            //     'product_rating' => $ratingData // Đưa thông tin đánh giá vào trong phản hồi
+            // ]);
+        }
+        // $commentList[] = $commentData;
         return response()->json([
             'comment_list' => $commentList,
             'product_rating' => $ratingData // Đưa thông tin đánh giá vào trong phản hồi

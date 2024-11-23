@@ -18,10 +18,10 @@ import ListUser from "@/pages/(dashboard)/dashboard/Users/list";
 import AddUser from "@/pages/(dashboard)/dashboard/Users/add";
 import UpdateUser from "@/pages/(dashboard)/dashboard/Users/update";
 import ListComments from "@/pages/(dashboard)/dashboard/Comment/list";
-import ListProducts from "@/pages/(dashboard)/dashboard/Products/list";
-import UpdateProduct from "@/pages/(dashboard)/dashboard/Products/update";
-import AddProduct from "@/pages/(dashboard)/dashboard/Products/add";
-import DetailProduct from "@/pages/(dashboard)/dashboard/Products/detail";
+import ListProducts from "@/pages/(dashboard)/dashboard/products/list";
+import UpdateProduct from "@/pages/(dashboard)/dashboard/products/update";
+import AddProduct from "@/pages/(dashboard)/dashboard/products/add";
+import DetailProduct from "@/pages/(dashboard)/dashboard/products/detail";
 import AddCategories from "@/pages/(dashboard)/dashboard/Category/add";
 import ListCategories from "@/pages/(dashboard)/dashboard/Category/list";
 import UpdateCategories from "@/pages/(dashboard)/dashboard/Category/update";
@@ -32,7 +32,7 @@ import CheckOutPage from "@/pages/(website)/checkout/page";
 import DetailPage from "@/pages/(website)/detail/page";
 import ListPage from "@/pages/(website)/list/page";
 import SearchPage from "@/pages/(website)/search/page";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import ListAttribute from "@/pages/(dashboard)/dashboard/Attribute/list";
 import Shiping from "@/pages/(dashboard)/dashboard/Bill/shiping";
 import AddAttribute from "@/pages/(dashboard)/dashboard/Attribute/add";
@@ -52,7 +52,7 @@ import AddressesPage from "@/pages/(website)/account/_components/addresses";
 import App from "@/pages/(dashboard)/dashboard/Bill/app";
 import Detailship from "@/pages/(dashboard)/dashboard/Bill/detailship";
 import DeatilConfirm from "@/pages/(dashboard)/dashboard/Bill/detailConfirm"
-import Comments from "@/pages/(dashboard)/dashboard/Products/comments";
+import Comments from "@/pages/(dashboard)/dashboard/products/comments";
 import DetailUser from "@/pages/(dashboard)/dashboard/Users/detail";
 import PrivateRouter from "./PrivateRoute";
 // import CartPage from "@/pages/(website)/cart/page";
@@ -61,11 +61,44 @@ import Signin from "@/pages/(dashboard)/dashboard/auth.tsx/signin";
 import DetailBanner from "@/pages/(dashboard)/dashboard/Banner/detail";
 import ForgotPasswordPage from "@/pages/(website)/ForgotPassword/page";
 import ResetPasswordPage from "@/pages/(website)/ResetPassword/page";
+import axios from "axios";
+import PrivateRoute from './PrivateRoute';
 
 const Router = () => {
 
     const [isSearch, setIsSearch] = useState<boolean>(false)
     const [isKeySearch, setKeySearch] = useState<string>("")
+    const [userRole, setUserRole] = useState<string | null>(null)
+    const [loading, setLoading] = useState<boolean>(true)
+
+    useEffect(() => {
+        const fetchUserProfile = async () => {
+            const token = localStorage.getItem("token")
+            if (token) {
+                try {
+                    const response = await axios.get("http://127.0.0.1:8000/api/client/auth/profile", {
+                        headers: {
+                            Authorization: `Bearer ${token}`,
+                        },
+                    })
+                    setUserRole(response.data.user.role)
+                } catch (error) {
+                    console.error("Error fetching user profile:", error)
+                } finally {
+                    setLoading(false)
+                }
+            } else {
+                setLoading(false)
+            }
+        }
+
+        fetchUserProfile()
+    }, [])
+
+    if (loading) {
+        return <div>Loading...</div>
+    }
+
     return (
 
         <>
@@ -93,8 +126,11 @@ const Router = () => {
 
                 {/* Admin Routes */}
                 <Route path="admin" element={<Signin />} />
-                {/* <Route path="admin/dashboard" element={<PrivateRouter><LayoutAdmin /></PrivateRouter>}> */}
-                <Route path="admin/dashboard" element={<LayoutAdmin />}>
+                <Route path="admin/dashboard" element={
+                    <PrivateRoute userRole={userRole}>
+                        <LayoutAdmin />
+                    </PrivateRoute>
+                }>
                     <Route index element={<DashboardPage />} />
                     <Route path="profile" element={<MyProfile />} />
                     {/* bills */}
