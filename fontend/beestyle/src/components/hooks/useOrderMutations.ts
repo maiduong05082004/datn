@@ -52,7 +52,9 @@ export const useOrderMutations = () => {
                         Authorization: `Bearer ${localStorage.getItem("token")}`,
                     }
                 })
-                window.location.href = data.data
+                console.log(data);
+                
+                // window.location.href = data.data
             } catch (error) {
                 throw new Error("Mua hàng thất bại!")
             }

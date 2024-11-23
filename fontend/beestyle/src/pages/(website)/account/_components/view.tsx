@@ -53,6 +53,9 @@ const ViewAccount = (props: Props) => {
         }
     })
 
+    console.log(order);
+    
+
     setValue("stars", start)
     const onSubmit = (data: any) => {
         if (itemProduct) {
