@@ -201,8 +201,12 @@ Route::prefix('admins')
             Route::prefix('statistics')->as('statistics')->group(function () {
                 Route::get('top-selling-products', [StatisticsController::class, 'getTopSellingProducts'])->name('statistics.top-selling-products');
                 Route::get('revenue-and-profit', [StatisticsController::class, 'getRevenueAndProfit'])->name('statistics.revenue-and-profit');
+                Route::get('delivered_product', [StatisticsController::class, 'getDeliveredOrderProducts'])->name('statistics.delivered_product');
+                Route::get('canceled_product', [StatisticsController::class, 'getCancelledOrderProducts'])->name('statistics.canceled_product');
+                Route::get('revenue-and-profit_with_categories', [StatisticsController::class, 'getRevenueAndProfitByCategory'])->name('statistics.revenue-and-profit_with_categories');
                 Route::get('new-users', [StatisticsController::class, 'getNewUsers'])->name('statistics.new-users');
                 Route::get('customer-behavior', [StatisticsController::class, 'getCustomerBehavior'])->name('statistics.customer-behavior');
+                Route::get('get_product_stock', [StatisticsController::class, 'getProductStock'])->name('statistics.get_product_stock');
                 Route::post('update-daily', [StatisticsController::class, 'updateDailyStatistics'])->name('statistics.update-daily');
             });
         });
