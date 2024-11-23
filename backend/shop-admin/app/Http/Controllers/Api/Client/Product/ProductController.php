@@ -443,7 +443,7 @@ class ProductController extends Controller
                 return [
                     'id' => $payment->id,
                     'method' => $payment->payment_method,
-                    'status' => $payment->getPaymentStatus(),
+                    'status' => $payment->status,
                     'amount' => $payment->amount,
                     'transaction_id' => $payment->transaction_id,
                     'bank_code' => $payment->bank_code,
@@ -454,7 +454,7 @@ class ProductController extends Controller
                     'transaction_fee' => $payment->transaction_fee,
                     'receipt_code' => $payment->receipt_code,
                 ];
-            })->toArray();
+            })->first();
 
             // Re-order the fields for bill
             return [
@@ -596,7 +596,7 @@ class ProductController extends Controller
                     'transaction_fee' => $payment->transaction_fee,
                     'receipt_code' => $payment->receipt_code,
                 ];
-            })->toArray();
+            })->first();
 
             $canceledReasonTime = $bill->canceled_at ? Carbon::parse($bill->canceled_at)->timezone('Asia/Ho_Chi_Minh') : null;
 
