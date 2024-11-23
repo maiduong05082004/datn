@@ -63,6 +63,9 @@ import ForgotPasswordPage from "@/pages/(website)/ForgotPassword/page";
 import ResetPasswordPage from "@/pages/(website)/ResetPassword/page";
 import axios from "axios";
 import PrivateRoute from './PrivateRoute';
+import ListStatistics from "@/pages/(dashboard)/dashboard/Statistics/list";
+import ListAllChart from "@/pages/(dashboard)/dashboard/Statistics/ListAllChart";
+import ListTopSelling from "@/pages/(dashboard)/dashboard/Statistics/listtopselling";
 
 const Router = () => {
 
@@ -180,6 +183,11 @@ const Router = () => {
                     <Route path="promotions/update/:id" element={<UpdatePromotion />} />
                     {/* inventory */}
                     <Route path="inventory/list" element={<InventoryManagement />} />
+                    {/*{/* statistic */}
+                    <Route path="statistic/list" element={<ListStatistics />} />
+                    <Route path="statistic/listtopselling" element={<ListTopSelling />} />
+                    <Route path="statistic/listall" element={<ListAllChart />} />
+                    
                 </Route>
             </Routes>
             <Search isSearch={isSearch} setIsSearch={setIsSearch} setKeySearch={setKeySearch} />

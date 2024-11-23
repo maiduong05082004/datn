@@ -43,8 +43,8 @@ const items1: MenuProps['items'] = [
     label: "Banners",
     children: [
 
-      { key: 'sub2-1', label: <NavLink to="/admin/dashboard/banner/add">Danh sách Banners</NavLink> },
-      { key: 'sub2-2', label: <NavLink to="/admin/dashboard/banner/list">Thêm Banners</NavLink> },
+      { key: 'sub2-1', label: <NavLink to="/admin/dashboard/banner/list">Danh sách Banners</NavLink> },
+      { key: 'sub2-2', label: <NavLink to="/admin/dashboard/banner/add">Thêm Banners</NavLink> },
     ],
   },
   {
@@ -110,8 +110,7 @@ const items1: MenuProps['items'] = [
     icon: React.createElement(BarChartOutlined),
     label: 'Thống Kê',
     children: [
-      { key: 'sub9-1', label: 'Xem Thống Kê' },
-      { key: 'sub9-2', label: 'Tải Xuống Thống Kê' },
+      { key: 'sub9-1', label: <NavLink to="/admin/dashboard/statistic/list">Xem Thống Thê</NavLink> },
     ],
   },
   {

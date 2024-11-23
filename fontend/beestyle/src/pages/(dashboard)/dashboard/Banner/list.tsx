@@ -58,6 +58,7 @@ const ListBanners: React.FC = () => {
         stt: index + 1,
         ...item,
         categoryName: categoryMap?.[item.category_id] || 'N/A',
+        typeLabel: item.type === 'main' ? 'Ảnh chính' : item.type === 'category' ? 'Ảnh danh mục' : 'Ảnh tự do',
     }));
 
     const columns = [
@@ -83,10 +84,21 @@ const ListBanners: React.FC = () => {
             key: 'categoryName',
         },
         {
+            title: 'Loại',
+            dataIndex: 'typeLabel',
+            key: 'typeLabel',
+        },
+        {
             title: 'Link',
             dataIndex: 'link',
             key: 'link',
             render: (text: string | null) => (text ? <a href={text} target="_blank" rel="noopener noreferrer">{text}</a> : 'N/A'),
+        },
+        {
+            title: 'Trạng Thái',
+            dataIndex: 'status',
+            key: 'status',
+            render: (status: number) => (status === 1 ? 'Hoạt động' : 'Không hoạt động'),
         },
         {
             title: 'Action',
