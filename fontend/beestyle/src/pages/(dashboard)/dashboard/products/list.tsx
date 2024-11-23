@@ -164,14 +164,14 @@ const ListProducts = () => {
           <Button
             type="default"
             icon={<EyeOutlined />}
-            className='rounded-full'
+            
             onClick={() => navigate(`/admin/dashboard/products/detail/${product.id}`)}
           />
 
           <Button
             type="default"
             icon={<EditOutlined />}
-            className='rounded-full'
+            
             onClick={() => navigate(`/admin/dashboard/products/update/${product.id}`)}
           />
           <Popconfirm
@@ -181,7 +181,7 @@ const ListProducts = () => {
             okText="Yes"
             cancelText="No"
           >
-            <Button icon={<DeleteOutlined />} danger type="default"className='rounded-full'
+            <Button icon={<DeleteOutlined />} danger type="default"
             />
           </Popconfirm>
         </div>

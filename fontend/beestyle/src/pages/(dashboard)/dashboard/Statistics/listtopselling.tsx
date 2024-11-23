@@ -13,6 +13,7 @@ import {
 } from 'chart.js';
 import axiosInstance from '@/configs/axios';
 
+// Đăng ký các thành phần của ChartJS
 ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement);
 
 type Props = {};
@@ -64,22 +65,13 @@ const ListTopSelling = (props: Props) => {
     setSelectedProducts(products);
     setDrawerVisible(true);
   };
+  
 
-  // Dữ liệu biểu đồ tròn
-  const pieChartData = {
-    labels: TopSelling.map((item) => item.product.name),
-    datasets: [
-      {
-        data: TopSelling.map((item) => item.total_sold),
-        backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF'],
-        hoverBackgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF'],
-      },
-    ],
-  };
-
-  // Dữ liệu biểu đồ cột
   const barChartData = {
-    labels: TopSelling.map((item) => item.product.name),
+    labels: TopSelling.map(item => {
+      const shortenedProductName = item.product.name.split('-')[0].trim(); 
+      return `${shortenedProductName}\n(${item.product.input_day})`;
+    }),
     datasets: [
       {
         label: 'Tổng bán',
@@ -114,76 +106,96 @@ const ListTopSelling = (props: Props) => {
     },
   };
 
+  const pieChartData = {
+    labels: TopSelling.map((item) => item.product.name),
+    datasets: [
+      {
+        data: TopSelling.map((item) => item.total_sold),
+        backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF'],
+        hoverBackgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF'],
+      },
+    ],
+  };
+
   return (
     <div className="p-4">
-      <h2 className="text-3xl font-bold text-center mb-6">Danh sách sản phẩm bán chạy</h2>
-
-      {/* Biểu đồ */}
       <div className="flex justify-center gap-10">
-        <div className="w-[49%] bg-gray-200 dark:bg-gray-800 rounded-lg shadow-lg p-6">
+        <div className="w-[45%] bg-gray-200 dark:bg-gray-800 rounded-lg shadow-lg p-6">
           <h3 className="text-xl font-semibold text-center text-gray-700 dark:text-gray-300">
             Biểu đồ cột tổng bán
           </h3>
           <div style={{ width: '90%', margin: '0 auto' }}>
             <Bar data={barChartData} options={barOptions} />
           </div>
+          <div className="flex justify-center mt-6">
+            <Button type="primary" size="large" onClick={handleShowDetails}>
+              Xemchi tiết
+            </Button>
+          </div>
         </div>
-        <div className="w-[49%] bg-gray-200 dark:bg-gray-800 rounded-lg shadow-lg p-6">
+        {/* <div className="w-[45%] bg-gray-200 dark:bg-gray-800 rounded-lg shadow-lg p-6">
           <h3 className="text-xl font-semibold text-center text-gray-700 dark:text-gray-300">
             Tỷ lệ sản phẩm bán chạy
           </h3>
-          <div style={{ width: '90%', margin: '0 auto' }}>
+          <div style={{ width: '70%', margin: '0 auto' }}>
             <Pie data={pieChartData} />
           </div>
-        </div>
+        </div> */}
       </div>
 
-      {/* Nút hiển thị danh sách chi tiết */}
-      <div className="flex justify-center mt-6">
-        <Button type="primary" size="large" onClick={handleShowDetails}>
-          Xem danh sách chi tiết
-        </Button>
-      </div>
-
-      {/* Drawer hiển thị chi tiết */}
       <Drawer
-        title="Chi tiết sản phẩm bán chạy"
-        placement="bottom"
+        title={<h2 className="text-xl font-bold text-gray-800 dark:text-gray-200">Chi tiết sản phẩm bán chạy</h2>}
         onClose={() => setDrawerVisible(false)}
         open={drawerVisible}
-        height={500} 
-        className="dark:bg-gray-900"
+        width={800} 
+        bodyStyle={{
+          padding: 0, 
+        }}
+        className="dark:bg-gray-900 rounded-lg overflow-hidden shadow-xl"
       >
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 px-4">
-          {selectedProducts.map((product) => (
-            <div
-              key={product.id}
-              className="p-4 bg-gray-100 dark:bg-gray-800 rounded-md shadow-md border border-gray-200 dark:border-gray-700"
-            >
-              <h4 className="font-semibold text-lg text-gray-800 dark:text-gray-200 text-center mb-2">
-                {product.name}
-              </h4>
-              <div className="text-sm text-gray-700 dark:text-gray-400 space-y-1">
-                <p>
-                  <strong>Giá:</strong> {parseFloat(product.price).toLocaleString()} VNĐ
-                </p>
-                <p>
-                  <strong>Tồn kho:</strong> {product.stock}
-                </p>
-                <p>
-                  <strong>Mô tả:</strong> {product.description}
-                </p>
-                <p>
-                  <strong>Lượt xem:</strong> {product.view}
-                </p>
-                <p>
-                  <strong>Ngày nhập:</strong> {product.input_day}
-                </p>
+        <div className="bg-gray-50 dark:bg-gray-900 h-full px-8 py-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {selectedProducts.map((product) => (
+              <div
+                key={product.id}
+                className="bg-white dark:bg-gray-800 rounded-lg shadow-md hover:shadow-lg transition duration-300 transform hover:-translate-y-2"
+              >
+                <div className="p-4 border-b dark:border-gray-700">
+                  <h4 className="font-semibold text-center text-lg text-gray-800 dark:text-gray-200">
+                    {product.name}
+                  </h4>
+                </div>
+
+                <div className="p-6 space-y-4 text-sm text-gray-700 dark:text-gray-400">
+                  <p>
+                    <strong>Giá:</strong>{" "}
+                    <span className="text-blue-500 font-medium">
+                      {parseFloat(product.price).toLocaleString()} VNĐ
+                    </span>
+                  </p>
+                  <p>
+                    <strong>Tồn kho:</strong>{" "}
+                    <span className="text-green-500">{product.stock}</span>
+                  </p>
+                  <p>
+                    <strong>Mô tả:</strong>{" "}
+                    <span className="line-clamp-3">{product.description}</span>
+                  </p>
+                  <p>
+                    <strong>Lượt xem:</strong>{" "}
+                    <span className="text-yellow-500">{product.view}</span>
+                  </p>
+                  <p>
+                    <strong>Ngày nhập:</strong>{" "}
+                    <span className="italic">{product.input_day}</span>
+                  </p>
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       </Drawer>
+
     </div>
   );
 };

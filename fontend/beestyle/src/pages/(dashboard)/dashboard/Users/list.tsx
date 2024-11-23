@@ -98,14 +98,12 @@ const UserList: React.FC = () => {
             type="default"
             icon={<EyeOutlined />}
             onClick={() => navigate(`/admin/dashboard/user/detail/${record.id}`)}
-            className='rounded-full'
           >
           </Button>
           <Button
             type="default"
             icon={<EditOutlined />}
             onClick={() => navigate(`/admin/dashboard/user/update/${record.id}`)}
-            className='rounded-full'
           >
           </Button>
         </Space>

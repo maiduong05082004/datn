@@ -57,7 +57,11 @@ class CommentController extends Controller
                 'bill_detail_id' => $comment->bill_detail_id,
                 'product_id' => $comment->billDetail->product_id ?? null,
                 'commentDate' => $comment->commentDate,
+                'stars' => $comment->stars,
                 'user_name' => $userName,
+                'user_id' => $comment->user_id,
+                'reported_count' => $comment->reported_count,
+                'is_visible' => $comment->is_visible,
                 'product_variation_value_id' => $variationValue['product_variation_value_id'],
                 'size' => $variationValue['size'],
                 'color' => $variationValue['color'],
@@ -263,6 +267,7 @@ class CommentController extends Controller
                 'content' => $comment->content,
                 'reported_count' => $comment->reported_count,
                 'is_visible' => $comment->is_visible,
+                'reason' => $reason
             ],
         ]);
     }
@@ -395,7 +400,7 @@ class CommentController extends Controller
             ], 404);
         }
         $comment->is_visible = 0;
-        $comment->hide_reason = $request->input('hide_reason') ?? 'Hidden by admin';
+        // $comment->hide_reason = $request->input('hide_reason') ?? 'Hidden by admin';
         $comment->save();
         return response()->json([
             'message' => 'Comment hide successfully',
@@ -433,6 +438,18 @@ class CommentController extends Controller
 
         if (Auth::user()->role !== 'admin' && Auth::id() !== $parentComment->user_id) {
             return response()->json(['message' => 'Permission denied.'], 403);
+        }
+
+        $existingReply = Comment::where('parent_id', $parentId)
+            ->where('user_id', Auth::id())  // Kiểm tra xem admin đã trả lời chưa
+            ->exists();
+
+        if ($existingReply) {
+            return response()->json(['message' => 'You have already replied to this comment.'], 400);
+        }
+
+        if ($parentComment->user_id == Auth::id()) {
+            return response()->json(['message' => 'You cannot reply to your own comment.'], 400);
         }
 
         $comment = Comment::create([

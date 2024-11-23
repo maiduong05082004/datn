@@ -40,8 +40,6 @@ const Comments = (props: Props) => {
   const [isReportModalVisible, setIsReportModalVisible] = useState(false);
   const [reportReason, setReportReason] = useState('');
   const [currentCommentId, setCurrentCommentId] = useState<number | null>(null);
-  const [reportReasons, setReportReasons] = useState<{ [key: number]: string }>({});
-  const [isReplyModalVisible, setIsReplyModalVisible] = useState(false);
 
   // Fetch danh sách bình luận
   const { data: CommentsData, isLoading, refetch } = useQuery({
@@ -90,17 +88,18 @@ const Comments = (props: Props) => {
       } else {
         messageAPI.success('Người dùng đã bị khóa thành công!');
       }
-      refetch();
+      refetch(); 
     },
     onError: () => {
       messageAPI.error('Lỗi khi khóa người dùng.');
     },
   });
 
+  // Báo cáo 
   const { mutate: reportComment } = useMutation({
-    mutationFn: async ({ id, reason }: { id: number; reason: string }) => {
+    mutationFn: async ({ comment_id, reason }: { comment_id: number; reason: string }) => {
       const response = await axiosInstance.post('http://localhost:8000/api/admins/comment/report', {
-        id,
+        comment_id,
         reason,
       });
       return response.data;
@@ -109,9 +108,7 @@ const Comments = (props: Props) => {
       messageAPI.success('Báo cáo bình luận thành công');
       refetch();
       setIsReportModalVisible(false);
-      if (currentCommentId !== null) {
-        setReportReasons((prev: any) => ({ ...prev, [currentCommentId]: '' })); 
-      }
+      setReportReason('');
     },
     onError: () => {
       messageAPI.error('Lỗi khi báo cáo bình luận');
@@ -123,15 +120,11 @@ const Comments = (props: Props) => {
   };
 
   const handleReport = () => {
-    if (!currentCommentId || !reportReasons[currentCommentId]?.trim()) {
+    if (!currentCommentId || !reportReason) {
       messageAPI.error('Vui lòng nhập lý do báo cáo.');
       return;
     }
-
-    reportComment({
-      id: currentCommentId,
-      reason: reportReasons[currentCommentId],
-    });
+    reportComment({ comment_id: currentCommentId, reason: reportReason });
   };
 
   const { mutate } = useMutation({
@@ -145,23 +138,17 @@ const Comments = (props: Props) => {
     onSuccess: () => {
       messageAPI.success('Trả lời bình luận thành công');
       refetch();
-      setIsReplyModalVisible(false);
     },
     onError: () => {
       messageAPI.error('Admin đã trả lời rồi');
     },
   });
-
-  // Show reply modal
-  const showReplyModal = (commentId: number) => {
-    setCurrentCommentId(commentId);
-    setIsReplyModalVisible(true);
-  };
-
   // Xử lý trả lời bình luận
-  const handleReply = () => {
-    if (currentCommentId !== null && replyContent[currentCommentId]?.trim()) {
-      mutate({ parentId: currentCommentId, content: replyContent[currentCommentId] });
+  const handleReply = (commentId: number) => {
+    const content = replyContent[commentId];
+    if (content) {
+      mutate({ parentId: commentId, content });
+      setReplyContent({ ...replyContent, [commentId]: '' });
     } else {
       messageAPI.error('Vui lòng nhập nội dung trả lời trước khi gửi.');
     }
@@ -201,7 +188,6 @@ const Comments = (props: Props) => {
     {
       title: 'Nội dung bình luận và trả lời',
       key: 'content_with_replies',
-      width:'20%',
       render: (_, record) => (
         <div className="p-4 bg-white rounded-lg shadow-md">
           {/* Phần nội dung bình luận chính */}
@@ -226,14 +212,22 @@ const Comments = (props: Props) => {
               ))}
             </div>
           )}
-          
-          {/* Nút trả lời */}
+
+          {/* Input và nút gửi trả lời */}
+          <Input
+            placeholder="Nhập nội dung trả lời..."
+            value={replyContent[record.comment_id] || ''}
+            onChange={(e) =>
+              setReplyContent({ ...replyContent, [record.comment_id]: e.target.value })
+            }
+            className="mt-4 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
+          />
           <Button
-            type="default"
+            type="primary"
             className="mt-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg px-4 py-2"
-            onClick={() => showReplyModal(record.comment_id)}
+            onClick={() => handleReply(record.comment_id)}
           >
-            Trả lời
+            Gửi trả lời
           </Button>
         </div>
       ),
@@ -250,6 +244,7 @@ const Comments = (props: Props) => {
           >
             {count || 0}
           </Tag>
+
           <Button type="default" danger onClick={() => showReportModal(record.comment_id)}>
             Báo cáo
           </Button>
@@ -279,23 +274,23 @@ const Comments = (props: Props) => {
       dataIndex: 'stars',
       key: 'stars',
       render: (stars) => <Tag
-        color="gold"
-        style={{
-          fontSize: '16px',
-          padding: '6px 12px',
-          borderRadius: '8px', 
-          display: 'inline-flex',
-          alignItems: 'center',
-        }}
-      >
-        {stars || 0} ⭐
-      </Tag>,
+      color="gold"
+      style={{
+        fontSize: '16px', // Tăng kích thước chữ
+        padding: '6px 12px', // Tăng khoảng cách bên trong
+        borderRadius: '8px', // Bo tròn góc
+        display: 'inline-flex', // Giữ nội dung tag trong một hàng
+        alignItems: 'center', // Căn giữa nội dung theo chiều dọc
+      }}
+    >
+      {stars || 0} ⭐
+    </Tag>,
     },
     {
       title: 'Hành động',
       key: 'actions',
       render: (_, record) => (
-        <div className="flex gap-2">
+        <div className="flex space-x-2">
           <Button
             type="default"
             danger
@@ -304,7 +299,7 @@ const Comments = (props: Props) => {
           >
             Ẩn
           </Button>
-
+    
           {/* Nút Khóa User */}
           <Button
             type="default"
@@ -316,6 +311,7 @@ const Comments = (props: Props) => {
         </div>
       ),
     }
+    
 
   ];
 
@@ -344,43 +340,12 @@ const Comments = (props: Props) => {
           <Input.TextArea
             rows={4}
             placeholder="Nhập lý do báo cáo..."
-            value={currentCommentId !== null ? reportReasons[currentCommentId] || '' : ''}
-            onChange={(e) => {
-              const value = e.target.value;
-              if (currentCommentId !== null) {
-                setReportReasons((prev) => ({
-                  ...prev,
-                  [currentCommentId]: value,
-                }));
-              }
-            }}
+            value={reportReason}
+            onChange={(e) => setReportReason(e.target.value)}
           />
         </Modal>
-
-        <Modal
-          title="Trả lời bình luận"
-          visible={isReplyModalVisible}
-          onOk={handleReply}
-          onCancel={() => setIsReplyModalVisible(false)}
-        >
-          <Input.TextArea
-            rows={4}
-            placeholder="Nhập nội dung trả lời..."
-            value={currentCommentId !== null ? replyContent[currentCommentId] || '' : ''}
-            onChange={(e) => {
-              const value = e.target.value;
-              if (currentCommentId !== null) {
-                setReplyContent((prev) => ({
-                  ...prev,
-                  [currentCommentId]: value,
-                }));
-              }
-            }}
-          />
-        </Modal>
-
       </div>
-
+      
     </>
   );
 };

@@ -109,7 +109,6 @@ const UpdateUser: React.FC = () => {
               label="Mật khẩu"
               name="password"
               rules={[
-                { required: true, message: 'Mật khẩu là bắt buộc' },
                 { min: 6, message: 'Mật khẩu phải có ít nhất 6 ký tự' },
               ]}
             >

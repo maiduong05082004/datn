@@ -90,7 +90,6 @@ const ListPromotions: React.FC = () => {
                     <Button
                         type="default"
                         icon={<EditOutlined />}
-                        className='rounded-full'
                         onClick={() => navigate(`/admin/dashboard/promotions/update/${record.id}`)}
                     />
                     <Popconfirm
@@ -100,7 +99,7 @@ const ListPromotions: React.FC = () => {
                         cancelText="Không"
                         okButtonProps={{ type: 'default' }}
                     >
-                        <Button className='rounded-full' type="default" danger  icon={<DeleteOutlined />} />
+                        <Button  type="default" danger  icon={<DeleteOutlined />} />
                     </Popconfirm>
                 </Space>
             ),

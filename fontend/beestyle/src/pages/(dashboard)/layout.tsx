@@ -110,7 +110,7 @@ const items1: MenuProps['items'] = [
     icon: React.createElement(BarChartOutlined),
     label: 'Thống Kê',
     children: [
-      { key: 'sub9-1', label: <NavLink to="/admin/dashboard/statistic/list">Xem Thống Thê</NavLink> },
+      { key: 'sub9-1', label: <NavLink to="/admin/dashboard/statistic/list">Xem Thống Kê</NavLink> },
     ],
   },
   {

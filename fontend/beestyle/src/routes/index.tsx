@@ -17,11 +17,10 @@ import UpdateBanners from "@/pages/(dashboard)/dashboard/Banner/update";
 import ListUser from "@/pages/(dashboard)/dashboard/Users/list";
 import AddUser from "@/pages/(dashboard)/dashboard/Users/add";
 import UpdateUser from "@/pages/(dashboard)/dashboard/Users/update";
-import ListComments from "@/pages/(dashboard)/dashboard/Comment/list";
-import ListProducts from "@/pages/(dashboard)/dashboard/products/list";
-import UpdateProduct from "@/pages/(dashboard)/dashboard/products/update";
-import AddProduct from "@/pages/(dashboard)/dashboard/products/add";
-import DetailProduct from "@/pages/(dashboard)/dashboard/products/detail";
+import ListProducts from "@/pages/(dashboard)/dashboard/Products/list";
+import UpdateProduct from "@/pages/(dashboard)/dashboard/Products/update";
+import AddProduct from "@/pages/(dashboard)/dashboard/Products/add";
+import DetailProduct from "@/pages/(dashboard)/dashboard/Products/detail";
 import AddCategories from "@/pages/(dashboard)/dashboard/Category/add";
 import ListCategories from "@/pages/(dashboard)/dashboard/Category/list";
 import UpdateCategories from "@/pages/(dashboard)/dashboard/Category/update";
@@ -52,9 +51,8 @@ import AddressesPage from "@/pages/(website)/account/_components/addresses";
 import App from "@/pages/(dashboard)/dashboard/Bill/app";
 import Detailship from "@/pages/(dashboard)/dashboard/Bill/detailship";
 import DeatilConfirm from "@/pages/(dashboard)/dashboard/Bill/detailConfirm"
-import Comments from "@/pages/(dashboard)/dashboard/products/comments";
+import Comments from "@/pages/(dashboard)/dashboard/Products/comments";
 import DetailUser from "@/pages/(dashboard)/dashboard/Users/detail";
-import PrivateRouter from "./PrivateRoute";
 // import CartPage from "@/pages/(website)/cart/page";
 import InventoryManagement from "@/pages/(dashboard)/dashboard/Inventory/list";
 import Signin from "@/pages/(dashboard)/dashboard/auth.tsx/signin";
@@ -66,6 +64,9 @@ import PrivateRoute from './PrivateRoute';
 import ListStatistics from "@/pages/(dashboard)/dashboard/Statistics/list";
 import ListAllChart from "@/pages/(dashboard)/dashboard/Statistics/ListAllChart";
 import ListTopSelling from "@/pages/(dashboard)/dashboard/Statistics/listtopselling";
+import ListNewPerson from "@/pages/(dashboard)/dashboard/Statistics/ListNewPerson";
+import ListCustomer from "@/pages/(dashboard)/dashboard/Statistics/ListCustomer";
+import StatisticsProducts from "@/pages/(dashboard)/dashboard/Statistics/statisticsproduct";
 
 const Router = () => {
 
@@ -130,9 +131,10 @@ const Router = () => {
                 {/* Admin Routes */}
                 <Route path="admin" element={<Signin />} />
                 <Route path="admin/dashboard" element={
-                    <PrivateRoute userRole={userRole}>
+                    // <PrivateRoute userRole={userRole}>
+                    // </PrivateRoute>
                         <LayoutAdmin />
-                    </PrivateRoute>
+
                 }>
                     <Route index element={<DashboardPage />} />
                     <Route path="profile" element={<MyProfile />} />
@@ -145,7 +147,6 @@ const Router = () => {
                     <Route path="bill/shiping/:id" element={<Shiping />} />
                     {/* <Route path="bill/address" element={<AddAddresses />} /> */}
                     {/* comments */}
-                    <Route path="comment/list" element={<ListComments />} />
                     {/* banners */}
                     <Route path="banner/add" element={<AddBanners />} />
                     <Route path="banner/list" element={<ListBanners />} />
@@ -184,9 +185,12 @@ const Router = () => {
                     {/* inventory */}
                     <Route path="inventory/list" element={<InventoryManagement />} />
                     {/*{/* statistic */}
-                    <Route path="statistic/list" element={<ListStatistics />} />
-                    <Route path="statistic/listtopselling" element={<ListTopSelling />} />
-                    <Route path="statistic/listall" element={<ListAllChart />} />
+                    <Route path="statistic/revenue" element={<ListStatistics />} />
+                    <Route path="statistic/selling" element={<ListTopSelling />} />
+                    <Route path="statistic/user" element={<ListNewPerson />} />
+                    <Route path="statistic/customer" element={<ListCustomer />} />
+                    <Route path="statistic/product" element={<StatisticsProducts />} />
+                    <Route path="statistic/list" element={<ListAllChart />} />
                     
                 </Route>
             </Routes>

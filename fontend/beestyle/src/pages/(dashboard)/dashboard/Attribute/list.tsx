@@ -110,13 +110,11 @@ const ListAttribute: React.FC = () => {
                 <div className="flex space-x-2">
                     <Button
                         icon={<EyeOutlined />}
-                        className='rounded-full'
                         onClick={() => handleViewDetails(attribute)}
                     />
                     <Button
                         type="default"
                         icon={<EditOutlined />}
-                        className='rounded-full'
                         onClick={() => navigate(`/admin/dashboard/attribute/update/${attribute.id}`)}
                     />
                     <Popconfirm
@@ -125,10 +123,10 @@ const ListAttribute: React.FC = () => {
                         onConfirm={() => deleteAttributeMutation.mutate(attribute.id)}
                         okText="Yes"
                         cancelText="No"
-                        icon={<DeleteOutlined className='rounded-full'
+                        icon={<DeleteOutlined 
                         />}
                     >
-                        <Button className='rounded-full' type="default" danger icon={<DeleteOutlined />} />
+                        <Button type="default" danger icon={<DeleteOutlined />} />
                     </Popconfirm>
                 </div>
             ),
@@ -225,7 +223,6 @@ const ListAttribute: React.FC = () => {
                                                 <Button
                                                     type="default"
                                                     icon={<EditOutlined />}
-                                                    className="rounded-full"
                                                     onClick={() =>
                                                         navigate(
                                                             `/admin/dashboard/attribute_value/update/${value.value_id}`
@@ -247,7 +244,6 @@ const ListAttribute: React.FC = () => {
                                                         type="default"
                                                         danger
                                                         icon={<DeleteOutlined />}
-                                                        className="rounded-full"
                                                     />
                                                 </Popconfirm>
                                             </td>

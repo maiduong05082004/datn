@@ -63,7 +63,7 @@ const ListAttributeGroup = (props: Props) => {
                     <Button
                         type="default"
                         icon={<EditOutlined />}
-                        className='rounded-full hover:bg-gray-200 transition duration-300 ease-in-out'
+                        className=' hover:bg-gray-200 transition duration-300 ease-in-out'
                         onClick={() => navigate(`/admin/dashboard/attribute_group/update/${attribute_group.id}`)}
                     />
                     <Popconfirm
@@ -76,7 +76,8 @@ const ListAttributeGroup = (props: Props) => {
                         <Button
                             icon={<DeleteOutlined />}
                             type="default"
-                            className='rounded-full hover:bg-gray-200 transition duration-300 ease-in-out'
+                            danger
+                            className='hover:bg-gray-200 transition duration-300 ease-in-out'
                         />
                     </Popconfirm>
                 </div>

@@ -110,7 +110,6 @@ const ListCategories: React.FC = () => {
         <Space size="middle">
           <Button
             type="default"
-            className='rounded-full'
             icon={<EditOutlined />}
             onClick={() => navigate(`/admin/dashboard/category/update/${category.id}`)}
           />
@@ -121,7 +120,7 @@ const ListCategories: React.FC = () => {
             okText="Có"
             cancelText="Không"
           >
-            <Button className='rounded-full' type="default" danger icon={<DeleteOutlined />} />
+            <Button  type="default" danger icon={<DeleteOutlined />} />
           </Popconfirm>
         </Space>
       ),
