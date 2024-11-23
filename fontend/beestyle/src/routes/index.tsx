@@ -63,10 +63,10 @@ import axios from "axios";
 import PrivateRoute from './PrivateRoute';
 import ListStatistics from "@/pages/(dashboard)/dashboard/Statistics/list";
 import ListAllChart from "@/pages/(dashboard)/dashboard/Statistics/ListAllChart";
-import ListTopSelling from "@/pages/(dashboard)/dashboard/Statistics/listtopselling";
 import ListNewPerson from "@/pages/(dashboard)/dashboard/Statistics/ListNewPerson";
 import ListCustomer from "@/pages/(dashboard)/dashboard/Statistics/ListCustomer";
 import StatisticsProducts from "@/pages/(dashboard)/dashboard/Statistics/statisticsproduct";
+import ListTopSelling from "@/pages/(dashboard)/dashboard/Statistics/listtopselling";
 
 const Router = () => {
 

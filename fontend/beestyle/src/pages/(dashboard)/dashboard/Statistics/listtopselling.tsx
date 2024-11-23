@@ -1,17 +1,17 @@
-import React, { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { Spin, Button, Drawer } from 'antd';
-import { Pie, Bar } from 'react-chartjs-2';
-import {
-  Chart as ChartJS,
-  ArcElement,
-  Tooltip,
-  Legend,
-  CategoryScale,
-  LinearScale,
-  BarElement,
-} from 'chart.js';
 import axiosInstance from '@/configs/axios';
+import { useQuery } from '@tanstack/react-query';
+import { Button, Drawer, Spin } from 'antd';
+import {
+  ArcElement,
+  BarElement,
+  CategoryScale,
+  Chart as ChartJS,
+  Legend,
+  LinearScale,
+  Tooltip,
+} from 'chart.js';
+import { useState } from 'react';
+import { Bar } from 'react-chartjs-2';
 
 // Đăng ký các thành phần của ChartJS
 ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement);
