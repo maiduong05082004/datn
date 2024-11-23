@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
 import React, { useEffect, useState } from 'react'
-import LoadingPage from '../../loading/page';
+import LoadingPage from '../../loading/loadPage';
 
 type Props = {}
 
@@ -37,7 +37,7 @@ const BannerMain = (props: Props) => {
         );
     };
 
-    if(isLoading) return <LoadingPage/>
+    if (isLoading) return <LoadingPage />
 
     return (
         !isLoading &&
@@ -46,7 +46,7 @@ const BannerMain = (props: Props) => {
                 {banner?.data?.banner_main.map((item: any, index: any) => (
                     <div key={index + 1} className={`${index === currentIndex ? "" : "hidden"}`}>
                         <picture className=''>
-                            <div className="pt-[33%] bg-center bg-cover bg-no-repeat" style={{ backgroundImage: `url(${item})`}}></div>
+                            <div className="pt-[33%] bg-center bg-cover bg-no-repeat" style={{ backgroundImage: `url(${item})` }}></div>
                             {/* <img className='h-full w-full hidden lg:block' src={item} alt="" /> */}
                         </picture>
                     </div>

@@ -12,9 +12,9 @@ type Props = {}
 const HomePage = (props: Props) => {
 
   // Load dau trang
-  // useEffect(() => {
-  //   window.scrollTo(0, 0);
-  // }, []);
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
   return (
     <main>

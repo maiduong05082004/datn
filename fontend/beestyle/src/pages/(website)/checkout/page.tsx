@@ -6,7 +6,7 @@ import Joi from 'joi';
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { Link, useLocation } from 'react-router-dom';
-import LoadingPage from '../loading/page';
+import LoadingPage from '../loading/loadPage';
 import AddAddresses from './_components/addAddresses';
 import CheckAddresses from './_components/checkAddresses';
 import ItemProducts from './_components/itemProducts';
@@ -158,8 +158,8 @@ const CheckOutPage = () => {
         setValue("address", address.check)
     }
 
-    const { handleContext, orderCod, orderATM} = useOrderMutations()
-    
+    const { handleContext, orderCod, orderATM } = useOrderMutations()
+
     const onSubmit = (data: any) => {
         const cart_id = checkouts.products.map((item: any) => item.cart_item_id)
         const { note, paymentMethod, address } = data
@@ -168,11 +168,11 @@ const CheckOutPage = () => {
         const promotion_ids = promotionAdd.map((item: any) => item.id)
         if (paymentMethod === "cod") {
             if (checkouts) {
-                const order = {cart_id ,promotion_ids, note, payment_type: paymentMethod, shipping_address_id: address, shipping_fee: priceShip, discounted_amount, discounted_shipping_fee, total: checkouts.totalPrice }
-                orderCod.mutate(order)                
+                const order = { cart_id, promotion_ids, note, payment_type: paymentMethod, shipping_address_id: address, shipping_fee: priceShip, discounted_amount, discounted_shipping_fee, total: checkouts.totalPrice }
+                orderCod.mutate(order)
             }
         } else {
-            const order = {cart_id ,promotion_ids, note, payment_type: "online",payment_method: paymentMethod, shipping_address_id: address, shipping_fee: priceShip, discounted_amount, discounted_shipping_fee, total: checkouts.totalPrice }
+            const order = { cart_id, promotion_ids, note, payment_type: "online", payment_method: paymentMethod, shipping_address_id: address, shipping_fee: priceShip, discounted_amount, discounted_shipping_fee, total: checkouts.totalPrice }
             orderATM.mutate(order)
         }
     }
@@ -183,7 +183,7 @@ const CheckOutPage = () => {
         <main>
             {handleContext}
             <div className="px-[15px] lg:flex pc:px-[80px] pc:py-[64px]">
-                <ItemProducts promotionAdd={promotionAdd} promotionShip={promotionShip} promotionProduct={promotionProduct} checkouts={checkouts} selectedAddress={selectedAddress} setPriceShip={setPriceShip} priceShip={priceShip} setPromotionShip={setPromotionShip} setPromotionProduct={setPromotionProduct} setPromotionAdd={setPromotionAdd}/>
+                <ItemProducts promotionAdd={promotionAdd} promotionShip={promotionShip} promotionProduct={promotionProduct} checkouts={checkouts} selectedAddress={selectedAddress} setPriceShip={setPriceShip} priceShip={priceShip} setPromotionShip={setPromotionShip} setPromotionProduct={setPromotionProduct} setPromotionAdd={setPromotionAdd} />
                 <div className="lg:w-[65%] lg:pr-[80px] lg:order-1">
                     <form onSubmit={handleSubmit(onSubmit)} action="">
                         <h2 className='font-[700] text-[16px] mb-[10px]'>THÔNG TIN GIAO HÀNG</h2>
