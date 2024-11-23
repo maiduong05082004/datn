@@ -62,8 +62,6 @@ const Favorite = (props: Props) => {
         }
     }, [favorite]);
 
-    if(isLoading) return(<LoadingPage/>)
-
     return (
         !isLoading &&
         <button onClick={() => onSubmitFavorite(!favoriteStatus)}>
