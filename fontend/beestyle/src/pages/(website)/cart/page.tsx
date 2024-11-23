@@ -14,7 +14,7 @@ type Props = {
 
 }
 
-const CartPage = ({}: any) => {
+const CartPage = ({ }: any) => {
 
     const [selectedProducts, setSelectedProducts] = useState<string[]>([]);
     const [totalPrice, setTotalPrice] = useState(0);
