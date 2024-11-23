@@ -78,10 +78,10 @@ class HomeController extends Controller
                 $hotProducts = Product::select('products.*')
                     ->join('bill_details', 'products.id', '=', 'bill_details.product_id')
                     ->join('bills', 'bill_details.bill_id', '=', 'bills.id')
-                    ->whereIn('bills.status_bill', ['delivered']) // Chỉ lấy đơn hàng đã giao
-                    ->whereIn('products.category_id', $categoryIds) // Lọc theo danh mục
+                    ->whereIn('bills.status_bill', ['delivered'])
+                    ->whereIn('products.category_id', $categoryIds) 
                     ->groupBy('products.id', 'products.name', 'products.price', 'products.category_id', 'products.stock', 'products.is_hot', 'products.is_new', 'products.is_collection', 'products.created_at', 'products.updated_at')
-                    ->orderByRaw('SUM(bill_details.quantity) DESC') // Sắp xếp theo số lượng bán
+                    ->orderByRaw('SUM(bill_details.quantity) DESC') 
                     ->take(12)
                     ->get();
 
