@@ -17,6 +17,7 @@ const CommentEvaluate = () => {
 
     const { id } = useParams()
     const product_id = id
+
     const { data: comment, isLoading } = useQuery({
         queryKey: ['comment', product_id],
         queryFn: async () => {
@@ -25,8 +26,8 @@ const CommentEvaluate = () => {
     })
 
     if(isLoading) return (<LoadingPage/>)
-
     return (
+        !isLoading &&
         <div className="">
             <div className="mt-[48px]">
                 <div className="px-[15px] pc:px-[48px]">

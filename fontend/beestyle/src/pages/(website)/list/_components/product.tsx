@@ -72,7 +72,6 @@ const ProductsList = ({ products }: any) => {
                             <picture className='group'>
                                 <div className="group-hover:hidden pt-[124%] bg-cover bg-center bg-no-repeat cursor-pointer" style={{ backgroundImage: `url(${item?.variations[0].variation_album_images[0]})` }} ></div>
                                 <div className="hidden group-hover:block pt-[124%] bg-cover bg-center bg-no-repeat cursor-pointer" style={{ backgroundImage: `url(${item?.variations[0].variation_album_images[1]})` }} ></div>
-
                             </picture>
                         </Link>
                         <div className="w-[100%] text-wrap px-[8px] pt-[10px]">

@@ -44,7 +44,6 @@ const Search = ({ isSearch, setIsSearch, setKeySearch }: any) => {
 
 
     const [products, setProducts] = useState<any>(JSON.parse(localStorage.getItem('suggest') || '[]'));
-    console.log(products);
 
     return (
         <div className={`${isSearch ? "fixed" : "hidden"} p-[15px] top-0 bg-white min-h-[100%] w-[100%] z-30 lg:p-0 lg:min-h-[584px]`}>

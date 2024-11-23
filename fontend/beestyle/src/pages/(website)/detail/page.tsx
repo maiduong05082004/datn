@@ -133,13 +133,8 @@ const DetailPage = () => {
         }
     }
 
-
-
-    if (isLoading) return (<LoadingPage />)
-    if (isError) return (<>{error}</>)
-
-
     return (
+        !isLoading &&
         <>
             {contextHolder}
             <main >

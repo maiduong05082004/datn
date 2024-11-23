@@ -62,12 +62,10 @@ const Report = ({ setReportTab, isReportTab, commentItem }: Props) => {
         }
     })
 
-
     const onSubmit = (reason: any) => {
         const { comment_id } = commentItem
         if (comment_id) mutate({...reason, comment_id});
     }
-
 
     return (
         <>

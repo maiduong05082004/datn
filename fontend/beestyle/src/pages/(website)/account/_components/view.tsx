@@ -53,6 +53,9 @@ const ViewAccount = (props: Props) => {
         }
     })
 
+    console.log(order);
+    
+
     setValue("stars", start)
     const onSubmit = (data: any) => {
         if (itemProduct) {
@@ -67,9 +70,6 @@ const ViewAccount = (props: Props) => {
     const handleDeleteOrder = (id: number) => {
         cancelOrder.mutate(id);
     }
-
-    console.log(order?.data?.bills[0]);
-
 
     if (isLoadingOrder) return (<LoadingPage />)
 
