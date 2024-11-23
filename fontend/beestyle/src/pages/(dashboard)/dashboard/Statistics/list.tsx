@@ -1,16 +1,15 @@
-import { useQuery } from '@tanstack/react-query'
-import React from 'react'
-import { Bar, Doughnut } from 'react-chartjs-2'
 import axiosInstance from '@/configs/axios'
+import { useQuery } from '@tanstack/react-query'
 import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
   BarElement,
+  CategoryScale,
+  Chart as ChartJS,
+  Legend,
+  LinearScale,
   Title,
   Tooltip,
-  Legend,
 } from 'chart.js'
+import { Bar, Doughnut } from 'react-chartjs-2'
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend)
 

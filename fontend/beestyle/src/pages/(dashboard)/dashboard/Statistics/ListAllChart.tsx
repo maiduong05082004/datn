@@ -1,8 +1,8 @@
 import React from 'react'
 import ListStatistics from './list'
-import ListTopSelling from './listtopselling'
 import ListNewPerson from './ListNewPerson'
 import ListCustomer from './ListCustomer'
+import ListTopSelling from './listtopselling'
 
 type Props = {}
 
