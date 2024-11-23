@@ -20,78 +20,10 @@ interface AddressForm {
 
 const CheckAddresses = ({ selectedAddress, handleSelectProduct, isCheckAddresses, isAddAddresses, isUpdateAddresses, setCheckAddresses, setAddAddresses, setUpdateAddresses, setIdAddresses }: Props) => {
 
-    // debugger    
-    const [addressCode, setAddresCode] = useState<any>([])
-    const [ward, setWard] = useState<any>([])
-    // console.log(ward);
-
-    const getWardName = (WardId: string) => {
-        // console.log(WardId);
-        
-        if (ward) {
-            //  const data = ward.find((item: any) => item.WardCode == WardId)
-            //  console.log(data);
-             
-             return ward?.WardName || 'Unknown Ward';
-        }
-    }
-    
-
-    useEffect(() => {
-        (async () => {
-            if (addressCode) {
-                addressCode?.data?.data.map(async (item: any) => {
-                    const { data } = await getWard(item.district)                    
-                    if(data){
-                        const pr = data.find((value: any) => value.WardCode === item.ward)
-                        if(pr){
-                           
-                            setWard(pr);
-                            
-                            
-                        }
-    
-                    }
-    
-                })
-            }
-        }) ();
-    }, [])
-
-    // const getWardName = async (WardName: any) => {
-    //     if (addressCode) {
-    //         addressCode.data.data.map(async (item: any) => {
-    //             const { data } = await getWard(item.district)
-    //             if(data){
-    //                 const pr = data.find((item: any) => item.WardCode === WardName)
-    //                 if(pr){
-    //                     console.log(pr.WardName);
-    //                     return pr?.WardName
-    //                 }
-
-    //             }
-
-    //         })
-    //     }
-    // }
-
-
-    const getWard = async (districtId: any) => {
-        await axios.get(`https://dev-online-gateway.ghn.vn/shiip/public-api/master-data/ward`, {
-            params: { district_id: districtId },
-            headers: {
-                token: '4bd9602e-9ad5-11ef-8e53-0a00184fe694',
-            }
-        }).then(({data}) =>{
-console.log(data);
-
-        })
-    }
-
-    const [districtId, setDistrictId] = useState<number | null>(null);
-
+    const { register, handleSubmit } = useForm<AddressForm>()
+    const [idCheck, setIdCheck] = useState<any>()
+    const [wardsMap, setWardsMap] = useState<Record<number, Record<string, string>>>({});
     const token = localStorage.getItem('token')
-
 
     const { data: addresses } = useQuery({
         queryKey: ['addresses'],
@@ -101,7 +33,6 @@ console.log(data);
                     Authorization: `Bearer ${token}`,
                 },
             })
-            setAddresCode(data)
             return data
         },
     })
@@ -112,11 +43,6 @@ console.log(data);
             setCheckAddresses(false)
         }
     }, [addresses])
-
-
-    const { register, handleSubmit, setValue, formState: { errors }, reset, watch } = useForm<AddressForm>()
-
-    const [idCheck, setIdCheck] = useState<any>()
 
     useEffect(() => {
         if (selectedAddress) {
@@ -129,7 +55,7 @@ console.log(data);
         setCheckAddresses(!isCheckAddresses)
     }
     // Lấy tỉnh/thành phố
-    const { data: provinceData, isLoading: isLoadingProvinces } = useQuery({
+    const { data: provinceData } = useQuery({
         queryKey: ['province'],
         queryFn: async () => {
             return await axios.get(`https://dev-online-gateway.ghn.vn/shiip/public-api/master-data/province`, {
@@ -141,7 +67,7 @@ console.log(data);
     });
 
     // Lấy quận/huyện
-    const { data: districtData, isLoading: isLoadingDistrict } = useQuery({
+    const { data: districtData } = useQuery({
         queryKey: ['district'],
         queryFn: async () => {
             return await axios.get(`https://dev-online-gateway.ghn.vn/shiip/public-api/master-data/district`, {
@@ -152,30 +78,12 @@ console.log(data);
         },
     });
 
-
-
-
-    // const { data: ward, isLoading: isLoadingWard } = useQuery({
-    //     queryKey: ['ward', districtId],
-    //     queryFn: async () => {
-    //         return await axios.get(`https://dev-online-gateway.ghn.vn/shiip/public-api/master-data/ward`, {
-    //             params: { district_id: districtId },
-    //             headers: {
-    //                 token: '4bd9602e-9ad5-11ef-8e53-0a00184fe694',
-    //             }
-    //         });
-    //     },
-    //     enabled: !!districtId,
-    // });
-
-    // Lookup functions with string conversion
     const getProvinceName = (id: string) => provinceData?.data.data.find((item: any) => item.ProvinceID === parseInt(id))?.ProvinceName || 'Unknown Province';
     const getDistrictName = (id: string) => districtData?.data.data.find((item: any) => item.DistrictID === parseInt(id))?.DistrictName || 'Unknown District';
 
-    const [wardsMap, setWardsMap] = useState<Record<number, Record<string, string>>>({});
     const fetchWardsByDistrict = async (districtId: number) => {
         if (wardsMap[districtId]) {
-            return; // Nếu đã có dữ liệu, không cần gọi lại API
+            return;
         }
         try {
             const { data } = await axios.get(`https://dev-online-gateway.ghn.vn/shiip/public-api/master-data/ward`, {
@@ -226,11 +134,7 @@ console.log(data);
                                                         <p className='text-[#787878]'>{item.phone_number}</p>
                                                     </div>
                                                     <div className="mt-[5px]">
-<<<<<<< HEAD
                                                         <div className="text-[#787878]"> {item.address_line} ,{wardsMap[item.district]?.[item.ward] || "Đang tải..."}, {getDistrictName(item.district)}, {getProvinceName(item.city)}</div>
-=======
-                                                        <div className="text-[#787878]"> {item.address_line} ,{getWard(item.ward)}, {getDistrictName(item.district)}, {getProvinceName(item.city)}</div>
->>>>>>> eb1ce11 (Manager Banner Admin)
                                                         {item?.is_default && (
                                                             <div className="py-[5px] w-[70px] text-center rounded-[3px] text-[12px] mt-[5px] text-white bg-black">Mặc định</div>
                                                         )}

@@ -7,7 +7,7 @@ import { useParams } from 'react-router-dom';
 type Props = {}
 
 const Comments = (props: Props) => {
-  const { id } = useParams(); // Lấy `bill_detail_id` từ params
+  const { id } = useParams(); 
   const [messageAPI, contextHolder] = message.useMessage();
   const [replyContent, setReplyContent] = useState<{ [key: number]: string }>({});
 
