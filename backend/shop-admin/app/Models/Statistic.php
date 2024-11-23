@@ -13,6 +13,12 @@ class Statistic extends Model
         'date',
         'total_revenue',
         'total_orders',
-        'total_users'
+        'total_users',
+        'total_profit',
+        'top_selling_product_id',
+        'top_selling_quantity',
+        'total_product_views',
+        'total_cart_adds',
+        'total_wishlist_adds',
     ];
 }

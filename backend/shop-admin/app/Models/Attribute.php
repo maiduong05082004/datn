@@ -22,6 +22,9 @@ class Attribute extends Model
         return $this->hasMany(AttributeGroup::class, 'attribute_id');
     }
     
-
+    public function attributeValues()
+    {
+        return $this->hasMany(AttributeValue::class, 'attribute_id');
+    }
    
 }

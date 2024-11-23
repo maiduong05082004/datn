@@ -16,6 +16,8 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
+use Cloudinary\Api\Upload\UploadApi;
 
 class ProductController extends Controller
 {
@@ -33,8 +35,9 @@ class ProductController extends Controller
             ]
         )->paginate(10);
 
-        return  ProductResource::collection($products);
+        return ProductResource::collection($products);
     }
+
 
 
 
@@ -44,7 +47,7 @@ class ProductController extends Controller
         DB::beginTransaction();
 
         try {
-
+            // Tạo slug cho sản phẩm
             $slug = $this->generateSeoFriendlySlug($request->name);
             $product = Product::create([
                 'name' => $request->name,
@@ -54,52 +57,48 @@ class ProductController extends Controller
                 'content' => $request->content,
                 'input_day' => $request->input_day,
                 'category_id' => $request->category_id,
-                'is_collection' => $request->has('is_collection') ? 1 : 0, // Kiểm tra checkbox
-                'is_hot' => $request->has('is_hot') ? 1 : 0,               // Kiểm tra checkbox
-                'is_new' => $request->has('is_new') ? 1 : 0,               // Kiểm tra checkbox
+                'is_collection' => $request->is_collection ? 1 : 0,
+                'is_hot' => $request->is_hot ? 1 : 0,
+                'is_new' => $request->is_new ? 1 : 0,
             ]);
-            
 
-            // Kiểm tra xem có biến thể không nhé ae
+            // Kiểm tra nếu có biến thể
             $hasVariations = $request->has('variations') && !empty($request->variations);
-
-            // Giải mã JSON của biến thể thành mảng
             $variations = json_decode($request->input('variations'), true);
 
-            // Nếu không có biến thể, lưu thông tin số lượng và ảnh cho sản phẩm
             if (!$hasVariations || !is_array($variations)) {
-                // Cập nhật tồn kho
+                // Không có biến thể, cập nhật tồn kho trực tiếp
                 $product->update(['stock' => $request->stock]);
+                $this->saveImages($product, $request);  // Lưu ảnh sản phẩm
+            } else {
+                $totalProductStock = 0;
 
-                // Lưu ảnh sản phẩm
-                $this->saveImages($product, $request);
-            }
+                foreach ($variations as $variation) {
+                    $attributeValueId = $variation['attribute_value_id'] ?? null;
 
-            // Nếu có biến thể, kiểm tra và lưu ảnh và thông tin biến thể
-            if ($hasVariations && is_array($variations)) {
-                $totalProductStock = 0; // Tổng số lượng tồn kho cho sản phẩm
+                    // Kiểm tra giá trị attribute_value_id trước khi lưu
+                    if (is_null($attributeValueId) || $attributeValueId == 0) {
+                        throw new \Exception("Giá trị attribute_value_id không hợp lệ: $attributeValueId");
+                    }
 
-                foreach ($variations as $attributeValueId => $sizes) {
-                    // Kiểm tra tính hợp lệ của thuộc tính với nhóm trước khi tạo biến thể
+                    // Kiểm tra tính hợp lệ của attribute_value_id với nhóm
                     if (!$this->isValidAttributeForGroup($request->group_id, $attributeValueId)) {
                         throw new \Exception("Thuộc tính không hợp lệ cho nhóm đã chọn.");
                     }
 
-                    // Tạo biến thể chính (ví dụ như màu sắc)
                     $productVariation = ProductVariation::create([
                         'product_id' => $product->id,
                         'group_id' => $request->group_id,
                         'attribute_value_id' => $attributeValueId,
                     ]);
 
-                    // Lưu ảnh cho biến thể
+                    // Lưu hình ảnh biến thể
                     $this->saveImages($productVariation, $request, true, $attributeValueId);
 
-                    // Tính toán tổng tồn kho cho từng biến thể
                     $totalVariationStock = 0;
 
-                    // Lưu các size (kích thước) của từng biến thể
-                    foreach ($sizes as $sizeId => $details) {
+                    // Lưu các size (kích thước) cho từng biến thể
+                    foreach ($variation['sizes'] as $sizeId => $details) {
                         if (!empty($details['stock']) && isset($details['discount'])) {
                             $sku = $this->generateVariationSku();
                             $calculatedPrice = $product->price - ($product->price * ($details['discount'] / 100));
@@ -113,19 +112,14 @@ class ProductController extends Controller
                                 'discount' => $details['discount'] ?? null,
                             ]);
 
-                            // Cộng dồn số lượng stock của các biến thể size
                             $totalVariationStock += $details['stock'];
                         }
                     }
 
-                    // Cập nhật tổng số lượng stock của biến thể vào bảng product_variations
                     $productVariation->update(['stock' => $totalVariationStock]);
-
-                    // Cộng dồn số lượng stock của biến thể vào tổng stock sản phẩm
                     $totalProductStock += $totalVariationStock;
                 }
 
-                // Cập nhật tổng số lượng stock của sản phẩm vào bảng products
                 $product->update(['stock' => $totalProductStock]);
             }
 
@@ -134,7 +128,7 @@ class ProductController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => 'Product created successfully',
-                'data' => $product
+                'data' => new ProductResource($product),
             ], 201);
         } catch (\Exception $e) {
             DB::rollback();
@@ -145,6 +139,101 @@ class ProductController extends Controller
         }
     }
 
+
+
+
+    private function saveImages($model, $request, $isVariation = false, $attributeValueId = null)
+    {
+        if ($isVariation) {
+            $modelType = 'product_variation_id';
+
+            // Xử lý ảnh variant (màu sắc)
+            $colorImageInput = "color_image_$attributeValueId";
+            if ($request->hasFile($colorImageInput)) {
+                // Upload lên Cloudinary
+                $imageFile = $request->file($colorImageInput);
+                $cloudinaryResponse = Cloudinary::upload($imageFile->getRealPath(), [
+                    'folder' => "products/{$model->product_id}/variations/{$model->id}",
+                    'public_id' => 'variant_image_' . $attributeValueId
+                ]);
+                $colorImagePath = $cloudinaryResponse->getSecurePath();
+            } elseif (isset($request[$colorImageInput])) {
+                $colorImagePath = $request[$colorImageInput];
+            }
+
+            if (isset($colorImagePath)) {
+                $existingVariant = ProductVariationImage::where($modelType, $model->id)
+                    ->where('image_type', 'variant')
+                    ->first();
+
+                if ($existingVariant) {
+                    throw new \Exception('Biến thể này đã có ảnh variant. Không thể thêm thêm ảnh variant.');
+                }
+
+                ProductVariationImage::create([
+                    $modelType => $model->id,
+                    'image_path' => $colorImagePath,
+                    'image_type' => 'variant',
+                ]);
+            }
+
+            // Lưu album hình ảnh cho biến thể
+            $albumInput = "album_images_$attributeValueId";
+            if ($request->hasFile($albumInput)) {
+                foreach ($request->file($albumInput) as $albumImage) {
+                    // Upload từng ảnh lên Cloudinary
+                    $cloudinaryResponse = Cloudinary::upload($albumImage->getRealPath(), [
+                        'folder' => "products/{$model->product_id}/variations/{$model->id}",
+                        'public_id' => 'album_image_' . uniqid()
+                    ]);
+                    $albumPath = $cloudinaryResponse->getSecurePath();
+
+                    ProductVariationImage::create([
+                        $modelType => $model->id,
+                        'image_path' => $albumPath,
+                        'image_type' => 'album',
+                    ]);
+                }
+            } elseif (isset($request[$albumInput]) && is_array($request[$albumInput])) {
+                foreach ($request[$albumInput] as $albumImage) {
+                    ProductVariationImage::create([
+                        $modelType => $model->id,
+                        'image_path' => $albumImage,
+                        'image_type' => 'album',
+                    ]);
+                }
+            }
+        } else {
+            $modelType = 'product_id';
+
+            // Lưu album hình ảnh cho sản phẩm
+            $albumInput = 'album_images';
+            if ($request->hasFile($albumInput)) {
+                foreach ($request->file($albumInput) as $albumImage) {
+                    // Upload từng ảnh lên Cloudinary
+                    $cloudinaryResponse = Cloudinary::upload($albumImage->getRealPath(), [
+                        'folder' => "products/{$model->id}/albums",
+                        'public_id' => 'album_image_' . uniqid()
+                    ]);
+                    $albumPath = $cloudinaryResponse->getSecurePath();
+
+                    ProductImage::create([
+                        $modelType => $model->id,
+                        'image_path' => $albumPath,
+                        'image_type' => 'album',
+                    ]);
+                }
+            } elseif (isset($request[$albumInput]) && is_array($request[$albumInput])) {
+                foreach ($request[$albumInput] as $albumImage) {
+                    ProductImage::create([
+                        $modelType => $model->id,
+                        'image_path' => $albumImage,
+                        'image_type' => 'album',
+                    ]);
+                }
+            }
+        }
+    }
 
 
     private function isValidAttributeForGroup($groupId, $attributeValueId)
@@ -165,115 +254,6 @@ class ProductController extends Controller
 
 
 
-    private function saveImages($model, $request, $isVariation = false, $attributeValueId = null)
-    {
-        if ($isVariation) {
-            $modelType = 'product_variation_id';
-
-            // Kiểm tra và lưu ảnh đại diện (thumbnail) cho biến thể
-            if ($attributeValueId) {
-                $thumbnailInput = "thumbnail_image_$attributeValueId";
-            }
-
-            if ($request->hasFile($thumbnailInput)) {
-                // Kiểm tra xem xem có ảnh thumbnail đã có trong biến thể chưa nhé ae
-                $existingThumbnail = ProductVariationImage::where($modelType, $model->id)
-                    ->where('image_type', 'thumbnail')
-                    ->first();
-
-                if ($existingThumbnail) {
-                    throw new \Exception('thuộc tính này chỉ cần 1 ảnh đại diện. Không thể thêm thêm ảnh ảnh đại diện.');
-                }
-
-                // Lưu ảnh mới nếu chưa có
-                $thumbnailPath = $request->file($thumbnailInput)->store("uploads/avata/{$model->product_id}/{$model->id}", 'public');
-
-                ProductVariationImage::create([
-                    $modelType => $model->id,
-                    'image_path' => $thumbnailPath,
-                    'image_type' => 'thumbnail',
-                ]);
-            }
-
-            // Kiểm tra và lưu ảnh variant (màu sắc)
-            if ($request->hasFile("color_image_$attributeValueId")) {
-                // Kiểm tra xem biến thể đã có variant chưa
-                $existingVariant = ProductVariationImage::where($modelType, $model->id)
-                    ->where('image_type', 'variant')
-                    ->first();
-
-                if ($existingVariant) {
-                    // Báo lỗi nếu đã tồn tại variant
-                    throw new \Exception('Biến thể này đã có ảnh variant. Không thể thêm thêm ảnh variant.');
-                }
-
-                // Lưu ảnh mới nếu chưa có
-                $colorImagePath = $request->file("color_image_$attributeValueId")
-                    ->store("uploads/color_images/{$model->product_id}/{$model->id}", 'public');
-
-                ProductVariationImage::create([
-                    $modelType => $model->id,
-                    'image_path' => $colorImagePath,
-                    'image_type' => 'variant',
-                ]);
-            }
-
-            // Lưu album hình ảnh cho biến thể (không giới hạn số lượng)
-            if ($attributeValueId) {
-                $albumInput = "album_images_$attributeValueId";
-            }
-
-            if ($request->hasFile($albumInput)) {
-                foreach ($request->file($albumInput) as $albumImage) {
-                    $albumPath = $albumImage->store("uploads/album/{$model->product_id}/{$model->id}", 'public');
-                    ProductVariationImage::create([
-                        $modelType => $model->id,
-                        'image_path' => $albumPath,
-                        'image_type' => 'album',
-                    ]);
-                }
-            }
-        } else {
-            // Lưu ảnh cho sản phẩm vào bảng product_images
-            $modelType = 'product_id';
-
-            // Kiểm tra và lưu ảnh đại diện (thumbnail) cho sản phẩm
-            $thumbnailInput = 'thumbnail_image';
-            if ($request->hasFile($thumbnailInput)) {
-                // Kiểm tra xem sản phẩm đã có thumbnail chưa
-                $existingThumbnail = ProductImage::where($modelType, $model->id)
-                    ->where('image_type', 'thumbnail')
-                    ->first();
-
-                if ($existingThumbnail) {
-                    // Báo lỗi nếu đã tồn tại thumbnail
-                    throw new \Exception('Sản phẩm này đã có ảnh thumbnail. Không thể thêm thêm ảnh thumbnail.');
-                }
-
-                // Lưu ảnh mới
-                $thumbnailPath = $request->file($thumbnailInput)->store('uploads/products/thumbnails', 'public');
-
-                ProductImage::create([
-                    $modelType => $model->id,
-                    'image_path' => $thumbnailPath,
-                    'image_type' => 'thumbnail',
-                ]);
-            }
-
-            // Lưu album hình ảnh cho sản phẩm (không giới hạn số lượng)
-            $albumInput = 'album_images';
-            if ($request->hasFile($albumInput)) {
-                foreach ($request->file($albumInput) as $albumImage) {
-                    $albumPath = $albumImage->store('uploads/products/albums', 'public');
-                    ProductImage::create([
-                        $modelType => $model->id,
-                        'image_path' => $albumPath,
-                        'image_type' => 'album',
-                    ]);
-                }
-            }
-        }
-    }
 
 
 
@@ -292,326 +272,189 @@ class ProductController extends Controller
     }
 
 
-    /**
-     * Update the specified resource in storage.
-     */
-    // public function update(ProductRequest $request, $id)
-    // {
-    //     DB::beginTransaction();
 
-    //     try {
-    //         $product = Product::findOrFail($id);
-
-    //         // Tạo slug từ tên sản phẩm mới (nếu tên thay đổi)
-    //         $slug = $this->generateSeoFriendlySlug($request->name);
-
-    //         $product->update([
-    //             'name' => $request->name,
-    //             'slug' => $slug,
-    //             'price' => $request->price,
-    //             'description' => $request->description,  // Mô tả sản phẩm
-    //             'content' => $request->content,          // Nội dung sản phẩm
-    //             'input_day' => $request->input_day,      // Ngày nhập
-    //             'category_id' => $request->category_id,  // Danh mục sản phẩm
-    //             'is_collection' => $request->has('is_collection') ? 1 : 0,  // Kiểm tra checkbox
-    //             'is_hot' => $request->has('is_hot') ? 1 : 0,                // Kiểm tra checkbox
-    //             'is_new' => $request->has('is_new') ? 1 : 0,                // Kiểm tra checkbox
-    //         ]);
-            
-
-    //         // Kiểm tra xem có biến thể không
-    //         $hasVariations = $request->has('variations') && !empty($request->variations);
-
-    //         // Giải mã JSON của biến thể thành mảng
-    //         $variations = json_decode($request->input('variations'), true);
-
-    //         // Xử lý xóa ảnh cũ nếu có
-    //         if ($request->has('delete_images')) {
-    //             $this->deleteSelectedImages($request->input('delete_images'), false); // false vì đây là sản phẩm
-    //         }
-
-    //         // Nếu không có biến thể, chỉ cần cập nhật số lượng và hình ảnh
-    //         if (!$hasVariations || !is_array($variations)) {
-    //             $product->update(['stock' => $request->stock]);
-    //             $this->saveImages($product, $request);
-    //         }
-
-    //         // Nếu có biến thể, xử lý cập nhật biến thể
-    //         if ($hasVariations && is_array($variations)) {
-    //             $totalProductStock = 0;
-
-    //             // Lấy danh sách tất cả attribute_value_id từ các biến thể
-    //             $attributeValueIds = array_keys($variations);
-
-    //             // Kiểm tra tính hợp lệ của tất cả các attribute_value_id với group_id
-    //             if (!$this->isValidAttributeForGroup_Update($request->group_id, $attributeValueIds)) {
-    //                 throw new \Exception("Có giá trị thuộc tính không hợp lệ trong nhóm đã chọn.");
-    //             }
-
-    //             foreach ($variations as $attributeValueId => $sizes) {
-    //                 // Kiểm tra xem biến thể đã tồn tại chưa
-    //                 $productVariation = ProductVariation::where('product_id', $product->id)
-    //                     ->where('attribute_value_id', $attributeValueId)
-    //                     ->first();
-
-    //                 if (!$productVariation) {
-    //                     $productVariation = ProductVariation::create([
-    //                         'product_id' => $product->id,
-    //                         'group_id' => $request->group_id,
-    //                         'attribute_value_id' => $attributeValueId,
-    //                     ]);
-    //                 } else {
-    //                     $productVariation->update([
-    //                         'group_id' => $request->group_id,
-    //                     ]);
-    //                 }
-
-    //                 // Xóa ảnh cũ của biến thể nếu có
-    //                 if ($request->has('delete_images')) {
-    //                     $this->deleteSelectedImages($request->input('delete_images'), true); // true vì đây là biến thể
-    //                 }
-
-    //                 // Thêm ảnh mới cho biến thể
-    //                 $this->saveImages($productVariation, $request, true, $attributeValueId);
-
-    //                 // Xử lý cập nhật các size (kích thước) của biến thể
-    //                 $totalVariationStock = 0;
-    //                 foreach ($sizes as $sizeId => $details) {
-    //                     // Kiểm tra tính hợp lệ của từng giá trị thuộc tính size trước khi cập nhật
-    //                     if (!$this->isValidAttributeForGroup_Update($request->group_id, [$sizeId])) {
-    //                         throw new \Exception("Giá trị thuộc tính kích thước không hợp lệ trong nhóm đã chọn.");
-    //                     }
-
-    //                     if (!empty($details['stock']) && isset($details['discount'])) {
-    //                         $sku = $this->generateVariationSku();
-    //                         $calculatedPrice = $product->price - ($product->price * ($details['discount'] / 100));
-
-    //                         // Tìm hoặc tạo mới biến thể kích thước
-    //                         $productVariationValue = ProductVariationValue::where('product_variation_id', $productVariation->id)
-    //                             ->where('attribute_value_id', $sizeId)
-    //                             ->first();
-
-    //                         if ($productVariationValue) {
-    //                             // Cập nhật giá trị biến thể hiện có
-    //                             $productVariationValue->update([
-    //                                 'sku' => $sku,
-    //                                 'stock' => $details['stock'],
-    //                                 'price' => $calculatedPrice,
-    //                                 'discount' => $details['discount'] ?? null,
-    //                             ]);
-    //                         } else {
-    //                             // Tạo mới giá trị biến thể
-    //                             ProductVariationValue::create([
-    //                                 'product_variation_id' => $productVariation->id,
-    //                                 'attribute_value_id' => $sizeId,
-    //                                 'sku' => $sku,
-    //                                 'stock' => $details['stock'],
-    //                                 'price' => $calculatedPrice,
-    //                                 'discount' => $details['discount'] ?? null,
-    //                             ]);
-    //                         }
-
-    //                         $totalVariationStock += $details['stock'];
-    //                     }
-    //                 }
-
-    //                 // Cập nhật tổng tồn kho của biến thể
-    //                 $productVariation->update(['stock' => $totalVariationStock]);
-
-    //                 // Cộng dồn tồn kho của biến thể vào tổng tồn kho của sản phẩm
-    //                 $totalProductStock += $totalVariationStock;
-    //             }
-
-    //             // Cập nhật tổng tồn kho của sản phẩm
-    //             $product->update(['stock' => $totalProductStock]);
-    //         }
-
-    //         DB::commit();
-
-    //         return response()->json([
-    //             'success' => true,
-    //             'message' => 'Product updated successfully',
-    //             'data' => $product
-    //         ], 200);
-    //     } catch (\Exception $e) {
-    //         DB::rollback();
-    //         return response()->json([
-    //             'success' => false,
-    //             'message' => 'Failed to update product: ' . $e->getMessage(),
-    //         ], 500);
-    //     }
-    // }
 
 
     public function update(UpdateProductRequest $request, $id)
-{
-    DB::beginTransaction();
-
-    try {
-        $product = Product::findOrFail($id);
-
-        // Không tạo lại slug, chỉ cập nhật slug nếu có trong request
-        $product->update([
-            'name' => $request->name,
-            'slug' => $request->slug ?? $product->slug,  // Giữ nguyên slug nếu không có slug mới trong request
-            'price' => $request->price,
-            'description' => $request->description,  // Mô tả sản phẩm
-            'content' => $request->content,          // Nội dung sản phẩm
-            'input_day' => $request->input_day,      // Ngày nhập
-            'category_id' => $request->category_id,  // Danh mục sản phẩm
-            'is_collection' => $request->has('is_collection') ? 1 : 0,  // Kiểm tra checkbox
-            'is_hot' => $request->has('is_hot') ? 1 : 0,                // Kiểm tra checkbox
-            'is_new' => $request->has('is_new') ? 1 : 0,                // Kiểm tra checkbox
-        ]);
-
-        // Kiểm tra xem có biến thể không
-        $hasVariations = $request->has('variations') && !empty($request->variations);
-
-        // Giải mã JSON của biến thể thành mảng
-        $variations = json_decode($request->input('variations'), true);
-
-        // Xử lý xóa ảnh cũ nếu có
-        if ($request->has('delete_images')) {
-            $this->deleteSelectedImages($request->input('delete_images'), false); // false vì đây là sản phẩm
-        }
-
-        // Nếu không có biến thể, chỉ cần cập nhật số lượng và hình ảnh
-        if (!$hasVariations || !is_array($variations)) {
-            $product->update(['stock' => $request->stock]);
-            $this->saveImages($product, $request);
-        }
-
-        // Nếu có biến thể, xử lý cập nhật biến thể
-        if ($hasVariations && is_array($variations)) {
-            $totalProductStock = 0;
-
-            // Lấy danh sách tất cả attribute_value_id từ các biến thể
-            $attributeValueIds = array_keys($variations);
-
-            // Kiểm tra tính hợp lệ của tất cả các attribute_value_id với group_id
-            if (!$this->isValidAttributeForGroup_Update($request->group_id, $attributeValueIds)) {
-                throw new \Exception("Có giá trị thuộc tính không hợp lệ trong nhóm đã chọn.");
-            }
-
-            foreach ($variations as $attributeValueId => $sizes) {
-                // Kiểm tra xem biến thể đã tồn tại chưa
-                $productVariation = ProductVariation::where('product_id', $product->id)
-                    ->where('attribute_value_id', $attributeValueId)
-                    ->first();
-
-                if (!$productVariation) {
-                    $productVariation = ProductVariation::create([
-                        'product_id' => $product->id,
-                        'group_id' => $request->group_id,
-                        'attribute_value_id' => $attributeValueId,
-                    ]);
-                } else {
-                    $productVariation->update([
-                        'group_id' => $request->group_id,
-                    ]);
-                }
-
-                // Xóa ảnh cũ của biến thể nếu có
-                if ($request->has('delete_images')) {
-                    $this->deleteSelectedImages($request->input('delete_images'), true); // true vì đây là biến thể
-                }
-
-                // Thêm ảnh mới cho biến thể
-                $this->saveImages($productVariation, $request, true, $attributeValueId);
-
-                // Xử lý cập nhật các size (kích thước) của biến thể
-                $totalVariationStock = 0;
-                foreach ($sizes as $sizeId => $details) {
-                    // Kiểm tra tính hợp lệ của từng giá trị thuộc tính size trước khi cập nhật
-                    if (!$this->isValidAttributeForGroup_Update($request->group_id, [$sizeId])) {
-                        throw new \Exception("Giá trị thuộc tính kích thước không hợp lệ trong nhóm đã chọn.");
-                    }
-
-                    if (!empty($details['stock']) && isset($details['discount'])) {
-                        // Không tạo lại SKU, chỉ tạo mới nếu SKU không tồn tại
-                        $productVariationValue = ProductVariationValue::where('product_variation_id', $productVariation->id)
-                            ->where('attribute_value_id', $sizeId)
-                            ->first();
-
-                        if ($productVariationValue) {
-                            // Cập nhật giá trị biến thể hiện có
-                            $productVariationValue->update([
-                                'stock' => $details['stock'],
-                                'price' => $product->price - ($product->price * ($details['discount'] / 100)),
-                                'discount' => $details['discount'] ?? null,
-                            ]);
-                        } else {
-                            // Tạo mới giá trị biến thể
-                            ProductVariationValue::create([
-                                'product_variation_id' => $productVariation->id,
-                                'attribute_value_id' => $sizeId,
-                                'sku' => $this->generateVariationSku(),  // Tạo SKU mới nếu không tồn tại
-                                'stock' => $details['stock'],
-                                'price' => $product->price - ($product->price * ($details['discount'] / 100)),
-                                'discount' => $details['discount'] ?? null,
-                            ]);
-                        }
-
-                        $totalVariationStock += $details['stock'];
-                    }
-                }
-
-                // Cập nhật tổng tồn kho của biến thể
-                $productVariation->update(['stock' => $totalVariationStock]);
-
-                // Cộng dồn tồn kho của biến thể vào tổng tồn kho của sản phẩm
-                $totalProductStock += $totalVariationStock;
-            }
-
-            // Cập nhật tổng tồn kho của sản phẩm
-            $product->update(['stock' => $totalProductStock]);
-        }
-
-        DB::commit();
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Product updated successfully',
-            'data' => $product
-        ], 200);
-    } catch (\Exception $e) {
-        DB::rollback();
-        return response()->json([
-            'success' => false,
-            'message' => 'Failed to update product: ' . $e->getMessage(),
-        ], 500);
-    }
-}
-
-    private function isValidAttributeForGroup_Update($groupId, $attributeValueIds)
     {
+        DB::beginTransaction();
 
-        $validAttributes = DB::table('attribute_groups')
-            ->where('group_id', $groupId)
-            ->pluck('attribute_id')  // Lấy danh sách attribute_id thuộc group_id
-            ->toArray();  // Chuyển sang mảng để dễ kiểm tra
+        try {
+            $product = Product::findOrFail($id);
 
-        if (empty($validAttributes)) {
-            // Nếu không có thuộc tính nào được tìm thấy cho group_id
-            return false;
+            $product->update([
+                'name' => $request->name,
+                'slug' => $request->slug ?? $product->slug,
+                'price' => $request->price,
+                'description' => $request->description,
+                'content' => $request->content,
+                'input_day' => $request->input_day,
+                'category_id' => $request->category_id,
+                'is_collection' => $request->is_collection ? 1 : 0,
+                'is_hot' => $request->is_hot ? 1 : 0,
+                'is_new' => $request->is_new ? 1 : 0,
+            ]);
+
+            // Xóa ảnh nếu có yêu cầu
+            if ($request->has('delete_images')) {
+                $this->deleteSelectedImages($request->input('delete_images'), false);
+            }
+
+            // Lưu cập nhật hình ảnh
+            $this->saveImagesUpdate($product, $request);
+
+            $variations = json_decode($request->input('variations'), true);
+            if (is_array($variations)) {
+                $totalProductStock = 0;
+
+                foreach ($variations as $attributeValueId => $sizes) {
+                    $productVariation = ProductVariation::updateOrCreate(
+                        ['product_id' => $product->id, 'attribute_value_id' => $attributeValueId],
+                        ['group_id' => $request->group_id]
+                    );
+
+                    if ($request->has('delete_images_variation')) {
+                        $this->deleteSelectedImages($request->input('delete_images_variation'), true);
+                    }
+
+                    $this->saveImagesUpdate($productVariation, $request, true, $attributeValueId);
+
+                    $totalVariationStock = 0;
+                    foreach ($sizes as $sizeId => $details) {
+                        if (!empty($details['stock']) && isset($details['discount'])) {
+                            ProductVariationValue::updateOrCreate(
+                                ['product_variation_id' => $productVariation->id, 'attribute_value_id' => $sizeId],
+                                [
+                                    'sku' => $this->generateVariationSku(),
+                                    'stock' => $details['stock'],
+                                    'price' => $product->price - ($product->price * ($details['discount'] / 100)),
+                                    'discount' => $details['discount'] ?? null
+                                ]
+                            );
+
+                            $totalVariationStock += $details['stock'];
+                        } else {
+                            // Nếu không có stock, đặt mặc định về 0
+                            ProductVariationValue::updateOrCreate(
+                                ['product_variation_id' => $productVariation->id, 'attribute_value_id' => $sizeId],
+                                [
+                                    'sku' => $this->generateVariationSku(),
+                                    'stock' => 0,  // Đặt stock về 0 nếu không có giá trị
+                                    'price' => $product->price,
+                                    'discount' => $details['discount'] ?? null
+                                ]
+                            );
+                        }
+                    }
+
+                    $productVariation->update(['stock' => $totalVariationStock]);
+                    $totalProductStock += $totalVariationStock;
+                }
+
+                $product->update(['stock' => $totalProductStock]);
+            }
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Product updated successfully',
+                'data' => new ProductResource($product),
+            ], 200);
+        } catch (\Exception $e) {
+            DB::rollback();
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to update product: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
+
+
+
+
+
+
+
+    private function saveImagesUpdate($model, $request, $isVariation = false, $attributeValueId = null)
+    {
+        $modelType = $isVariation ? 'product_variation_id' : 'product_id';
+        $albumInput = $isVariation ? "album_images_$attributeValueId" : 'album_images';
+        $colorImageInput = $isVariation ? "color_image_$attributeValueId" : null;
+
+        // Xử lý ảnh màu cho biến thể
+        if ($isVariation && $colorImageInput && $request->hasFile($colorImageInput)) {
+            $this->processFileImage($model, $request->file($colorImageInput), 'variant', $modelType, $isVariation);
         }
 
-        // Lấy tất cả các giá trị thuộc tính hợp lệ từ bảng attribute_values dựa trên attribute_id đã lấy từ attribute_groups
-        $validAttributeValues = DB::table('attribute_values')
-            ->whereIn('attribute_id', $validAttributes)
-            ->pluck('id')  // Lấy danh sách attribute_value_id hợp lệ
-            ->toArray();
-
-        // Kiểm tra tất cả các attribute_value_id mà người dùng cung cấp xem có nằm trong danh sách hợp lệ không
-        foreach ($attributeValueIds as $attributeValueId) {
-            if (!in_array($attributeValueId, $validAttributeValues)) {
-                // Nếu bất kỳ giá trị thuộc tính nào không hợp lệ
-                return false;
+        // Xử lý album ảnh
+        if ($request->hasFile($albumInput)) {
+            foreach ($request->file($albumInput) as $file) {
+                $this->processFileImage($model, $file, 'album', $modelType, $isVariation);
+            }
+        } elseif ($request->has($albumInput) && is_array($request->input($albumInput))) {
+            foreach ($request->input($albumInput) as $url) {
+                $this->processSingleImage($model, $albumInput, $url, 'album', $modelType);
             }
         }
-
-        return true;
     }
+
+    // Hàm xử lý ảnh từ file và upload lên Cloudinary
+    private function processFileImage($model, $file, $type, $modelType, $isVariation)
+    {
+        try {
+            Log::info("Uploading new $type image for {$modelType} ID {$model->id}");
+
+            $folder = $isVariation ? "products/{$model->product_id}/variations/{$model->id}" : "products/{$model->id}/albums";
+            $cloudinaryResponse = Cloudinary::upload($file->getRealPath(), [
+                'folder' => $folder,
+                'public_id' => "{$type}_image_" . uniqid()
+            ]);
+            $imagePath = $cloudinaryResponse->getSecurePath();
+
+            $this->saveImageRecord($model, $imagePath, $type, $modelType);
+        } catch (\Exception $e) {
+            Log::error("Failed to upload $type image for {$modelType} ID {$model->id}: " . $e->getMessage());
+        }
+    }
+
+    // Hàm xử lý ảnh từ URL hoặc đường dẫn cục bộ
+    private function processSingleImage($model, $inputName, $imagePath, $type, $modelType)
+    {
+        try {
+            Log::info("Processing $type image for {$modelType} ID {$model->id} with path: $imagePath");
+
+            if (!empty($imagePath)) {
+                $this->saveImageRecord($model, $imagePath, $type, $modelType);
+            } else {
+                Log::warning("No valid $type image provided for {$modelType} ID {$model->id}.");
+            }
+        } catch (\Exception $e) {
+            Log::error("Failed to process $type image for {$modelType} ID {$model->id}: " . $e->getMessage());
+        }
+    }
+
+    private function saveImageRecord($model, $imagePath, $type, $modelType)
+    {
+        // Kiểm tra xem ảnh đã tồn tại trong cơ sở dữ liệu chưa dựa trên `modelType`, `model->id` và `image_path`
+        $existingImage = ProductVariationImage::where($modelType, $model->id)
+            ->where('image_type', $type)
+            ->where('image_path', $imagePath)
+            ->exists();
+
+        if (!$existingImage) {
+            ProductVariationImage::create([
+                $modelType => $model->id,
+                'image_path' => $imagePath,
+                'image_type' => $type,
+            ]);
+            Log::info("Saved $type image for {$modelType} ID {$model->id}.");
+        } else {
+            Log::info("Skipped saving duplicate $type image for {$modelType} ID {$model->id}.");
+        }
+    }
+
+
 
 
     private function deleteSelectedImages($imageIds, $isVariation = false)
@@ -666,7 +509,7 @@ class ProductController extends Controller
     }
 
 
- 
+
 
 
     private function generateSeoFriendlySlug($productName)
@@ -704,65 +547,220 @@ class ProductController extends Controller
     }
 
 
-   
 
     public function destroy(string $id)
-{
-    DB::beginTransaction();
+    {
+        DB::beginTransaction();
+    
+        try {
+            $product = Product::findOrFail($id);
+    
+            $variations = ProductVariation::where('product_id', $product->id)->get();
+            foreach ($variations as $variation) {
+                // Xóa mềm các hình ảnh của biến thể
+                $variationImages = ProductVariationImage::where('product_variation_id', $variation->id)->get();
+                foreach ($variationImages as $variationImage) {
+                    $variationImage->delete(); 
+                }
+    
+                ProductVariationValue::where('product_variation_id', $variation->id)->delete();
+                $variation->delete(); 
+            }
+    
 
-    try {
-        $product = Product::withTrashed()->findOrFail($id);
-        $variations = ProductVariation::where('product_id', $product->id)->get();
+            $productImages = ProductImage::where('product_id', $product->id)->get();
+            foreach ($productImages as $productImage) {
+                $productImage->delete(); 
+            }
+    
+            $product->delete();
+    
+            DB::commit();
+    
+            return response()->json([
+                'success' => true,
+                'message' => 'Xóa sản phẩm thành công'
+            ], 200);
+        } catch (\Exception $e) {
+            DB::rollback();
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to delete product: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
+    
 
 
-        foreach ($variations as $variation) {
-            // Lấy danh sách hình ảnh của biến thể
-            $variationImages = ProductVariationImage::where('product_variation_id', $variation->id)->get();
 
-   
-            foreach ($variationImages as $variationImage) {
-                if (Storage::disk('public')->exists($variationImage->image_path)) {
-                    Storage::disk('public')->delete($variationImage->image_path);
+
+
+    // public function deleteImageByPath($type, $encodedPath)
+    // {
+    //     DB::beginTransaction();
+
+    //     try {
+    //         // Giải mã đường dẫn ảnh từ base64
+    //         $imagePath = base64_decode($encodedPath);
+    //         Log::info("Đang xóa ảnh với đường dẫn: " . $imagePath);
+
+    //         // Loại bỏ phần tên miền và phần mở rộng
+    //         $publicId = preg_replace('/^.+\/upload\/(v[0-9]+\/)?/', '', $imagePath);
+    //         $publicId = pathinfo($publicId, PATHINFO_DIRNAME) . '/' . pathinfo($publicId, PATHINFO_FILENAME);
+
+    //         // Xóa ảnh trên Cloudinary bằng UploadApi
+    //         $response = (new UploadApi())->destroy($publicId);
+    //         Log::info("Kết quả xóa ảnh trên Cloudinary: " . json_encode($response));
+
+    //         if ($response['result'] !== 'ok') {
+    //             throw new \Exception("Không thể xóa ảnh trên Cloudinary với public_id: " . $publicId);
+    //         }
+
+    //         // Xóa bản ghi trong database nếu xóa trên Cloudinary thành công
+    //         if ($type === 'product') {
+    //             $productImage = ProductImage::where('image_path', $imagePath)->first();
+
+    //             if (!$productImage) {
+    //                 return response()->json([
+    //                     'success' => false,
+    //                     'message' => 'Ảnh sản phẩm không tồn tại.'
+    //                 ], 404);
+    //             }
+
+    //             $productImage->delete();
+    //         } elseif ($type === 'variation') {
+    //             $variationImage = ProductVariationImage::where('image_path', $imagePath)->first();
+
+    //             if (!$variationImage) {
+    //                 return response()->json([
+    //                     'success' => false,
+    //                     'message' => 'Ảnh biến thể không tồn tại.'
+    //                 ], 404);
+    //             }
+
+    //             $variationImage->delete();
+    //         } else {
+    //             return response()->json([
+    //                 'success' => false,
+    //                 'message' => 'Loại ảnh không hợp lệ.'
+    //             ], 400);
+    //         }
+
+    //         DB::commit();
+
+    //         return response()->json([
+    //             'success' => true,
+    //             'message' => 'Xóa ảnh thành công.'
+    //         ], 200);
+
+    //     } catch (\Exception $e) {
+    //         DB::rollback();
+    //         Log::error("Lỗi khi xóa ảnh: " . $e->getMessage());
+    //         return response()->json([
+    //             'success' => false,
+    //             'message' => 'Lỗi khi xóa ảnh: ' . $e->getMessage()
+    //         ], 500);
+    //     }
+    // }
+
+
+
+
+
+    public function deleteImageByPath($type, $encodedPath)
+    {
+        DB::beginTransaction();
+
+        try {
+            // Giải mã đường dẫn ảnh từ base64
+            $imagePath = base64_decode($encodedPath);
+            Log::info("Đang xóa ảnh với đường dẫn: " . $imagePath);
+
+            // Khởi tạo publicId là null
+            $publicId = null;
+
+            // Xác định publicId dựa trên loại ảnh
+            if ($type === 'product') {
+                // Lấy public_id cho ảnh sản phẩm không biến thể (album_image)
+                // Loại bỏ phần tên miền, phiên bản và phần mở rộng
+                $publicId = preg_replace('/^.+\/upload\/v[0-9]+\/(.+)\.[a-z]+$/', '$1', $imagePath);
+                Log::info("Loại ảnh: product, Public ID: " . $publicId);
+            } elseif ($type === 'variation') {
+                // Lấy public_id cho ảnh sản phẩm có biến thể (variant_image)
+                // Loại bỏ phần tên miền, phiên bản và phần mở rộng
+                $publicId = preg_replace('/^.+\/upload\/v[0-9]+\/(.+)\.[a-z]+$/', '$1', $imagePath);
+                Log::info("Loại ảnh: variation, Public ID: " . $publicId);
+            } else {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Loại ảnh không hợp lệ.'
+                ], 400);
+            }
+
+            // Kiểm tra lại publicId xem có hợp lệ không trước khi gọi xóa
+            if (!$publicId) {
+                throw new \Exception("Không thể lấy public_id từ đường dẫn ảnh.");
+            }
+
+            // Xóa ảnh trên Cloudinary bằng UploadApi
+            $response = (new UploadApi())->destroy($publicId);
+            Log::info("Kết quả xóa ảnh trên Cloudinary: " . json_encode($response));
+
+            if ($response['result'] !== 'ok') {
+                throw new \Exception("Không thể xóa ảnh trên Cloudinary với public_id: " . $publicId);
+            }
+
+            // Xóa bản ghi trong database nếu xóa trên Cloudinary thành công
+            if ($type === 'product') {
+                $productImage = ProductImage::where('image_path', $imagePath)->first();
+
+                if (!$productImage) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Ảnh sản phẩm không tồn tại.'
+                    ], 404);
                 }
 
-                $directoryPath = dirname($variationImage->image_path);
-                $this->deleteDirectoryIfEmpty($directoryPath);
+                Log::info("Xóa ảnh sản phẩm từ database.");
+                $productImage->delete();
+            } elseif ($type === 'variation') {
+                $variationImage = ProductVariationImage::where('image_path', $imagePath)->first();
 
+                if (!$variationImage) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Ảnh biến thể không tồn tại.'
+                    ], 404);
+                }
+
+                Log::info("Xóa ảnh biến thể từ database.");
                 $variationImage->delete();
             }
 
-            // Xóa tất cả các giá trị biến thể
-            ProductVariationValue::where('product_variation_id', $variation->id)->delete();
+            DB::commit();
 
-            // Xóa biến thể
-            $variation->forceDelete();  // Xóa vĩnh viễn biến thể
+            return response()->json([
+                'success' => true,
+                'message' => 'Xóa ảnh thành công.'
+            ], 200);
+        } catch (\Exception $e) {
+            DB::rollback();
+            Log::error("Lỗi khi xóa ảnh: " . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Lỗi khi xóa ảnh: ' . $e->getMessage()
+            ], 500);
         }
-
-        $productImages = ProductImage::where('product_id', $product->id)->get();
-        foreach ($productImages as $productImage) {
-            if (Storage::disk('public')->exists($productImage->image_path)) {
-                Storage::disk('public')->delete($productImage->image_path);
-            }
-
-            $directoryPath = dirname($productImage->image_path);
-            $this->deleteDirectoryIfEmpty($directoryPath);
-            $productImage->delete();
-        }
-        $product->forceDelete();  
-
-        DB::commit();
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Xóa sản phẩm thành công'
-        ], 200);
-    } catch (\Exception $e) {
-        DB::rollback();
-        return response()->json([
-            'success' => false,
-            'message' => 'Failed to delete product: ' . $e->getMessage(),
-        ], 500);
     }
-}
+    public function getProductsByIds(Request $request)
+    {
+        $request->validate([
+            'ids' => 'required|array',
+            'ids.*' => 'integer|exists:products,id',
+        ]);
 
+        $products = Product::whereIn('id', $request->ids)->get();
+
+        return response()->json(['products' => $products], 200);
+    }
 }

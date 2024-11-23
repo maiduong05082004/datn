@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
+use App\Notifications\ResetPasswordNotification;
 
 class User extends Authenticatable
 {
@@ -25,13 +26,16 @@ class User extends Authenticatable
         'date_of_birth',    // Ngày tháng năm sinh của người dùng
         'sex',              // Giới tính của người dùng (male, female, other)
         'email',            // Địa chỉ email của người dùng
+        'address',
+        'phone',
         'password',         // Mật khẩu (sẽ được mã hóa khi lưu vào cơ sở dữ liệu)
         'provider_name',    // Tên nhà cung cấp phương thức đăng nhập)
         'provider_id',      // id của nhà cung cấp (sẽ được mã hóa khi lưu vào cơ sở dữ liệu)
         'role',             // Vai trò của người dùng (ví dụ: admin, user)
         'last_login_at',    // Thời gian người dùng đăng nhập lần cuối
         'is_active',        // Trạng thái kích hoạt tài khoản (true/false)
-
+        'points',
+        'tier',
     ];
 
 
@@ -57,12 +61,10 @@ class User extends Authenticatable
 
     ];
 
-
     public function bill()
     {
         return $this->hasMany(Bill::class);
     }
-
 
     public function promotions()
     {
@@ -74,16 +76,28 @@ class User extends Authenticatable
         return $this->hasMany(Comment::class);
     }
 
-
     // Mối quan hệ với bảng ShippingAddress
     public function shippingAddresses()
     {
         return $this->hasMany(ShippingAddress::class);
     }
 
-
     public function defaultShippingAddress()
     {
         return $this->hasOne(ShippingAddress::class)->where('is_default', true);
+    }
+
+    public function sendPasswordResetNotification($token)
+    {
+        $this->notify(new ResetPasswordNotification($token));
+    }
+
+    public function wishlistItems()
+    {
+        return $this->hasMany(WishlistItem::class);
+    }
+    public function userPromotions()
+    {
+        return $this->hasMany(UserPromotion::class);
     }
 }

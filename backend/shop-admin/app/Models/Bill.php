@@ -10,12 +10,12 @@ class Bill extends Model
     use HasFactory;
 
     // Các hằng số cho trạng thái của đơn hàng
-    const STATUS_PENDING = 'pending';
-    const STATUS_PROCESSED = 'processed';
-    const STATUS_SHIPPED = 'shipped';
-    const STATUS_DELIVERED = 'delivered';
-    const STATUS_CANCELED = 'canceled';
-    const STATUS_RETURNED = 'returned'; // Trạng thái hủy đơn và trả hàng
+    const STATUS_PENDING = 'pending'; // đang xử lý
+    const STATUS_PROCESSED = 'processed'; // đã xử lý (Mục đích ko thể hủy đơn hàng)
+    const STATUS_SHIPPED = 'shipped'; // ship đang giao
+    const STATUS_DELIVERED = 'delivered'; // đã giao nhận
+    const STATUS_CANCELED = 'canceled'; // Đã hủy
+    const STATUS_RETURNED = 'returned'; // trả hàng
 
     // Các hằng số cho loại thanh toán
     const PAYMENT_TYPE_ONLINE = 'online';
@@ -24,19 +24,21 @@ class Bill extends Model
     // Các trường có thể điền hàng loạt (fillable)
     protected $fillable = [
         'code_orders',
-        'name_receiver',
         'user_id',
         'email_receiver',
-        'phone_receiver',
-        'Address',
         'note',
         'status_bill',
         'subtotal',
         'total',
-        'promotion_id',
         'canceled_at',
         'canceled_reason',
-        'payment_type', // Thêm cột payment_type
+        'promotion_ids',
+        'payment_type',
+        'shipping_address_id',
+        'order_code_shipping',
+        'shipping_fee',
+        'discounted_amount',
+        'discounted_shipping_fee'
     ];
 
     // Quan hệ với bảng users
@@ -45,20 +47,13 @@ class Bill extends Model
         return $this->belongsTo(User::class);
     }
 
-    // Quan hệ với bảng bill_dentail (BillDentail)
-    public function billDentail()
+    // Quan hệ với bảng Bill_detail (BillDetail)
+    public function BillDetail()
     {
-        return $this->hasMany(BillDentail::class);
+        return $this->hasMany(BillDetail::class);
     }
 
-    // Quan hệ với bảng promotions
-    public function promotion()
-    {
-        return $this->belongsTo(Promotion::class);
-    }
 
-    // Quan hệ với bảng vnpays (hoặc các phương thức thanh toán khác)
-  
 
     // Quan hệ với bảng payments để quản lý các giao dịch thanh toán
     public function payments()
@@ -66,18 +61,11 @@ class Bill extends Model
         return $this->hasMany(Payment::class);
     }
 
-    // Quan hệ với bảng shipping (vận chuyển)
-    public function shipping()
+    // Quan hệ với bảng ShippingAddress
+    public function shippingAddress()
     {
-        return $this->hasOne(Shipping::class, 'bill_id');
+        return $this->belongsTo(ShippingAddress::class, 'shipping_address_id');
     }
-
-
-      // Mối quan hệ với bảng ShippingAddress
-      public function shippingAddress()
-      {
-          return $this->belongsTo(ShippingAddress::class, 'shipping_address_id');
-      }
 
     // Các phương thức tiện ích để kiểm tra trạng thái đơn hàng
     public function isPending()
@@ -116,7 +104,7 @@ class Bill extends Model
         $statuses = [
             self::STATUS_PENDING => 'Đang chờ xử lý',
             self::STATUS_PROCESSED => 'Đã xử lý',
-            self::STATUS_SHIPPED => 'Đang bàn giao cho vận chuyển',
+            self::STATUS_SHIPPED => 'Đã giao hàng',
             self::STATUS_DELIVERED => 'Đã giao hàng',
             self::STATUS_CANCELED => 'Đã hủy đơn hàng',
             self::STATUS_RETURNED => 'Hủy đơn và trả hàng',
@@ -146,6 +134,4 @@ class Bill extends Model
 
         return $paymentTypes[$this->payment_type] ?? 'Không xác định';
     }
-
-    
 }

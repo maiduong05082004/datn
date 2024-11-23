@@ -1,104 +1,161 @@
+
+
 {
-    "products": [
-        {
-            "id": 1,
-            "name": "Product 1",
-            "price": 100000,
-            "image": "https://picsum.photos/id/10/300/300",
-            "description": "This is product 1",
-            "discount": 30,
-            "quantity": 100,
-            "featured": true
-        },
-        {
-            "id": 2,
-            "name": "Product 2",
-            "price": 19.99,
-            "image": "https://picsum.photos/id/11/300/300",
-            "description": "This is product 2",
-            "discount": 0.1,
-            "quantity": 50,
-            "featured": false
-        },
-        {
-            "id": 3,
-            "name": "Product 3",
-            "price": 5.99,
-            "image": "https://picsum.photos/id/12/300/300",
-            "description": "This is product 3",
-            "discount": 0,
-            "quantity": 200,
-            "featured": true
-        },
-        {
-            "id": 4,
-            "name": "Product 4",
-            "price": 14.99,
-            "image": "https://picsum.photos/id/13/300/300",
-            "description": "This is product 4",
-            "discount": 0.2,
-            "quantity": 75,
-            "featured": true
-        },
-        {
-            "id": 5,
-            "name": "Product 5",
-            "price": 9.99,
-            "image": "https://picsum.photos/id/14/300/300",
-            "description": "This is product 5",
-            "discount": 0,
-            "quantity": 150,
-            "featured": false
-        },
-        {
-            "id": 6,
-            "name": "Product 6",
-            "price": 7.99,
-            "image": "https://picsum.photos/id/15/300/300",
-            "description": "This is product 6",
-            "discount": 0.15,
-            "quantity": 100,
-            "featured": false
-        },
-        {
-            "id": 7,
-            "name": "Product 7",
-            "price": 12.99,
-            "image": "https://picsum.photos/id/16/300/300",
-            "description": "This is product 7",
-            "discount": 0,
-            "quantity": 50,
-            "featured": true
-        },
-        {
+    "variation": [
+      {
+        "group_id": 55,
+        "group_name": "Biến thể cho quần áo",
+        "attributes": [
+          {
             "id": 8,
-            "name": "Product 8",
-            "price": 17.99,
-            "image": "https://picsum.photos/id/17/300/300",
-            "description": "This is product 8",
-            "discount": 0.1,
-            "quantity": 80,
-            "featured": true
-        },
-        {
+            "name": "Kích Thước Quần Áo",
+            "attribute_type": 1,
+            "attribute_values": {
+              "value_27": "S",
+              "value_28": "M",
+              "value_29": "L",
+              "value_30": "XL",
+              "value_31": "XXL"
+            }
+          },
+          {
             "id": 9,
-            "name": "Product 9",
-            "price": 6.99,
-            "image": "https://picsum.photos/id/18/300/300",
-            "description": "This is product 9",
-            "discount": 0,
-            "quantity": 120,
-            "featured": false
-        },
-        {
+            "name": "Màu Sắc",
+            "attribute_type": 0,
+            "attribute_values": {
+              "value_32": "Xanh lá cây",
+              "value_33": "Xanh Nước biển",
+              "value_34": "Đỏ",
+              "value_35": "Vàng",
+              "value_36": "Cam",
+              "value_37": "Tím"
+            }
+          }
+        ]
+      },
+      {
+        "group_id": 58,
+        "group_name": "Biến thể cho giày dép",
+        "attributes": [
+          {
+            "id": 9,
+            "name": "Màu Sắc",
+            "attribute_type": 0,
+            "attribute_values": {
+              "value_32": "Xanh lá cây",
+              "value_33": "Xanh Nước biển",
+              "value_34": "Đỏ",
+              "value_35": "Vàng",
+              "value_36": "Cam",
+              "value_37": "Tím"
+            }
+          },
+          {
             "id": 10,
-            "name": "Product 10",
-            "price": 11.99,
-            "image": "https://picsum.photos/id/19/300/300",
-            "description": "This is product 10",
-            "discount": 0.25,
-            "quantity": 90,
-            "featured": true
-        }
+            "name": "Kích Thước giày dép",
+            "attribute_type": 1,
+            "attribute_values": {
+              "value_39": "38",
+              "value_40": "38.5",
+              "value_41": "39",
+              "value_42": "40",
+              "value_43": "41",
+              "value_44": "42"
+            }
+          }
+        ]
+      },
+      {
+        "group_id": 62,
+        "group_name": "Biến thể cho nước hoa",
+        "attributes": [
+          {
+            "id": 32,
+            "name": "Dung Tích",
+            "attribute_type": 1,
+            "attribute_values": {
+              "value_97": "10ml",
+              "value_98": "50ml",
+              "value_99": "100ml",
+              "value_100": "200ml"
+            }
+          },
+          {
+            "id": 33,
+            "name": "Loại Nước Hoa",
+            "attribute_type": 0,
+            "attribute_values": {
+              "value_101": "EDT",
+              "value_102": "EDP"
+            }
+          }
+        ]
+      },
+      {
+        "group_id": 68,
+        "group_name": "Nhóm biến thể quần áo lần 5",
+        "attributes": [
+          {
+            "id": 8,
+            "name": "Kích Thước Quần Áo",
+            "attribute_type": 1,
+            "attribute_values": {
+              "value_27": "S",
+              "value_28": "M",
+              "value_29": "L",
+              "value_30": "XL",
+              "value_31": "XXL"
+            }
+          },
+          {
+            "id": 9,
+            "name": "Màu Sắc",
+            "attribute_type": 0,
+            "attribute_values": {
+              "value_32": "Xanh lá cây",
+              "value_33": "Xanh Nước biển",
+              "value_34": "Đỏ",
+              "value_35": "Vàng",
+              "value_36": "Cam",
+              "value_37": "Tím"
+            }
+          },
+          {
+            "id": 35,
+            "name": "Chất Liệu",
+            "attribute_type": 2,
+            "attribute_values": {
+              "value_105": "vải cotton",
+              "value_106": "vaỈ FE"
+            }
+          }
+        ]
+      },
+      {
+        "group_id": 69,
+        "group_name": "Nhóm điện thoại",
+        "attributes": [
+          {
+            "id": 38,
+            "name": "Màu sắc điện thoại",
+            "attribute_type": 0,
+            "attribute_values": {
+              "value_108": "Xanh Đậm",
+              "value_121": "trắng",
+              "value_128": "Đỏ Nhạt",
+              "value_129": "Hồng mộng mơ1",
+              "value_143": "Màu Mới"
+            }
+          },
+          {
+            "id": 42,
+            "name": "tên thuộc tính",
+            "attribute_type": 0,
+            "attribute_values": [
+              
+            ]
+          }
+        ]
+      }
     ]
-}
+  }

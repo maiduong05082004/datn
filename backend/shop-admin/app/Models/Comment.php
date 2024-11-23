@@ -9,6 +9,9 @@ class Comment extends Model
 {
     use HasFactory;
 
+    const STATUS_PENDING = 'Pending';    // Đang chờ duyệt
+    const STATUS_APPROVED = 'Approved';          // Duyệt thành công
+    const STATUS_REJECTED = 'Rejected';  // Duyệt không thành công (từ ngữ tục tĩu)
     protected $fillable = [
         'user_id',
         'product_id',
@@ -18,17 +21,42 @@ class Comment extends Model
         'reported_count',      // Thêm cột reported_count cho số lần bị báo cáo bởi người dùng
         'moderation_status',   // Thêm cột moderation_status cho trạng thái kiểm duyệt
         'is_visible',          // Thêm cột is_visible để kiểm soát hiển thị
+        'parent_id',
+        'bill_detail_id',
+        'stars',
+        'like',
+        'is_anonymous'  // Bình luận ẩn danh
     ];
 
     // Liên kết với bảng User
     public function user()
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class, 'user_id');
     }
 
     // Liên kết với bảng Product
     public function product()
     {
         return $this->belongsTo(Product::class);
+    }
+
+    public function replies()
+    {
+        return $this->hasMany(Comment::class, 'parent_id');
+    }
+
+    public function billDetail()
+    {
+        return $this->belongsTo(BillDetail::class, 'bill_detail_id');
+    }
+
+    public function reports()
+    {
+        return $this->hasMany(ReportComment::class);
+    }
+
+    public function parentComment()
+    {
+        return $this->belongsTo(Comment::class, 'parent_id');
     }
 }
