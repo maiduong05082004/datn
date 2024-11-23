@@ -47,12 +47,14 @@ export const useOrderMutations = () => {
     const orderATM = useMutation({
         mutationFn: async (order: any) => {
             try {
-                const {data} = await axios.post(`http://127.0.0.1:8000/api/client/payment`, order, {
+                const {data} = await axios.post(`http://localhost:8000/api/client/payment/`, order, {
                     headers: {
                         Authorization: `Bearer ${localStorage.getItem("token")}`,
                     }
                 })
-                window.location.href = data.data
+                console.log(data);
+                
+                // window.location.href = data.data
             } catch (error) {
                 throw new Error("Mua hàng thất bại!")
             }

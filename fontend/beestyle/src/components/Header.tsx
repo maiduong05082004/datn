@@ -78,7 +78,7 @@ const Header = ({ isSearch, setIsSearch }: Props) => {
                         </div>
                         <nav className="overflow-y-auto h-full lg:h-auto lg:overflow-hidden">
                             <ul className="px-[20px] lg:flex text-[14px] font-[500] lg:text-[17px] lg:font-[700]">
-                                {categorires?.data.map((item: any, index: any) => (
+                                {categorires?.data.slice(0, 6).map((item: any, index: any) => (
                                     <li key={index + 1} className="group mb-[10px] lg:m-0">
                                         <h4 className="flex justify-between items-center w-[100%] py-[10px] lg:py-0">
                                             <Link onClick={() => setOpenCategories(false)} to={`categories/${item.id}`} className="w-full flex h-full lg:h-auto hover:text-[#BB9244] lg:hover:border-b-[1px] lg:hover:border-b-black lg:py-[15px] lg:px-[18px]">{item.name}</Link>
