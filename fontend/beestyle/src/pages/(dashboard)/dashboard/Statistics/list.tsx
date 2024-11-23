@@ -39,8 +39,8 @@ const ListStatistics = (props: Props) => {
   if (!Statistics || Statistics.length === 0) return <div className="text-center text-lg text-gray-700">Không có dữ liệu thống kê</div>
 
   const labels = Statistics.map(item => {
-    const shortenedProductName = item.product_name.split('-')[0].trim(); // Rút gọn tên sản phẩm
-    return `${shortenedProductName}\n(${item.period})`; // Xuống hàng thời gian
+    const shortenedProductName = item.product_name.split('-')[0].trim(); 
+    return `${shortenedProductName}\n(${item.period})`;
   });
 
   const chartData = {
@@ -64,8 +64,8 @@ const ListStatistics = (props: Props) => {
     datasets: [
       {
         data: [
-          Statistics.reduce((acc, item) => acc + item.total_revenue, 0), // Tổng doanh thu
-          Statistics.reduce((acc, item) => acc + item.total_profit, 0), // Tổng lợi nhuận
+          Statistics.reduce((acc, item) => acc + item.total_revenue, 0), 
+          Statistics.reduce((acc, item) => acc + item.total_profit, 0),  
         ],
         backgroundColor: ['rgba(255, 99, 132, 0.6)', 'rgba(54, 162, 235, 0.6)'],
       },
@@ -82,13 +82,11 @@ const ListStatistics = (props: Props) => {
     scales: {
       x: {
         title: {
-          display: true,
           text: 'Sản phẩm (Thời gian)',
         },
       },
       y: {
         title: {
-          display: true,
           text: 'Số tiền (VNĐ)',
         },
       },
@@ -97,15 +95,15 @@ const ListStatistics = (props: Props) => {
 
   return (
     <div className="flex justify-center gap-10 pt-10">
-      <div className=" w-[45%] h-auto bg-gray-100 rounded-lg shadow-md">
+      <div className=" w-[45%] h-auto bg-gray-100 rounded-lg shadow-md p-6">
         <h2 className="text-center text-2xl font-semibold text-gray-800 mb-4">Thống kê Doanh thu và Lợi nhuận</h2>
         <Bar data={chartData} options={options} />
       </div>
-      <div className="w-[45%] bg-gray-100 rounded-lg shadow-md">
+      <div className="w-[45%] bg-gray-100 rounded-lg shadow-md p-6">
         <h2 className="text-center text-2xl font-semibold text-gray-800 mb-4">
-          Biểu đồ Tròn Doanh thu và Lợi nhuận
+          Tổng Doanh Thu Và Lợi Nhuận
         </h2>
-        <div style={{ width: '500px', height: '500px', margin: '0 auto' }}>
+        <div style={{ width: '400px', height: '400px', margin: '0 auto' }}>
           <Doughnut data={doughnutData} options={options} />
         </div>
       </div>
