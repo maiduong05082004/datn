@@ -103,6 +103,7 @@ class Payment extends Model
         $methods = [
             self::METHOD_VNPAY => 'Thanh toán qua VNPAY',
             self::METHOD_MOMO => 'Thanh toán qua MOMO',
+            self::METHOD_PAYPAL => 'Thanh toán qua PAYPAL',
         ];
 
         return $methods[$this->payment_method] ?? 'Không xác định';
