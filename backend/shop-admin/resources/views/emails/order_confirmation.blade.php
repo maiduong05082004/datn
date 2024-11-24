@@ -121,8 +121,15 @@
                 </tr>
                 <tr>
                     <td><strong>Phương thức thanh toán:</strong></td>
-                    <td>{{ $paymentType }}</td>
+                    <td>
+                        @if ($payment_method !== null && isset($status))
+                            {{ $payment_method }} - {{ $status }}
+                        @else
+                            {{ $paymentType }}
+                        @endif
+                    </td>
                 </tr>
+                
             </table>
         </div>
 
