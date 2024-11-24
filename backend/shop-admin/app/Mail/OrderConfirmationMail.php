@@ -24,6 +24,8 @@ class OrderConfirmationMail extends Mailable
                         'orderId' => $this->orderData['orderId'],
                         'orderDate' => $this->orderData['orderDate'],
                         'paymentType' => $this->orderData['paymentType'],
+                        'payment_method' => $this->orderData['payment_method'] ??null, // Thêm dòng này
+                        'status' => $this->orderData['status'] ??null, // Thêm dòng này
                         'shippingAddress' => $this->orderData['shippingAddress'],
                         'phoneNumber' => $this->orderData['phoneNumber'],
                         'orderItems' => $this->orderData['orderItems'],  
