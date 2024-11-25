@@ -20,11 +20,11 @@ class ProductVariation extends Model
     //     return $this->belongsTo(AttributeGroup::class, 'group_id');
     // }
 
-    // public function AttributeGroup()
-    // {
-    //     return $this->belongsTo(AttributeGroup::class, 'group_id');
-    // }
-
+    public function attributeValues()
+    {
+        return $this->belongsToMany(AttributeValue::class, 'product_variation_values', 'product_variation_id', 'attribute_value_id');
+    }
+    
     // mối quan hệ đến bảng Group
     public function group()
     {
