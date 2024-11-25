@@ -65,7 +65,7 @@ Route::prefix('client')->as('client.')->group(function () {
         Route::get('/productnew', [HomeController::class, 'productNew'])->name('productNew');
         Route::get('/productnewhot', [HomeController::class, 'productNewHot'])->name('productNewHot');
         Route::get('/bannercustom', [HomeController::class, 'bannerCustom'])->name('bannerCustom');
-        Route::get('search', [HomeController::class, 'search'])->name('search');
+        Route::post('search', [HomeController::class, 'search'])->name('search');
     });
     Route::apiResource('shippingaddress', ShippingController::class)
         ->names('shippingaddress');
