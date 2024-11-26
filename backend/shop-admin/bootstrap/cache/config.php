@@ -1,6 +1,6 @@
-<?php return array (
-  'app' => 
-  array (
+<?php return array(
+  'app' =>
+  array(
     'name' => 'BeeStyle',
     'env' => 'local',
     'debug' => true,
@@ -12,12 +12,12 @@
     'faker_locale' => 'en_US',
     'key' => 'base64:FKog/iUBGuTJjbmi9NjWDFvnIMBoBkAaAK2UJlwCYm8=',
     'cipher' => 'AES-256-CBC',
-    'maintenance' => 
-    array (
+    'maintenance' =>
+    array(
       'driver' => 'file',
     ),
-    'providers' => 
-    array (
+    'providers' =>
+    array(
       0 => 'Illuminate\\Auth\\AuthServiceProvider',
       1 => 'Illuminate\\Broadcasting\\BroadcastServiceProvider',
       2 => 'Illuminate\\Bus\\BusServiceProvider',
@@ -47,8 +47,8 @@
       26 => 'Laravel\\Sanctum\\SanctumServiceProvider',
       27 => 'Srmklive\\PayPal\\Providers\\PayPalServiceProvider',
     ),
-    'aliases' => 
-    array (
+    'aliases' =>
+    array(
       'App' => 'Illuminate\\Support\\Facades\\App',
       'Arr' => 'Illuminate\\Support\\Arr',
       'Artisan' => 'Illuminate\\Support\\Facades\\Artisan',
@@ -92,49 +92,49 @@
       'Vite' => 'Illuminate\\Support\\Facades\\Vite',
     ),
   ),
-  'auth' => 
-  array (
-    'defaults' => 
-    array (
+  'auth' =>
+  array(
+    'defaults' =>
+    array(
       'guard' => 'api',
       'passwords' => 'users',
     ),
-    'guards' => 
-    array (
-      'web' => 
-      array (
+    'guards' =>
+    array(
+      'web' =>
+      array(
         'driver' => 'session',
         'provider' => 'users',
       ),
-      'api' => 
-      array (
+      'api' =>
+      array(
         'driver' => 'sanctum',
         'provider' => 'users',
         'hash' => false,
       ),
-      'admin' => 
-      array (
+      'admin' =>
+      array(
         'driver' => 'sanctum',
         'provider' => 'users',
       ),
-      'sanctum' => 
-      array (
+      'sanctum' =>
+      array(
         'driver' => 'sanctum',
         'provider' => 'users',
       ),
     ),
-    'providers' => 
-    array (
-      'users' => 
-      array (
+    'providers' =>
+    array(
+      'users' =>
+      array(
         'driver' => 'eloquent',
         'model' => 'App\\Models\\User',
       ),
     ),
-    'passwords' => 
-    array (
-      'users' => 
-      array (
+    'passwords' =>
+    array(
+      'users' =>
+      array(
         'provider' => 'users',
         'table' => 'password_reset_tokens',
         'expire' => 60,
@@ -144,19 +144,19 @@
     ),
     'password_timeout' => 10800,
   ),
-  'broadcasting' => 
-  array (
+  'broadcasting' =>
+  array(
     'default' => 'log',
-    'connections' => 
-    array (
-      'pusher' => 
-      array (
+    'connections' =>
+    array(
+      'pusher' =>
+      array(
         'driver' => 'pusher',
         'key' => '',
         'secret' => '',
         'app_id' => '',
-        'options' => 
-        array (
+        'options' =>
+        array(
           'cluster' => 'mt1',
           'host' => 'api-mt1.pusher.com',
           'port' => '443',
@@ -164,87 +164,85 @@
           'encrypted' => true,
           'useTLS' => true,
         ),
-        'client_options' => 
-        array (
-        ),
+        'client_options' =>
+        array(),
       ),
-      'ably' => 
-      array (
+      'ably' =>
+      array(
         'driver' => 'ably',
         'key' => NULL,
       ),
-      'redis' => 
-      array (
+      'redis' =>
+      array(
         'driver' => 'redis',
         'connection' => 'default',
       ),
-      'log' => 
-      array (
+      'log' =>
+      array(
         'driver' => 'log',
       ),
-      'null' => 
-      array (
+      'null' =>
+      array(
         'driver' => 'null',
       ),
     ),
   ),
-  'cache' => 
-  array (
+  'cache' =>
+  array(
     'default' => 'file',
-    'stores' => 
-    array (
-      'apc' => 
-      array (
+    'stores' =>
+    array(
+      'apc' =>
+      array(
         'driver' => 'apc',
       ),
-      'array' => 
-      array (
+      'array' =>
+      array(
         'driver' => 'array',
         'serialize' => false,
       ),
-      'database' => 
-      array (
+      'database' =>
+      array(
         'driver' => 'database',
         'table' => 'cache',
         'connection' => NULL,
         'lock_connection' => NULL,
       ),
-      'file' => 
-      array (
+      'file' =>
+      array(
         'driver' => 'file',
         'path' => 'C:\\laragon\\www\\datn\\backend\\shop-admin\\storage\\framework/cache/data',
         'lock_path' => 'C:\\laragon\\www\\datn\\backend\\shop-admin\\storage\\framework/cache/data',
       ),
-      'memcached' => 
-      array (
+      'memcached' =>
+      array(
         'driver' => 'memcached',
         'persistent_id' => NULL,
-        'sasl' => 
-        array (
+        'sasl' =>
+        array(
           0 => NULL,
           1 => NULL,
         ),
-        'options' => 
-        array (
-        ),
-        'servers' => 
-        array (
-          0 => 
-          array (
+        'options' =>
+        array(),
+        'servers' =>
+        array(
+          0 =>
+          array(
             'host' => '127.0.0.1',
             'port' => 11211,
             'weight' => 100,
           ),
         ),
       ),
-      'redis' => 
-      array (
+      'redis' =>
+      array(
         'driver' => 'redis',
         'connection' => 'cache',
         'lock_connection' => 'default',
       ),
-      'dynamodb' => 
-      array (
+      'dynamodb' =>
+      array(
         'driver' => 'dynamodb',
         'key' => '',
         'secret' => '',
@@ -252,71 +250,69 @@
         'table' => 'cache',
         'endpoint' => NULL,
       ),
-      'octane' => 
-      array (
+      'octane' =>
+      array(
         'driver' => 'octane',
       ),
     ),
     'prefix' => 'beestyle_cache_',
   ),
-  'cloudinary' => 
-  array (
+  'cloudinary' =>
+  array(
     'notification_url' => NULL,
     'cloud_url' => 'cloudinary://873618673342167:Gt_eSYE6MVhrv_TL96rB7jsLo14@duxy2crfs',
     'upload_preset' => NULL,
     'upload_route' => NULL,
     'upload_action' => NULL,
   ),
-  'cors' => 
-  array (
-    'paths' => 
-    array (
+  'cors' =>
+  array(
+    'paths' =>
+    array(
       0 => 'api/*',
       1 => 'sanctum/csrf-cookie',
     ),
-    'allowed_methods' => 
-    array (
+    'allowed_methods' =>
+    array(
       0 => '*',
     ),
-    'allowed_origins' => 
-    array (
+    'allowed_origins' =>
+    array(
       0 => 'http://localhost:5173',
       1 => 'http://localhost:5174',
       2 => 'http://127.0.0.1:8000',
     ),
-    'allowed_origins_patterns' => 
-    array (
-    ),
-    'allowed_headers' => 
-    array (
+    'allowed_origins_patterns' =>
+    array(),
+    'allowed_headers' =>
+    array(
       0 => '*',
     ),
-    'exposed_headers' => 
-    array (
-    ),
+    'exposed_headers' =>
+    array(),
     'max_age' => 0,
     'supports_credentials' => true,
   ),
-  'database' => 
-  array (
+  'database' =>
+  array(
     'default' => 'mysql',
-    'connections' => 
-    array (
-      'sqlite' => 
-      array (
+    'connections' =>
+    array(
+      'sqlite' =>
+      array(
         'driver' => 'sqlite',
         'url' => NULL,
-        'database' => 'duanprovip',
+        'database' => 'nmn_27_datn',
         'prefix' => '',
         'foreign_key_constraints' => true,
       ),
-      'mysql' => 
-      array (
+      'mysql' =>
+      array(
         'driver' => 'mysql',
         'url' => NULL,
         'host' => '127.0.0.1',
         'port' => '3306',
-        'database' => 'duanprovip',
+        'database' => 'nmn_27_datn',
         'username' => 'root',
         'password' => '',
         'unix_socket' => '',
@@ -326,17 +322,16 @@
         'prefix_indexes' => true,
         'strict' => false,
         'engine' => NULL,
-        'options' => 
-        array (
-        ),
+        'options' =>
+        array(),
       ),
-      'pgsql' => 
-      array (
+      'pgsql' =>
+      array(
         'driver' => 'pgsql',
         'url' => NULL,
         'host' => '127.0.0.1',
         'port' => '3306',
-        'database' => 'duanprovip',
+        'database' => 'nmn_27_datn',
         'username' => 'root',
         'password' => '',
         'charset' => 'utf8',
@@ -345,13 +340,13 @@
         'search_path' => 'public',
         'sslmode' => 'prefer',
       ),
-      'sqlsrv' => 
-      array (
+      'sqlsrv' =>
+      array(
         'driver' => 'sqlsrv',
         'url' => NULL,
         'host' => '127.0.0.1',
         'port' => '3306',
-        'database' => 'duanprovip',
+        'database' => 'nmn_27_datn',
         'username' => 'root',
         'password' => '',
         'charset' => 'utf8',
@@ -360,16 +355,16 @@
       ),
     ),
     'migrations' => 'migrations',
-    'redis' => 
-    array (
+    'redis' =>
+    array(
       'client' => 'phpredis',
-      'options' => 
-      array (
+      'options' =>
+      array(
         'cluster' => 'redis',
         'prefix' => 'beestyle_database_',
       ),
-      'default' => 
-      array (
+      'default' =>
+      array(
         'url' => NULL,
         'host' => '127.0.0.1',
         'username' => NULL,
@@ -377,8 +372,8 @@
         'port' => '6379',
         'database' => '0',
       ),
-      'cache' => 
-      array (
+      'cache' =>
+      array(
         'url' => NULL,
         'host' => '127.0.0.1',
         'username' => NULL,
@@ -388,27 +383,27 @@
       ),
     ),
   ),
-  'filesystems' => 
-  array (
+  'filesystems' =>
+  array(
     'default' => 'local',
-    'disks' => 
-    array (
-      'local' => 
-      array (
+    'disks' =>
+    array(
+      'local' =>
+      array(
         'driver' => 'local',
         'root' => 'C:\\laragon\\www\\datn\\backend\\shop-admin\\storage\\app',
         'throw' => false,
       ),
-      'public' => 
-      array (
+      'public' =>
+      array(
         'driver' => 'local',
         'root' => 'C:\\laragon\\www\\datn\\backend\\shop-admin\\storage\\app/public',
         'url' => 'http://localhost/storage',
         'visibility' => 'public',
         'throw' => false,
       ),
-      's3' => 
-      array (
+      's3' =>
+      array(
         'driver' => 's3',
         'key' => '',
         'secret' => '',
@@ -419,68 +414,68 @@
         'use_path_style_endpoint' => false,
         'throw' => false,
       ),
-      'cloudinary' => 
-      array (
+      'cloudinary' =>
+      array(
         'driver' => 'cloudinary',
       ),
     ),
-    'links' => 
-    array (
+    'links' =>
+    array(
       'C:\\laragon\\www\\datn\\backend\\shop-admin\\public\\storage' => 'C:\\laragon\\www\\datn\\backend\\shop-admin\\storage\\app/public',
     ),
   ),
-  'hashing' => 
-  array (
+  'hashing' =>
+  array(
     'driver' => 'bcrypt',
-    'bcrypt' => 
-    array (
+    'bcrypt' =>
+    array(
       'rounds' => 12,
       'verify' => true,
     ),
-    'argon' => 
-    array (
+    'argon' =>
+    array(
       'memory' => 65536,
       'threads' => 1,
       'time' => 4,
       'verify' => true,
     ),
   ),
-  'logging' => 
-  array (
+  'logging' =>
+  array(
     'default' => 'stack',
-    'deprecations' => 
-    array (
+    'deprecations' =>
+    array(
       'channel' => NULL,
       'trace' => false,
     ),
-    'channels' => 
-    array (
-      'stack' => 
-      array (
+    'channels' =>
+    array(
+      'stack' =>
+      array(
         'driver' => 'stack',
-        'channels' => 
-        array (
+        'channels' =>
+        array(
           0 => 'single',
         ),
         'ignore_exceptions' => false,
       ),
-      'single' => 
-      array (
+      'single' =>
+      array(
         'driver' => 'single',
         'path' => 'C:\\laragon\\www\\datn\\backend\\shop-admin\\storage\\logs/laravel.log',
         'level' => 'debug',
         'replace_placeholders' => true,
       ),
-      'daily' => 
-      array (
+      'daily' =>
+      array(
         'driver' => 'daily',
         'path' => 'C:\\laragon\\www\\datn\\backend\\shop-admin\\storage\\logs/laravel.log',
         'level' => 'debug',
         'days' => 14,
         'replace_placeholders' => true,
       ),
-      'slack' => 
-      array (
+      'slack' =>
+      array(
         'driver' => 'slack',
         'url' => NULL,
         'username' => 'Laravel Log',
@@ -488,68 +483,68 @@
         'level' => 'debug',
         'replace_placeholders' => true,
       ),
-      'papertrail' => 
-      array (
+      'papertrail' =>
+      array(
         'driver' => 'monolog',
         'level' => 'debug',
         'handler' => 'Monolog\\Handler\\SyslogUdpHandler',
-        'handler_with' => 
-        array (
+        'handler_with' =>
+        array(
           'host' => NULL,
           'port' => NULL,
           'connectionString' => 'tls://:',
         ),
-        'processors' => 
-        array (
+        'processors' =>
+        array(
           0 => 'Monolog\\Processor\\PsrLogMessageProcessor',
         ),
       ),
-      'stderr' => 
-      array (
+      'stderr' =>
+      array(
         'driver' => 'monolog',
         'level' => 'debug',
         'handler' => 'Monolog\\Handler\\StreamHandler',
         'formatter' => NULL,
-        'with' => 
-        array (
+        'with' =>
+        array(
           'stream' => 'php://stderr',
         ),
-        'processors' => 
-        array (
+        'processors' =>
+        array(
           0 => 'Monolog\\Processor\\PsrLogMessageProcessor',
         ),
       ),
-      'syslog' => 
-      array (
+      'syslog' =>
+      array(
         'driver' => 'syslog',
         'level' => 'debug',
         'facility' => 8,
         'replace_placeholders' => true,
       ),
-      'errorlog' => 
-      array (
+      'errorlog' =>
+      array(
         'driver' => 'errorlog',
         'level' => 'debug',
         'replace_placeholders' => true,
       ),
-      'null' => 
-      array (
+      'null' =>
+      array(
         'driver' => 'monolog',
         'handler' => 'Monolog\\Handler\\NullHandler',
       ),
-      'emergency' => 
-      array (
+      'emergency' =>
+      array(
         'path' => 'C:\\laragon\\www\\datn\\backend\\shop-admin\\storage\\logs/laravel.log',
       ),
     ),
   ),
-  'mail' => 
-  array (
+  'mail' =>
+  array(
     'default' => 'smtp',
-    'mailers' => 
-    array (
-      'smtp' => 
-      array (
+    'mailers' =>
+    array(
+      'smtp' =>
+      array(
         'transport' => 'smtp',
         'url' => NULL,
         'host' => 'smtp.gmail.com',
@@ -560,76 +555,76 @@
         'timeout' => NULL,
         'local_domain' => NULL,
       ),
-      'ses' => 
-      array (
+      'ses' =>
+      array(
         'transport' => 'ses',
       ),
-      'postmark' => 
-      array (
+      'postmark' =>
+      array(
         'transport' => 'postmark',
       ),
-      'mailgun' => 
-      array (
+      'mailgun' =>
+      array(
         'transport' => 'mailgun',
       ),
-      'sendmail' => 
-      array (
+      'sendmail' =>
+      array(
         'transport' => 'sendmail',
         'path' => '/usr/sbin/sendmail -bs -i',
       ),
-      'log' => 
-      array (
+      'log' =>
+      array(
         'transport' => 'log',
         'channel' => NULL,
       ),
-      'array' => 
-      array (
+      'array' =>
+      array(
         'transport' => 'array',
       ),
-      'failover' => 
-      array (
+      'failover' =>
+      array(
         'transport' => 'failover',
-        'mailers' => 
-        array (
+        'mailers' =>
+        array(
           0 => 'smtp',
           1 => 'log',
         ),
       ),
-      'roundrobin' => 
-      array (
+      'roundrobin' =>
+      array(
         'transport' => 'roundrobin',
-        'mailers' => 
-        array (
+        'mailers' =>
+        array(
           0 => 'ses',
           1 => 'postmark',
         ),
       ),
     ),
-    'from' => 
-    array (
+    'from' =>
+    array(
       'address' => 'levanlong0968350160@gmail.com',
       'name' => '${BEESTYLE}',
     ),
-    'markdown' => 
-    array (
+    'markdown' =>
+    array(
       'theme' => 'default',
-      'paths' => 
-      array (
+      'paths' =>
+      array(
         0 => 'C:\\laragon\\www\\datn\\backend\\shop-admin\\resources\\views/vendor/mail',
       ),
     ),
   ),
-  'paypal' => 
-  array (
+  'paypal' =>
+  array(
     'mode' => 'sandbox',
-    'sandbox' => 
-    array (
+    'sandbox' =>
+    array(
       'client_id' => 'ASMOTPHmZ0rvQlP9WqMCsQhIvwfoTrZqCJdxZq3YbNoY_LscRGeCHcgYTgPQTt6Kd_fpegvGU0jlIKiZ',
       'client_secret' => 'EHMdkKZbD0gpC_wX4v9GQcB9vMpP-sMqN-pSDopJh9PLMRM82GjkaCEHFW4mT-lneS9JcdKaG0L98vls',
       'app_id' => 'APP-80W284485P519543T',
     ),
-    'live' => 
-    array (
+    'live' =>
+    array(
       'client_id' => '',
       'client_secret' => '',
       'app_id' => '',
@@ -640,25 +635,25 @@
     'locale' => 'en_US',
     'validate_ssl' => true,
   ),
-  'queue' => 
-  array (
+  'queue' =>
+  array(
     'default' => 'database',
-    'connections' => 
-    array (
-      'sync' => 
-      array (
+    'connections' =>
+    array(
+      'sync' =>
+      array(
         'driver' => 'sync',
       ),
-      'database' => 
-      array (
+      'database' =>
+      array(
         'driver' => 'database',
         'table' => 'jobs',
         'queue' => 'default',
         'retry_after' => 90,
         'after_commit' => false,
       ),
-      'beanstalkd' => 
-      array (
+      'beanstalkd' =>
+      array(
         'driver' => 'beanstalkd',
         'host' => 'localhost',
         'queue' => 'default',
@@ -666,8 +661,8 @@
         'block_for' => 0,
         'after_commit' => false,
       ),
-      'sqs' => 
-      array (
+      'sqs' =>
+      array(
         'driver' => 'sqs',
         'key' => '',
         'secret' => '',
@@ -677,8 +672,8 @@
         'region' => 'us-east-1',
         'after_commit' => false,
       ),
-      'redis' => 
-      array (
+      'redis' =>
+      array(
         'driver' => 'redis',
         'connection' => 'default',
         'queue' => 'default',
@@ -687,71 +682,71 @@
         'after_commit' => false,
       ),
     ),
-    'batching' => 
-    array (
+    'batching' =>
+    array(
       'database' => 'mysql',
       'table' => 'job_batches',
     ),
-    'failed' => 
-    array (
+    'failed' =>
+    array(
       'driver' => 'database-uuids',
       'database' => 'mysql',
       'table' => 'failed_jobs',
     ),
   ),
-  'sanctum' => 
-  array (
-    'stateful' => 
-    array (
+  'sanctum' =>
+  array(
+    'stateful' =>
+    array(
       0 => 'localhost:5173',
       1 => 'localhost:5174',
       2 => '127.0.0.1:8000',
     ),
-    'guard' => 
-    array (
+    'guard' =>
+    array(
       0 => 'web',
     ),
     'expiration' => NULL,
     'token_prefix' => '',
-    'middleware' => 
-    array (
+    'middleware' =>
+    array(
       'authenticate_session' => 'Laravel\\Sanctum\\Http\\Middleware\\AuthenticateSession',
       'encrypt_cookies' => 'App\\Http\\Middleware\\EncryptCookies',
       'verify_csrf_token' => 'App\\Http\\Middleware\\VerifyCsrfToken',
     ),
   ),
-  'services' => 
-  array (
-    'mailgun' => 
-    array (
+  'services' =>
+  array(
+    'mailgun' =>
+    array(
       'domain' => NULL,
       'secret' => NULL,
       'endpoint' => 'api.mailgun.net',
       'scheme' => 'https',
     ),
-    'postmark' => 
-    array (
+    'postmark' =>
+    array(
       'token' => NULL,
     ),
-    'ses' => 
-    array (
+    'ses' =>
+    array(
       'key' => '',
       'secret' => '',
       'region' => 'us-east-1',
     ),
-    'google' => 
-    array (
+    'google' =>
+    array(
       'client_id' => '863599487550-oosvlnimv1getb888v0sqncom33f80be.apps.googleusercontent.com',
       'client_secret' => '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',
       'redirect' => 'http://localhost:8000/api/auth/callback/google',
     ),
-    'exchangerateapi' => 
-    array (
+    'exchangerateapi' =>
+    array(
       'key' => 'f912a5af83b3991103a28cd6',
     ),
   ),
-  'session' => 
-  array (
+  'session' =>
+  array(
     'driver' => 'file',
     'lifetime' => '120',
     'expire_on_close' => false,
@@ -760,8 +755,8 @@
     'connection' => NULL,
     'table' => 'sessions',
     'store' => NULL,
-    'lottery' => 
-    array (
+    'lottery' =>
+    array(
       0 => 2,
       1 => 100,
     ),
@@ -773,52 +768,52 @@
     'same_site' => 'lax',
     'partitioned' => false,
   ),
-  'view' => 
-  array (
-    'paths' => 
-    array (
+  'view' =>
+  array(
+    'paths' =>
+    array(
       0 => 'C:\\laragon\\www\\datn\\backend\\shop-admin\\resources\\views',
     ),
     'compiled' => 'C:\\laragon\\www\\datn\\backend\\shop-admin\\storage\\framework\\views',
   ),
-  'flare' => 
-  array (
+  'flare' =>
+  array(
     'key' => NULL,
-    'flare_middleware' => 
-    array (
+    'flare_middleware' =>
+    array(
       0 => 'Spatie\\FlareClient\\FlareMiddleware\\RemoveRequestIp',
       1 => 'Spatie\\FlareClient\\FlareMiddleware\\AddGitInformation',
       2 => 'Spatie\\LaravelIgnition\\FlareMiddleware\\AddNotifierName',
       3 => 'Spatie\\LaravelIgnition\\FlareMiddleware\\AddEnvironmentInformation',
       4 => 'Spatie\\LaravelIgnition\\FlareMiddleware\\AddExceptionInformation',
       5 => 'Spatie\\LaravelIgnition\\FlareMiddleware\\AddDumps',
-      'Spatie\\LaravelIgnition\\FlareMiddleware\\AddLogs' => 
-      array (
+      'Spatie\\LaravelIgnition\\FlareMiddleware\\AddLogs' =>
+      array(
         'maximum_number_of_collected_logs' => 200,
       ),
-      'Spatie\\LaravelIgnition\\FlareMiddleware\\AddQueries' => 
-      array (
+      'Spatie\\LaravelIgnition\\FlareMiddleware\\AddQueries' =>
+      array(
         'maximum_number_of_collected_queries' => 200,
         'report_query_bindings' => true,
       ),
-      'Spatie\\LaravelIgnition\\FlareMiddleware\\AddJobs' => 
-      array (
+      'Spatie\\LaravelIgnition\\FlareMiddleware\\AddJobs' =>
+      array(
         'max_chained_job_reporting_depth' => 5,
       ),
       6 => 'Spatie\\LaravelIgnition\\FlareMiddleware\\AddContext',
       7 => 'Spatie\\LaravelIgnition\\FlareMiddleware\\AddExceptionHandledStatus',
-      'Spatie\\FlareClient\\FlareMiddleware\\CensorRequestBodyFields' => 
-      array (
-        'censor_fields' => 
-        array (
+      'Spatie\\FlareClient\\FlareMiddleware\\CensorRequestBodyFields' =>
+      array(
+        'censor_fields' =>
+        array(
           0 => 'password',
           1 => 'password_confirmation',
         ),
       ),
-      'Spatie\\FlareClient\\FlareMiddleware\\CensorRequestHeaders' => 
-      array (
-        'headers' => 
-        array (
+      'Spatie\\FlareClient\\FlareMiddleware\\CensorRequestHeaders' =>
+      array(
+        'headers' =>
+        array(
           0 => 'API-KEY',
           1 => 'Authorization',
           2 => 'Cookie',
@@ -830,14 +825,14 @@
     ),
     'send_logs_as_events' => true,
   ),
-  'ignition' => 
-  array (
+  'ignition' =>
+  array(
     'editor' => 'phpstorm',
     'theme' => 'auto',
     'enable_share_button' => true,
     'register_commands' => false,
-    'solution_providers' => 
-    array (
+    'solution_providers' =>
+    array(
       0 => 'Spatie\\Ignition\\Solutions\\SolutionProviders\\BadMethodCallSolutionProvider',
       1 => 'Spatie\\Ignition\\Solutions\\SolutionProviders\\MergeConflictSolutionProvider',
       2 => 'Spatie\\Ignition\\Solutions\\SolutionProviders\\UndefinedPropertySolutionProvider',
@@ -861,16 +856,15 @@
       20 => 'Spatie\\LaravelIgnition\\Solutions\\SolutionProviders\\UnknownMysql8CollationSolutionProvider',
       21 => 'Spatie\\LaravelIgnition\\Solutions\\SolutionProviders\\UnknownMariadbCollationSolutionProvider',
     ),
-    'ignored_solution_providers' => 
-    array (
-    ),
+    'ignored_solution_providers' =>
+    array(),
     'enable_runnable_solutions' => NULL,
     'remote_sites_path' => 'C:\\laragon\\www\\datn\\backend\\shop-admin',
     'local_sites_path' => '',
     'housekeeping_endpoint_prefix' => '_ignition',
     'settings_file_path' => '',
-    'recorders' => 
-    array (
+    'recorders' =>
+    array(
       0 => 'Spatie\\LaravelIgnition\\Recorders\\DumpRecorder\\DumpRecorder',
       1 => 'Spatie\\LaravelIgnition\\Recorders\\JobRecorder\\JobRecorder',
       2 => 'Spatie\\LaravelIgnition\\Recorders\\LogRecorder\\LogRecorder',
@@ -878,8 +872,8 @@
     ),
     'open_ai_key' => NULL,
     'with_stack_frame_arguments' => true,
-    'argument_reducers' => 
-    array (
+    'argument_reducers' =>
+    array(
       0 => 'Spatie\\Backtrace\\Arguments\\Reducers\\BaseTypeArgumentReducer',
       1 => 'Spatie\\Backtrace\\Arguments\\Reducers\\ArrayArgumentReducer',
       2 => 'Spatie\\Backtrace\\Arguments\\Reducers\\StdClassArgumentReducer',
@@ -893,8 +887,8 @@
       10 => 'Spatie\\Backtrace\\Arguments\\Reducers\\StringableArgumentReducer',
     ),
   ),
-  'ide-helper' => 
-  array (
+  'ide-helper' =>
+  array(
     'filename' => '_ide_helper.php',
     'models_filename' => '_ide_helper_models.php',
     'meta_filename' => '.phpstorm.meta.php',
@@ -905,67 +899,58 @@
     'write_model_relation_count_properties' => true,
     'write_eloquent_model_mixins' => false,
     'include_helpers' => false,
-    'helper_files' => 
-    array (
+    'helper_files' =>
+    array(
       0 => 'C:\\laragon\\www\\datn\\backend\\shop-admin/vendor/laravel/framework/src/Illuminate/Support/helpers.php',
     ),
-    'model_locations' => 
-    array (
+    'model_locations' =>
+    array(
       0 => 'app',
     ),
-    'ignored_models' => 
-    array (
-    ),
-    'model_hooks' => 
-    array (
-    ),
-    'extra' => 
-    array (
-      'Eloquent' => 
-      array (
+    'ignored_models' =>
+    array(),
+    'model_hooks' =>
+    array(),
+    'extra' =>
+    array(
+      'Eloquent' =>
+      array(
         0 => 'Illuminate\\Database\\Eloquent\\Builder',
         1 => 'Illuminate\\Database\\Query\\Builder',
       ),
-      'Session' => 
-      array (
+      'Session' =>
+      array(
         0 => 'Illuminate\\Session\\Store',
       ),
     ),
-    'magic' => 
-    array (
-    ),
-    'interfaces' => 
-    array (
-    ),
+    'magic' =>
+    array(),
+    'interfaces' =>
+    array(),
     'model_camel_case_properties' => false,
-    'type_overrides' => 
-    array (
+    'type_overrides' =>
+    array(
       'integer' => 'int',
       'boolean' => 'bool',
     ),
     'include_class_docblocks' => false,
     'force_fqn' => false,
     'use_generics_annotations' => true,
-    'additional_relation_types' => 
-    array (
-    ),
-    'additional_relation_return_types' => 
-    array (
-    ),
-    'post_migrate' => 
-    array (
-    ),
+    'additional_relation_types' =>
+    array(),
+    'additional_relation_return_types' =>
+    array(),
+    'post_migrate' =>
+    array(),
   ),
-  'tinker' => 
-  array (
-    'commands' => 
-    array (
-    ),
-    'alias' => 
-    array (
-    ),
-    'dont_alias' => 
-    array (
+  'tinker' =>
+  array(
+    'commands' =>
+    array(),
+    'alias' =>
+    array(),
+    'dont_alias' =>
+    array(
       0 => 'App\\Nova',
     ),
   ),
