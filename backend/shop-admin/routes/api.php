@@ -131,6 +131,7 @@ Route::prefix('admins')
 
             Route::apiResource('attribute_values', AttributeValueController::class)
                 ->names('attribute_values');
+                Route::delete('attribute_values/{id}/image', [AttributeValueController::class, 'deleteImage']);
 
             Route::prefix('categories')->group(function () {
                 Route::post('{id}/soft-delete', [AdminCategoryController::class, 'softDestroy'])->name('categories.soft-delete');
