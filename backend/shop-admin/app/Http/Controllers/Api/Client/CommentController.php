@@ -453,6 +453,7 @@ class CommentController extends Controller
         if (!$product) {
             return response()->json(['message' => 'Product not found for this comment.'], 404);
         }
+<<<<<<< HEAD
 
         $user = Auth::user();
         if ($user->role === 'admin') {
@@ -464,6 +465,17 @@ class CommentController extends Controller
             return response()->json(['message' => 'Bạn không thể báo cáo bình luận của chính mình'], 403);
         }
 
+=======
+        // $user = Auth::user();
+        // if ($user->role === 'admin') {
+        //     return response()->json([
+        //         'message' => 'Admin không được báo cáo bình luận của user'
+        //     ], 403);
+        // }
+        // if ($comment->user_id == $userId) {
+        //     return response()->json(['message' => 'Bạn không thể báo cáo bình luận của chính mình'], 403);
+        // }
+>>>>>>> 6c6a1ef (Fix UI..)
         $existingReport = ReportComment::where('comment_id', $commentId)
             ->where('user_id', $userId)
             ->first();
@@ -494,7 +506,53 @@ class CommentController extends Controller
         ]);
     }
 
+<<<<<<< HEAD
     // Update Comment
+=======
+
+    public function listReportComment(Request $request)
+    {
+        // Kiểm tra ID bình luận
+        $commentId = $request->input('comment_id');
+        $comment = Comment::find($commentId);
+       
+
+        if (!$comment) {
+            return response()->json(['message' => 'Bình luận không tồn tại'], 404);
+        }
+
+        // Lấy danh sách những người đã báo cáo bình luận này
+        $reportComments = ReportComment::with('user') // Liên kết với bảng user để lấy thông tin người báo cáo
+            ->where('comment_id', $commentId)
+            ->get();
+
+        if ($reportComments->isEmpty()) {
+            return response()->json(['message' => 'Không có báo cáo nào cho bình luận này.']);
+        }
+        $user = Auth::user();
+        if($user->role !=='admin') {
+            return response()->json(['message'=> 'Không có quyền xem danh sách báo cáo'],403);
+        }
+
+
+        // Trả về thông tin báo cáo và lý do báo cáo
+        $reports = $reportComments->map(function ($report) {
+            return [
+                'user_name' => $report->user->name,
+                'reason' => $report->reason,
+                'reported_at' => $report->created_at,
+            ];
+        });
+
+        return response()->json([
+            'comment_id' => $commentId,
+            'reports' => $reports
+        ]);
+    }
+
+
+    // API cập nhật bình luận
+>>>>>>> 6c6a1ef (Fix UI..)
     public function update(Request $request)
     {
         $userId = Auth::id();

@@ -14,6 +14,11 @@ interface ReplyComment {
   commentDate: string;
   user_name: string;
 }
+type Report = {
+  user_name: string;
+  reason: string;
+  reported_at: string;
+};
 
 interface Comment {
   comment_id: number;
@@ -37,11 +42,13 @@ const Comments = (props: Props) => {
   const { id } = useParams(); // Lấy ID sản phẩm từ URL
   const [messageAPI, contextHolder] = message.useMessage();
   const [replyContent, setReplyContent] = useState<{ [key: number]: string }>({}); // Quản lý nội dung trả lời
-  const [isReportModalVisible, setIsReportModalVisible] = useState(false);
-  const [reportReason, setReportReason] = useState('');
+  // const [isReportModalVisible, setIsReportModalVisible] = useState(false);
+  // const [reportReason, setReportReason] = useState('');
   const [currentCommentId, setCurrentCommentId] = useState<number | null>(null);
-  const [reportReasons, setReportReasons] = useState<{ [key: number]: string }>({});
+  // const [reportReasons, setReportReasons] = useState<{ [key: number]: string }>({});
   const [isReplyModalVisible, setIsReplyModalVisible] = useState(false);
+  const [isReportModalVisible, setIsReportModalVisible] = useState(false);
+  const [reportData, setReportData] = useState<Report[]>([]);
 
   // Fetch danh sách bình luận
   const { data: CommentsData, isLoading, refetch } = useQuery({
@@ -77,6 +84,7 @@ const Comments = (props: Props) => {
       messageAPI.error('Lỗi khi ẩn bình luận');
     },
   });
+  // Khóa comment
   const { mutate: manageUser } = useMutation({
     mutationFn: async (user_id: number) => {
       const response = await axiosInstance.post('http://localhost:8000/api/admins/comment/manageUser', {
@@ -96,43 +104,65 @@ const Comments = (props: Props) => {
       messageAPI.error('Lỗi khi khóa người dùng.');
     },
   });
+  // list báo cáo
 
-  const { mutate: reportComment } = useMutation({
-    mutationFn: async ({ id, reason }: { id: number; reason: string }) => {
-      const response = await axiosInstance.post('http://localhost:8000/api/admins/comment/report', {
-        id,
-        reason,
+  const { mutate: fetchReports } = useMutation({
+    mutationFn: async (comment_id: number) => {
+      const response = await axiosInstance.post('http://localhost:8000/api/admins/comment/list-report', {
+        comment_id,
       });
-      return response.data;
+      return response.data.reports;
     },
-    onSuccess: () => {
-      messageAPI.success('Báo cáo bình luận thành công');
-      refetch();
-      setIsReportModalVisible(false);
-      if (currentCommentId !== null) {
-        setReportReasons((prev: any) => ({ ...prev, [currentCommentId]: '' })); 
-      }
+    onSuccess: (data) => {
+      setReportData(data);
+      setIsReportModalVisible(true);
     },
     onError: () => {
-      messageAPI.error('Lỗi khi báo cáo bình luận');
+      messageAPI.error('Không thể lấy dữ liệu báo cáo.');
     },
   });
   const showReportModal = (commentId: number) => {
     setCurrentCommentId(commentId);
-    setIsReportModalVisible(true);
+    fetchReports(commentId); // Gọi hàm fetch báo cáo
   };
+  
 
-  const handleReport = () => {
-    if (!currentCommentId || !reportReasons[currentCommentId]?.trim()) {
-      messageAPI.error('Vui lòng nhập lý do báo cáo.');
-      return;
-    }
+  // const { mutate: reportComment } = useMutation({
+  //   mutationFn: async ({ id, reason }: { id: number; reason: string }) => {
+  //     const response = await axiosInstance.post('http://localhost:8000/api/admins/comment/report', {
+  //       id,
+  //       reason,
+  //     });
+  //     return response.data;
+  //   },
+  //   onSuccess: () => {
+  //     messageAPI.success('Báo cáo bình luận thành công');
+  //     refetch();
+  //     setIsReportModalVisible(false);
+  //     if (currentCommentId !== null) {
+  //       setReportReasons((prev: any) => ({ ...prev, [currentCommentId]: '' })); 
+  //     }
+  //   },
+  //   onError: () => {
+  //     messageAPI.error('Lỗi khi báo cáo bình luận');
+  //   },
+  // });
+  // const showReportModal = (commentId: number) => {
+  //   setCurrentCommentId(commentId);
+  //   setIsReportModalVisible(true);
+  // };
 
-    reportComment({
-      id: currentCommentId,
-      reason: reportReasons[currentCommentId],
-    });
-  };
+  // const handleReport = () => {
+  //   if (!currentCommentId || !reportReasons[currentCommentId]?.trim()) {
+  //     messageAPI.error('Vui lòng nhập lý do báo cáo.');
+  //     return;
+  //   }
+
+  //   reportComment({
+  //     id: currentCommentId,
+  //     reason: reportReasons[currentCommentId],
+  //   });
+  // };
 
   const { mutate } = useMutation({
     mutationFn: async ({ parentId, content }: { parentId: number; content: string }) => {
@@ -201,7 +231,7 @@ const Comments = (props: Props) => {
     {
       title: 'Nội dung bình luận và trả lời',
       key: 'content_with_replies',
-      width:'20%',
+      width: '20%',
       render: (_, record) => (
         <div className="p-4 bg-white rounded-lg shadow-md">
           {/* Phần nội dung bình luận chính */}
@@ -226,7 +256,7 @@ const Comments = (props: Props) => {
               ))}
             </div>
           )}
-          
+
           {/* Nút trả lời */}
           <Button
             type="default"
@@ -243,16 +273,27 @@ const Comments = (props: Props) => {
       dataIndex: 'reported_count',
       key: 'reported_count',
       render: (count, record) => (
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center gap-2">
           <Tag
             color={count > 0 ? 'red' : 'green'}
-            style={{ fontSize: '16px', padding: '6px 12px', borderRadius: '8px' }}
+            style={{
+              fontSize: '16px',
+              padding: '6px 12px',
+              borderRadius: '8px',
+              textAlign: 'center',
+            }}
           >
             {count || 0}
           </Tag>
-          <Button type="default" danger onClick={() => showReportModal(record.comment_id)}>
-            Báo cáo
-          </Button>
+          {count > 0 && (
+            <Button
+              type="default"
+              danger
+              onClick={() => showReportModal(record.comment_id)}
+            >
+              Xem Chi Tiết
+            </Button>
+          )}
         </div>
       ),
     },
@@ -283,7 +324,7 @@ const Comments = (props: Props) => {
         style={{
           fontSize: '16px',
           padding: '6px 12px',
-          borderRadius: '8px', 
+          borderRadius: '8px',
           display: 'inline-flex',
           alignItems: 'center',
         }}
@@ -335,7 +376,7 @@ const Comments = (props: Props) => {
             showTotal: (total) => `Tổng ${total} bình luận`,
           }}
         />
-        <Modal
+        {/* <Modal
           title="Báo cáo bình luận"
           visible={isReportModalVisible}
           onOk={handleReport}
@@ -355,7 +396,7 @@ const Comments = (props: Props) => {
               }
             }}
           />
-        </Modal>
+        </Modal> */}
 
         <Modal
           title="Trả lời bình luận"
@@ -376,6 +417,38 @@ const Comments = (props: Props) => {
                 }));
               }
             }}
+          />
+        </Modal>
+
+        <Modal
+          title="Chi Tiết Báo Cáo"
+          visible={isReportModalVisible}
+          onCancel={() => setIsReportModalVisible(false)}
+          footer={null}
+        >
+          <Table
+            dataSource={reportData}
+            columns={[
+              {
+                title: 'Người báo cáo',
+                dataIndex: 'user_name',
+                key: 'user_name',
+              },
+              {
+                title: 'Lý do',
+                dataIndex: 'reason',
+                key: 'reason',
+              },
+              {
+                title: 'Thời gian báo cáo',
+                dataIndex: 'reported_at',
+                key: 'reported_at',
+                render: (text) => new Date(text).toLocaleString(),
+              },
+            ]}
+            rowKey={(record, index) => index !== undefined ? index.toString() : record.user_name}
+            pagination={false}
+            bordered
           />
         </Modal>
 

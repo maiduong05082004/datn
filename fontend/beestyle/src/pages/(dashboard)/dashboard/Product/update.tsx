@@ -686,24 +686,9 @@ const UpdateProduct: React.FC = () => {
             ))}
           </Select>
         </Form.Item>
-
-        <div className="flex gap-5">
-          <Form.Item name="is_collection" valuePropName="checked">
-            <Checkbox>Bộ sưu tập</Checkbox>
-          </Form.Item>
-
-          <Form.Item name="is_hot" valuePropName="checked">
-            <Checkbox>Nổi bật</Checkbox>
-          </Form.Item>
-
-          <Form.Item name="is_new" valuePropName="checked">
-            <Checkbox>Sản phẩm mới</Checkbox>
-          </Form.Item>
-        </div>
-
-        <Button onClick={() => setShowVariantForm(!showVariantForm)} type="default">
+        {/* <Button onClick={() => setShowVariantForm(!showVariantForm)} type="default">
           {showVariantForm ? 'Ẩn Biến Thể' : 'Hiện Biến Thể'}
-        </Button>
+        </Button> */}
 
         {showVariantForm && (
           <>
@@ -768,7 +753,7 @@ const UpdateProduct: React.FC = () => {
           </>
         )}
 
-        {!showVariantForm && (
+        {/* {!showVariantForm && (
           <>
             <div className="mt-4">
               <Form.Item
@@ -807,7 +792,7 @@ const UpdateProduct: React.FC = () => {
               </Form.Item>
             </div>
           </>
-        )}
+        )} */}
 
         <Form.Item>
           <div className='flex justify-end space-x-4'>
