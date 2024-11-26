@@ -152,7 +152,11 @@ const ListProducts = () => {
                   }}
                   className="text-indigo-600"
                   style={{ fontSize: '0.875rem' }}
+<<<<<<< HEAD:fontend/beestyle/src/pages/(dashboard)/dashboard/Product/list.tsx
                   icon={<EyeOutlined />}
+=======
+                  icon={<EyeOutlined/>}
+>>>>>>> 6c6a1ef (Fix UI..):fontend/beestyle/src/pages/(dashboard)/dashboard/products/list.tsx
                 >
                 </Button>
               </span>

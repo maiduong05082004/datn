@@ -113,7 +113,7 @@ class BannerController extends Controller
         $validatedData = $request->validate([
             'category_id' => 'exists:categories,id',
             'title' => 'string|max:255',
-            'image_path' => 'file|mimes:jpeg,png,jpg,gif,jfif|max:5120', // Để `nullable` cho ảnh
+            'image_path' => 'file|mimes:jpeg,png,jpg,gif,jfif|max:5120', // Để ` cho ảnh
             'link' => 'string|max:255',
             'type' => 'required|in:' . implode(',', [Banner::TYPE_MAIN, Banner::TYPE_CATEGORY, Banner::TYPE_CUSTOM]),
             'status' => 'required|integer|in:0,1', // Chỉ cho phép giá trị là số 0 hoặc 1

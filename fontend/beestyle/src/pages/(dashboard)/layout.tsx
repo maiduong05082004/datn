@@ -44,9 +44,15 @@ const items1: MenuProps['items'] = [
     label: "Banners",
     children: [
 
+<<<<<<< HEAD
       { key: 'sub2-1', label: <NavLink to="/admin/dashboard/banner/list/custom">Banners Tự Do</NavLink> },
       { key: 'sub2-2', label: <NavLink to="/admin/dashboard/banner/list/main">Banners Chính</NavLink> },
       { key: 'sub2-4', label: <NavLink to="/admin/dashboard/banner/list/category">Banners Danh Mục</NavLink> },
+=======
+      { key: 'sub2-1', label: <NavLink to="/admin/dashboard/banner/list/custom">D/s Banners Tự Do</NavLink> },
+      { key: 'sub2-2', label: <NavLink to="/admin/dashboard/banner/list/main">D/s Banners Chính</NavLink> },
+      { key: 'sub2-4', label: <NavLink to="/admin/dashboard/banner/list/category">D/s Banners Danh Mục</NavLink> },
+>>>>>>> 6c6a1ef (Fix UI..)
       { key: 'sub2-5', label: <NavLink to="/admin/dashboard/banner/add">Thêm Banners</NavLink> },
     ],
   },
@@ -124,6 +130,7 @@ const items1: MenuProps['items'] = [
       { key: 'inventory-1', label: <NavLink to="/admin/dashboard/inventory/list">Danh sách tồn kho</NavLink> },
     ],
   },
+<<<<<<< HEAD
 
   {
     key: 'sub12',
@@ -135,6 +142,8 @@ const items1: MenuProps['items'] = [
     ],
   },
 
+=======
+>>>>>>> 6c6a1ef (Fix UI..)
 ];
 
 const DashboardPage: React.FC<{ isDarkMode: boolean }> = ({ isDarkMode }) => {

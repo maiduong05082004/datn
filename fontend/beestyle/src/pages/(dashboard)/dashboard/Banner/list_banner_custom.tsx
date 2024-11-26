@@ -15,7 +15,7 @@ type Banner = {
     status: number;
 };
 
-const ListBannersMain: React.FC = () => {
+const ListBannersCategory: React.FC = () => {
     const navigate = useNavigate();
     const [messageApi, contextHolder] = message.useMessage();
     const queryClient = useQueryClient();
@@ -54,13 +54,13 @@ const ListBannersMain: React.FC = () => {
         return map;
     }, {});
 
-    // Lọc banners chỉ có type === 'main'
-    const dataSource = BannerData?.filter((item: Banner) => item.type === 'main').map((item: Banner, index: number) => ({
+    // Lọc banners chỉ có type === 'category'
+    const dataSource = BannerData?.filter((item: Banner) => item.type === 'category').map((item: Banner, index: number) => ({
         key: item.id,
         stt: index + 1,
         ...item,
         categoryName: categoryMap?.[item.category_id] || 'Không có',
-        typeLabel: 'Ảnh chính', // Chỉ hiển thị loại main nên gán trực tiếp
+        typeLabel: 'Ảnh danh mục', // Chỉ hiển thị loại category nên gán trực tiếp
     }));
 
     const columns = [
@@ -82,6 +82,11 @@ const ListBannersMain: React.FC = () => {
             render: (text: string) => (
                 <img src={text} alt="banner" style={{ width: 100, height: 50, objectFit: 'cover' }} />
             ),
+        },
+        {
+            title: 'Category',
+            dataIndex: 'categoryName',
+            key: 'categoryName',
         },
         {
             title: 'Link',
@@ -160,4 +165,4 @@ const ListBannersMain: React.FC = () => {
     );
 };
 
-export default ListBannersMain;
+export default ListBannersCategory;

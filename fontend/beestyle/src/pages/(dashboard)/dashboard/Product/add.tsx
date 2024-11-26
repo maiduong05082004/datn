@@ -187,9 +187,9 @@ const AddProduct: React.FC = () => {
     setVariants(updatedVariants);
   };
 
-  const toggleVariantForm = () => {
-    setShowVariantForm(!showVariantForm);
-  };
+  // const toggleVariantForm = () => {
+  //   setShowVariantForm(!showVariantForm);
+  // };
 
 
   const onFinish = async (values: any) => {
@@ -202,9 +202,9 @@ const AddProduct: React.FC = () => {
     formData.append('content', content);
     formData.append('input_day', formattedInputDay);
     formData.append('category_id', values.category_id.toString());
-    formData.append('is_collection', values.is_collection ? '1' : '0');
-    formData.append('is_hot', values.is_hot ? '1' : '0');
-    formData.append('is_new', values.is_new ? '1' : '0');
+    // formData.append('is_collection', values.is_collection ? '1' : '0');
+    // formData.append('is_hot', values.is_hot ? '1' : '0');
+    // formData.append('is_new', values.is_new ? '1' : '0');
     formData.append('stock', values.stock ? values.stock.toString() : '0');
     formData.append('group_id', values.variant_group ? values.variant_group.toString() : '');
 
@@ -326,7 +326,7 @@ const AddProduct: React.FC = () => {
             </select>
           </Form.Item>
 
-          <div className='flex gap-5'>
+          {/* <div className='flex gap-5'>
             <Form.Item name="is_collection" valuePropName="checked" initialValue={false}>
               <Checkbox>Bộ sưu tập</Checkbox>
             </Form.Item>
@@ -338,11 +338,11 @@ const AddProduct: React.FC = () => {
             <Form.Item name="is_new" valuePropName="checked" initialValue={false}>
               <Checkbox>Sản phẩm mới</Checkbox>
             </Form.Item>
-          </div>
+          </div> */}
 
-          <Button onClick={toggleVariantForm} type="default">
+          {/* <Button onClick={toggleVariantForm} type="default">
             {showVariantForm ? 'Ẩn Biến Thể' : 'Hiện Biến Thể'}
-          </Button>
+          </Button> */}
 
           {showVariantForm && (
             <>
@@ -494,7 +494,7 @@ const AddProduct: React.FC = () => {
               />
             </>
           )}
-          {!showVariantForm && (
+          {/* {!showVariantForm && (
             <>
               <div className="mt-4">
                 <Form.Item
@@ -536,7 +536,7 @@ const AddProduct: React.FC = () => {
 
               </div>
             </>
-          )}
+          )} */}
 
           <Form.Item>
             <div className='flex justify-end space-x-4 pt-5'>
