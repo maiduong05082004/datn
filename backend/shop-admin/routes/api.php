@@ -25,6 +25,8 @@ use App\Http\Controllers\Api\Client\Product\ShippingController;
 use App\Http\Controllers\Api\Client\PromotionController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\Api\Admin\PaymentController;
+use App\Http\Controllers\Api\Admin\Product\ProductCostController;
+use App\Http\Controllers\Api\Admin\StatisticsController;
 use App\Http\Controllers\Api\Client\CommentController;
 
 Route::prefix('client')->as('client.')->group(function () {
@@ -35,7 +37,7 @@ Route::prefix('client')->as('client.')->group(function () {
             Route::post('/signin', [AuthController::class, 'login'])->name('signin');
             Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth:sanctum')->name('logout');
             Route::get('/profile', [AuthController::class, 'user'])->middleware('auth:sanctum')->name('profile');
-            Route::put('/update', [AuthController::class, 'updateUserInfo'])->name('user.update');
+            Route::put('/update', [AuthController::class, 'updateInfoUser'])->name('user.update');
             Route::post('/add-points', [AuthController::class, 'addPoints']);
             Route::post('/forgot-password', [AuthController::class, 'forgotPassword'])->name('password.email');
             Route::post('/reset-password', [AuthController::class, 'resetPassword'])->name('password.update');
@@ -98,11 +100,13 @@ Route::prefix('client')->as('client.')->group(function () {
         Route::post('/', [PaymentController::class, 'vnpayPayment'])->name('vn-pay');
         Route::get('/callback', [PaymentController::class, 'vnpayCallback'])->name('callback');
     });
-    
+
     Route::prefix('comment')->as('comment.')->group(function () {
-        Route::post('/store', [CommentController::class, 'store'])->name('comment.store'); // Tạo 1 bình luận
-        Route::put('/update', [CommentController::class, 'update'])->name('comment.update'); // Cập nhật bình luận
-        Route::delete('/destroy', [CommentController::class, 'destroy'])->name('comment->destroy'); // Xóa bình luận bên giao diện
+        Route::post('/list', [CommentController::class, 'index'])->name('comment.list'); // Lấy list bình luận đã duyệt theo user_id & product_id
+        Route::post('/store', [CommentController::class, 'store'])->name('comment.store')->middleware('auth:sanctum'); // Tạo 1 bình luận
+        Route::put('/update', [CommentController::class, 'update'])->name('comment.update')->middleware('auth:sanctum'); // Cập nhật bình luận
+        Route::post('/report', [CommentController::class, 'reportComment'])->name('comment.report'); // Báo cáo bình luận
+        // Route::delete('/destroy', [CommentController::class, 'destroy'])->name('comment->destroy'); // Xóa bình luận bên giao diện
         Route::get('/rating', [CommentController::class, 'getProductRating'])->name('comment.rating'); // Trung bình số sao đánh giá
 
         //     Route::post('approve', [CommentController::class, 'approve'])->name('comment.approve'); // Duyệt bình luận
@@ -131,7 +135,7 @@ Route::prefix('admins')
 
             Route::apiResource('attribute_values', AttributeValueController::class)
                 ->names('attribute_values');
-                Route::delete('attribute_values/{id}/image', [AttributeValueController::class, 'deleteImage']);
+            Route::delete('attribute_values/{id}/image', [AttributeValueController::class, 'deleteImage']);
 
             Route::prefix('categories')->group(function () {
                 Route::post('{id}/soft-delete', [AdminCategoryController::class, 'softDestroy'])->name('categories.soft-delete');
@@ -184,8 +188,8 @@ Route::prefix('admins')
                 Route::post('approve', [CommentController::class, 'approve'])->name('comment.approve'); // Duyệt bình luận
                 Route::post('/reply', [CommentController::class, 'reply'])->name('comment.reply'); // Admin trả lời bình luận của user
                 Route::post('/hide', [CommentController::class, 'hideComment'])->name('comment.hide'); // Ẩn bình luận nếu vi phạm 
-                Route::post('/report', [CommentController::class, 'report'])->name('comment.report'); // Báo cáo bình luận
                 Route::post('/manageUser', [CommentController::class, 'manageUser'])->name('comment.manageUser'); // quản lý user (khóa nếu comment bị báo cáo nhiều)
+                Route::post('/list-report', [CommentController::class, 'listReportComment'])->name('comment.list-report');
             });
 
             Route::prefix('inventory')->as('inventory.')->group(function () {
@@ -195,12 +199,27 @@ Route::prefix('admins')
 
             Route::prefix('banners')->as('banner')->group(function () {
                 Route::get('/', [BannerController::class, 'index'])->name('index');
-                Route::get('/{id}', [BannerController::class, 'show'])->name('show'); 
-                Route::post('/', [BannerController::class, 'store'])->name('store'); 
-                Route::put('/{id}', [BannerController::class, 'update'])->name('update'); 
-                Route::delete('/{id}', [BannerController::class, 'destroy'])->name('destroy'); 
+                Route::get('/{id}', [BannerController::class, 'show'])->name('show');
+                Route::post('/', [BannerController::class, 'store'])->name('store');
+                Route::put('/{id}', [BannerController::class, 'update'])->name('update');
+                Route::delete('/{id}', [BannerController::class, 'destroy'])->name('destroy');
                 Route::delete('/{id}/image', [BannerController::class, 'deleteImage'])->name('banners.deleteImage');
 
+                Route::prefix('statistics')->as('statistics')->group(function () {
+                    Route::post('top-selling-products', [StatisticsController::class, 'getTopSellingProducts'])->name('statistics.top-selling-products');
+                    Route::get('revenue-and-profit', [StatisticsController::class, 'getRevenueAndProfit'])->name('statistics.revenue-and-profit');
+                    Route::get('delivered_product', [StatisticsController::class, 'getDeliveredOrderProducts'])->name('statistics.delivered_product');
+                    Route::get('canceled_product', [StatisticsController::class, 'getCancelledOrderProducts'])->name('statistics.canceled_product');
+                    Route::get('revenue-and-profit_with_categories', [StatisticsController::class, 'getRevenueAndProfitByCategory'])->name('statistics.revenue-and-profit_with_categories');
+                    Route::get('new-users', [StatisticsController::class, 'getNewUsers'])->name('statistics.new-users');
+                    Route::get('customer-behavior', [StatisticsController::class, 'getCustomerBehavior'])->name('statistics.customer-behavior');
+                    Route::get('get_product_stock', [StatisticsController::class, 'getProductStock'])->name('statistics.get_product_stock'); // tồn kho của từng sản phẩm còn bao nhiêu
+                    Route::post('update-daily', [StatisticsController::class, 'updateDailyStatistics'])->name('statistics.update-daily');
+                });
+
+                Route::prefix('product_cost')->as('product_cost.')->group(function () {
+                    Route::post('/store', [ProductCostController::class, 'store'])->name('product_cost.store');
+                });
             });
         });
     });

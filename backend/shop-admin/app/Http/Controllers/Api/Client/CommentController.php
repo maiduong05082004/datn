@@ -57,7 +57,10 @@ class CommentController extends Controller
                 'bill_detail_id' => $comment->bill_detail_id,
                 'product_id' => $comment->billDetail->product_id ?? null,
                 'commentDate' => $comment->commentDate,
+                'stars' => $comment->stars,
                 'user_name' => $userName,
+                'reported_count' => $comment->reported_count,
+                'is_visible' => $comment->is_visible,
                 'product_variation_value_id' => $variationValue['product_variation_value_id'],
                 'size' => $variationValue['size'],
                 'color' => $variationValue['color'],
@@ -238,6 +241,16 @@ class CommentController extends Controller
             return response()->json(['message' => 'Product not found for this comment.'], 404);
         }
 
+        $user = Auth::user();
+        if ($user->role === 'admin') {
+            return response()->json([
+                'message' => 'Admin không được báo cáo bình luận của user'
+            ], 403);
+        }
+        if ($comment->user_id == $userId) {
+            return response()->json(['message' => 'Bạn không thể báo cáo bình luận của chính mình'], 403);
+        }
+
         $existingReport = ReportComment::where('comment_id', $commentId)
             ->where('user_id', $userId)
             ->first();
@@ -263,9 +276,49 @@ class CommentController extends Controller
                 'content' => $comment->content,
                 'reported_count' => $comment->reported_count,
                 'is_visible' => $comment->is_visible,
+                'reason' => $reason
             ],
         ]);
     }
+
+    public function listReportComment(Request $request)
+    {
+        $user = Auth::user();
+        if ($user->role !== 'admin') {
+            return response()->json(['message' => 'Bạn không có quyền xem danh sách báo cáo'], 403);
+        }
+        // Kiểm tra ID bình luận
+        $commentId = $request->input('comment_id');
+        $comment = Comment::find($commentId);
+
+        if (!$comment) {
+            return response()->json(['message' => 'Bình luận không tồn tại'], 404);
+        }
+
+        // Lấy danh sách những người đã báo cáo bình luận này
+        $reportComments = ReportComment::with('user') // Liên kết với bảng user để lấy thông tin người báo cáo
+            ->where('comment_id', $commentId)
+            ->get();
+
+        if ($reportComments->isEmpty()) {
+            return response()->json(['message' => 'Không có báo cáo nào cho bình luận này.']);
+        }
+
+        // Trả về thông tin báo cáo và lý do báo cáo
+        $reports = $reportComments->map(function ($report) {
+            return [
+                'user_name' => $report->user->name,
+                'reason' => $report->reason,
+                'reported_at' => $report->created_at,
+            ];
+        });
+
+        return response()->json([
+            'comment_id' => $commentId,
+            'reports' => $reports
+        ]);
+    }
+
 
 
     // API lấy danh sách bình luận đã duyệt cho một sản phẩm
@@ -395,7 +448,7 @@ class CommentController extends Controller
             ], 404);
         }
         $comment->is_visible = 0;
-        $comment->hide_reason = $request->input('hide_reason') ?? 'Hidden by admin';
+        // $comment->hide_reason = $request->input('hide_reason') ?? 'Hidden by admin';
         $comment->save();
         return response()->json([
             'message' => 'Comment hide successfully',
@@ -433,6 +486,18 @@ class CommentController extends Controller
 
         if (Auth::user()->role !== 'admin' && Auth::id() !== $parentComment->user_id) {
             return response()->json(['message' => 'Permission denied.'], 403);
+        }
+
+        $existingReply = Comment::where('parent_id', $parentId)
+            ->where('user_id', Auth::id())  // Kiểm tra xem admin đã trả lời chưa
+            ->exists();
+
+        if ($existingReply) {
+            return response()->json(['message' => 'You have already replied to this comment.'], 400);
+        }
+
+        if ($parentComment->user_id == Auth::id()) {
+            return response()->json(['message' => 'You cannot reply to your own comment.'], 400);
         }
 
         $comment = Comment::create([

@@ -12,6 +12,7 @@ use App\Models\Product;
 use App\Models\Statistic;
 use App\Models\User;
 use App\Models\WishlistItem;
+use Carbon\Carbon;
 use DB;
 use Illuminate\Http\Request;
 use Symfony\Component\Console\Input\Input;
@@ -21,12 +22,17 @@ class StatisticsController extends Controller
     // Thống kê sản phẩm theo lượt bán & sản phẩm bán chạy nhất (top 12)
     public function getTopSellingProducts(Request $request)
     {
-        $date = $request->get('date');
+        $currentDate = Carbon::now();
+
+        $startDate = $currentDate->copy()->subMonth(3)->startOfMonth();
+        $endDate = $currentDate->copy()->endOfMonth();
+        // $date = $request->get('date', [
+        //     'start' => $startOfOeriod->toDateString(),
+        //     'end' => $endOfPeriod->toDateString()
+        // ]);
         $products = BillDetail::selectRaw('product_id,SUM(quantity) as total_sold')
-            ->when($date, function ($query, $date) {
-                $query->whereHas('bill', function ($q) use ($date) {
-                    $q->whereBetween('created_at', [$date['start'], $date['end']]);
-                });
+            ->whereHas('bill', function ($query) use ($startDate, $endDate) {
+                $query->whereBetween('created_at', [$startDate, $endDate]);
             })
             ->groupBy('product_id')
             ->orderByDesc('total_sold')
@@ -35,107 +41,82 @@ class StatisticsController extends Controller
             ->get();
         return response()->json($products);
     }
-    // public function productNewHot()
-    // {
-    //     $productsNewHot = Category::whereNull('parent_id')
-    //         ->get()
-    //         ->map(function ($category) {
-    //             $categoryIds = collect([$category->id]);
-    //             $categoryIds = $categoryIds->merge($category->childrenRecursive->pluck('id'));
-
-    //             // Lấy sản phẩm bán chạy
-    //             $hotProducts = Product::select('products.*')
-    //                 ->join('bill_details', 'products.id', '=', 'bill_details.product_id')
-    //                 ->join('bills', 'bill_details.bill_id', '=', 'bills.id')
-    //                 ->whereIn('bills.status_bill', ['delivered'])
-    //                 ->whereIn('products.category_id', $categoryIds)
-    //                 ->groupBy('products.id', 'products.name', 'products.price', 'products.category_id', 'products.stock', 'products.is_hot', 'products.is_new', 'products.is_collection', 'products.created_at', 'products.updated_at')
-    //                 ->orderByRaw('SUM(bill_details.quantity) DESC')
-    //                 ->take(12)
-    //                 ->get();
-
-    //             return [
-    //                 'category_id' => $category->id,
-    //                 'name' => $category->name,
-    //                 'products' => ProductResource::collection($hotProducts), // Chuyển sản phẩm sang resource
-    //             ];
-    //         });
-
-    //     // Trả về kết quả
-    //     return response()->json([
-    //         'data' => $productsNewHot,
-
-    //     ]);
-    // }
 
     // Thống kê doanh thu, lợi nhuận
     public function getRevenueAndProfit(Request $request)
     {
         $isSummary = $request->get('summary', false); // Mặc định là false nếu không có tham số truyền vào
-        $date = $request->get('date');
-        $groupByType = $request->get('group_by', 'day'); // Mặc định là 'day'
+        // $date = $request->get('date');
+        $year = $request->get('year');
+        $month = $request->get('month');
+        $groupByType = $request->get('group_by', 'month'); // Mặc định là 'day'
+
         switch ($groupByType) {
             case 'month':
+            default:
                 $groupBy = "CONCAT(YEAR(bills.created_at), '-', LPAD(MONTH(bills.created_at), 2, '0'))";
                 break;
             case 'year':
                 $groupBy = "YEAR(bills.created_at)";
                 break;
             case 'day':
-            default:
                 $groupBy = "DATE(bills.created_at)";
                 break;
         }
-        if ($isSummary) {
-            // Tổng doanh thu và lợi nhuận all
-            $stats = BillDetail::selectRaw("
+        // Tổng doanh thu và lợi nhuận all
+        $query = BillDetail::selectRaw("
             $groupBy as period,
             SUM(bill_details.quantity * bill_details.don_gia) as total_revenue,
-            SUM((bill_details.don_gia - 500000) * bill_details.quantity) as total_profit
-        ")                          // 500000 là giá vốn nhập sản phẩm
-                ->join('bills', 'bill_details.bill_id', '=', 'bills.id')
-                ->when($date, function ($query, $date) {
-                    $query->whereBetween('bills.created_at', [$date['start'], $date['end']]);
-                })
-                ->groupBy('period')
-                ->get();
+            SUM((bill_details.don_gia - table_product_costs.cost_price) * bill_details.quantity) as total_profit
+        ")
+            ->join('bills', 'bill_details.bill_id', '=', 'bills.id')
+            ->join('table_product_costs', 'bill_details.product_id', '=', 'table_product_costs.product_id');
+
+        if ($year) {
+            $query->whereYear('bills.created_at', $year);
+        }
+
+        if ($month) {
+            $query->whereMonth('bills.created_at', $month);
+        }
+
+        $date = $request->get('date');
+        if ($date) {
+            $query->whereBetween('bills.created_at', [$date['start'], $date['end']]);
+        }
+
+        if ($isSummary) {
+            $stats = $query->groupBy('period')->get();
         } else {
-            // Tổng doanh thu và lợi nhuận theo từng sản phẩm
-            //     $stats = BillDetail::selectRaw("
-            //     products.name as product_name,
-            //     GROUP_CONCAT(DISTINCT attribute_values.value SEPARATOR ', ') as variation_details,
-            //     $groupBy as period,
-            //     SUM(bill_details.quantity * bill_details.don_gia) as total_revenue,
-            //     SUM((bill_details.don_gia - 500000) * bill_details.quantity) as total_profit
-            // ")
-            //         ->join('bills', 'bill_details.bill_id', '=', 'bills.id')
-            //         ->join('products', 'bill_details.product_id', '=', 'products.id')
-            //         ->join('product_variation_values', 'bill_details.product_variation_value_id', '=', 'product_variation_values.id')
-            //         ->join('attribute_values', 'product_variation_values.attribute_value_id', '=', 'attribute_values.id')
-            //         ->when($date, function ($query, $date) {
-            //             $query->whereBetween('bills.created_at', [$date['start'], $date['end']]);
-            //         })
-            //         ->groupBy('period', 'bill_details.product_id', 'bill_details.product_variation_value_id')
-            //         ->get();
             $stats = BillDetail::selectRaw("
+                products.id as product_id,
                 products.name as product_name,
                 size_attribute.value as size,
                 color_attribute.value as color,
                 $groupBy as period,
                 SUM(bill_details.quantity * bill_details.don_gia) as total_revenue,
-                SUM((bill_details.don_gia - 500000) * bill_details.quantity) as total_profit
-")
+                SUM((bill_details.don_gia - table_product_costs.cost_price) * bill_details.quantity) as total_profit
+                    ")
                 ->join('bills', 'bill_details.bill_id', '=', 'bills.id')
                 ->join('products', 'bill_details.product_id', '=', 'products.id')
                 ->join('product_variation_values as size_variation', 'bill_details.product_variation_value_id', '=', 'size_variation.id')
                 ->join('attribute_values as size_attribute', 'size_variation.attribute_value_id', '=', 'size_attribute.id') // Join lấy size
                 ->join('product_variations', 'size_variation.product_variation_id', '=', 'product_variations.id')
                 ->join('attribute_values as color_attribute', 'product_variations.attribute_value_id', '=', 'color_attribute.id') // Join lấy color
-                ->when($date, function ($query, $date) {
-                    $query->whereBetween('bills.created_at', [$date['start'], $date['end']]);
-                })
-                ->groupBy('period', 'products.name', 'size', 'color')
-                ->get();
+                ->join('table_product_costs', 'products.id', '=', 'table_product_costs.product_id');
+            // ->when($date, function ($query, $date) {
+            //     $query->whereBetween('bills.created_at', [$date['start'], $date['end']]);
+            // });
+            if ($year) {
+                $stats = $stats->whereYear('bills.created_at', $year);
+            }
+            if ($month) {
+                $stats = $stats->whereMonth('bills.created_at', $month);
+            }
+            if ($date) {
+                $stats->whereBetween('bills.created_at', [$date['start'], $date['end']]);
+            }
+            $stats = $stats->groupBy('period', 'products.id', 'products.name', 'size', 'color')->get();
         }
         return response()->json($stats);
     }
@@ -166,15 +147,16 @@ class StatisticsController extends Controller
             $groupBy as period,
             categories.name as category_name,
             SUM(bill_details.quantity * bill_details.don_gia) as total_revenue,
-            SUM((bill_details.don_gia - 500000) * bill_details.quantity) as total_profit
+            SUM((bill_details.don_gia - table_product_costs.cost_price) * bill_details.quantity) as total_profit
         ")
                 ->join('bills', 'bill_details.bill_id', '=', 'bills.id')
                 ->join('products', 'bill_details.product_id', '=', 'products.id')
-                ->join('categories', 'products.category_id', '=', 'categories.id')  // Tham gia bảng categories
+                ->join('categories', 'products.category_id', '=', 'categories.id')
+                ->join('table_product_costs', 'bill_details.product_id', '=', 'table_product_costs.product_id')
                 ->when($date, function ($query, $date) {
                     $query->whereBetween('bills.created_at', [$date['start'], $date['end']]);
                 })
-                ->groupBy('period', 'category_name')  // Nhóm theo ngày/tháng/năm và danh mục
+                ->groupBy('period', 'category_name')
                 ->get();
         } else {
             // Doanh thu và lợi nhuận theo từng sản phẩm trong từng danh mục
@@ -183,11 +165,12 @@ class StatisticsController extends Controller
             categories.name as category_name,
             $groupBy as period,
             SUM(bill_details.quantity * bill_details.don_gia) as total_revenue,
-            SUM((bill_details.don_gia - 500000) * bill_details.quantity) as total_profit
+            SUM((bill_details.don_gia - table_product_costs.cost_price) * bill_details.quantity) as total_profit
         ")
                 ->join('bills', 'bill_details.bill_id', '=', 'bills.id')
                 ->join('products', 'bill_details.product_id', '=', 'products.id')
                 ->join('categories', 'products.category_id', '=', 'categories.id')  // Tham gia bảng categories
+                ->join('table_product_costs', 'bill_details.product_id', '=', 'table_product_costs.product_id')
                 ->when($date, function ($query, $date) {
                     $query->whereBetween('bills.created_at', [$date['start'], $date['end']]);
                 })
@@ -332,9 +315,12 @@ class StatisticsController extends Controller
             'total_revenue' => Bill::whereDate('created_at', '>=', $startDate)
                 ->whereDate('created_at', '<=', $today)
                 ->sum('total'),
-            'total_profit' => Bill::whereDate('created_at', '>=', $startDate)
-                ->whereDate('created_at', '<=', $today)
-                ->sum(DB::raw('total - 500000')),
+            'total_profit' => Bill::selectRaw('SUM(bills.total - table_product_costs.cost_price) as total_profit')
+                ->join('bill_details', 'bills.id', '=', 'bill_details.bill_id')
+                ->join('table_product_costs', 'bill_details.product_id', '=', 'table_product_costs.product_id')
+                ->whereDate('bills.created_at', '>=', $startDate)
+                ->whereDate('bills.created_at', '<=', $today)
+                ->value('total_profit'),
             'total_orders' => Bill::whereDate('created_at', '>=', $startDate)
                 ->whereDate('created_at', '<=', $today)
                 ->count(),
