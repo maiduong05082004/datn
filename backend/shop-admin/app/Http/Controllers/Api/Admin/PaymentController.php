@@ -42,6 +42,8 @@ class PaymentController extends Controller
 
         $vnp_Url = "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html";
         $vnp_Returnurl = "http://localhost:8000/api/client/payment/callback";
+        // $vnp_Returnurl = "https://vn.mlb-korea.com/";
+
         $vnp_TmnCode = "943CGXVQ";
         $vnp_HashSecret = "WLQHP1MXDBOCOQZ56YQHESM95GC25M81";
 

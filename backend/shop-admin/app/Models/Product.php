@@ -66,5 +66,9 @@ class Product extends Model
     {
         return $this->hasMany(WishlistItem::class);
     }
-    
+
+    public function cost()
+    {
+        return $this->hasOne(TableProductCost::class);
+    }
 }
