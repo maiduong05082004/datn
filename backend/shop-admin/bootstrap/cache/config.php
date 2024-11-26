@@ -10,7 +10,7 @@
     'locale' => 'en',
     'fallback_locale' => 'en',
     'faker_locale' => 'en_US',
-    'key' => 'base64:g2XJ83kjsgJOoa2Z/Nz/SM2JyzXAPVJZcAvgGdR6s78=',
+    'key' => 'base64:FKog/iUBGuTJjbmi9NjWDFvnIMBoBkAaAK2UJlwCYm8=',
     'cipher' => 'AES-256-CBC',
     'maintenance' => 
     array (
@@ -212,8 +212,8 @@
       'file' => 
       array (
         'driver' => 'file',
-        'path' => 'H:\\datn\\backend\\shop-admin\\storage\\framework/cache/data',
-        'lock_path' => 'H:\\datn\\backend\\shop-admin\\storage\\framework/cache/data',
+        'path' => 'C:\\laragon\\www\\datn\\backend\\shop-admin\\storage\\framework/cache/data',
+        'lock_path' => 'C:\\laragon\\www\\datn\\backend\\shop-admin\\storage\\framework/cache/data',
       ),
       'memcached' => 
       array (
@@ -262,7 +262,7 @@
   'cloudinary' => 
   array (
     'notification_url' => NULL,
-    'cloud_url' => NULL,
+    'cloud_url' => 'cloudinary://873618673342167:Gt_eSYE6MVhrv_TL96rB7jsLo14@duxy2crfs',
     'upload_preset' => NULL,
     'upload_route' => NULL,
     'upload_action' => NULL,
@@ -306,7 +306,7 @@
       array (
         'driver' => 'sqlite',
         'url' => NULL,
-        'database' => 'duan_long',
+        'database' => 'duanprovip',
         'prefix' => '',
         'foreign_key_constraints' => true,
       ),
@@ -316,7 +316,7 @@
         'url' => NULL,
         'host' => '127.0.0.1',
         'port' => '3306',
-        'database' => 'duan_long',
+        'database' => 'duanprovip',
         'username' => 'root',
         'password' => '',
         'unix_socket' => '',
@@ -336,7 +336,7 @@
         'url' => NULL,
         'host' => '127.0.0.1',
         'port' => '3306',
-        'database' => 'duan_long',
+        'database' => 'duanprovip',
         'username' => 'root',
         'password' => '',
         'charset' => 'utf8',
@@ -351,7 +351,7 @@
         'url' => NULL,
         'host' => '127.0.0.1',
         'port' => '3306',
-        'database' => 'duan_long',
+        'database' => 'duanprovip',
         'username' => 'root',
         'password' => '',
         'charset' => 'utf8',
@@ -396,13 +396,13 @@
       'local' => 
       array (
         'driver' => 'local',
-        'root' => 'H:\\datn\\backend\\shop-admin\\storage\\app',
+        'root' => 'C:\\laragon\\www\\datn\\backend\\shop-admin\\storage\\app',
         'throw' => false,
       ),
       'public' => 
       array (
         'driver' => 'local',
-        'root' => 'H:\\datn\\backend\\shop-admin\\storage\\app/public',
+        'root' => 'C:\\laragon\\www\\datn\\backend\\shop-admin\\storage\\app/public',
         'url' => 'http://localhost/storage',
         'visibility' => 'public',
         'throw' => false,
@@ -426,7 +426,7 @@
     ),
     'links' => 
     array (
-      'H:\\datn\\backend\\shop-admin\\public\\storage' => 'H:\\datn\\backend\\shop-admin\\storage\\app/public',
+      'C:\\laragon\\www\\datn\\backend\\shop-admin\\public\\storage' => 'C:\\laragon\\www\\datn\\backend\\shop-admin\\storage\\app/public',
     ),
   ),
   'hashing' => 
@@ -467,14 +467,14 @@
       'single' => 
       array (
         'driver' => 'single',
-        'path' => 'H:\\datn\\backend\\shop-admin\\storage\\logs/laravel.log',
+        'path' => 'C:\\laragon\\www\\datn\\backend\\shop-admin\\storage\\logs/laravel.log',
         'level' => 'debug',
         'replace_placeholders' => true,
       ),
       'daily' => 
       array (
         'driver' => 'daily',
-        'path' => 'H:\\datn\\backend\\shop-admin\\storage\\logs/laravel.log',
+        'path' => 'C:\\laragon\\www\\datn\\backend\\shop-admin\\storage\\logs/laravel.log',
         'level' => 'debug',
         'days' => 14,
         'replace_placeholders' => true,
@@ -539,7 +539,7 @@
       ),
       'emergency' => 
       array (
-        'path' => 'H:\\datn\\backend\\shop-admin\\storage\\logs/laravel.log',
+        'path' => 'C:\\laragon\\www\\datn\\backend\\shop-admin\\storage\\logs/laravel.log',
       ),
     ),
   ),
@@ -555,8 +555,8 @@
         'host' => 'smtp.gmail.com',
         'port' => '465',
         'encryption' => 'ssl',
-        'username' => 'duongkhongkich@gmail.com',
-        'password' => 'orfndnlifselriaq',
+        'username' => 'levanlong0968350160@gmail.com',
+        'password' => 'scptbxrmhbwzqiqj',
         'timeout' => NULL,
         'local_domain' => NULL,
       ),
@@ -607,15 +607,15 @@
     ),
     'from' => 
     array (
-      'address' => 'duongkhongkich@gmail.com',
-      'name' => 'BeeStyle',
+      'address' => 'levanlong0968350160@gmail.com',
+      'name' => '${BEESTYLE}',
     ),
     'markdown' => 
     array (
       'theme' => 'default',
       'paths' => 
       array (
-        0 => 'H:\\datn\\backend\\shop-admin\\resources\\views/vendor/mail',
+        0 => 'C:\\laragon\\www\\datn\\backend\\shop-admin\\resources\\views/vendor/mail',
       ),
     ),
   ),
@@ -624,8 +624,8 @@
     'mode' => 'sandbox',
     'sandbox' => 
     array (
-      'client_id' => '',
-      'client_secret' => '',
+      'client_id' => 'ASMOTPHmZ0rvQlP9WqMCsQhIvwfoTrZqCJdxZq3YbNoY_LscRGeCHcgYTgPQTt6Kd_fpegvGU0jlIKiZ',
+      'client_secret' => 'EHMdkKZbD0gpC_wX4v9GQcB9vMpP-sMqN-pSDopJh9PLMRM82GjkaCEHFW4mT-lneS9JcdKaG0L98vls',
       'app_id' => 'APP-80W284485P519543T',
     ),
     'live' => 
@@ -642,7 +642,7 @@
   ),
   'queue' => 
   array (
-    'default' => 'sync',
+    'default' => 'database',
     'connections' => 
     array (
       'sync' => 
@@ -703,13 +703,9 @@
   array (
     'stateful' => 
     array (
-      0 => 'localhost',
-      1 => 'localhost:5173',
-      2 => 'localhost:3000',
-      3 => '127.0.0.1',
-      4 => '127.0.0.1:8000',
-      5 => '::1',
-      6 => 'localhost',
+      0 => 'localhost:5173',
+      1 => 'localhost:5174',
+      2 => '127.0.0.1:8000',
     ),
     'guard' => 
     array (
@@ -747,11 +743,11 @@
     array (
       'client_id' => '863599487550-oosvlnimv1getb888v0sqncom33f80be.apps.googleusercontent.com',
       'client_secret' => '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',
-      'redirect' => 'http://localhost:5173/auth/google',
+      'redirect' => 'http://localhost:8000/api/auth/callback/google',
     ),
     'exchangerateapi' => 
     array (
-      'key' => NULL,
+      'key' => 'f912a5af83b3991103a28cd6',
     ),
   ),
   'session' => 
@@ -760,7 +756,7 @@
     'lifetime' => '120',
     'expire_on_close' => false,
     'encrypt' => false,
-    'files' => 'H:\\datn\\backend\\shop-admin\\storage\\framework/sessions',
+    'files' => 'C:\\laragon\\www\\datn\\backend\\shop-admin\\storage\\framework/sessions',
     'connection' => NULL,
     'table' => 'sessions',
     'store' => NULL,
@@ -781,9 +777,9 @@
   array (
     'paths' => 
     array (
-      0 => 'H:\\datn\\backend\\shop-admin\\resources\\views',
+      0 => 'C:\\laragon\\www\\datn\\backend\\shop-admin\\resources\\views',
     ),
-    'compiled' => 'H:\\datn\\backend\\shop-admin\\storage\\framework\\views',
+    'compiled' => 'C:\\laragon\\www\\datn\\backend\\shop-admin\\storage\\framework\\views',
   ),
   'flare' => 
   array (
@@ -869,7 +865,7 @@
     array (
     ),
     'enable_runnable_solutions' => NULL,
-    'remote_sites_path' => 'H:\\datn\\backend\\shop-admin',
+    'remote_sites_path' => 'C:\\laragon\\www\\datn\\backend\\shop-admin',
     'local_sites_path' => '',
     'housekeeping_endpoint_prefix' => '_ignition',
     'settings_file_path' => '',
@@ -911,7 +907,7 @@
     'include_helpers' => false,
     'helper_files' => 
     array (
-      0 => 'H:\\datn\\backend\\shop-admin/vendor/laravel/framework/src/Illuminate/Support/helpers.php',
+      0 => 'C:\\laragon\\www\\datn\\backend\\shop-admin/vendor/laravel/framework/src/Illuminate/Support/helpers.php',
     ),
     'model_locations' => 
     array (

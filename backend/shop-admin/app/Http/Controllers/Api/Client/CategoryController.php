@@ -122,29 +122,50 @@ class CategoryController extends Controller
         return $attributeOptions;
     }
 
+    // public function getAllColors()
+    // {
+    //     $colorsWithImages = AttributeValue::whereHas('attribute', function ($query) {
+    //         $query->where('name', 'Màu Sắc');
+    //     })
+    //         ->with(['productVariations.variationImages' => function ($query) {
+    //             $query->where('image_type', 'variant');
+    //         }])->get();
+
+    //     $formattedColors = $colorsWithImages->map(function ($color) {
+    //         return [
+    //             'id' => $color->id,
+    //             'name' => $color->value,
+    //             'image' => $color->productVariations->flatMap(function ($variation) {
+    //                 return $variation->variationImages->pluck('image_path');
+    //             })->first()
+    //         ];
+    //     });
+
+    //     return response()->json([
+    //         'colors' => $formattedColors
+    //     ], 200);
+    // }
+
     public function getAllColors()
     {
         $colorsWithImages = AttributeValue::whereHas('attribute', function ($query) {
             $query->where('name', 'Màu Sắc');
         })
-            ->with(['productVariations.variationImages' => function ($query) {
-                $query->where('image_type', 'variant');
-            }])->get();
-
+        ->whereHas('productVariations') 
+        ->get();
         $formattedColors = $colorsWithImages->map(function ($color) {
             return [
                 'id' => $color->id,
                 'name' => $color->value,
-                'image' => $color->productVariations->flatMap(function ($variation) {
-                    return $variation->variationImages->pluck('image_path');
-                })->first()
+                'image' => $color->image_path, // Sử dụng trực tiếp ảnh từ attribute_values
             ];
         });
-
+    
         return response()->json([
             'colors' => $formattedColors
         ], 200);
     }
+    
 
     private function filterCategory($category)
     {
