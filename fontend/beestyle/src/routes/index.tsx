@@ -48,7 +48,6 @@ import ViewAccount from "@/pages/(website)/account/_components/view";
 import InfoPage from "@/pages/(website)/account/_components/info";
 import RecentlyPage from "@/pages/(website)/account/_components/recently";
 import AddressesPage from "@/pages/(website)/account/_components/addresses";
-import App from "@/pages/(dashboard)/dashboard/Bill/app";
 import Detailship from "@/pages/(dashboard)/dashboard/Bill/detailship";
 import DeatilConfirm from "@/pages/(dashboard)/dashboard/Bill/detailConfirm"
 import Comments from "@/pages/(dashboard)/dashboard/Products/comments";
@@ -65,8 +64,13 @@ import ListStatistics from "@/pages/(dashboard)/dashboard/Statistics/list";
 import ListAllChart from "@/pages/(dashboard)/dashboard/Statistics/ListAllChart";
 import ListNewPerson from "@/pages/(dashboard)/dashboard/Statistics/ListNewPerson";
 import ListCustomer from "@/pages/(dashboard)/dashboard/Statistics/ListCustomer";
-import StatisticsProducts from "@/pages/(dashboard)/dashboard/Statistics/statisticsproduct";
 import ListTopSelling from "@/pages/(dashboard)/dashboard/Statistics/listtopselling";
+import StatisticsProducts from "@/pages/(dashboard)/dashboard/Statistics/Statisticsproduct";
+import ListBannersMain from "@/pages/(dashboard)/dashboard/Banner/list";
+import ListBannersCategory from "@/pages/(dashboard)/dashboard/Banner/list_banner_custom";
+import ListBannersCustom from "@/pages/(dashboard)/dashboard/Banner/list_banner_category";
+import ChatRealTime from "@/pages/(dashboard)/dashboard/ChatRealTime/chatrealtime";
+import DetailPro from "@/pages/(dashboard)/dashboard/Products/detailpro";
 
 const Router = () => {
 
@@ -139,7 +143,6 @@ const Router = () => {
                     <Route index element={<DashboardPage />} />
                     <Route path="profile" element={<MyProfile />} />
                     {/* bills */}
-                    <Route path="bill/app" element={<App />} />
                     <Route path="bill/list" element={<ListBill />} />
                     <Route path="bill/detail/:id" element={<DetailBill />} />
                     <Route path="bill/detailship/:id" element={<Detailship />} />
@@ -149,7 +152,9 @@ const Router = () => {
                     {/* comments */}
                     {/* banners */}
                     <Route path="banner/add" element={<AddBanners />} />
-                    <Route path="banner/list" element={<ListBanners />} />
+                    <Route path="banner/list/main" element={<ListBannersMain />} />
+                    <Route path="banner/list/custom" element={<ListBannersCustom />} />
+                    <Route path="banner/list/category" element={<ListBannersCategory />} />
                     <Route path="banner/update/:id" element={<UpdateBanners />} />
                     <Route path="banner/detail/:id" element={<DetailBanner />} />
                     {/* users */}
@@ -162,7 +167,8 @@ const Router = () => {
                     <Route path="comments/list/:id" element={<Comments />} />
                     <Route path="products/add" element={<AddProduct />} />
                     <Route path="products/update/:id" element={<UpdateProduct />} />
-                    <Route path="products/detail/:id" element={<DetailProduct />} />
+                    {/* <Route path="products/detail/:id" element={<DetailProduct />} /> */}
+                    <Route path="products/detail/:id" element={<DetailPro />} />
                     {/* attribute_group */}
                     <Route path="attribute_group/add" element={<AddtributeGroup />} />
                     <Route path="attribute_group/list" element={<ListAttributeGroup />} />
@@ -191,7 +197,8 @@ const Router = () => {
                     <Route path="statistic/customer" element={<ListCustomer />} />
                     <Route path="statistic/product" element={<StatisticsProducts />} />
                     <Route path="statistic/list" element={<ListAllChart />} />
-                    
+                    {/* chatrealtime */}
+                    <Route path="chat/main" element={<ChatRealTime />} />
                 </Route>
             </Routes>
             <Search isSearch={isSearch} setIsSearch={setIsSearch} setKeySearch={setKeySearch} />

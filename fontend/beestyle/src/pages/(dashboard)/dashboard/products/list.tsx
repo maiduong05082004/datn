@@ -42,6 +42,8 @@ const ListProducts = () => {
   const [messageApi, contextHolder] = message.useMessage();
   const queryClient = useQueryClient();
   const navigate = useNavigate();
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [currentDescription, setCurrentDescription] = useState('');
   // const { id } = useParams();
 
   const { data: productsData, isLoading } = useQuery({
@@ -64,7 +66,6 @@ const ListProducts = () => {
       messageApi.error('Xóa sản phẩm thất bại');
     },
   });
-  // Hàm mở rộng để render danh sách các biến thể
 
   const columns: Array<any> = [
     {
@@ -101,17 +102,20 @@ const ListProducts = () => {
       key: 'description',
       render: (text: string) => (
         <div className="max-w-xs truncate">
-          {text.length > 30 ? ( 
-            <Tooltip title={text}>  
+          {text.length > 30 ? (
+            <Tooltip title={text}>
               <span>
                 {text.slice(0, 30)}...{' '}
                 <Button
-                  type="link"
-                  onClick={() => messageApi.info(text)}
-                  className="text-indigo-600 p-0"
-                  style={{ fontSize: '0.875rem' }}  
+                  type="default"
+                  onClick={() => {
+                    setCurrentDescription(text);
+                    setIsModalVisible(true);
+                  }}
+                  className="text-indigo-600"
+                  style={{ fontSize: '0.875rem' }}
+                  icon={<EyeOutlined/>}
                 >
-                  Xem chi tiết
                 </Button>
               </span>
             </Tooltip>
@@ -151,7 +155,7 @@ const ListProducts = () => {
             Xem Bình Luận
           </Button>
 
-          
+
         </div>
       ),
     }
@@ -164,14 +168,14 @@ const ListProducts = () => {
           <Button
             type="default"
             icon={<EyeOutlined />}
-            
+
             onClick={() => navigate(`/admin/dashboard/products/detail/${product.id}`)}
           />
 
           <Button
             type="default"
             icon={<EditOutlined />}
-            
+
             onClick={() => navigate(`/admin/dashboard/products/update/${product.id}`)}
           />
           <Popconfirm
@@ -214,6 +218,18 @@ const ListProducts = () => {
             showTotal: (total) => `Tổng ${total} sản phẩm`,
           }}
         />
+        <Modal
+          title="Chi tiết mô tả"
+          visible={isModalVisible}
+          onCancel={() => setIsModalVisible(false)}
+          footer={[
+            <Button key="close" onClick={() => setIsModalVisible(false)}>
+              Đóng
+            </Button>,
+          ]}
+        >
+          <p>{currentDescription}</p>
+        </Modal>
       </div>
     </>
   );

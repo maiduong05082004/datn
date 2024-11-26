@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Button, Form, Input, Select, Upload, message, Spin, FormProps, Radio } from 'antd';
+import { Button, Form, Input, Radio, Select, Upload, message } from 'antd';
 import { UploadOutlined } from '@ant-design/icons';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useMutation, useQuery } from '@tanstack/react-query';
@@ -13,39 +13,40 @@ const UpdateBanners: React.FC = () => {
   const [messageApi, contextHolder] = message.useMessage();
   const navigate = useNavigate();
   const [fileList, setFileList] = useState<any[]>([]);
+  const [bannerType, setBannerType] = useState<string>(''); // Lưu trạng thái `type`
 
   // Fetch categories
-  const { data: categoryData, isLoading: categoryLoading } = useQuery({
+  const { data: categoryData, isLoading: categoryLoading, isError: categoryError } = useQuery({
     queryKey: ['categories'],
     queryFn: async () => {
-      const response = await axiosInstance.get('http://127.0.0.1:8000/api/admins/categories');
+      const response = await axiosInstance.get('/api/admins/categories');
       return response.data;
     },
   });
 
   // Fetch banner details
-  const { data: bannerData, isLoading: bannerLoading } = useQuery({
+  const { data: bannerData, isLoading: bannerLoading, isError: bannerError } = useQuery({
     queryKey: ['banner', id],
     queryFn: async () => {
-      const response = await axiosInstance.get(`http://127.0.0.1:8000/api/admins/banners/${id}`);
+      const response = await axiosInstance.get(`/api/admins/banners/${id}`);
       return response.data;
     },
+    enabled: !!id,
   });
 
-  // Mutation to update banner
-  const { mutate } = useMutation({
+  // Mutation để cập nhật banner
+  const { mutate: updateBanner } = useMutation({
     mutationFn: async (formData: FormData) => {
-      return await axiosInstance.put(`http://127.0.0.1:8000/api/admins/banners/${id}`, formData, {
+      return await axiosInstance.post(`/api/admins/banners/${id}`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
-        params: {
-          _method: 'PUT',
-        },
+        params: { _method: 'PUT' },
       });
     },
     onSuccess: () => {
       messageApi.success('Cập nhật banner thành công!');
       form.resetFields();
       setFileList([]);
+      navigate('/admin/dashboard/banner/list'); // Chuyển hướng sau khi thành công
     },
     onError: (error: any) => {
       const errorMessage = error.response?.data?.message || `Lỗi: ${error.message}`;
@@ -53,10 +54,10 @@ const UpdateBanners: React.FC = () => {
     },
   });
 
-  // Mutation to delete image
+  // Mutation để xóa ảnh banner
   const { mutate: deleteImage } = useMutation({
     mutationFn: async () => {
-      return await axiosInstance.delete(`http://127.0.0.1:8000/api/admins/banners/${id}/image`);
+      return await axiosInstance.delete(`/api/admins/banners/${id}/image`);
     },
     onSuccess: () => {
       messageApi.success('Xóa ảnh thành công!');
@@ -68,48 +69,67 @@ const UpdateBanners: React.FC = () => {
     },
   });
 
+  // Xử lý gửi dữ liệu
+  const onFinish = (values: any) => {
+    const formData = new FormData();
+    formData.append('title', values.title || '');
+    formData.append('type', values.type || '');
+    formData.append('status', values.status.toString());
+    if (values.category_id) formData.append('category_id', values.category_id.toString());
+    if (values.link) formData.append('link', values.link);
+    if (fileList.length > 0 && fileList[0].originFileObj) {
+      formData.append('image_path', fileList[0].originFileObj);
+    }
+    updateBanner(formData);
+  };
+
+  // Xử lý thay đổi file
+  const handleFileChange = (info: any) => {
+    setFileList(info.fileList);
+  };
+
+  // Xử lý khi thay đổi loại banner
+  const handleTypeChange = (value: string) => {
+    setBannerType(value);
+    if (value === 'main') {
+      form.setFieldsValue({ category_id: undefined, link: undefined });
+    } else if (value === 'category') {
+      form.setFieldsValue({ link: undefined });
+    } else if (value === 'custom') {
+      form.setFieldsValue({ category_id: undefined });
+    }
+  };
+
+  // Pre-fill form với dữ liệu banner
   useEffect(() => {
     if (bannerData) {
       form.setFieldsValue({
         title: bannerData.title,
+        type: bannerData.type,
         category_id: bannerData.category_id,
         link: bannerData.link,
-        type: bannerData.type,
         status: bannerData.status,
       });
-      setFileList([
-        {
-          uid: '-1',
-          status: 'done',
-          url: bannerData.image_path,
-        },
-      ]);
+      setBannerType(bannerData.type);
+      if (bannerData.image_path) {
+        setFileList([
+          {
+            uid: '-1',
+            name: 'currentImage.png',
+            status: 'done',
+            url: bannerData.image_path,
+          },
+        ]);
+      }
     }
   }, [bannerData, form]);
 
-  const onFinish: FormProps<any>["onFinish"] = (values: any) => {
-    const formData = new FormData();
-    formData.append('title', values.title);
-    formData.append('category_id', values.category_id);
-    formData.append('type', values.type);
-    formData.append('status', values.status.toString());
-    if (values.link) {
-      formData.append('link', values.link);
-    }
-    if (fileList.length > 0 && fileList[0].originFileObj) {
-      formData.append('image', fileList[0].originFileObj);
-    }
-
-    mutate(formData);
-  };
-
-  const handleFileChange = (info: any) => {
-    const { fileList } = info;
-    setFileList(fileList);
-  };
-
   if (categoryLoading || bannerLoading) {
-    return <Spin tip="Đang tải danh mục và banner..." className="flex justify-center items-center h-screen" />;
+    return <div>Đang tải dữ liệu...</div>;
+  }
+
+  if (categoryError || bannerError) {
+    return <div>Lỗi khi tải dữ liệu. Vui lòng thử lại sau.</div>;
   }
 
   return (
@@ -123,99 +143,109 @@ const UpdateBanners: React.FC = () => {
           onFinish={onFinish}
           initialValues={{
             title: '',
+            type: '',
+            status: 1,
             category_id: undefined,
             link: '',
-            type: 'main',
-            status: 1,
           }}
         >
-          <Form.Item
-            name="title"
-            label="Tiêu đề Banner"
-            rules={[{ required: true, message: 'Vui lòng nhập tiêu đề banner' }]}
-          >
-            <Input placeholder="Nhập tiêu đề banner" />
-          </Form.Item>
-
-          <Form.Item
-            name="category_id"
-            label="Danh mục"
-            rules={[{ required: true, message: 'Vui lòng chọn danh mục' }]}
-          >
-            <Select placeholder="Chọn danh mục">
-              {categoryData?.map((category: any) => (
-                <Option key={category.id} value={category.id}>
-                  {category.name}
-                </Option>
-              ))}
-            </Select>
-          </Form.Item>
-
-          <Form.Item
-            name="link"
-            label="Đường link (Tùy chọn)"
-          >
-            <Input placeholder="Nhập đường link" />
-          </Form.Item>
-
           <Form.Item
             name="type"
             label="Loại Banner"
             rules={[{ required: true, message: 'Vui lòng chọn loại banner' }]}
           >
-            <Select placeholder="Chọn loại banner">
-              <Option value="main">Main</Option>
-              <Option value="custom">Custom</Option>
-              <Option value="category">Category</Option>
+            <Select placeholder="Chọn loại banner" onChange={handleTypeChange} allowClear>
+              <Option value="main">Banner Chính</Option>
+              <Option value="category">Banner Danh Mục</Option>
+              <Option value="custom">Banner Tự Do</Option>
             </Select>
           </Form.Item>
 
-          <Form.Item
-            name="status"
-            label="Trạng thái"
-            rules={[{ required: true, message: 'Vui lòng chọn trạng thái' }]}
-          >
-            <Radio.Group>
-              <Radio value={1}>Hiển thị</Radio>
-              <Radio value={0}>Ẩn</Radio>
-            </Radio.Group>
-          </Form.Item>
-
-          <Form.Item
-            label={<span className="font-medium text-gray-700">Ảnh Banner</span>}
-            name="image"
-          >
-            <Upload
-              listType="picture"
-              fileList={fileList}
-              onChange={handleFileChange}
-              beforeUpload={() => false}
-              maxCount={1}
-              showUploadList={{
-                showRemoveIcon: false,
-              }}
-            >
-              <Button icon={<UploadOutlined />}>Tải lên ảnh</Button>
-            </Upload>
-            {fileList.length > 0 && (
-              <Button
-                type="link"
-                danger
-                onClick={() => deleteImage()}
+          {bannerType && (
+            <>
+              <Form.Item
+                name="title"
+                label="Tiêu đề Banner"
+                rules={[{ required: true, message: 'Vui lòng nhập tiêu đề banner' }]}
               >
-                Xóa ảnh hiện tại
-              </Button>
-            )}
-          </Form.Item>
+                <Input placeholder="Nhập tiêu đề banner" />
+              </Form.Item>
+
+              {bannerType === 'category' && (
+                <Form.Item
+                  name="category_id"
+                  label="Danh mục"
+                  rules={[{ required: true, message: 'Vui lòng chọn danh mục' }]}
+                >
+                  <Select placeholder="Chọn danh mục">
+                    {categoryData?.map((category: any) => (
+                      <Option key={category.id} value={category.id}>
+                        {category.name}
+                      </Option>
+                    ))}
+                  </Select>
+                </Form.Item>
+              )}
+
+              {bannerType !== 'main' && (
+                <Form.Item
+                  name="link"
+                  label="Đường link (Tùy chọn)"
+                  rules={[
+                    {
+                      required: bannerType === 'custom',
+                      message: 'Vui lòng nhập đường link cho banner tự do',
+                    },
+                  ]}
+                >
+                  <Input placeholder="Nhập đường link" />
+                </Form.Item>
+              )}
+
+              <Form.Item
+                name="status"
+                label="Trạng thái"
+                rules={[{ required: true, message: 'Vui lòng chọn trạng thái' }]}
+              >
+                <Radio.Group>
+                  <Radio value={1}>Hoạt động</Radio>
+                  <Radio value={0}>Không hoạt động</Radio>
+                </Radio.Group>
+              </Form.Item>
+
+              <Form.Item
+                label="Ảnh Banner"
+                name="image"
+              >
+                <Upload
+                  listType="picture"
+                  fileList={fileList}
+                  onChange={handleFileChange}
+                  beforeUpload={() => false}
+                  maxCount={1}
+                >
+                  <Button icon={<UploadOutlined />}>Tải lên ảnh</Button>
+                </Upload>
+                {fileList.length > 0 && (
+                  <Button
+                    type="primary"
+                    danger
+                    onClick={() => deleteImage()}
+                    style={{ marginTop: '10px' }}
+                  >
+                    Xóa ảnh hiện tại
+                  </Button>
+                )}
+              </Form.Item>
+            </>
+          )}
 
           <Form.Item>
             <div className="flex justify-end space-x-4">
               <Button type="primary" htmlType="submit">
                 Cập nhật
               </Button>
-              <Button onClick={() => navigate('/admin/dashboard/banner/list')}>
-                Quay lại
-              </Button>
+              <Button onClick={() => navigate('/admin/dashboard/banner/list')}>Quay lại</Button>
             </div>
           </Form.Item>
         </Form>

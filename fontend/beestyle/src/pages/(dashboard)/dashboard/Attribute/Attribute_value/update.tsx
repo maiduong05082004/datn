@@ -21,22 +21,25 @@ const UpdateAttributeValues: React.FC = () => {
     const navigate = useNavigate();
     const { id } = useParams();
 
-    const { data: attributeUpdate , isLoading } = useQuery({
+    const { data: attributeUpdate , isLoading, isError } = useQuery({
         queryKey: ['attributeUpdate', id],
         queryFn: async () => {
             const response = await axiosInstance.get(`http://127.0.0.1:8000/api/admins/attribute_values/${id}`);
             return response.data;
         },
     });
-    console.log(attributeUpdate);
-    
+
+    if (isError) {
+        messageApi.error('Lỗi khi tải dữ liệu thuộc tính');
+        return <div>Error loading data</div>;
+    }
 
     const { mutate } = useMutation({
         mutationFn: async (data: { attribute_id: number; values: string[] }) => {
-            return await axiosInstance.put('http://127.0.0.1:8000/api/admins/attribute_values', data);
+            return await axiosInstance.put(`http://127.0.0.1:8000/api/admins/attribute_values/${id}`, data);
         },
         onSuccess: () => {
-            messageApi.success('Thêm giá trị thuộc tính thành công');
+            messageApi.success('Cập nhật giá trị thuộc tính thành công');
             queryClient.invalidateQueries({ queryKey: ['attributes'] });
             form.resetFields();
         },
@@ -46,12 +49,7 @@ const UpdateAttributeValues: React.FC = () => {
     });
 
     const onFinish = (values: any) => {
-        const payload = {
-            id: id || '', // Đảm bảo id được truyền đúng
-            value: values.value.trim(),
-        };
-        console.log("Payload gửi đi:", payload);
-        mutate(payload);
+        mutate(values)
     };
     
 

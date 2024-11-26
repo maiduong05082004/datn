@@ -20,6 +20,7 @@ import {
   Layout,
   Switch,
   MenuProps,
+  Button,
 } from 'antd';
 import { Link, Outlet } from 'react-router-dom';
 import { NavLink } from 'react-router-dom'; // Import NavLink for navigation
@@ -43,8 +44,10 @@ const items1: MenuProps['items'] = [
     label: "Banners",
     children: [
 
-      { key: 'sub2-1', label: <NavLink to="/admin/dashboard/banner/list">Danh sách Banners</NavLink> },
-      { key: 'sub2-2', label: <NavLink to="/admin/dashboard/banner/add">Thêm Banners</NavLink> },
+      { key: 'sub2-1', label: <NavLink to="/admin/dashboard/banner/list/custom">D/s Banners Tự Do</NavLink> },
+      { key: 'sub2-2', label: <NavLink to="/admin/dashboard/banner/list/main">D/s Banners Chính</NavLink> },
+      { key: 'sub2-4', label: <NavLink to="/admin/dashboard/banner/list/category">D/s Banners Danh Mục</NavLink> },
+      { key: 'sub2-5', label: <NavLink to="/admin/dashboard/banner/add">Thêm Banners</NavLink> },
     ],
   },
   {
@@ -93,7 +96,7 @@ const items1: MenuProps['items'] = [
     label: 'Bill',
     children: [
       // { key: 'sub6-1', label: <NavLink to="/admin/bill/list">Danh sách đơn hàng</NavLink> },
-      { key: 'sub6-1', label: <NavLink to="/admin/dashboard/bill/app">Danh sách đơn hàng</NavLink> },
+      { key: 'sub6-1', label: <NavLink to="/admin/dashboard/bill/list">Danh sách đơn hàng</NavLink> },
     ],
   },
   {
@@ -118,9 +121,9 @@ const items1: MenuProps['items'] = [
     icon: React.createElement(DatabaseOutlined),
     label: 'Quản lý tồn kho',
     children: [
-        { key: 'inventory-1', label: <NavLink to="/admin/dashboard/inventory/list">Danh sách tồn kho</NavLink> },
+      { key: 'inventory-1', label: <NavLink to="/admin/dashboard/inventory/list">Danh sách tồn kho</NavLink> },
     ],
-},
+  },
 ];
 
 const DashboardPage: React.FC<{ isDarkMode: boolean }> = ({ isDarkMode }) => {
@@ -150,6 +153,7 @@ const App: React.FC = () => {
     setIsDarkMode((prevMode) => !prevMode);
   };
 
+
   return (
     <Layout style={{ minHeight: '100vh' }}>
       {/* Sidebar Navigation */}
@@ -176,7 +180,7 @@ const App: React.FC = () => {
       <Layout>
         {/* Top Header */}
         <Header
-          className='h-[80px]'
+          className='h-[50px]'
           style={{
             background: isDarkMode ? '#001529' : '#fff',
             padding: '0 16px',
@@ -191,13 +195,13 @@ const App: React.FC = () => {
             className={`w-[448px] h-[50px] border-none px-3 rounded-md flex items-center justify-center gap-2 ${isDarkMode ? 'bg-[#001529] text-white placeholder-white' : 'bg-white text-black placeholder-gray-400'
               }`}
           >
-            <SearchOutlined style={{ fontSize: '20px' }} />
+            {/* <SearchOutlined style={{ fontSize: '20px' }} />
             <input
               type="text"
               className={`w-full text-xl bg-transparent focus:outline-none placeholder-${isDarkMode ? 'white' : 'gray-400'
                 }`}
               placeholder="Type to search..."
-            />
+            /> */}
           </div>
 
           {/* Notifications, Messages, and Profile */}
@@ -239,10 +243,13 @@ const App: React.FC = () => {
                 fontSize: '12px',
               }}
             >
-              <button className={`bg-transparent bg-[#eef3fb] hover:bg-slate-500 p-2 rounded-full ${isDarkMode ? 'bg-[#313d4a]' : 'text-black'}`}>
+              <button
+                className={`flex items-center justify-center bg-transparent bg-[#eef3fb] hover:bg-slate-500 p-2 rounded-full ${isDarkMode ? "bg-[#313d4a]" : "text-black"
+                  }`}
+              >
                 <MessageOutlined
-                  className={`${isDarkMode ? 'text-white' : 'text-black'}`}
-                  style={{ fontSize: '24px' }} // Adjust the size to 34px
+                  className={`${isDarkMode ? "text-white" : "text-black"}`}
+                  style={{ fontSize: "24px" }} // Adjust the size as needed
                 />
               </button>
             </Badge>

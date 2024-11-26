@@ -104,6 +104,7 @@ Route::prefix('client')->as('client.')->group(function () {
         Route::post('/list', [CommentController::class, 'index'])->name('comment.list'); // Lấy list bình luận đã duyệt theo user_id & product_id
         Route::post('/store', [CommentController::class, 'store'])->name('comment.store')->middleware('auth:sanctum'); // Tạo 1 bình luận
         Route::put('/update', [CommentController::class, 'update'])->name('comment.update')->middleware('auth:sanctum'); // Cập nhật bình luận
+        Route::post('/report', [CommentController::class, 'reportComment'])->name('comment.report'); // Báo cáo bình luận
         // Route::delete('/destroy', [CommentController::class, 'destroy'])->name('comment->destroy'); // Xóa bình luận bên giao diện
         Route::get('/rating', [CommentController::class, 'getProductRating'])->name('comment.rating'); // Trung bình số sao đánh giá
     });
@@ -180,8 +181,8 @@ Route::prefix('admins')
                 Route::post('approve', [CommentController::class, 'approve'])->name('comment.approve'); // Duyệt bình luận
                 Route::post('/reply', [CommentController::class, 'reply'])->name('comment.reply'); // Admin trả lời bình luận của user
                 Route::post('/hide', [CommentController::class, 'hideComment'])->name('comment.hide'); // Ẩn bình luận nếu vi phạm 
-                Route::post('/report', [CommentController::class, 'report'])->name('comment.report'); // Báo cáo bình luận
                 Route::post('/manageUser', [CommentController::class, 'manageUser'])->name('comment.manageUser'); // quản lý user (khóa nếu comment bị báo cáo nhiều)
+                Route::post('/list-report', [CommentController::class, 'listReportComment'])->name('comment.list-report');
             });
 
             Route::prefix('inventory')->as('inventory.')->group(function () {
