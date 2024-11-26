@@ -1,7 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import axios from 'axios'
-import { add, set } from 'lodash'
-import React, { Dispatch, SetStateAction, useEffect, useMemo, useState } from 'react'
+import { Dispatch, SetStateAction, useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 
 type Props = {
@@ -78,15 +77,13 @@ const CheckAddresses = ({ selectedAddress, handleSelectProduct, isCheckAddresses
 
 
     const getWard = async (districtId: any) => {
-        await axios.get(`https://dev-online-gateway.ghn.vn/shiip/public-api/master-data/ward`, {
+        const { data } = await axios.get(`https://dev-online-gateway.ghn.vn/shiip/public-api/master-data/ward`, {
             params: { district_id: districtId },
             headers: {
                 token: '4bd9602e-9ad5-11ef-8e53-0a00184fe694',
             }
-        }).then(({data}) =>{
-console.log(data);
-
         })
+        return data
     }
 
     const [districtId, setDistrictId] = useState<number | null>(null);
@@ -173,10 +170,42 @@ console.log(data);
     const getProvinceName = (id: string) => provinceData?.data.data.find((item: any) => item.ProvinceID === parseInt(id))?.ProvinceName || 'Unknown Province';
     const getDistrictName = (id: string) => districtData?.data.data.find((item: any) => item.DistrictID === parseInt(id))?.DistrictName || 'Unknown District';
 
+    const [wardsMap, setWardsMap] = useState<Record<number, Record<string, string>>>({});
+    const fetchWardsByDistrict = async (districtId: number) => {
+        if (wardsMap[districtId]) {
+            return; // Nếu đã có dữ liệu, không cần gọi lại API
+        }
+        try {
+            const { data } = await axios.get(`https://dev-online-gateway.ghn.vn/shiip/public-api/master-data/ward`, {
+                params: { district_id: districtId },
+                headers: {
+                    token: '4bd9602e-9ad5-11ef-8e53-0a00184fe694',
+                },
+            });
+    
+            const wardDictionary = data?.data.reduce((acc: Record<string, string>, ward: any) => {
+                acc[ward.WardCode] = ward.WardName;
+                return acc;
+            }, {});
+    
+            setWardsMap((prev) => ({
+                ...prev,
+                [districtId]: wardDictionary,
+            }));
+        } catch (error) {
+            console.error("Error fetching wards:", error);
+        }
+    };
+    useEffect(() => {
+        addresses?.data?.data.forEach((item: any) => {
+            fetchWardsByDistrict(item.district);
+        });
+    }, [addresses]);
+
     return (
         <>
             {isCheckAddresses && (
-                <div className={`fixed z-10 flex-col top-0`}>
+                <div className={`step fixed z-20 flex-col top-0`}>
                     <div className="fixed overflow-hidden rounded-[5px] bg-white z-20 flex top-[50%] translate-y-[-50%] left-[50%] translate-x-[-50%] min-w-[400px] max-w-[600px] w-[100%] p-[20px]">
                         <form onSubmit={handleSubmit(onSubmit)} className='w-[100%]'>
                             <h2 className='font-[700] text-[20px]'>Địa chỉ của tôi</h2>
@@ -195,7 +224,7 @@ console.log(data);
                                                         <p className='text-[#787878]'>{item.phone_number}</p>
                                                     </div>
                                                     <div className="mt-[5px]">
-                                                        <div className="text-[#787878]"> {item.address_line} ,{getWard(item.ward)}, {getDistrictName(item.district)}, {getProvinceName(item.city)}</div>
+                                                        <div className="text-[#787878]"> {item.address_line} ,{wardsMap[item.district]?.[item.ward] || "Đang tải..."}, {getDistrictName(item.district)}, {getProvinceName(item.city)}</div>
                                                         {item?.is_default && (
                                                             <div className="py-[5px] w-[70px] text-center rounded-[3px] text-[12px] mt-[5px] text-white bg-black">Mặc định</div>
                                                         )}

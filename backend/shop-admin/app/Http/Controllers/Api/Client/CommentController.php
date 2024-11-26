@@ -59,7 +59,6 @@ class CommentController extends Controller
                 'commentDate' => $comment->commentDate,
                 'stars' => $comment->stars,
                 'user_name' => $userName,
-                'user_id' => $comment->user_id,
                 'reported_count' => $comment->reported_count,
                 'is_visible' => $comment->is_visible,
                 'product_variation_value_id' => $variationValue['product_variation_value_id'],
@@ -241,15 +240,17 @@ class CommentController extends Controller
         if (!$product) {
             return response()->json(['message' => 'Product not found for this comment.'], 404);
         }
-        // $user = Auth::user();
-        // if ($user->role === 'admin') {
-        //     return response()->json([
-        //         'message' => 'Admin không được báo cáo bình luận của user'
-        //     ], 403);
-        // }
-        // if ($comment->user_id == $userId) {
-        //     return response()->json(['message' => 'Bạn không thể báo cáo bình luận của chính mình'], 403);
-        // }
+
+        $user = Auth::user();
+        if ($user->role === 'admin') {
+            return response()->json([
+                'message' => 'Admin không được báo cáo bình luận của user'
+            ], 403);
+        }
+        if ($comment->user_id == $userId) {
+            return response()->json(['message' => 'Bạn không thể báo cáo bình luận của chính mình'], 403);
+        }
+
         $existingReport = ReportComment::where('comment_id', $commentId)
             ->where('user_id', $userId)
             ->first();
@@ -280,13 +281,15 @@ class CommentController extends Controller
         ]);
     }
 
-
     public function listReportComment(Request $request)
     {
+        $user = Auth::user();
+        if ($user->role !== 'admin') {
+            return response()->json(['message' => 'Bạn không có quyền xem danh sách báo cáo'], 403);
+        }
         // Kiểm tra ID bình luận
         $commentId = $request->input('comment_id');
         $comment = Comment::find($commentId);
-       
 
         if (!$comment) {
             return response()->json(['message' => 'Bình luận không tồn tại'], 404);
@@ -300,11 +303,6 @@ class CommentController extends Controller
         if ($reportComments->isEmpty()) {
             return response()->json(['message' => 'Không có báo cáo nào cho bình luận này.']);
         }
-        $user = Auth::user();
-        if($user->role !=='admin') {
-            return response()->json(['message'=> 'Không có quyền xem danh sách báo cáo'],403);
-        }
-
 
         // Trả về thông tin báo cáo và lý do báo cáo
         $reports = $reportComments->map(function ($report) {
@@ -320,6 +318,10 @@ class CommentController extends Controller
             'reports' => $reports
         ]);
     }
+
+
+
+    // API lấy danh sách bình luận đã duyệt cho một sản phẩm
 
 
     // API cập nhật bình luận

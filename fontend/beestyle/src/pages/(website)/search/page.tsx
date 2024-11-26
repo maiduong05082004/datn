@@ -46,7 +46,15 @@ const SearchPage = ({ isKeySearch }: Props) => {
         },
     })
 
+    useEffect(() => {
+        if(products) {
+            const firstTwoProducts = products?.data.products.slice(0, 8);
+            localStorage.setItem("suggest", JSON.stringify(firstTwoProducts));
+        }
+    }, [])
+
     console.log(products);
+    
     
 
 

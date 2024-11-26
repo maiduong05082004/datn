@@ -23,9 +23,6 @@ const ListPage = (props: Props) => {
     const [color, setColor] = useState<string[]>([]);
     const [priceCheck, setPiceCheck] = useState<string>("");
 
-    console.log(priceCheck);
-
-
     const { data: products, isLoading } = useQuery({
         queryKey: ['products', id, categoryIds, sizeIds, priceCheck, color],
         queryFn: () => {
@@ -121,30 +118,12 @@ const ListPage = (props: Props) => {
                 <div className="block lg:justify-between lg:items-center lg:px-0 lg:flex">
 
                     <div className="*:text-[12px] *:font-[500] hidden lg:block">
-                        <span className='text-[#787878]'>DANH MUC {'>'} </span>
-                        <span className='text-[#787878]'>TRANG CHU {'>'} </span>
-                        <span>QUAN AO</span>
                     </div>
 
                     <div className="flex justify-between">
-                        <div onClick={() => setFilter(!filter)} className="flex cursor-pointer items-center lg:border-[#E8E8E8] lg:border-[1px] lg:px-[16px] lg:py-[10px] lg:rounded-[4px]">
+                        <div onClick={() => setFilter(!filter)} className="flex py-[5px] cursor-pointer items-center lg:border-[#E8E8E8] lg:border-[1px] lg:px-[16px] lg:py-[10px] lg:rounded-[4px]">
                             <span className='mr-[5px] text-[14px] font-[500] lg:mr-[20px]'>Bộ lọc</span>
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="12" viewBox="0 0 16 12" fill="none"><path d="M1.33325 2.66699H8.83325" stroke="black" strokeLinecap="square"></path><path d="M12.1665 2.66699L14.6665 2.66699" stroke="black" strokeLinecap="square"></path><path d="M7.1665 9.33301L14.6665 9.33301" stroke="black" strokeLinecap="square"></path><path d="M1.33325 9.33301H3.83325" stroke="black" strokeLinecap="square"></path><ellipse cx="5.49992" cy="9.33366" rx="1.66667" ry="1.66667" stroke="black"></ellipse><ellipse cx="10.4999" cy="2.66667" rx="1.66667" ry="1.66667" stroke="black"></ellipse></svg>
-                        </div>
-
-                        <div className="my-[3px] text-[14px] font-[500] lg:ml-[12px]">
-                            <Space wrap>
-                                <Select
-                                    defaultValue="Sắp xếp"
-                                    style={{ width: 120 }}
-                                    options={[
-                                        { value: 'jack', label: 'Jack' },
-                                        { value: 'lucy', label: 'Lucy' },
-                                        { value: 'Yiminghe', label: 'yiminghe' },
-                                        { value: 'disabled', label: 'Disabled', disabled: true },
-                                    ]}
-                                />
-                            </Space>
                         </div>
                     </div>
                 </div>
@@ -152,8 +131,8 @@ const ListPage = (props: Props) => {
 
             <ProductsList products={products} />
 
-            <div className={`${filter ? "flex" : "hidden"} fixed max-w-[440px] w-[100%] top-0 right-0 z-20 bg-white flex-col justify-between h-full`}>
-                <div className="relative bg-white z-20 h-full">
+            <div className={`${filter ? "flex" : "hidden"} step fixed max-w-[440px] w-[100%] top-0 right-0 z-20 flex-col justify-between h-full`}>
+                <div className="relative bg-white z-20 h-full filter">
                     <div className="flex justify-between items-center p-[8px_20px] shadow-sm">
                         <h2 className="text-lg font-semibold">Bộ lọc</h2>
                         <div onClick={() => setFilter(!filter)} className="flex cursor-pointer w-[40px] h-[40px] justify-center items-center">
@@ -285,20 +264,20 @@ const ListPage = (props: Props) => {
                             {isPriceMenuOpen && (
                                 <div className="flex flex-col mt-[26px] mb-[46px] ">
                                     <div className=" cursor-pointer select-none flex items-center mb-[5px]">
-                                        <input onClick={() => setPiceCheck("under_1m")} id="under_1m" className='w-[20px] h-[20px]' type="radio" name="otp" />
+                                        <input onClick={() => setPiceCheck("under_1m")} checked={priceCheck === "under_1m"} id="under_1m" className='w-[20px] h-[20px]' type="radio" name="otp" />
                                         <label htmlFor="under_1m" className='ml-[10px]'>Dưới 1.000.000 VND</label>
                                     </div>
                                     <div className="flex items-center mb-[5px]">
-                                        <input onClick={() => setPiceCheck("1m_to_2m")} id="1m_to_2m" className='w-[20px] h-[20px]' type="radio" name="otp" />
-                                        <label htmlFor="1m_to_2m" onClick={() => setPiceCheck("1m_to_2m")} className='ml-[10px]'>1.000.000 - 2.000.000 VND</label>
+                                        <input onClick={() => setPiceCheck("1m_to_2m")} checked={priceCheck === "1m_to_2m"} id="1m_to_2m" className='w-[20px] h-[20px]' type="radio" name="otp" />
+                                        <label htmlFor="1m_to_2m" className='ml-[10px]'>1.000.000 - 2.000.000 VND</label>
                                     </div>
                                     <div className="flex items-center mb-[5px]">
-                                        <input onClick={() => setPiceCheck("2m_to_3m")} id="2m_to_3m" className='w-[20px] h-[20px]' type="radio" name="otp" />
-                                        <label htmlFor="2m_to_3m" onClick={() => setPiceCheck("2m_to_3m")} className='ml-[10px]'>2.000.000 - 3.000.000 VND</label>
+                                        <input onClick={() => setPiceCheck("2m_to_3m")} checked={priceCheck === "2m_to_3m"} id="2m_to_3m" className='w-[20px] h-[20px]' type="radio" name="otp" />
+                                        <label htmlFor="2m_to_3m" className='ml-[10px]'>2.000.000 - 3.000.000 VND</label>
                                     </div>
                                     <div className="flex items-center mb-[5px]">
-                                        <input onClick={() => setPiceCheck("above_4m")} id="above_4m" className='w-[20px] h-[20px]' type="radio" name="otp" />
-                                        <label htmlFor="above_4m" onClick={() => setPiceCheck("above_4m")} className='ml-[10px]'>Trên 4.000.000 VND</label>
+                                        <input onClick={() => setPiceCheck("above_4m")} checked={priceCheck === "above_4m"} id="above_4m" className='w-[20px] h-[20px]' type="radio" name="otp" />
+                                        <label htmlFor="above_4m" className='ml-[10px]'>Trên 4.000.000 VND</label>
                                     </div>
                                 </div>)}
                         </div>

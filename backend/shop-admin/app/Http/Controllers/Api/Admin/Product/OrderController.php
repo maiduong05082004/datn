@@ -485,7 +485,7 @@ class OrderController extends Controller
                     'transaction_fee' => $payment->transaction_fee,
                     'receipt_code' => $payment->receipt_code,
                 ];
-            })->toArray();
+            })->first();
 
             $canceledReasonTime = $bill->canceled_at ? Carbon::parse($bill->canceled_at)->timezone('Asia/Ho_Chi_Minh') : null;
 

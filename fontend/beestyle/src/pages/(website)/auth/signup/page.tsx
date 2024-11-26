@@ -3,9 +3,9 @@ import { useMutation } from '@tanstack/react-query'
 import { message } from 'antd'
 import axios from 'axios'
 import Joi from 'joi'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 
 type Props = {}
 interface TAuth {
@@ -62,6 +62,10 @@ const PageSignup = (props: Props) => {
     const [eyes, setEyes] = useState<boolean>(true)
     const [messageApi, contextHolder] = message.useMessage()
     const navigater = useNavigate()
+
+    useEffect(() => {
+        window.scrollTo(0, 0);
+    }, []);
 
     const { register, handleSubmit, formState: { errors }, reset } = useForm<TAuth>({
         resolver: joiResolver(authSchema),
@@ -178,6 +182,16 @@ const PageSignup = (props: Props) => {
                             <div className="flex flex-col w-[100%] text-[16px] mt-[24px]">
                                 <button type='submit' className='px-[32px] py-[12px] bg-black text-white rounded-[4px]'>ĐĂNG KÝ</button>
                             </div>
+                            
+                            <div className="mt-[16px]">
+                                <div className="flex justify-center items-center *:text-[14px] *:text-[#787878] *:font-[500]">
+                                    <div>Bạn đã có tài khoản?</div>
+                                    <span className='mx-[10px]'>
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="2" height="10" viewBox="0 0 2 10" fill="none"> <rect x="0.5" width="1" height="10" fill="#D0D0D0"></rect> </svg>
+                                    </span>
+                                    <Link to={`/signin`}>Đăng nhập</Link>
+                                </div>
+                            </div>
                         </div>
                     </form>
 
@@ -186,11 +200,11 @@ const PageSignup = (props: Props) => {
                             <div className="mb-[5px] flex justify-center items-center">
                                 <img src="https://encrypted-tbn3.gstatic.com/images?q=tbn:ANd9GcRcJCBNNt1a5beIvBpfZ_vM82U1B3AHdou0Pi50225Ng5dtIE_R" alt="" width={40} height={40} />
                             </div>
-                            <span>DĂNG NHẬP GOOGLE</span>
+                            <span>ĐĂNG NHẬP GOOGLE</span>
                         </button>
                         <button>
                             <div className="mb-[5px] flex justify-center items-center">
-                                <img src="https://encrypted-tbn3.gstatic.com/images?q=tbn:ANd9GcTFPNc3va29d6z1y9PQDmou5b5VlkC7t2u0swQfnJBKsE3Im2wF" alt="" width={40} height={40} />
+                                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/05/Facebook_Logo_%282019%29.png/600px-Facebook_Logo_%282019%29.png" alt="" width={40} height={40} />
                             </div>
                             <span>ĐĂNG NHẬP FACEBOOK</span>
                         </button>

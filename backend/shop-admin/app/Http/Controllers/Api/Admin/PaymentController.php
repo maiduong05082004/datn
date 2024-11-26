@@ -42,6 +42,8 @@ class PaymentController extends Controller
 
         $vnp_Url = "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html";
         $vnp_Returnurl = "http://localhost:8000/api/client/payment/callback";
+        // $vnp_Returnurl = "https://vn.mlb-korea.com/";
+
         $vnp_TmnCode = "943CGXVQ";
         $vnp_HashSecret = "WLQHP1MXDBOCOQZ56YQHESM95GC25M81";
 
@@ -73,7 +75,7 @@ class PaymentController extends Controller
             // Lấy danh sách cart_items dựa vào cart_id và thêm vào bill_details
             $cartItems = CartItem::whereIn('id', $request->input('cart_id'))->get();
             $subtotal = 0;
-            $orderItems = [];
+
 
             foreach ($cartItems as $item) {
                 $variationValue = ProductVariationValue::findOrFail($item->product_variation_value_id);
@@ -97,29 +99,13 @@ class PaymentController extends Controller
                     'product_variation_value_id' => $item->product_variation_value_id,
                     'total_amount' => $totalAmount, // Thêm giá trị total_amount vào đây
                 ]);
-
-                $variationValue->decrement('stock', $item->quantity);
-                $variationValue->productVariation->decrement('stock', $item->quantity);
-                Product::findOrFail($item->product_id)->decrement('stock', $item->quantity);
-
-                // $orderItems[] = [
-                //     'productName' => $item->product->name,
-                //     'size' => $variationValue->attributeValue->value,
-                //     'color' => $variationValue->productVariation->attributeValue->value,
-                //     'quantity' => $item->quantity,
-                //     'unitPrice' => $variationValue->price,
-                //     'total' => $totalAmount,
-                //     'image' => $item->productVariationValue->productVariation->variationImages()
-                //         ->where('image_type', 'album')
-                //         ->first()?->image_path,
-                // ];
             }
 
             $bill->subtotal = $subtotal;
             $bill->total = $subtotal;
             $bill->save();
 
-            // // Gửi email xác nhận đơn hàng qua hàng đợi
+            // Gửi email xác nhận đơn hàng qua hàng đợi
             // $orderData = $this->prepareOrderData($request, $bill, $orderItems);
             // Mail::to($request->user()->email)->queue(new OrderConfirmationMail($orderData));
 
@@ -127,7 +113,7 @@ class PaymentController extends Controller
             Payment::create([
                 'bill_id' => $bill->id,
                 'user_id' => auth()->user()->id,
-                'payment_method' => $request->input('payment_method'), // Lấy request để xác định cổng thanh toán
+                'payment_method' => Payment::METHOD_VNPAY, // Lấy request để xác định cổng thanh toán
                 'amount' => $request->input('total'),
                 'status' => Payment::STATUS_PENDING,
                 'transaction_id' => null,
@@ -179,19 +165,129 @@ class PaymentController extends Controller
     }
 
 
+
     private function prepareOrderData($request, $bill, $orderItems)
     {
+
+        $payment = Payment::where('bill_id', $bill->id)->first();
+
         return [
-            'customerName' => $request->user()->name,
+            'customerName' => $bill->shippingAddress->full_name,
             'orderId' => $bill->code_orders,
             'orderDate' => now()->format('d/m/Y H:i'),
             'paymentType' => $bill->getLoaiThanhToan(),
+            'payment_method' => $payment ? $payment->getPaymentMethod() : 'Không rõ',
+            'status' => $payment ? $payment->getPaymentStatus() : 'Không rõ',
             'shippingAddress' => $bill->shippingAddress->address_line,
             'phoneNumber' => $bill->shippingAddress->phone_number,
             'orderItems' => $orderItems,
-            'totalAmount' => $bill->total,
+            'subtotal' => $bill->subtotal,
+            'shipping_fee' => $bill->shipping_fee,
+            'discounted_amount' => $bill->discounted_amount,
+            'discounted_shipping_fee' => $bill->discounted_shipping_fee,
+            'totalAmount' => (int) ($bill->total + ($bill->shipping_fee ?? 0) - ($bill->discounted_amount ?? 0) - ($bill->discounted_shipping_fee ?? 0)),
         ];
     }
+
+
+
+    // public function vnpayCallback(Request $request)
+    // {
+    //     $vnp_HashSecret = "WLQHP1MXDBOCOQZ56YQHESM95GC25M81";
+    //     $vnp_SecureHash = $request->get('vnp_SecureHash');
+
+    //     $inputData = $request->all();
+    //     unset($inputData['vnp_SecureHash']);
+
+    //     ksort($inputData);
+    //     $hashdata = '';
+
+    //     foreach ($inputData as $key => $value) {
+    //         if (is_array($value)) {
+    //             $value = json_encode($value);
+    //         }
+    //         $hashdata .= '&' . urldecode($key) . '=' . urlencode($value);
+    //     }
+    //     $hashdata = ltrim($hashdata, '&');
+
+    //     $secureHash = hash_hmac('sha512', $hashdata, $vnp_HashSecret);
+    //     if ($secureHash == $vnp_SecureHash) {
+    //         $vnp_TxnRef = $request->get('vnp_TxnRef');
+    //         $vnp_BankCode = $request->get('vnp_BankCode');
+    //         $vnp_OrderInfo = $request->get('vnp_OrderInfo');
+    //         // Hash hợp lệ, xử lý lưu vào database
+    //         $transactionStatus = $request->get('vnp_TransactionStatus');
+    //         $bill = Bill::find($vnp_TxnRef);
+    //         if (!$bill) {
+    //             return response()->json(['message' => 'Bill not found'], 404);
+    //         }
+    //         $orderDetails = [];
+    //         foreach ($bill->billDetail as $detail) {
+    //             $orderDetails[] = [
+    //                 'product_id' => $detail->product_id,
+    //                 'variations' => [
+    //                     [
+    //                         'product_variation_value_id' => $detail->product_variation_value_id,
+    //                         'quantity' => $detail->quantity,
+    //                     ],
+    //                 ],
+    //             ];
+    //         }
+    //         $payment = Payment::where('bill_id', $vnp_TxnRef)->first();
+    //         if ($transactionStatus == '00') {
+    //             // Giao dịch thành công, lưu vào database
+    //             $payment->update([
+    //                 'status' => Payment::STATUS_PAID,
+    //                 'transaction_id' => $vnp_TxnRef,
+    //                 'pay_date' => now(),
+    //             ]);
+
+
+
+    //             $bill->status_bill = Bill::STATUS_PENDING;
+    //             $bill->save();
+    //             // CartItem::whereIn('id', $validatedData['cart_id'])->delete();
+    //             return response()->json([
+    //                 'code' => '00',
+    //                 'total' => $bill->total,
+    //                 'promotion_ids' => $bill->promotion_ids, // Nếu có trường này trong bảng bills
+    //                 'note' => $bill->note, // Nếu có trường này trong bảng bills
+    //                 'payment_type' => $bill->payment_type, // Nếu có trường này trong bảng bills
+    //                 'payment_method' => $payment->payment_method, // Trả về cổng thanh toán đã chọn
+    //                 'shipping_address_id' => $bill->shipping_address_id, // Nếu có trường này trong bảng bills
+    //                 'order_details' => $orderDetails,
+    //                 'shipping_fee' => $bill->shipping_fee,
+    //                 'discounted_amount' => $bill->discounted_amount,
+    //                 'discounted_shipping_fee' => $bill->discounted_shipping_fee,
+    //                 'message' => 'Payment processed successfully, cart items cleared'
+    //             ]);
+    //             // foreach ($bill->billDentail as $dentails) {
+    //             //     BillDetail::create([
+    //             //         'bill_id' => $bill->id,
+    //             //         'product_id' => $dentails->product_id,
+    //             //         'quantity' => $dentails->quantity,
+    //             //         'price' => $dentails->price,
+    //             //         'don_gia' => $dentails->don_gia,
+    //             //         'total_amount' => $dentails->total_amount,
+    //             //         'created_at' => now(),
+    //             //         'updated_at' => now(),
+    //             //     ]);
+    //             // }
+    //             // return response()->json(['message' => 'Payment processed successfully']);
+    //         } else {
+    //             $payment->update([
+    //                 'status' => Payment::STATUS_FAILED,
+    //                 'canceled_reason' => 'Transaction failed',
+    //             ]);
+    //             $bill->status_bill = 'failed';
+    //             $bill->save();
+    //             // Giao dịch không thành công, xử lý logic thất bại
+    //         }
+    //     } else {
+    //         return response()->json(['message' => 'Invalid signature'], 400);
+    //     }
+    // }
+
 
     public function vnpayCallback(Request $request)
     {
@@ -214,101 +310,80 @@ class PaymentController extends Controller
 
         $secureHash = hash_hmac('sha512', $hashdata, $vnp_HashSecret);
         if ($secureHash == $vnp_SecureHash) {
-            $vnp_TxnRef = $request->get('vnp_TxnRef');
-            $vnp_BankCode = $request->get('vnp_BankCode');
-            $vnp_OrderInfo = $request->get('vnp_OrderInfo');
-            // Hash hợp lệ, xử lý lưu vào database
-            $transactionStatus = $request->get('vnp_TransactionStatus');
-            $bill = Bill::find($vnp_TxnRef);
+            $vnp_TxnRef = $request->get('vnp_TxnRef'); // ID hóa đơn
+            $transactionStatus = $request->get('vnp_TransactionStatus'); // Trạng thái giao dịch
+
+            $bill = Bill::with('billDetail.productVariationValue')->find($vnp_TxnRef); // Lấy hóa đơn và chi tiết
             if (!$bill) {
                 return response()->json(['message' => 'Bill not found'], 404);
             }
-            $orderDetails = [];
-            foreach ($bill->billDetail as $detail) {
-                $orderDetails[] = [
-                    'product_id' => $detail->product_id,
-                    'variations' => [
-                        [
-                            'product_variation_value_id' => $detail->product_variation_value_id,
-                            'quantity' => $detail->quantity,
-                        ],
-                    ],
-                ];
-            }
+
             $payment = Payment::where('bill_id', $vnp_TxnRef)->first();
+            if (!$payment) {
+                return response()->json(['message' => 'Payment record not found'], 404);
+            }
+
             if ($transactionStatus == '00') {
-                // Giao dịch thành công, lưu vào database
+                // **1. Cập nhật trạng thái thanh toán**
                 $payment->update([
                     'status' => Payment::STATUS_PAID,
                     'transaction_id' => $vnp_TxnRef,
                     'pay_date' => now(),
                 ]);
 
-                $cartItems = CartItem::whereIn('id', $request->input('cart_id'))->get();
-                $subtotal = 0;
-                $orderItems = [];
+                // **2. Cập nhật trạng thái hóa đơn**
+                $bill->update(['status_bill' => Bill::STATUS_PENDING]);
 
-                foreach ($cartItems as $item) {
-                    $variationValue = ProductVariationValue::findOrFail($item->product_variation_value_id);
-                    $totalAmount = $variationValue->price * $item->quantity;
-                    $subtotal += $totalAmount;
+                // **3. Cập nhật kho hàng**
+                foreach ($bill->billDetail as $detail) {
+                    $variationValue = $detail->productVariationValue;
 
-                    $orderItems[] = [
-                        'productName' => $item->product->name,
-                        'size' => $variationValue->attributeValue->value,
-                        'color' => $variationValue->productVariation->attributeValue->value,
-                        'quantity' => $item->quantity,
-                        'unitPrice' => $variationValue->price,
-                        'total' => $totalAmount,
-                        'image' => $item->productVariationValue->productVariation->variationImages()
-                            ->where('image_type', 'album')
-                            ->first()?->image_path,
-                    ];
-
-
-                    // Gửi email xác nhận đơn hàng qua hàng đợi
-                    $orderData = $this->prepareOrderData($request, $bill, $orderItems);
-                    Mail::to($request->user()->email)->queue(new OrderConfirmationMail($orderData));
+                    if ($variationValue) {
+                        $variationValue->decrement('stock', $detail->quantity);
+                        $variationValue->productVariation->decrement('stock', $detail->quantity);
+                        $variationValue->productVariation->product->decrement('stock', $detail->quantity);
+                    }
                 }
 
-                $bill->status_bill = Bill::STATUS_PENDING;
-                $bill->save();
-                // CartItem::whereIn('id', $validatedData['cart_id'])->delete();
+                // **4. Gửi email xác nhận đơn hàng**
+                $orderItems = [];
+                foreach ($bill->billDetail as $item) {
+                    $variationValue = $item->productVariationValue;
+                    $orderItems[] = [
+                        'productName' => $item->product->name ?? 'N/A',
+                        'size' => $variationValue->attributeValue->value ?? 'N/A',
+                        'color' => $variationValue->productVariation->attributeValue->value ?? 'N/A',
+                        'quantity' => $item->quantity ?? 0,
+                        'unitPrice' => $item->don_gia ?? 0,
+                        'total' => $item->total_amount ?? 0,
+                        'image' => $variationValue->productVariation->variationImages()
+                            ->where('image_type', 'album')
+                            ->first()?->image_path ?? null,
+                    ];
+                }
+
+                try {
+                    $orderData = $this->prepareOrderData($request, $bill, $orderItems);
+                    Mail::to($bill->email_receiver)->queue(new OrderConfirmationMail($orderData));
+                } catch (\Exception $e) {
+                    \Log::error('Error sending email:', ['error' => $e->getMessage()]);
+                }
+
                 return response()->json([
                     'code' => '00',
-                    'total' => $bill->total,
-                    'promotion_ids' => $bill->promotion_ids, // Nếu có trường này trong bảng bills
-                    'note' => $bill->note, // Nếu có trường này trong bảng bills
-                    'payment_type' => $bill->payment_type, // Nếu có trường này trong bảng bills
-                    'payment_method' => $payment->payment_method, // Trả về cổng thanh toán đã chọn
-                    'shipping_address_id' => $bill->shipping_address_id, // Nếu có trường này trong bảng bills
-                    'order_details' => $orderDetails,
-                    'shipping_fee' => $bill->shipping_fee,
-                    'discounted_amount' => $bill->discounted_amount,
-                    'discounted_shipping_fee' => $bill->discounted_shipping_fee,
-                    'message' => 'Payment processed successfully, cart items cleared'
+                    'message' => 'Payment processed successfully',
+                    'bill_id' => $bill->id,
                 ]);
-                // foreach ($bill->billDentail as $dentails) {
-                //     BillDetail::create([
-                //         'bill_id' => $bill->id,
-                //         'product_id' => $dentails->product_id,
-                //         'quantity' => $dentails->quantity,
-                //         'price' => $dentails->price,
-                //         'don_gia' => $dentails->don_gia,
-                //         'total_amount' => $dentails->total_amount,
-                //         'created_at' => now(),
-                //         'updated_at' => now(),
-                //     ]);
-                // }
-                // return response()->json(['message' => 'Payment processed successfully']);
+
+                // return redirect('http://localhost:5173/account?status=success');
             } else {
+                // **5. Xử lý khi giao dịch thất bại**
                 $payment->update([
                     'status' => Payment::STATUS_FAILED,
                     'canceled_reason' => 'Transaction failed',
                 ]);
-                $bill->status_bill = 'failed';
-                $bill->save();
-                // Giao dịch không thành công, xử lý logic thất bại
+                $bill->update(['status_bill' => 'failed']);
+                return response()->json(['message' => 'Transaction failed'], 400);
             }
         } else {
             return response()->json(['message' => 'Invalid signature'], 400);

@@ -153,3 +153,79 @@ input[type="radio"]:checked::before, input[type="checkbox"]:checked::before {
     left: 0;
   }
 }
+
+
+.marquee {
+  position: fixed;
+  display: inline-block;
+  white-space: nowrap;
+  animation: marquee-animation 10s linear infinite;
+}
+
+@keyframes marquee-animation {
+  0% {
+    transform: translateX(0%); /* Bắt đầu từ ngoài màn hình bên trái */
+  }
+  100% {
+    transform: translateX(140%); /* Kết thúc khi văn bản ra ngoài màn hình bên phải */
+  }
+}
+
+
+.support {
+  animation: support-animation .3s ease-out;
+}
+
+@keyframes support-animation {
+  0% {
+    height: 0;
+    width: 0; /* Bắt đầu từ ngoài màn hình bên trái */
+  }
+  100% {
+    width: 400;
+    height: 400; /* Kết thúc khi văn bản ra ngoài màn hình bên phải */
+  }
+}
+
+.support {
+  animation: support-animation .3s ease-out;
+}
+
+@keyframes support-animation {
+  0% {
+    height: 0;
+    width: 0; /* Bắt đầu từ ngoài màn hình bên trái */
+  }
+  100% {
+    width: 400;
+    height: 400; /* Kết thúc khi văn bản ra ngoài màn hình bên phải */
+  }
+}
+
+.step {
+  animation: step-animation .2s ease-out;
+}
+
+@keyframes step-animation {
+  0% {
+    opacity: 0;
+    opacity: 0; /* Bắt đầu từ ngoài màn hình bên trái */
+  }
+  100% {
+    opacity: 1;
+    opacity: 1; /* Kết thúc khi văn bản ra ngoài màn hình bên phải */
+  }
+}
+.filter {
+  animation: filter-animation .2s ease-out;
+}
+
+@keyframes filter-animation {
+  0% {
+    transform: translateX(100%);
+  }
+  100% {
+    transform: translateX(0%);
+  }
+}
+

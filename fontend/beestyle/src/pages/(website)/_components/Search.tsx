@@ -1,6 +1,7 @@
 
 import React, { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
+import AddProductCart from './AddProductCart';
 
 type Props = {}
 
@@ -8,6 +9,9 @@ const Search = ({ isSearch, setIsSearch, setKeySearch }: any) => {
 
     const [inputValue, setInputValue] = useState('');
     const [searchHistory, setSearchHistory] = useState<string[]>([]);
+    const [cartItem, setCartItem] = useState<any>()
+    const [activeCart, setActiveCart] = useState<boolean>(false)
+
     const handlerInputSearch = (e: any) => {
         setInputValue(e.target.value)
     }
@@ -39,6 +43,8 @@ const Search = ({ isSearch, setIsSearch, setKeySearch }: any) => {
     };
 
 
+    const [products, setProducts] = useState<any>(JSON.parse(localStorage.getItem('suggest') || '[]'));
+
     return (
         <div className={`${isSearch ? "fixed" : "hidden"} p-[15px] top-0 bg-white min-h-[100%] w-[100%] z-30 lg:p-0 lg:min-h-[584px]`}>
             <div className="max-w-[900px] m-[0_auto] py-[56px] relative">
@@ -47,7 +53,7 @@ const Search = ({ isSearch, setIsSearch, setKeySearch }: any) => {
 
                     <form action="" className="relative">
                         <input onChange={handlerInputSearch} value={inputValue} className="h-[48px] border-b-[3px] border-b-black px-[15px] w-[100%] outline-none text-[20px] text-black font-[500] leading-8" placeholder="#Giày MLB Chunky Liner" type="text" name="" id="" />
-                        <Link to={`/search?keyword=${inputValue}`} onClick={() => { setIsSearch(!isSearch); setInputValue(''); saveSearchHistory(inputValue); setKeySearch(inputValue)}} className="bg-transparent absolute bottom-[10px] right-[15px] w-[32px] h-[32px] flex items-center justify-center">
+                        <Link to={`/search?keyword=${inputValue}`} onClick={() => { setIsSearch(!isSearch); setInputValue(''); saveSearchHistory(inputValue); setKeySearch(inputValue) }} className="bg-transparent absolute bottom-[10px] right-[15px] w-[32px] h-[32px] flex items-center justify-center">
                             <div className='w-[40px] h-[40px] flex justify-center items-center text-center'>
                                 <img className=" ls-is-cached lazyloaded" src="https://file.hstatic.net/200000642007/file/icon-search_f3577f42c6314038a0636c20100bd8d9.svg" data-src="https://file.hstatic.net/200000642007/file/icon-search_f3577f42c6314038a0636c20100bd8d9.svg" alt="Icon search" width={24} height={24} />
                             </div>
@@ -104,23 +110,23 @@ const Search = ({ isSearch, setIsSearch, setKeySearch }: any) => {
                             <div className="w-[70%] pl-[50px]">
                                 <div className="flex font-[700] text-[16px] mb-[16px]">Sản phẩm gợi ý</div>
 
-
                                 <div className="grid grid-cols-8 gap-2">
-                                    <div className="mb-[30px] col-span-2 relative">
-                                        <div className="absolute top-[16px] right-[16px]">
-                                            <div className="bg-black flex justify-center w-[40px] h-[40px] rounded-[100%] items-center opacity-10">
-                                                <div className="w-[24px] h-[24px]">
-                                                    <img src="https:file.hstatic.net/200000642007/file/shopping-cart_3475f727ea204ccfa8fa7c70637d1d06.svg" alt="" />
+                                    {products.map((item: any) => (
+                                        <div className="mb-[30px] col-span-2 relative">
+                                            <div onClick={() => {setCartItem(item), setActiveCart(true)}} className="absolute top-[16px] right-[16px]">
+                                                <div className="bg-black flex justify-center w-[40px] h-[40px] rounded-[100%] items-center opacity-10">
+                                                    <div className="w-[24px] h-[24px]">
+                                                        <img src="https:file.hstatic.net/200000642007/file/shopping-cart_3475f727ea204ccfa8fa7c70637d1d06.svg" alt="" />
+                                                    </div>
                                                 </div>
                                             </div>
+                                            <Link to={`#`} className="">
+                                                <picture>
+                                                    <div className="pt-[124%] bg-cover bg-center bg-no-repeat cursor-pointer" style={{ backgroundImage: `url(${item.variations[0].variation_album_images[0]})` }}></div>
+                                                </picture>
+                                            </Link>
                                         </div>
-                                        <Link to={`#`} className="">
-                                            <picture>
-                                                <div className="pt-[124%] bg-cover bg-center bg-no-repeat cursor-pointer" style={{ backgroundImage: `url(https://product.hstatic.net/200000642007/product/50mgl_3amtv0841_1_cba086570a904bba927cc1aff81aeaf9_ff0ea9f3163c4b859a158bd043566317_grande.jpg)` }}></div>
-                                            </picture>
-                                        </Link>
-
-                                    </div>
+                                    ))}
                                 </div>
 
 
@@ -130,7 +136,7 @@ const Search = ({ isSearch, setIsSearch, setKeySearch }: any) => {
 
                 </div>
 
-                <div className=""></div>
+                <AddProductCart cartItem={cartItem} activeCart={activeCart} setActiveCart={setActiveCart} />
 
             </div>
             <div onClick={() => setIsSearch(!isSearch)} className="top-[15px] right-[15px] w-[40px] h-[40px] absolute border-[1px] border-[#E8E8E8] flex items-center justify-center rounded-[100%] cursor-pointer lg:top-[48px] lg:right-[48px] lg:w-[56px] lg:h-[56px]">

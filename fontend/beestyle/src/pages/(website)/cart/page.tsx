@@ -8,9 +8,13 @@ import { useProductMutations } from '@/components/hooks/useProductMutations';
 import NavigationButton from './_components/navigationButton';
 import Slider from 'react-slick';
 import { Link, useNavigate } from 'react-router-dom';
+import LoadingPage from '../loading/page';
 
+type Props = {
 
-const CartPage = () => {
+}
+
+const CartPage = ({}: any) => {
 
     const [selectedProducts, setSelectedProducts] = useState<string[]>([]);
     const [totalPrice, setTotalPrice] = useState(0);
@@ -24,7 +28,7 @@ const CartPage = () => {
     const { contextHolder, updateProductMutation, deleteProductMutation } = useProductMutations();
 
     const token = localStorage.getItem("token")
-    const { data: carts } = useQuery({
+    const { data: carts, isLoading: isLoadingCarts } = useQuery({
         queryKey: ['carts', token],
         queryFn: async () => {
             return await axios.get('http://127.0.0.1:8000/api/client/cart', {
@@ -34,7 +38,6 @@ const CartPage = () => {
             });
         },
     })
-    console.log(carts);
 
     useEffect(() => {
         if (variationId !== variationIdDf) {
@@ -94,19 +97,24 @@ const CartPage = () => {
         }
     }, [selectedProducts, carts?.data?.cart_items]);
 
+
+
     useEffect(() => {
         if (carts?.data?.cart_items) {
-            const allProductIds = carts?.data?.cart_items?.map((item: any) => item.cart_item_id);
+            const allProductIds = carts?.data?.cart_items
+                ?.filter((item: any) => item.variation_values.stock >= item.quantity)
+                .map((item: any) => item.cart_item_id);
             setSelectedProducts([...allProductIds]);
 
             // Tính tổng tiền của tất cả sản phẩm khi tự động tích
-            // const total = carts?.data?.cartData?.products.reduce(
-            //     (sum: any, item: any) => sum + (item.price * item.quantity),
-            //     0
-            // );
-            // setTotalPrice(total);
+            const total = carts?.data?.cartData?.filter((item: any) => item.variation_values.stock >= item.quantity)?.products.reduce(
+                (sum: any, item: any) => sum + (item.price * item.quantity),
+                0
+            );
+            setTotalPrice(total);
         }
     }, [carts?.data?.cart_items]);
+
 
     const handleDelete = (productId: any) => {
         deleteProductMutation.mutate(
@@ -132,7 +140,7 @@ const CartPage = () => {
 
     const handleSelectAll = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.checked) {
-            const allProductIds = carts?.data?.cart_items.map((item: any) => item.cart_item_id) || [];
+            const allProductIds = carts?.data?.cart_items?.filter((item: any) => item.variation_values.stock >= item.quantity).map((item: any) => item.cart_item_id) || [];
             setSelectedProducts(allProductIds);
         } else {
             setSelectedProducts([]);
@@ -155,6 +163,7 @@ const CartPage = () => {
         navigate("/checkouts", { state: { products: selectedItems, totalPrice } });
     };
 
+    // if (isLoadingCarts) return (<LoadingPage />)
     return (
         <main>
             {contextHolder}
@@ -180,22 +189,28 @@ const CartPage = () => {
                         </div>
 
 
-                        {carts?.data?.cart_items.length !== 0 ? (
+
+
+                        {carts?.data?.cart_items.length !== 0 && carts ? (
                             <div className="px-[20px]">
                                 {carts?.data?.cart_items.map((item: any, index: any) => (
                                     <div key={index + 1} className="flex flex-wrap items-center justify-between mt-[24px] lg:justify-between lg:flex-nowrap">
                                         <div className='flex items-start w-[100%]'>
-                                            <div className="w-[120px]">
+                                            <div className="w-[120px] relative">
                                                 <input className='absolute w-[20px] h-[20px]'
                                                     type="checkbox"
-                                                    checked={selectedProducts.includes(item?.cart_item_id)}
+                                                    checked={item.variation_values.stock >= item.quantity && selectedProducts.includes(item?.cart_item_id)}
                                                     onChange={() => handleSelectProduct(item?.cart_item_id)}
-
                                                 />
 
                                                 <div className="pt-[123.5%] bg-cover bg-center bg-no-repeat"
                                                     style={{ backgroundImage: `url(${item.album_images[0]})` }}
                                                 ></div>
+                                                {item.variation_values.stock < item.quantity ? (
+                                                    <div className="bg-black absolute z-10 w-[100%] h-[100%] top-0 bg-opacity-30 flex items-center justify-center text-white font-[600] text-[16px] select-none">
+                                                        Hết hàng
+                                                    </div>
+                                                ) : ""}
                                             </div>
 
                                             <div className='w-[calc(100%-120px)]'>
@@ -208,7 +223,7 @@ const CartPage = () => {
                                                     <div className='text-[12px] text-black font-[500] my-[4px]'> {item.variation_values.value} / {item.variation_values.sku} </div>
                                                     <div className='text-[12px] text-black font-[500]'>Số lượng: {item.quantity}</div>
 
-                                                    {item.stock === 0 ?
+                                                    {item.variation_values.discount === 0 ?
                                                         (<div className='mt-[24px] flex flex-col'>
                                                             <span className={` font-[700] text-[16px]`}>{new Intl.NumberFormat('vi-VN').format(item.variation_values.price)} VND</span>
                                                         </div>) : (<div className='mt-[24px] flex flex-col'>
@@ -233,7 +248,7 @@ const CartPage = () => {
                                         </div>
                                     </div>
                                 ))}
-                                <div className="hidden lg:flex justify-center mt-[12px] pt-[48px] border-t-[1px] border-t-[#E8E8E8]">
+                                <div className="hidden lg:flex justify-center mt-[24px] pt-[48px] border-t-[1px] border-t-[#E8E8E8]">
                                     <NavigationButton />
                                 </div>
                             </div>
@@ -267,7 +282,7 @@ const CartPage = () => {
 
                         </div>
 
-                        <button onClick={() => handleProceedToCheckout()} className={`${carts?.data?.cart_items.length === 0 || selectedProducts.length === 0 ? "pointer-events-none opacity-50" : ""} outline-none bg-black text-white text-[16px] font-[600] w-full fixed bottom-0 h-[56px] -tracking-wide lg:static lg:rounded-[0_0_8px_8px]`}>
+                        <button onClick={() => handleProceedToCheckout()} className={`${carts?.data?.cart_items.length === 0 || selectedProducts.length === 0 ? "pointer-events-none bg-[#787878]" : ""} select-none outline-none bg-black text-white text-[16px] font-[600] w-full fixed bottom-0 h-[56px] -tracking-wide lg:static lg:rounded-[0_0_8px_8px]`}>
                             THANH TOÁN
                         </button>
                     </div>
@@ -275,10 +290,10 @@ const CartPage = () => {
             </div>
 
 
-            <div className={`${activeCart ? "" : "hidden"} fixed z-10 flex-col top-0`}>
+            <div className={`${activeCart ? "" : "hidden"} step fixed z-20 flex-col top-0`}>
                 <div className="">
                     <div className="fixed overflow-hidden rounded-[5px] bg-white z-20 flex top-[50%] translate-y-[-50%] left-[50%] translate-x-[-50%] max-w-[825px] w-[100%]">
-                        <div onClick={() => setActiveCart(!activeCart)} className="absolute right-0 cursor-pointer p-[5px]">
+                        <div onClick={() => setActiveCart(false)} className="absolute right-0 cursor-pointer p-[5px]">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
                             </svg>
@@ -368,7 +383,7 @@ const CartPage = () => {
                         </div>
                     </div>
                 </div>
-                <div className="block bg-black opacity-[0.7] fixed w-[100%] h-[100%] top-0 left-0 z-10"></div>
+                <div onClick={() => setActiveCart(false)} className="block bg-black opacity-[0.7] fixed w-[100%] h-[100%] top-0 left-0 z-10"></div>
             </div>
         </main>
     )

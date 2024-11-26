@@ -17,6 +17,7 @@ import UpdateBanners from "@/pages/(dashboard)/dashboard/Banner/update";
 import ListUser from "@/pages/(dashboard)/dashboard/Users/list";
 import AddUser from "@/pages/(dashboard)/dashboard/Users/add";
 import UpdateUser from "@/pages/(dashboard)/dashboard/Users/update";
+import ListComments from "@/pages/(dashboard)/dashboard/Comment/list";
 import ListProducts from "@/pages/(dashboard)/dashboard/Products/list";
 import UpdateProduct from "@/pages/(dashboard)/dashboard/Products/update";
 import AddProduct from "@/pages/(dashboard)/dashboard/Products/add";
@@ -31,7 +32,7 @@ import CheckOutPage from "@/pages/(website)/checkout/page";
 import DetailPage from "@/pages/(website)/detail/page";
 import ListPage from "@/pages/(website)/list/page";
 import SearchPage from "@/pages/(website)/search/page";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import ListAttribute from "@/pages/(dashboard)/dashboard/Attribute/list";
 import Shiping from "@/pages/(dashboard)/dashboard/Bill/shiping";
 import AddAttribute from "@/pages/(dashboard)/dashboard/Attribute/add";
@@ -52,6 +53,9 @@ import Detailship from "@/pages/(dashboard)/dashboard/Bill/detailship";
 import DeatilConfirm from "@/pages/(dashboard)/dashboard/Bill/detailConfirm"
 import Comments from "@/pages/(dashboard)/dashboard/Products/comments";
 import DetailUser from "@/pages/(dashboard)/dashboard/Users/detail";
+import PrivateRouter from "./PrivateRoute";
+import OrderDetail from "@/pages/(website)/account/_components/orderDetail";
+import ErrorPage from "@/pages/(website)/404/page";
 // import CartPage from "@/pages/(website)/cart/page";
 import InventoryManagement from "@/pages/(dashboard)/dashboard/Inventory/list";
 import Signin from "@/pages/(dashboard)/dashboard/auth.tsx/signin";
@@ -76,37 +80,6 @@ const Router = () => {
 
     const [isSearch, setIsSearch] = useState<boolean>(false)
     const [isKeySearch, setKeySearch] = useState<string>("")
-    const [userRole, setUserRole] = useState<string | null>(null)
-    const [loading, setLoading] = useState<boolean>(true)
-
-    useEffect(() => {
-        const fetchUserProfile = async () => {
-            const token = localStorage.getItem("token")
-            if (token) {
-                try {
-                    const response = await axios.get("http://127.0.0.1:8000/api/client/auth/profile", {
-                        headers: {
-                            Authorization: `Bearer ${token}`,
-                        },
-                    })
-                    setUserRole(response.data.user.role)
-                } catch (error) {
-                    console.error("Error fetching user profile:", error)
-                } finally {
-                    setLoading(false)
-                }
-            } else {
-                setLoading(false)
-            }
-        }
-
-        fetchUserProfile()
-    }, [])
-
-    if (loading) {
-        return <div>Loading...</div>
-    }
-
     return (
 
         <>
@@ -116,8 +89,6 @@ const Router = () => {
                     <Route path="categories/:id" element={<ListPage />} />
                     <Route path="products/:id" element={<DetailPage />} />
                     <Route path="checkouts" element={<CheckOutPage />} />
-                    <Route path="signin" element={<PageSignin />} />
-                    <Route path="signup" element={<PageSignup />} />
                     <Route path="forgot-password" element={<ForgotPasswordPage />} />
                     <Route path="reset-password/:token" element={<ResetPasswordPage />} />
                     <Route path="search" element={<SearchPage isKeySearch={isKeySearch} />} />
@@ -128,18 +99,17 @@ const Router = () => {
                         <Route path="info" element={<InfoPage />} />
                         <Route path="recently" element={<RecentlyPage />} />
                         <Route path="addresses" element={<AddressesPage />} />
+                        <Route path="orders/:oderId" element={<OrderDetail />} />
                     </Route>
-                    {/* <Route path="carts" element={<CartPage />} /> */}
+                    <Route path="*" element={<ErrorPage />} />
                 </Route>
+                <Route path="signin" element={<PageSignin />} />
+                <Route path="signup" element={<PageSignup />} />
 
                 {/* Admin Routes */}
                 <Route path="admin" element={<Signin />} />
-                <Route path="admin/dashboard" element={
-                    // <PrivateRoute userRole={userRole}>
-                    // </PrivateRoute>
-                        <LayoutAdmin />
-
-                }>
+                {/* <Route path="admin/dashboard" element={<PrivateRouter><LayoutAdmin /></PrivateRouter>}> */}
+                <Route path="admin/dashboard" element={<LayoutAdmin />}>
                     <Route index element={<DashboardPage />} />
                     <Route path="profile" element={<MyProfile />} />
                     {/* bills */}

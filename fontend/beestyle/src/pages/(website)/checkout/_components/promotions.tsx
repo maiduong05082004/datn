@@ -22,6 +22,9 @@ const Promotions = ({ isPromotion, setPromotion, setPromotionAdd }: Props) => {
         },
     })
 
+    console.log(promotions);
+    
+
 
     const [promotion, setPromotionList] = useState<any>(JSON.parse(localStorage.getItem('promotions') || '[]'))    
     
@@ -64,7 +67,7 @@ const Promotions = ({ isPromotion, setPromotion, setPromotionAdd }: Props) => {
     }
 
     return (
-        <div className={`${isPromotion ? "" : "hidden"} fixed z-10 flex-col top-0`}>
+        <div className={`${isPromotion ? "" : "hidden"} step fixed z-10 flex-col top-0`}>
             <div className="fixed bg-white z-20 top-[50%] translate-y-[-50%] left-[50%] translate-x-[-50%] max-w-[500px] max-h-[500px] w-[100%]">
                 <div onClick={() => setPromotion(!isPromotion)} className="absolute right-0 cursor-pointer p-[5px]">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
@@ -99,7 +102,7 @@ const Promotions = ({ isPromotion, setPromotion, setPromotionAdd }: Props) => {
                                     <div className="p-[10px_16px] flex justify-between items-end">
                                         <div>
                                             <ul className='text-[14px]'>
-                                                <li>Giảm {item.discount_amount} sản phẩm</li>
+                                                <li>Giảm {new Intl.NumberFormat('vi-VN').format(item.discount_amount)} VND sản phẩm</li>
                                                 <li>Nhóm khách hàng được chỉ định</li>
                                                 <li>Nhóm sản phẩm</li>
                                                 <li>Hàng mới về</li>

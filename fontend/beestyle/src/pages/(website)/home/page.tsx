@@ -2,214 +2,25 @@ import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import Noel from "../events/eventsAudio";
+import ProductNew from "./_components/productNew";
+import BannerMain from "./_components/bannerMain";
+import ProductHot from "./_components/productHot";
 
 type Props = {}
 
 const HomePage = (props: Props) => {
 
-  const [categoryId, setCategoryId] = useState<any>({})
-
   // Load dau trang
-  useEffect(() => {
-    window.scrollTo(0, 0);
-  }, []);
-
-  const { data: home } = useQuery({
-    queryKey: ["home"],
-    queryFn: async () => {
-      return await axios.get(`http://127.0.0.1:8000/api/client/home`)
-    }
-  })
-
-  console.log(home);
-
-
-
-  useEffect(() => {
-    if (home?.data?.products_new_category) {
-      const foundCategory = home.data.products_new_category.find((item: any) => item);
-      if (foundCategory) {
-        setCategoryId(foundCategory);
-      }
-    }
-  }, [home?.data?.products_new_category]);
-
-  const [currentIndex, setCurrentIndex] = useState<number>(0);
-
-  // Tự động chuyển banner sau 3 giây
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentIndex((prevIndex) =>
-        prevIndex === home?.data?.banners.length - 1 ? 0 : prevIndex + 1
-      );
-    }, 3000); // Chuyển sau mỗi 3 giây
-    return () => clearInterval(interval); // Dọn dẹp bộ đếm thời gian
-  }, [home?.data?.banners.length]);
-
-  const goToNext = () => {
-    setCurrentIndex((prevIndex) =>
-      prevIndex === home?.data?.banners.length - 1 ? 0 : prevIndex + 1
-    );
-  };
-
-  const goToPrev = () => {
-    setCurrentIndex((prevIndex) =>
-      prevIndex === 0 ? home?.data?.banners.length - 1 : prevIndex - 1
-    );
-  };
-
+  // useEffect(() => {
+  //   window.scrollTo(0, 0);
+  // }, []);
 
   return (
     <main>
-      <section>
-        <div className="">
-          {home?.data?.banners.map((item: any, index: any) => (
-
-            <a href="" className={`${index === currentIndex ? "" : "hidden"}`}>
-              <picture className=''>
-                <img className='h-full w-full hidden lg:block' src={item.image_path} alt="" />
-                {/* <img className='h-full w-full lg:hidden' src="https://file.hstatic.net/200000642007/file/vn__1_.jpg" alt="" /> */}
-              </picture>
-            </a>
-
-          ))}
-        </div>
-        <button
-          onClick={goToPrev}
-          className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-black text-white p-5 rounded-full opacity-50"
-        >
-          ❮
-        </button>
-        <button
-          onClick={goToNext}
-          className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-black text-white p-5 rounded-full opacity-50"
-        >
-          ❯
-        </button>
-      </section>
-      <section>
-        <div className="pt-[40px]">
-          <div className="px-[15px] pc:px-[48px]">
-            <div className="mb-[20px] lg:mb-[24px] lg:flex lg:justify-between lg:items-center">
-              <h3 className='font-[600] text-[24px] lg:text-[32px]'>HÀNG MỚI VỀ</h3>
-              <div className="flex gap-2.5 justify-start mt-[10px] font-[600] *:rounded-[25px] *:border-black *:border-[1px] *:py-[5px] *:leading-8 *:px-[15px] lg:mt-[0] *:lg:py-[0]">
-                {home?.data?.products_new_category.map((item: any) => (
-                  item.name === "GIẢM GIÁ" || item.name === "PHỤ KIỆN" ? null : (
-                    <div onClick={() => setCategoryId(item)} className={`${item.name === categoryId.name ? "bg-black text-white" : "bg-white text-black"} cursor-pointer select-none`} >{item.name}</div>
-                  )
-                ))}
-              </div>
-            </div>
-
-            {home?.data.products_new_category.map((item: any) => (
-              <div className={`${item.name === categoryId.name ? "" : "hidden"} -mx-[15px] overflow-x-auto whitespace-nowrap flex scrollbar lg:mx-[0]`}>
-                <div className="w-[100%] shrink-0 lg:grid lg:grid-cols-12">
-
-                  <Link to={`/categories/${item.category_id}`} className="lg:col-span-7 relative group cursor-pointer">
-                    <picture className="">
-                      <img className='w-full' src={item.image_path} alt="" />
-                    </picture>
-                    <div className="absolute top-0 left-0 w-full h-full group-hover:bg-black opacity-0 group-hover:opacity-50 transition-opacity duration-300">
-                      <div className="text-white font-[700] absolute top-[50%] left-[50%] translate-x-[-50%] translate-y-[-50%] p-[15px_35px] border-[1px] rounded-[5px]">Xem tất cả</div>
-                    </div>
-                  </Link>
-
-                  <div className="lg:col-span-5">
-
-                    <div className="pt-[10px] overflow-x-auto whitespace-nowrap scrollbar flex gap-2 grid-">
-                      {item.products.map((item: any) => (
-                        <>
-                          <div className="max-w-[33.333%] grow-0 basis-[33.333%] shrink-0 relative ">
-                            <div className="absolute top-[16px] right-[16px]">
-                              <div className="bg-black flex justify-center w-[40px] h-[40px] rounded-[100%] items-center opacity-10">
-                                <div className="w-[24px] h-[24px]">
-                                  <img src="https://file.hstatic.net/200000642007/file/shopping-cart_3475f727ea204ccfa8fa7c70637d1d06.svg" alt="" />
-                                </div>
-                              </div>
-                            </div>
-                            <div className="">
-                              <picture>
-                                <div className="pt-[124%] bg-cover bg-center bg-no-repeat" style={{ backgroundImage: `url(${item?.variations[0]?.variation_album_images[0]})`, }}></div>
-                              </picture>
-                            </div>
-                            <div className="w-[100%] text-wrap px-[8px] pt-[10px]">
-                              <h4 className='description mb-[30px] text-[14px] font-[600]'>{item.name}</h4>
-                              <div className="flex gap-1 justify-start">
-                                <div className="w-[12px] h-[12px] rounded-[100%] border-black border-[6px] bg-black"></div>
-                                <div className="w-[12px] h-[12px] rounded-[100%] border-red-500 border-[6px] bg-red-500"></div>
-                              </div>
-                            </div>
-                          </div>
-                        </>
-                      ))}
-
-                    </div>
-
-                  </div>
-
-                </div>
-
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-      <section>
-        <div className="pt-[40px]">
-          <div className="px-[15px] pc:px-[48px]">
-            <div className="mb-[20px] lg:flex lg:justify-between lg:mb-[24px]">
-              <h3 className='text-[24px] font-[600] lg:text-[32px]'>HÀNG BÁN CHẠY</h3>
-              <div className="flex justify-start mt-[10px]">
-                <ul className='flex text-[16px] font-[600] lg:text-[18px]'>
-                  <li className=''><a href="">QUẦN ÁO</a></li>
-                  <li className='ml-[20px]'><a href="">NÓN</a></li>
-                  <li className='ml-[20px]'><a href="">GIÀY</a></li>
-                  <li className='ml-[20px]'><a href="">TÚI</a></li>
-                  <li className='ml-[20px]'><a href="">PHỤ KIỆN</a></li>
-                </ul>
-              </div>
-            </div>
-
-            <div className="-mx-[15px] lg:-mx-[0]">
-              <div className="flex gap-2 overflow-x-auto whitespace-nowrap scrollbar lg:gap-4">
-                {home?.data?.hot_products.map((item: any, index: any) => (
-                  <div className="max-w-[38.8%] basis-[38.8%] shrink-0 relative relatives lg:max-w-[19.157%] lg:basis-[19.157%]">
-                    <div className="absolute top-[16px] right-[16px]">
-                      <div className="bg-black flex justify-center w-[40px] h-[40px] rounded-[100%] items-center opacity-10">
-                        <div className="w-[24px] h-[24px]">
-                          <img src="https://file.hstatic.net/200000642007/file/shopping-cart_3475f727ea204ccfa8fa7c70637d1d06.svg" alt="" />
-                        </div>
-                      </div>
-                    </div>
-                    <div className="absolute bg-black h-[30px] w-[30px] top-0 left-0 z-0 flex items-center justify-center">
-                      <div className="text-white text-[18px] font-[700]">{index + 1}</div>
-                    </div>
-                    <div className="">
-                      <picture>
-                        <div className="pt-[124%] bg-cover bg-center bg-no-repeat" style={{ backgroundImage: `url(${item?.variations[0]?.variation_album_images[0]})`, }}></div>
-                      </picture>
-                    </div>
-                    <div className="w-[100%] text-wrap px-[8px] pt-[10px]">
-                      <div className="">
-                        <h4 className='description2 mb-[5px] text-[14px] font-[600]'>{item.name}</h4>
-                        <div className="text-[14px] font-[700]">
-                          <span className=''>{item.price}</span><sup className='underline'>đ</sup>
-                        </div>
-                      </div>
-                      <div className="flex gap-1 justify-start mt-[18px]">
-                        <div className="w-[12px] h-[12px] rounded-[100%] border-black border-[6px] bg-black"></div>
-                        <div className="w-[12px] h-[12px] rounded-[100%] border-red-500 border-[6px] bg-red-500"></div>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-
-
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
+      <BannerMain/>
+      <ProductNew />
+      <ProductHot/>
       <section>
         <div className="pt-[40px]">
           <div className="px-[15px] pc:px-[48px]">
@@ -242,7 +53,7 @@ const HomePage = (props: Props) => {
                 <div className="w-[100%] pt-[55px]">
                   <div className="-mx-[15px] lg:-mx-[0] flex gap-2 overflow-x-auto whitespace-nowrap scrollbar">
 
-                    {home?.data?.collection_products.map((item: any) => (
+                    {/* {home?.data?.collection_products.map((item: any) => (
                       <div className="w-[38.66%] shrink-0 relative">
                         <div className="absolute top-[16px] right-[16px]">
                           <div className="bg-black flex justify-center w-[40px] h-[40px] rounded-[100%] items-center opacity-10">
@@ -269,7 +80,7 @@ const HomePage = (props: Props) => {
                           </div>
                         </div>
                       </div>
-                    ))}
+                    ))} */}
 
                   </div>
                 </div>
@@ -278,7 +89,7 @@ const HomePage = (props: Props) => {
           </div>
         </div>
       </section>
-      <section>
+      {/* <section>
         <div className="pt-[40px]">
           <div className="px-[15px] pc:px-[48px]">
             <h3 className='text-[24px] font-[600] mb-[20px] lg:text-[32px]'>MLB STYLING</h3>
@@ -318,8 +129,8 @@ const HomePage = (props: Props) => {
             </div>
           </div>
         </div>
-      </section>
-      <section>
+      </section> */}
+      {/* <section>
         <div className="pt-[40px]">
           <div className="px-[15px] pc:px-[48px]">
             <h3 className='text-[24px] font-[600] mb-[20px] lg:text-[32px]'>MLB VIDEO</h3>
@@ -342,7 +153,7 @@ const HomePage = (props: Props) => {
             </div>
           </div>
         </div>
-      </section>
+      </section> */}
       <section>
         <div className="pt-[40px]">
           <div className="px-[15px] pc:px-[48px]">
