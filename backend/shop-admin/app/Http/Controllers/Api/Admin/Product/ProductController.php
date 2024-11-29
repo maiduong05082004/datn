@@ -11,6 +11,7 @@ use App\Models\ProductImage;
 use App\Models\ProductVariation;
 use App\Models\ProductVariationImage;
 use App\Models\ProductVariationValue;
+use App\Models\TableProductCost;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -55,12 +56,18 @@ class ProductController extends Controller
                 'price' => $request->price,
                 'description' => $request->description,
                 'content' => $request->content,
-                'input_day' => $request->input_day,
                 'category_id' => $request->category_id,
                 'is_collection' => $request->is_collection ? 1 : 0,
                 'is_hot' => $request->is_hot ? 1 : 0,
                 'is_new' => $request->is_new ? 1 : 0,
             ]);
+
+             $tableProductCost = TableProductCost::created([
+                'product_id' => $product->id,
+                'cost_price' => $request->cost_price,
+                'supplier' => $request->supplier,
+                'import_date' => $request->import_date,
+             ]);
 
             // Kiểm tra nếu có biến thể
             $hasVariations = $request->has('variations') && !empty($request->variations);
@@ -288,12 +295,19 @@ class ProductController extends Controller
                 'price' => $request->price,
                 'description' => $request->description,
                 'content' => $request->content,
-                'input_day' => $request->input_day,
                 'category_id' => $request->category_id,
                 'is_collection' => $request->is_collection ? 1 : 0,
                 'is_hot' => $request->is_hot ? 1 : 0,
                 'is_new' => $request->is_new ? 1 : 0,
             ]);
+
+            $tableProductCost = $product->cost;
+
+            $tableProductCost->update([
+                'cost_price' => $request->cost_price,
+                'supplier' => $request->supplier,
+                'import_date' => $request->import_date,
+             ]);
 
             // Xóa ảnh nếu có yêu cầu
             if ($request->has('delete_images')) {
