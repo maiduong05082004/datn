@@ -462,6 +462,7 @@ class OrderController extends Controller
                     'don_gia' => $detail->don_gia,
                     'quantity' => $detail->quantity,
                     'total_amount' => $detail->total_amount,
+                    'status_comment' => $detail->status_comment,
                     'variation_images' => $detail->variation_images,
                 ];
             });
@@ -496,7 +497,7 @@ class OrderController extends Controller
                 'user_id' => $bill->user_id,
                 'name' => $bill->user->name,
                 'note' => $bill->note,
-                'canceled_reason' => $bill->canceled_reason??null,
+                'canceled_reason' => $bill->canceled_reason ?? null,
                 'canceled_date' => $canceledReasonTime ? $canceledReasonTime->format('d/m/Y') : null,
                 'canceled_time' => $canceledReasonTime ? $canceledReasonTime->format('H:i:s') : null,
                 'payment_type' => $bill->payment_type,
