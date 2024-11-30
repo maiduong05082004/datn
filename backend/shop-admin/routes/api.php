@@ -102,7 +102,7 @@ Route::prefix('client')->as('client.')->group(function () {
     });
 
     Route::prefix('comment')->as('comment.')->group(function () {
-        Route::post('/list', [CommentController::class, 'index'])->name('comment.list'); // Lấy list bình luận đã duyệt theo user_id & product_id
+        Route::post('/list', [CommentController::class, 'listCommentClient'])->name('comment.list'); // Lấy list bình luận đã duyệt theo user_id & product_id
         Route::post('/store', [CommentController::class, 'store'])->name('comment.store')->middleware('auth:sanctum'); // Tạo 1 bình luận
         Route::put('/update', [CommentController::class, 'update'])->name('comment.update')->middleware('auth:sanctum'); // Cập nhật bình luận
         Route::post('/report', [CommentController::class, 'reportComment'])->name('comment.report'); // Báo cáo bình luận

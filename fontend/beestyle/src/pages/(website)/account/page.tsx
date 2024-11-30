@@ -6,6 +6,7 @@ import { Link, Outlet, useNavigate } from 'react-router-dom';
 type Props = {}
 
 const AccountPage = (props: Props) => {
+    
 
     const navigate = useNavigate()
 

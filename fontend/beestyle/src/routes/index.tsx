@@ -90,8 +90,6 @@ const Router = () => {
                     <Route path="categories/:id" element={<ListPage />} />
                     <Route path="products/:id" element={<DetailPage />} />
                     <Route path="checkouts" element={<CheckOutPage />} />
-                    <Route path="forgot-password" element={<ForgotPasswordPage />} />
-                    <Route path="reset-password/:token" element={<ResetPasswordPage />} />
                     <Route path="search" element={<SearchPage isKeySearch={isKeySearch} />} />
                     <Route path="carts" element={<CartPage />} />
                     <Route path="account" element={<AccountPage />}>
@@ -104,6 +102,8 @@ const Router = () => {
                     </Route>
                     <Route path="*" element={<ErrorPage />} />
                 </Route>
+                <Route path="forgot-password" element={<ForgotPasswordPage />} />
+                <Route path="reset-password/:token" element={<ResetPasswordPage />} />
                 <Route path="signin" element={<PageSignin />} />
                 <Route path="signup" element={<PageSignup />} />
 

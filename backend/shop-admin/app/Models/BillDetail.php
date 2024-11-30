@@ -16,11 +16,12 @@ class BillDetail extends Model
         'don_gia',
         'quantity',
         'total_amount',
+        'status_comment'
     ];
 
     public function bill()
     {
-        return $this->belongsTo(Bill::class);
+        return $this->belongsTo(Bill::class,);
     }
 
     public function product()

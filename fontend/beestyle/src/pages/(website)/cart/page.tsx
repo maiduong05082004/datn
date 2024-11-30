@@ -8,13 +8,13 @@ import { useProductMutations } from '@/components/hooks/useProductMutations';
 import NavigationButton from './_components/navigationButton';
 import Slider from 'react-slick';
 import { Link, useNavigate } from 'react-router-dom';
-import LoadingPage from '../loading/page';
+import LoadingPage from '../loading/loadPage';
 
 type Props = {
 
 }
 
-const CartPage = ({}: any) => {
+const CartPage = ({ }: any) => {
 
     const [selectedProducts, setSelectedProducts] = useState<string[]>([]);
     const [totalPrice, setTotalPrice] = useState(0);
@@ -96,7 +96,6 @@ const CartPage = ({}: any) => {
             setTotalPrice(total);
         }
     }, [selectedProducts, carts?.data?.cart_items]);
-
 
 
     useEffect(() => {

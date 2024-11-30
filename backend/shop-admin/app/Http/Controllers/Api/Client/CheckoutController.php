@@ -183,7 +183,7 @@ class CheckoutController extends Controller
             if (isset($response['id']) && $response['id'] != null) {
                 foreach ($response['links'] as $link) {
                     if ($link['rel'] === 'approve') {
-                        return response()->json(['redirect_url' => $link['href']]);
+                        return response()->json(['data' => $link['href']]);
                     }
                 }
             } else {
@@ -282,7 +282,9 @@ class CheckoutController extends Controller
                 Log::error('Failed to send order confirmation email.', ['error' => $e->getMessage()]);
             }
 
-            return response()->json(['message' => 'Thanh toán thành công và trạng thái đã được cập nhật.', 'bill_id' => $bill->id]);
+            // return response()->json(['message' => 'Thanh toán thành công và trạng thái đã được cập nhật.', 'bill_id' => $bill->id]);
+            return redirect('http://localhost:5173/account?status=success');
+
         } else {
             $errorDetails = isset($response['details']) ? json_encode($response['details']) : 'Unknown error';
             Log::error('PayPal payment capture failed', ['response' => $response, 'errorDetails' => $errorDetails]);

@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import axios from 'axios'
 import React, { useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 
 type Props = {}
 
@@ -28,7 +28,7 @@ const InfoPage = (props: Props) => {
             <label htmlFor="">Tên đăng nhập</label>
             <span>{user?.data.user.email}</span>
           </div>
-          <div className="flex items-center justify-center h-[45px] border-[1px] border-[#e8e8e8] rounded-[2px] font-[600] text-[16px] mt-[20px] lg:w-[200px] cursor-pointer">Đổi mật khẩu</div>
+          <Link to={`/forgot-password`} className="flex items-center justify-center h-[45px] border-[1px] border-[#e8e8e8] rounded-[2px] font-[600] text-[16px] mt-[20px] lg:w-[200px] cursor-pointer">Đổi mật khẩu</Link>
         </div>
       </div>
       <div className="mt-[20px]">

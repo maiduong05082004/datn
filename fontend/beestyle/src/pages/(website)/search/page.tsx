@@ -38,11 +38,14 @@ const SearchPage = ({ isKeySearch }: Props) => {
     const queryParams = new URLSearchParams(location.search);
     const searchName = queryParams.get('keyword')
 
+    console.log(searchName);
+    
+
     // console.log(searchName);
     const { data: products, isLoading, isError, error } = useQuery({
         queryKey: ['search', searchName],
         queryFn: async () => {
-            return axios.get(`http://127.0.0.1:8000/api/client/home/search?keyword=${searchName}`)
+            return axios.post(`http://127.0.0.1:8000/api/client/home/search?keyword=${searchName}`)
         },
     })
 
