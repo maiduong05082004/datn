@@ -1,9 +1,7 @@
 import React, { useState } from "react";
+import { AudioOutlined, CloseOutlined, FileGifOutlined, MinusOutlined, PhoneOutlined, PictureOutlined, SendOutlined, SmileOutlined, VideoCameraOutlined } from '@ant-design/icons';
 
-const ChatRealTime: React.FC<{ isDarkMode: boolean; closeChat: () => void }> = ({
-  isDarkMode,
-  closeChat,
-}) => {
+const ChatRealTime: React.FC<{ closeChat: () => void }> = ({ closeChat }) => {
   const [messages, setMessages] = useState<string[]>([]);
   const [input, setInput] = useState<string>("");
 
@@ -15,43 +13,29 @@ const ChatRealTime: React.FC<{ isDarkMode: boolean; closeChat: () => void }> = (
   };
 
   return (
-    <div
-      className={`fixed bottom-16 right-4 w-80 h-96 ${
-        isDarkMode ? "bg-gray-800 text-white" : "bg-white text-black"
-      } rounded-lg shadow-lg flex flex-col z-50`}
-    >
-      {/* Header */}
-      <header
-        className={`py-2 px-4 flex justify-between items-center ${
-          isDarkMode ? "bg-gray-700" : "bg-gray-200"
-        } rounded-t-lg`}
-      >
-        <h2 className="text-lg font-semibold">Chat Real-Time</h2>
+    <div className="fixed bottom-16 right-4 w-[360px] h-[480px] bg-white text-black rounded-lg shadow-lg flex flex-col z-50">
+      <header className="py-2 px-4 flex justify-between items-center bg-gray-200 rounded-t-lg">
+        <h2 className="text-lg font-semibold">Người Dùng Chat</h2>
+        <button className="w-8 h-8 "><PhoneOutlined /></button>
+        <button className="w-8 h-8"><VideoCameraOutlined /></button>
+        <button className="w-8 h-8"><MinusOutlined /></button>
         <button
           onClick={closeChat}
-          className={`text-sm px-2 py-1 rounded ${
-            isDarkMode ? "bg-gray-600 text-white" : "bg-gray-300 text-black"
-          } hover:bg-red-600 hover:text-white`}
+          className="w-8 h-8 flex justify-center items-center text-lg py-1 rounded-full hover:bg-red-600 hover:text-white transition-colors"
         >
-          Close
+          <CloseOutlined />
         </button>
       </header>
 
       {/* Messages */}
+      
       <div className="flex-1 overflow-y-auto p-4">
         {messages.length > 0 ? (
           messages.map((msg, index) => (
             <div
               key={index}
-              className={`mb-2 p-2 rounded ${
-                index % 2 === 0
-                  ? isDarkMode
-                    ? "bg-gray-600"
-                    : "bg-gray-300"
-                  : isDarkMode
-                  ? "bg-gray-700"
-                  : "bg-gray-200"
-              }`}
+              className={`mb-2 p-2 rounded ${index % 2 === 0 ? "bg-gray-300" : "bg-gray-200"
+                }`}
             >
               {msg}
             </div>
@@ -62,29 +46,29 @@ const ChatRealTime: React.FC<{ isDarkMode: boolean; closeChat: () => void }> = (
       </div>
 
       {/* Input */}
-      <div
-        className={`flex items-center p-2 ${
-          isDarkMode ? "bg-gray-700" : "bg-gray-200"
-        }`}
-      >
+      <div className="flex items-center p-2 bg-blue-300 text-white rounded-b-lg">
+        {/* Icons trước input */}
+        <div className="flex items-center space-x-2 px-2">
+          <AudioOutlined  style={{ fontSize: '20px' }} />
+          <PictureOutlined  style={{ fontSize: '20px' }} />
+          <FileGifOutlined  style={{ fontSize: '20px' }} />
+          <SmileOutlined  style={{ fontSize: '20px' }} />
+        </div>
+
+        {/* Input để nhập tin nhắn */}
         <input
           type="text"
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          placeholder="Type a message..."
-          className={`flex-1 px-4 py-2 border rounded-l focus:outline-none ${
-            isDarkMode ? "border-gray-600 bg-gray-700 text-white" : "border-gray-300"
-          }`}
+          placeholder="Aa"
+          className="flex-1 mx-2 px-2 py-2 border-none rounded-full focus:outline-none bg-gray-700 text-white placeholder-gray-400"
         />
+
+        {/* Nút gửi tin nhắn */}
         <button
           onClick={sendMessage}
-          className={`px-4 py-2 rounded-r font-semibold ${
-            isDarkMode
-              ? "bg-blue-600 text-white hover:bg-blue-700"
-              : "bg-blue-500 text-white hover:bg-blue-600"
-          }`}
         >
-          Send
+          <SendOutlined style={{ fontSize: '24px' }} />
         </button>
       </div>
     </div>

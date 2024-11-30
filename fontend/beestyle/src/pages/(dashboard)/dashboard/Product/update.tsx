@@ -33,7 +33,6 @@ const UpdateProduct: React.FC = () => {
   const [selectedVariantGroup, setSelectedVariantGroup] = useState<number | null>(null);
   const [attributes, setAttributes] = useState<any[]>([]);
   const [variants, setVariants] = useState<Variant[]>([]);
-  const [stock, setStock] = useState<number | null>(null);
   const [showVariantForm, setShowVariantForm] = useState<boolean>(true);
   const { id } = useParams();
   const navigate = useNavigate();
@@ -72,8 +71,8 @@ const UpdateProduct: React.FC = () => {
   });
 
   const deleteImageMutation = useMutation({
-    mutationFn: async ({ imageUrl, type }: { imageUrl: string; type: 'product' | 'variation' }) => {
-      const base64FileUrl = btoa(imageUrl); // Encode toàn bộ URL
+    mutationFn: async ({ imageUrl }: { imageUrl: string; type: 'product' | 'variation' }) => {
+      const base64FileUrl = btoa(imageUrl); 
       const response = await AxiosInstance.delete(`http://127.0.0.1:8000/api/admins/images/variation/${base64FileUrl}`, {
         headers: { 'Content-Type': 'application/json' },
       });
@@ -91,7 +90,6 @@ const UpdateProduct: React.FC = () => {
     Modal.confirm({
       title: 'Bạn có chắc chắn muốn xóa ảnh này?',
       onOk: () => {
-        // Set loading chỉ cho ảnh cụ thể
         setDeletingImage((prev) => ({ ...prev, [imageUrl]: true }));
         deleteImageMutation.mutate(
           { imageUrl, type },
@@ -102,8 +100,6 @@ const UpdateProduct: React.FC = () => {
                 (img: any) => img.url !== imageUrl
               );
               setVariants(updatedVariants);
-
-              // Loại bỏ ảnh khỏi newColorImages nếu tồn tại trong đó
               setNewColorImages((prev) => {
                 const updatedImages = { ...prev };
                 if (updatedImages[variants[variantIndex].colorId]) {
@@ -131,9 +127,11 @@ const UpdateProduct: React.FC = () => {
     if (UpdateVariant && variantgroup) {
       form.setFieldsValue({
         ...UpdateVariant,
-        input_day: UpdateVariant.input_day ? moment(UpdateVariant.input_day) : null,
+        import_date: UpdateVariant.product_cost?.import_date ? moment(UpdateVariant.product_cost.import_date, 'YYYY-MM-DD', true) : null,
         category_id: UpdateVariant.category_id,
         variant_group: UpdateVariant.group?.id,
+        product_cost: UpdateVariant.product_cost?.cost_price || '',
+        supplier: UpdateVariant.product_cost?.supplier || '',
       });
       setContent(UpdateVariant.content || '');
       setProductData(UpdateVariant);
@@ -214,37 +212,30 @@ const UpdateProduct: React.FC = () => {
   }, [UpdateVariant, form, variantgroup]);
 
   // Đã chỉnh sửa để destructure mutateAsync
-  const { mutateAsync: updateProductMutation, isPending: isUpdating } = useMutation({
+  const { mutateAsync: updateProductMutation } = useMutation({
     mutationFn: async (formData: FormData) => {
       const response = await AxiosInstance.post(`http://127.0.0.1:8000/api/admins/products/${id}`, formData, {
-        headers: {
-          // Do not set Content-Type explicitly; let Axios handle it.
-        },
+        headers: { 'Content-Type': 'application/json' },
         params: {
-          _method: 'PUT', // Laravel will interpret this as a PUT request.
+          _method: 'PUT', 
         },
       });
       return response.data;
     },
     onSuccess: () => {
       toast.success('Cập nhật sản phẩm thành công!');
+      
     },
     onError: (error: any) => {
       toast.error(`Cập nhật sản phẩm thất bại: ${error.message}`);
     },
   });
 
-  const handleStockChange = (value: number | null) => {
-    setStock(value);
-    form.setFieldsValue({ stock: value });
-  };
-
-  // Xóa biến thể
   const handleDeleteVariant = (colorId: number) => {
     setRemovedVariants((prev) => [...prev, colorId]);
     setVariants((prevVariants) => {
       const updatedVariants = prevVariants.filter((variant) => variant.colorId !== colorId);
-      console.log("Updated Variants after Deletion:", updatedVariants); // Check the updated variants here
+      console.log("Updated Variants after Deletion:", updatedVariants);
       return updatedVariants;
     });
   };
@@ -290,7 +281,7 @@ const UpdateProduct: React.FC = () => {
     const selectedSizes = sizeAttribute.selectedValues || [];
 
     if (selectedColors.length === 0 || selectedSizes.length === 0) {
-      console.log('No colors or sizes selected');  // Debugging output
+      console.log('No colors or sizes selected'); 
       toast.error('Vui lòng chọn ít nhất một màu sắc và một kích thước để tạo biến thể.');
       return;
     }
@@ -318,14 +309,13 @@ const UpdateProduct: React.FC = () => {
       if (existingVariantIndex > -1) {
         const existingSizes = mergedVariants[existingVariantIndex].sizes;
 
-        // Add only new sizes to the existing variant
         newVariant.sizes.forEach((newSize: any) => {
           if (!existingSizes.find((size: any) => size.sizeId === newSize.sizeId)) {
             existingSizes.push(newSize);
           }
         });
       } else {
-        mergedVariants.push(newVariant); // Add entirely new variants
+        mergedVariants.push(newVariant);
       }
     });
 
@@ -364,57 +354,56 @@ const UpdateProduct: React.FC = () => {
           </div>
         )),
     },
-    {
-      title: 'Ảnh Màu',
-      dataIndex: 'colorImage',
-      key: 'colorImage',
-      render: (_: any, record: any, index: number) => (
-        <div className="flex flex-col items-center gap-3 p-4 border border-gray-200 rounded-md shadow-sm">
-          <Upload
-            listType="picture-card"
-            fileList={record.colorImage || []}
-            onChange={({ fileList }) => {
-              const filesToUpload = fileList.filter(file => file.originFileObj);
-              setNewColorImages(prev => ({
-                ...prev,
-                [record.colorId]: filesToUpload.map(file => file.originFileObj as File),
-              }));
-              // Cập nhật giao diện hiển thị ảnh nếu cần
-              const updatedColorImage = fileList.map((file) => ({
-                ...file,
-                url: file.url || (file.originFileObj ? URL.createObjectURL(file.originFileObj) : ''),
-              }));
-              const updatedRecord = { ...record, colorImage: updatedColorImage };
-              setVariants((prev) => {
-                const updatedVariants = [...prev];
-                updatedVariants[index] = updatedRecord;
-                return updatedVariants;
-              });
-            }}
-            beforeUpload={() => false}
-            showUploadList={{ showPreviewIcon: true, showRemoveIcon: true, showDownloadIcon: false }}
-            className="upload-inline"
-          >
-            {record.colorImage?.length < 1 && (
-              <div className="w-20 h-20 border border-dashed border-gray-300 rounded-md flex items-center justify-center cursor-pointer">
-                <UploadOutlined className="text-blue-500 text-xl" />
-              </div>
-            )}
-          </Upload>
-          {record.colorImage?.length > 0 && (
-            <Button
-              icon={<DeleteOutlined />}
-              type="primary"
-              danger
-              loading={deletingImage[record.colorImage[0].url] || false} // Chỉ hiển thị trạng thái loading cho ảnh cụ thể
-              onClick={() => handleDeleteImage(record.colorImage[0].url, index, 'colorImage', 'variation')}
-            >
-              Delete
-            </Button>
-          )}
-        </div>
-      ),
-    },
+    // {
+    //   title: 'Ảnh Màu',
+    //   dataIndex: 'colorImage',
+    //   key: 'colorImage',
+    //   render: (_: any, record: any, index: number) => (
+    //     <div className="flex flex-col items-center gap-3 p-4 border border-gray-200 rounded-md shadow-sm">
+    //       <Upload
+    //         listType="picture-card"
+    //         fileList={record.colorImage || []}
+    //         onChange={({ fileList }) => {
+    //           const filesToUpload = fileList.filter(file => file.originFileObj);
+    //           setNewColorImages(prev => ({
+    //             ...prev,
+    //             [record.colorId]: filesToUpload.map(file => file.originFileObj as File),
+    //           }));
+    //           const updatedColorImage = fileList.map((file) => ({
+    //             ...file,
+    //             url: file.url || (file.originFileObj ? URL.createObjectURL(file.originFileObj) : ''),
+    //           }));
+    //           const updatedRecord = { ...record, colorImage: updatedColorImage };
+    //           setVariants((prev) => {
+    //             const updatedVariants = [...prev];
+    //             updatedVariants[index] = updatedRecord;
+    //             return updatedVariants;
+    //           });
+    //         }}
+    //         beforeUpload={() => false}
+    //         showUploadList={{ showPreviewIcon: true, showRemoveIcon: true, showDownloadIcon: false }}
+    //         className="upload-inline"
+    //       >
+    //         {record.colorImage?.length < 1 && (
+    //           <div className="w-20 h-20 border border-dashed border-gray-300 rounded-md flex items-center justify-center cursor-pointer">
+    //             <UploadOutlined className="text-blue-500 text-xl" />
+    //           </div>
+    //         )}
+    //       </Upload>
+    //       {record.colorImage?.length > 0 && (
+    //         <Button
+    //           icon={<DeleteOutlined />}
+    //           type="primary"
+    //           danger
+    //           loading={deletingImage[record.colorImage[0].url] || false} 
+    //           onClick={() => handleDeleteImage(record.colorImage[0].url, index, 'colorImage', 'variation')}
+    //         >
+    //           Delete
+    //         </Button>
+    //       )}
+    //     </div>
+    //   ),
+    // },
     {
       title: 'Album Ảnh',
       dataIndex: 'albumImages',
@@ -439,7 +428,7 @@ const UpdateProduct: React.FC = () => {
                   danger
                   size="small"
                   className="m-1"
-                  loading={deletingImage[image.url] || false} // Chỉ hiển thị trạng thái loading cho ảnh cụ thể
+                  loading={deletingImage[image.url] || false} 
                   onClick={() => handleDeleteImage(image.url, index, 'albumImages', 'variation')}
                 />
               </div>
@@ -455,14 +444,13 @@ const UpdateProduct: React.FC = () => {
                 setNewAlbumImages(prev => ({
                   ...prev,
                   [record.colorId]: [
-                    ...(prev[record.colorId] || []), // giữ lại các ảnh cũ trong album
+                    ...(prev[record.colorId] || []),
                     ...filesToUpload.map(file => file.originFileObj as File),
                   ],
                 }));
 
-                // Cập nhật giao diện hiển thị ảnh nếu cần
                 const updatedAlbumImages = [
-                  ...(record.albumImages || []), // giữ lại các ảnh cũ
+                  ...(record.albumImages || []),
                   ...fileList.map((file) => ({
                     ...file,
                     url: file.url || (file.originFileObj ? URL.createObjectURL(file.originFileObj) : ''),
@@ -488,24 +476,24 @@ const UpdateProduct: React.FC = () => {
         </div>
       ),
     },
-    {
-      title: 'Hành động',
-      key: 'action',
-      render: (text: any, record: any) => (
-        <Button
-          type="primary"
-          danger
-          icon={<DeleteOutlined />}
-          onClick={() => handleDeleteVariant(record.colorId)}
-        >
-          Xóa
-        </Button>
-      ),
-    },
+    // {
+    //   title: 'Hành động',
+    //   key: 'action',
+    //   render: ( record: any) => (
+    //     <Button
+    //       type="primary"
+    //       danger
+    //       icon={<DeleteOutlined />}
+    //       onClick={() => handleDeleteVariant(record.colorId)}
+    //     >
+    //       Xóa
+    //     </Button>
+    //   ),
+    // },
   ];
 
   const onFinish = async (values: any) => {
-    const formattedDate = values.input_day ? moment(values.input_day).format('YYYY-MM-DD') : null;
+    const formattedDate = values.import_date ? moment(values.import_date).format('YYYY-MM-DD') : null;
 
     if (!formattedDate) {
       toast.error('Ngày nhập không hợp lệ. Vui lòng chọn một ngày!');
@@ -517,7 +505,6 @@ const UpdateProduct: React.FC = () => {
       return;
     }
 
-    // Prepare variations, excluding removed variants
     const variations: Record<number, Record<number, { stock: number; discount: number }>> = {};
 
     variants.forEach((variant: Variant) => {
@@ -532,7 +519,6 @@ const UpdateProduct: React.FC = () => {
       }
     });
 
-    // Tạo FormData
     const formData = new FormData();
     formData.append('name', values.name);
     formData.append('price', values.price.toString());
@@ -541,34 +527,29 @@ const UpdateProduct: React.FC = () => {
     formData.append('category_id', values.category_id.toString());
     formData.append('description', values.description || '');
     formData.append('content', content || '');
-    formData.append('input_day', formattedDate);
+    formData.append('import_date', formattedDate);
+    formData.append('cost_price', values.product_cost); 
+    formData.append('supplier', values.supplier);
+    // Object.keys(newColorImages).forEach(colorId => {
+    //   newColorImages[Number(colorId)].forEach(file => {
+    //     formData.append(`color_image_${colorId}`, file);
+    //   });
+    // });
 
-
-    // Kiểm tra và append ảnh colorImage
-    Object.keys(newColorImages).forEach(colorId => {
-      newColorImages[Number(colorId)].forEach(file => {
-        formData.append(`color_image_${colorId}`, file);
-      });
-    });
-
-    // Kiểm tra và append ảnh albumImages
     Object.keys(newAlbumImages).forEach(colorId => {
       newAlbumImages[Number(colorId)].forEach(file => {
         formData.append(`album_images_${colorId}[]`, file);
       });
     });
 
-    // Kiểm tra và append ảnh variation_album_images
     newVariationAlbumImages.forEach(file => {
       formData.append('variation_album_images[]', file);
     });
 
-    console.log('Final FormData:', formData); // Debugging log
+    console.log('Final FormData:', formData);
 
-    // Gọi mutation để cập nhật sản phẩm
     try {
-      await updateProductMutation(formData); // Sử dụng mutateAsync
-      // Có thể reset các state liên quan nếu cần
+      await updateProductMutation(formData);
     } catch (error: any) {
       toast.error(`Cập nhật sản phẩm thất bại: ${error.message}`);
     }
@@ -608,13 +589,37 @@ const UpdateProduct: React.FC = () => {
     <div className="w-full px-6 py-8">
       <ToastContainer />
       <h2 className="text-4xl font-bold mb-6">Cập nhật sản phẩm</h2>
-      <Form form={form} layout="vertical" onFinish={onFinish}>
+      <Form form={form} layout="vertical" onFinish={onFinish} >
         <Form.Item
           label="Tên sản phẩm"
           name="name"
           rules={[{ required: true, message: 'Tên sản phẩm bắt buộc' }]}
         >
           <Input className="border border-gray-300 rounded-md" />
+        </Form.Item>
+
+        <Form.Item
+          label="Giá Nhập"
+          name="product_cost"
+          rules={[{ required: true, message: 'Giá Nhập sản phẩm bắt buộc' }]}
+        >
+          <Input />
+        </Form.Item>
+
+        <Form.Item
+          label="Nhà Cung Cấp"
+          name="supplier"
+          rules={[{ required: true, message: 'Nhà Cung Cấp bắt buộc' }]}
+        >
+          <Input />
+        </Form.Item>
+
+        <Form.Item
+          label="Ngày nhập"
+          name="import_date"
+          rules={[{ required: true, message: "Ngày nhập sản phẩm bắt buộc phải điền" }]}
+        >
+          <DatePicker format="YYYY-MM-DD" style={{ width: '100%' }} />
         </Form.Item>
 
         <Form.Item
@@ -641,24 +646,17 @@ const UpdateProduct: React.FC = () => {
           <CKEditor
             editor={ClassicEditor}
             data={content}
-            onChange={(event: any, editor: any) => {
+            onChange={(editor: any) => {
               const data = editor.getData();
               setContent(data);
             }}
           />
         </Form.Item>
         <Form.Item
-          label="Ngày nhập"
-          name="input_day"
-          rules={[{ required: true, message: "Ngày nhập sản phẩm bắt buộc phải điền" }]}
-        >
-          <DatePicker format="YYYY-MM-DD" style={{ width: '100%' }} />
-        </Form.Item>
-        <Form.Item
           label="Danh mục"
           name="category_id"
           rules={[{ required: true, message: 'Danh mục sản phẩm bắt buộc phải chọn' }]}
-          style={{ display: 'none' }} // Ẩn trường này vì chúng ta chỉ cần lưu id
+          style={{ display: 'none' }} 
         >
           <Input />
         </Form.Item>
@@ -686,10 +684,6 @@ const UpdateProduct: React.FC = () => {
             ))}
           </Select>
         </Form.Item>
-        {/* <Button onClick={() => setShowVariantForm(!showVariantForm)} type="default">
-          {showVariantForm ? 'Ẩn Biến Thể' : 'Hiện Biến Thể'}
-        </Button> */}
-
         {showVariantForm && (
           <>
             <Form.Item
@@ -746,56 +740,14 @@ const UpdateProduct: React.FC = () => {
             <Table
               dataSource={variants}
               columns={columns}
-              rowKey={(record, index) => (index !== undefined ? index.toString() : Math.random().toString())}
+              rowKey={( index) => (index !== undefined ? index.toString() : Math.random().toString())}
               pagination={false}
               className="w-full border-collapse border border-gray-300"
             />
           </>
         )}
-
-        {/* {!showVariantForm && (
-          <>
-            <div className="mt-4">
-              <Form.Item
-                label="Nhập số lượng sản phẩm"
-                name="stock"
-                rules={[{ required: true, message: 'Số lượng sản phẩm là bắt buộc' }]}
-              >
-                <InputNumber
-                  placeholder="Số lượng"
-                  value={stock}
-                  className="w-full border border-gray-300 rounded-md p-2"
-                  onChange={handleStockChange}
-                  min={0}
-                />
-              </Form.Item>
-            </div>
-            <div className="mt-4">
-              <Form.Item label="Tải lên album ảnh" name="variation_album_images">
-                <Upload
-                  listType="picture"
-                  multiple
-                  onChange={({ fileList }) => {
-                    const filesToUpload = fileList.filter(file => file.originFileObj);
-                    setNewVariationAlbumImages(filesToUpload.map(file => file.originFileObj as File));
-                  }}
-                  beforeUpload={() => false}
-                  showUploadList={true}
-                  onRemove={(file: any) => {
-                    setNewVariationAlbumImages(prev => prev.filter(f => f !== file.originFileObj));
-                  }}
-                >
-                  <Button icon={<UploadOutlined />} className="bg-green-500 hover:bg-green-600 text-white">
-                    Tải lên album ảnh
-                  </Button>
-                </Upload>
-              </Form.Item>
-            </div>
-          </>
-        )} */}
-
         <Form.Item>
-          <div className='flex justify-end space-x-4'>
+          <div className='flex justify-end space-x-4 pt-5'>
             <Button type="primary" htmlType="submit">
               Submit
             </Button>

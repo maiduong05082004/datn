@@ -14,11 +14,7 @@ const UpdateAttributeValues: React.FC = () => {
     const [fileList, setFileList] = useState<any[]>([]);
     const [loading, setLoading] = useState<boolean>(false);
 
-<<<<<<< HEAD
     const { data: attributeUpdate, isLoading, isError } = useQuery({
-=======
-    const { data: attributeUpdate , isLoading, isError } = useQuery({
->>>>>>> 6c6a1ef (Fix UI..)
         queryKey: ['attributeUpdate', id],
         queryFn: async () => {
             const response = await axiosInstance.get(`http://127.0.0.1:8000/api/admins/attribute_values/${id}`);
@@ -30,7 +26,6 @@ const UpdateAttributeValues: React.FC = () => {
         messageApi.error('Lỗi khi tải dữ liệu thuộc tính');
         return <div>Error loading data</div>;
     }
-<<<<<<< HEAD
 
     useEffect(() => {
         if (attributeUpdate && attributeUpdate.image_path) {
@@ -62,24 +57,12 @@ const UpdateAttributeValues: React.FC = () => {
             queryClient.invalidateQueries({ queryKey: ['attributeUpdate'] });
             setFileList([]);
             setLoading(false);
-=======
-
-    const { mutate } = useMutation({
-        mutationFn: async (data: { attribute_id: number; values: string[] }) => {
-            return await axiosInstance.put(`http://127.0.0.1:8000/api/admins/attribute_values/${id}`, data);
-        },
-        onSuccess: () => {
-            messageApi.success('Cập nhật giá trị thuộc tính thành công');
-            queryClient.invalidateQueries({ queryKey: ['attributes'] });
-            form.resetFields();
->>>>>>> 6c6a1ef (Fix UI..)
         },
         onError: (error: any) => {
             messageApi.error(`Lỗi: ${error.response?.data?.message || error.message}`);
         },
     });
 
-<<<<<<< HEAD
     const { mutate: deleteImage } = useMutation({
         mutationFn: async () => {
             return await axiosInstance.delete(`/api/admins/attribute_values/${id}/image`);
@@ -96,10 +79,6 @@ const UpdateAttributeValues: React.FC = () => {
 
     const handleFileChange = (info: any) => {
         setFileList(info.fileList);
-=======
-    const onFinish = (values: any) => {
-        mutate(values)
->>>>>>> 6c6a1ef (Fix UI..)
     };
 
     const onFinish = (values: any) => {

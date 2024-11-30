@@ -263,11 +263,7 @@ const ListBill: React.FC = () => {
       align: 'center',
       key: 'total',
       sorter: (a: any, b: any) => parseFloat(a.total) - parseFloat(b.total),
-<<<<<<< HEAD
       render: (text: string) => <span className="font-bold">{parseFloat(text).toLocaleString()}</span>,
-=======
-      render: (text: string) => <span className="font-bold">{parseFloat(text).toLocaleString()} đ</span>,
->>>>>>> 6c6a1ef (Fix UI..)
     },
     {
       title: 'Ngày Đặt Hàng',
@@ -280,7 +276,6 @@ const ListBill: React.FC = () => {
     {
       title: 'Trạng Thái',
       dataIndex: 'status_bill',
-<<<<<<< HEAD
       align: 'center',
       key: 'status_bill',
       render: (text: string) => {
@@ -324,33 +319,6 @@ const ListBill: React.FC = () => {
       },
     }
     ,
-=======
-      key: 'status_bill',
-      render: (text: string) => {
-        let vietnameseStatus = '';
-        switch (text) {
-          case 'pending':
-            vietnameseStatus = 'Chưa xử lý giao hàng';
-            break;
-          case 'processed':
-            vietnameseStatus = 'Chờ lấy hàng';
-            break;
-          case 'shipped':
-            vietnameseStatus = 'Đang giao hàng';
-            break;
-          case 'delivered':
-            vietnameseStatus = 'Đã giao hàng';
-            break;
-          case 'canceled':
-            vietnameseStatus = 'Đã hủy';
-            break;
-          default:
-            vietnameseStatus = 'Không xác định';
-        }
-        return <div className="p-2 rounded-md text-green-500 font-semibold">{vietnameseStatus}</div>;
-      },
-    },
->>>>>>> 6c6a1ef (Fix UI..)
     {
       title: 'Chức năng',
       align: 'center',
@@ -388,22 +356,14 @@ const ListBill: React.FC = () => {
             {record.status_bill === 'processed' && (
               <>
                 <option value="processed">Đã Xác Nhận Đơn Hàng</option>
-<<<<<<< HEAD
                 <option value="shipping">Giao Hàng</option>
-=======
-                <option value="shipping">Bàn Giao Đơn Vị Vận Chuyển</option>
->>>>>>> 6c6a1ef (Fix UI..)
                 <option value="canceled">Hủy Đơn Hàng</option>
                 {/* <option value="remove">Xóa Đơn Hàng</option> */}
               </>
             )}
             {record.status_bill === 'shipped' && (
               <>
-<<<<<<< HEAD
                 <option value="shipped">Giao Hàng</option>
-=======
-                <option value="shipping">Bàn Giao Đơn Vị Vận Chuyển</option>
->>>>>>> 6c6a1ef (Fix UI..)
                 <option value="delivered">Đã Giao Hàng</option>
                 <option value="canceled">Hủy Đơn Hàng</option>
               </>
@@ -414,10 +374,6 @@ const ListBill: React.FC = () => {
             {record.status_bill === 'canceled' && (
               <>
                 <option value="canceled">Hủy Đơn Hàng</option>
-<<<<<<< HEAD
-=======
-                {/* <option value="remove">Xóa Đơn Hàng</option> */}
->>>>>>> 6c6a1ef (Fix UI..)
               </>
             )}
           </select>
@@ -428,19 +384,12 @@ const ListBill: React.FC = () => {
     ,
     {
       title: 'Xem Chi Tiết',
-<<<<<<< HEAD
       align: 'center',
       key: 'action',
       render: (record: BillRecord) => (
         <div className='w-full text-center flex justify-center gap-2'>
           {/* Trạng thái "pending" và "shipping" */}
           {['pending', 'shipping'].includes(record.status_bill) && (
-=======
-      key: 'action',
-      render: (record: BillRecord) => (
-        <div className=" w-[140px]">
-          {['pending', 'shipping', 'confirmed'].includes(record.status_bill) && (
->>>>>>> 6c6a1ef (Fix UI..)
             <Button
               type="default"
               icon={<EyeOutlined />}
@@ -454,34 +403,7 @@ const ListBill: React.FC = () => {
               icon={<EyeOutlined />}
               type="default"
               onClick={() => navigate(`/admin/dashboard/bill/shiping/${record.id}`)}
-<<<<<<< HEAD
             />
-=======
-              className="bg-yellow-500 text-white hover:bg-yellow-600 focus:bg-yellow-700 rounded-md shadow-md"
-            >
-              Vận Chuyển
-            </Button>
-          )}
-          {['processed'].includes(record.status_bill) && (
-            <Button
-              icon={<EyeOutlined/>}
-              type="default"
-              onClick={() => navigate(`/admin/dashboard/bill/detailConfirm/${record.id}`)}
-              className="bg-yellow-500 text-white hover:bg-yellow-600 focus:bg-yellow-700 rounded-md shadow-md"
-            >
-              Đơn Xác Nhận
-            </Button>
-          )}
-          {['delivered'].includes(record.status_bill) && (
-            <Button
-              icon={<EyeOutlined />}
-              type="default"
-              onClick={() => navigate(`/admin/dashboard/bill/detailship/${record.id}`)}
-              className="bg-yellow-500 text-white hover:bg-yellow-600 focus:bg-yellow-700 rounded-md shadow-md"
-            >
-              Đơn Hàng
-            </Button>
->>>>>>> 6c6a1ef (Fix UI..)
           )}
 
           {/* Trạng thái "processed" */}
@@ -522,30 +444,19 @@ const ListBill: React.FC = () => {
     <>
       <ToastContainer />
       <div className='p-5'>
-<<<<<<< HEAD
         <div className="w-[100%]">
           <div className="flex justify-between items-center mb-5">
             <div className="flex gap-6 w-full">
-=======
-        <div className="w-[100%] border border-gray-200 shadow-xl rounded-xl">
-          <div className="flex justify-between items-center mb-6">
-            <div className="flex gap-4 w-full">
->>>>>>> 6c6a1ef (Fix UI..)
               {['all', 'pending', 'processing', 'shipping', 'delivered', 'canceled'].map((status, index) => (
                 <button
                   key={index}
                   onClick={() => handleFilterStatusChange(status)}
-<<<<<<< HEAD
                   className={` flex justify-center items-center py-2 pt-3 border-b-2 transition duration-300 ease-in-out
-=======
-                  className={` flex justify-center items-center px-5 py-2 pt-3 border-b-2 transition duration-300 ease-in-out
->>>>>>> 6c6a1ef (Fix UI..)
                   ${filterStatus === status ? 'border-blue-500 text-blue-600 font-semibold' : 'border-transparent text-gray-500'}
                   hover:text-blue-600 hover:border-gray-200`}
                 >
                   <h2 className="text-[16px]">
                     {status === 'all'
-<<<<<<< HEAD
                       ? `Tất Cả`
                       : status === 'pending'
                         ? `Chưa xử lý giao hàng`
@@ -571,29 +482,11 @@ const ListBill: React.FC = () => {
                               ? `Đã giao hàng (${billCounts.delivered})`
                               : `Đã Hủy (${billCounts.canceled})`}
                   </h2> */}
-=======
-                      ? `Tất Cả (${billCounts.all})`
-                      : status === 'pending'
-                        ? `Chưa xử lý giao hàng (${billCounts.pending})`
-                        : status === 'processing'
-                          ? `Chờ lấy hàng (${billCounts.processing})`
-                          : status === 'shipping'
-                            ? `Đang giao hàng (${billCounts.shipping})`
-                            : status === 'delivered'
-                              ? `Chưa thanh toán (${billCounts.delivered})`
-                              : `Đã Hủy (${billCounts.canceled})`}
-                  </h2>
-
->>>>>>> 6c6a1ef (Fix UI..)
                 </button>
               ))}
             </div>
           </div>
-<<<<<<< HEAD
           <div className="w-[100%] h-auto">
-=======
-          <div className="w-[100%] h-auto px-5">
->>>>>>> 6c6a1ef (Fix UI..)
             <div className="flex gap-4 items-center">
               <Input
                 placeholder="Nhập mã đơn hàng để tìm kiếm..."
@@ -601,22 +494,14 @@ const ListBill: React.FC = () => {
                 onChange={(e) => setSearchCode(e.target.value)}
                 className="w-[1000px] h-[40px]"
               />
-<<<<<<< HEAD
               <Button type="default" icon={<SearchOutlined />} onClick={searchBill} className="h-[40px] bg-blue-500 text-white hover:bg-blue-600 focus:bg-blue-700">
-=======
-              <Button type="primary" onClick={searchBill} className="h-[40px] bg-blue-500 text-white hover:bg-blue-600 focus:bg-blue-700 rounded-md">
->>>>>>> 6c6a1ef (Fix UI..)
                 Tìm Kiếm
               </Button>
               <Button
                 type="default"
                 icon={<FilterOutlined />}
                 onClick={() => setIsFilterVisible(true)}
-<<<<<<< HEAD
                 className="h-[40px] bg-blue-500 text-white hover:bg-blue-600 focus:bg-blue-700"
-=======
-                className="h-[40px] bg-blue-500 text-white hover:bg-blue-600 focus:bg-blue-700 rounded-md shadow-md"
->>>>>>> 6c6a1ef (Fix UI..)
               >
                 Lọc
               </Button>
@@ -678,11 +563,7 @@ const ListBill: React.FC = () => {
           </Drawer>
 
 
-<<<<<<< HEAD
           <div className="overflow-x-auto pt-5">
-=======
-          <div className="overflow-x-auto p-5">
->>>>>>> 6c6a1ef (Fix UI..)
             <div className=''>
               <div className='w-[100%] mx-auto'>
                 <Table

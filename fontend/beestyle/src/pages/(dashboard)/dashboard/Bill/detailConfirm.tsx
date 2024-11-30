@@ -1,12 +1,5 @@
-<<<<<<< HEAD
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Dispatch, SetStateAction, useEffect, useState } from 'react';
-=======
-import { joiResolver } from '@hookform/resolvers/joi';
-import Joi from 'joi';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import React, { Dispatch, SetStateAction, useEffect, useState } from 'react';
->>>>>>> 6c6a1ef (Fix UI..)
 import { useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
 import { Button, Input, Spin, Select, message } from 'antd';
@@ -40,7 +33,6 @@ interface TCheckout {
   is_default: boolean;
 }
 
-<<<<<<< HEAD
 const checkoutSchema = Joi.object({
   full_name: Joi.string().required().min(5).max(30).messages({
       'any.required': 'Tên người nhận là bắt buộc',
@@ -79,8 +71,6 @@ const checkoutSchema = Joi.object({
   is_default: Joi.boolean(),
 });
 
-=======
->>>>>>> 6c6a1ef (Fix UI..)
 
 const DetailConfirm = ({ isCheckAddresses, idAddresses, isUpdateAddresses, setCheckAddresses, setUpdateAddresses }: Props) => {
   const [visible, setVisible] = useState(false);
@@ -104,10 +94,6 @@ const DetailConfirm = ({ isCheckAddresses, idAddresses, isUpdateAddresses, setCh
     setValue,
     watch,
     handleSubmit,
-<<<<<<< HEAD
-=======
-    getValues,
->>>>>>> 6c6a1ef (Fix UI..)
     formState: { errors },
   } = useForm<TCheckout>({
     resolver: joiResolver(checkoutSchema)
@@ -132,10 +118,7 @@ const DetailConfirm = ({ isCheckAddresses, idAddresses, isUpdateAddresses, setCh
     },
     onSuccess: () => {
       toast.success('Trạng thái đơn hàng đã được cập nhật thành công.');
-<<<<<<< HEAD
       navigate('/admin/dashboard/bill/list')
-=======
->>>>>>> 6c6a1ef (Fix UI..)
     },
     onError: (error: any) => {
       toast.error(error.response?.data?.message || 'Không thể cập nhật trạng thái đơn hàng.');
@@ -188,7 +171,6 @@ const DetailConfirm = ({ isCheckAddresses, idAddresses, isUpdateAddresses, setCh
     mutate(data);
   };
 
-<<<<<<< HEAD
 
   useEffect(() => {
     if (detailConfirm) {
@@ -202,8 +184,6 @@ const DetailConfirm = ({ isCheckAddresses, idAddresses, isUpdateAddresses, setCh
     }
 }, [detailConfirm, setValue])
 
-=======
->>>>>>> 6c6a1ef (Fix UI..)
   const { data: province, isLoading: isLoadingProvinces } = useQuery({
     queryKey: ['province'],
     queryFn: async () => {
@@ -219,11 +199,8 @@ const DetailConfirm = ({ isCheckAddresses, idAddresses, isUpdateAddresses, setCh
   
 
   const cityId: any = watch('city');
-<<<<<<< HEAD
   console.log(cityId);
   
-=======
->>>>>>> 6c6a1ef (Fix UI..)
   const province_id = parseInt(cityId)
   const { data: district, isLoading: isLoadingDistrict } = useQuery({
     queryKey: ['district', cityId],
@@ -265,20 +242,6 @@ const DetailConfirm = ({ isCheckAddresses, idAddresses, isUpdateAddresses, setCh
     setValue('ward', '');
   }, [districtId, setValue]);
 
-<<<<<<< HEAD
-=======
-  useEffect(() => {
-    if (detailConfirm) {
-      setValue("full_name", detailConfirm.full_name);
-      setValue("phone_number", detailConfirm.phone_number);
-      setValue("address_line", detailConfirm.address_line);
-      setValue("city", detailConfirm.city);
-      setValue("district", detailConfirm.district);
-      setValue("ward", detailConfirm.ward);
-      setValue("is_default", detailConfirm.is_default);
-    }
-  }, [detailConfirm, setValue]);
->>>>>>> 6c6a1ef (Fix UI..)
 
   if (isLoading)
     return <Spin tip="Loading..." className="flex justify-center items-center h-screen" />;
@@ -296,13 +259,6 @@ const DetailConfirm = ({ isCheckAddresses, idAddresses, isUpdateAddresses, setCh
             </div>
 
             <div className="flex-grow px-4">
-<<<<<<< HEAD
-=======
-              <Input
-                placeholder="Mã đơn / Mã vận chuyển / Tên / Địa chỉ / Số điện thoại / Ghich"
-                className="w-full rounded-full border-gray-300 shadow-sm px-4 py-2 text-gray-700 placeholder-gray-400"
-              />
->>>>>>> 6c6a1ef (Fix UI..)
             </div>
 
             <div className="flex items-center space-x-4 mr-5">
@@ -447,11 +403,7 @@ const DetailConfirm = ({ isCheckAddresses, idAddresses, isUpdateAddresses, setCh
             <Button
               type="default"
               className="rounded-md px-4 w-[150px] transition duration-300 ease-in-out transform hover:scale-105"
-<<<<<<< HEAD
               onClick={() => navigate('/admin/dashboard/bill/list')}
-=======
-              onClick={() => navigate('/admin/dashboard/bill/app')}
->>>>>>> 6c6a1ef (Fix UI..)
             >
               Quay Lại
             </Button>
