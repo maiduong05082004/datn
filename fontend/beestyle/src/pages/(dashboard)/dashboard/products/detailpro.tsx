@@ -104,15 +104,15 @@ const DetailProduct: React.FC = () => {
             name="product_cost"
             rules={[{ required: true, message: 'Giá Nhập sản phẩm bắt buộc' }]}
           >
-            <Input />
-          </Form.Item>
+            <Input disabled />
+          </Form.Item >
 
           <Form.Item
             label="Nhà Cung Cấp"
             name="supplier"
             rules={[{ required: true, message: 'Nhà Cung Cấp bắt buộc' }]}
           >
-            <Input />
+            <Input disabled />
           </Form.Item>
 
           <Form.Item
@@ -120,7 +120,7 @@ const DetailProduct: React.FC = () => {
             name="import_date"
             rules={[{ required: true, message: "Ngày nhập sản phẩm bắt buộc phải điền" }]}
           >
-            <DatePicker format="YYYY-MM-DD" style={{ width: '100%' }} />
+            <DatePicker format="YYYY-MM-DD" style={{ width: '100%' }} disabled />
           </Form.Item>
 
             <Form.Item label="Giá sản phẩm" name="price">
