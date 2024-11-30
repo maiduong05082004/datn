@@ -434,6 +434,7 @@ class ProductController extends Controller
                     'don_gia' => $detail->don_gia,
                     'quantity' => $detail->quantity,
                     'total_amount' => $detail->total_amount,
+                    'status_comment' => $detail->status_comment,
                     'variation_images' => $detail->variation_images,
                 ];
             });
