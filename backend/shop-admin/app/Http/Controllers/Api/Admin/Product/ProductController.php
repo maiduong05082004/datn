@@ -62,7 +62,7 @@ class ProductController extends Controller
                 'is_new' => $request->is_new ? 1 : 0,
             ]);
 
-             $tableProductCost = TableProductCost::created([
+            TableProductCost::create([
                 'product_id' => $product->id,
                 'cost_price' => $request->cost_price,
                 'supplier' => $request->supplier,
@@ -307,6 +307,7 @@ class ProductController extends Controller
                 'cost_price' => $request->cost_price,
                 'supplier' => $request->supplier,
                 'import_date' => $request->import_date,
+                
              ]);
 
             // Xóa ảnh nếu có yêu cầu

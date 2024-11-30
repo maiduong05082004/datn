@@ -44,9 +44,11 @@ const DetailProduct: React.FC = () => {
     if (UpdateVariant && variantgroup) {
       form.setFieldsValue({
         ...UpdateVariant,
-        input_day: UpdateVariant.input_day ? moment(UpdateVariant.input_day) : null,
+        import_date: UpdateVariant.product_cost?.import_date ? moment(UpdateVariant.product_cost.import_date, 'YYYY-MM-DD', true) : null,
         category_id: UpdateVariant.category_id,
         variant_group: UpdateVariant.group?.id,
+        product_cost: UpdateVariant.product_cost?.cost_price || '',
+        supplier: UpdateVariant.product_cost?.supplier || '',
       });
       setContent(UpdateVariant.content || '');
 
@@ -61,13 +63,13 @@ const DetailProduct: React.FC = () => {
         })),
         colorImage: variation.attribute_value_image_variant.image_path
           ? [
-              {
-                name: variation.attribute_value_image_variant.image_path,
-                uid: variation.attribute_value_image_variant.image_path,
-                status: 'done',
-                url: variation.attribute_value_image_variant.image_path,
-              },
-            ]
+            {
+              name: variation.attribute_value_image_variant.image_path,
+              uid: variation.attribute_value_image_variant.image_path,
+              status: 'done',
+              url: variation.attribute_value_image_variant.image_path,
+            },
+          ]
           : [],
         albumImages: variation.variation_album_images.map((image: string) => ({
           name: image,
@@ -89,13 +91,37 @@ const DetailProduct: React.FC = () => {
   }
 
   return (
-    <div className="w-full px-6 py-8">
-      <div className="flex gap-2">
-        <div className="bg-white p-6 rounded-lg shadow-md border border-gray-300 w-[70%]">
+    <div className="w-[100%] p-5 m-auto">
+      <div className="">
+        <div className="bg-white p-6 rounded-lg shadow-md border border-gray-300 mb-5">
           <Form form={form} layout="vertical">
             <Form.Item label="Tên sản phẩm" name="name">
               <Input className="border border-gray-300 rounded-md" disabled />
             </Form.Item>
+
+            <Form.Item
+            label="Giá Nhập"
+            name="product_cost"
+            rules={[{ required: true, message: 'Giá Nhập sản phẩm bắt buộc' }]}
+          >
+            <Input />
+          </Form.Item>
+
+          <Form.Item
+            label="Nhà Cung Cấp"
+            name="supplier"
+            rules={[{ required: true, message: 'Nhà Cung Cấp bắt buộc' }]}
+          >
+            <Input />
+          </Form.Item>
+
+          <Form.Item
+            label="Ngày nhập"
+            name="import_date"
+            rules={[{ required: true, message: "Ngày nhập sản phẩm bắt buộc phải điền" }]}
+          >
+            <DatePicker format="YYYY-MM-DD" style={{ width: '100%' }} />
+          </Form.Item>
 
             <Form.Item label="Giá sản phẩm" name="price">
               <InputNumber min={0} style={{ width: '100%' }} className="border border-gray-300 rounded-md" disabled />
@@ -129,76 +155,61 @@ const DetailProduct: React.FC = () => {
           </Form>
         </div>
 
-        <div className="flex flex-col gap-8 w-[28%]">
-          <div className="bg-white p-6 rounded-lg shadow-md border border-gray-300">
-            <h3 className="text-2xl font-semibold mb-4">Biến Thể</h3>
-            {variants.map((variant: any, index: number) => (
-              <div key={index} className="mb-8 p-6 bg-white">
-                <h4 className="text-xl font-semibold mb-4">Biến thể màu: {variant.colorName}</h4>
+        <div className="flex flex-col gap-8 bg-white p-6 rounded-lg shadow-md border border-gray-300">
+          <h3 className="text-3xl font-semibold">Biến Thể</h3>
 
-                <div className="">
-                  <div>
-                    <h5 className="font-semibold mb-4">Thông tin kích thước:</h5>
-                    {variant.sizes.map((size: any, idx: number) => (
-                      <div key={idx} className="flex items-center gap-4 mb-3">
-                        <span className="w-20 font-semibold">{size.size}</span>
-                        <InputNumber value={size.stock} className="w-24 border border-gray-300 rounded-md" placeholder="Số lượng" disabled />
-                        <InputNumber value={size.discount} className="w-24 border border-gray-300 rounded-md" placeholder="Giảm giá (%)" disabled />
-                      </div>
-                    ))}
-                  </div>
-
-                    <div>
-                    <h5 className="font-semibold mb-4">Hình ảnh biến thể:</h5>
-                    <div className="flex flex-wrap gap-6">
-                      {/* Color Image */}
-                      <div className="flex flex-col items-center">
-                        <div className="mb-2 text-sm font-semibold">Ảnh màu:</div>
-                        {variant.colorImage.length > 0 ? (
-                          variant.colorImage.map((image: any, imgIndex: number) => (
-                            <div
-                              key={imgIndex}
-                              className="border border-gray-300 rounded-md overflow-hidden shadow-lg"
-                            >
-                              <img
-                                src={image.url}
-                                alt="color"
-                                className="w-32 h-32 object-cover transition-transform duration-300 hover:scale-105"
-                              />
-                            </div>
-                          ))
-                        ) : (
-                          <div className="w-32 h-32 bg-gray-100 border border-dashed border-gray-300 rounded-md flex items-center justify-center">
-                            Không có ảnh
-                          </div>
-                        )}
-                      </div>
-
-                      {/* Album Images */}
-                      <div className="flex flex-col items-start">
-                        <div className="mb-2 text-sm font-semibold">Album ảnh:</div>
-                        <div className="grid grid-cols-3 gap-4">
-                          {variant.albumImages.map((image: any, imgIndex: number) => (
-                            <div
-                              key={imgIndex}
-                              className="w-24 h-24 border border-gray-300 rounded-md overflow-hidden shadow-lg"
-                            >
-                              <img
-                                src={image.url}
-                                alt="album"
-                                className="object-cover w-full h-full transition-transform duration-300 hover:scale-105"
-                              />
-                            </div>
-                          ))}
+          {variants.map((variant: any, index: number) => (
+            <div key={index} className="mb-8 p-4 bg-white rounded-lg shadow-sm border border-gray-200 flex gap-10">
+              <div>
+                <h4 className="text-xl font-semiboldmb-2">Biến thể màu: {variant.colorName}</h4>
+                <div>
+                  <h5 className="font-semibold mb-4">Thông tin kích thước:</h5>
+                  {variant.sizes.map((size: any, idx: number) => (
+                    <div key={idx} className="flex items-center gap-4 mb-3">
+                      <span className="w-20 font-semibold">{size.size}</span>
+                      <input
+                        type="number"
+                        value={size.stock}
+                        className="w-24 border border-gray-300 rounded-md p-2"
+                        placeholder="Số lượng"
+                        disabled
+                      />
+                      <input
+                        type="number"
+                        value={size.discount}
+                        className="w-24 border border-gray-300 rounded-md p-2"
+                        placeholder="Giảm giá (%)"
+                        disabled
+                      />
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div>
+                <div className="flex flex-wrap gap-6">
+                  <div className="flex flex-col items-start">
+                    <div className="mb-2 text-xl font-semibold">Album ảnh:</div>
+                    <div className="flex gap-4 pt-7">
+                      {variant.albumImages.map((image: any, imgIndex: number) => (
+                        <div
+                          key={imgIndex}
+                          className="w-20 h-20 border border-gray-300 rounded-md overflow-hidden shadow-lg"
+                        >
+                          <img
+                            src={image.url}
+                            alt="album"
+                            className="object-cover w-full h-full transition-transform duration-300 hover:scale-105"
+                          />
                         </div>
-                      </div>
+                      ))}
                     </div>
                   </div>
                 </div>
               </div>
-            ))}
-          </div>
+            </div>
+          ))}
         </div>
+
       </div>
     </div>
   );

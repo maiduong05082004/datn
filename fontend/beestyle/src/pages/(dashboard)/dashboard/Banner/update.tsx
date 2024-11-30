@@ -233,7 +233,7 @@ const UpdateBanners: React.FC = () => {
                     onClick={() => deleteImage()}
                     style={{ marginTop: '10px' }}
                   >
-                    Xóa ảnh hiện tại
+                    Xóa ảnh
                   </Button>
                 )}
               </Form.Item>
