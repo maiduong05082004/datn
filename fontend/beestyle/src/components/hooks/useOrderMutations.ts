@@ -46,15 +46,24 @@ export const useOrderMutations = () => {
 
     const orderATM = useMutation({
         mutationFn: async (order: any) => {
+
+            console.log(order);
+            
+
+            let status
             try {
-                const {data} = await axios.post(`http://localhost:8000/api/client/payment/`, order, {
+                const { payment_method } = order
+                if (payment_method == "VNPay") {
+                    status = "payment"
+                } else {
+                    status = "checkout"
+                }
+                const {data} = await axios.post(`http://localhost:8000/api/client/${status}`, order, {
                     headers: {
                         Authorization: `Bearer ${localStorage.getItem("token")}`,
                     }
                 })
-                console.log(data);
-                
-                // window.location.href = data.data
+                window.location.href = data.data
             } catch (error) {
                 throw new Error("Mua hàng thất bại!")
             }
