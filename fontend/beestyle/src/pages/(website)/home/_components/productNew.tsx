@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
 import React, { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom';
-import LoadingPage from '../../loading/page';
+import LoadingPage from '../../loading/loadPage';
 import AddProductCart from '../../_components/AddProductCart';
 
 type Props = {}

@@ -2,6 +2,7 @@ import { useQuery } from '@tanstack/react-query'
 import axios from 'axios'
 import React, { useEffect, useState } from 'react'
 import AddProductCart from '../../_components/AddProductCart'
+import { Link } from 'react-router-dom'
 
 type Props = {}
 
@@ -26,8 +27,6 @@ const ProductHot = (props: Props) => {
     }
   }, [hotpr?.data?.data]);
 
-  console.log(hotpr);
-
   return (
     <section>
       <div className="pt-[40px]">
@@ -48,7 +47,7 @@ const ProductHot = (props: Props) => {
               <div key={index + 1} className={`${item.category_id === categoryId.category_id ? "flex" : "hidden"} gap-2 overflow-x-auto whitespace-nowrap scrollbar lg:gap-4`}>
                 {
                   item.products.slice(0, 12).map((product: any, index: any) => (
-                    <div key={index + 1} className="max-w-[38.8%] basis-[38.8%] shrink-0 relative relatives lg:max-w-[19.157%] lg:basis-[19.157%]">
+                    <Link to={`/products/${product.id}`} key={index + 1} className="max-w-[38.8%] basis-[38.8%] shrink-0 relative relatives lg:max-w-[19.157%] lg:basis-[19.157%]">
                       <div onClick={() => { setCartItem(product), setActiveCart(!activeCart) }} className="absolute cursor-pointer top-[16px] right-[16px]">
                         <div className="bg-black flex justify-center w-[40px] h-[40px] rounded-[100%] items-center opacity-10">
                           <div className="w-[24px] h-[24px]">
@@ -77,7 +76,7 @@ const ProductHot = (props: Props) => {
                           <div className="w-[12px] h-[12px] rounded-[100%] border-red-500 border-[6px] bg-red-500"></div>
                         </div>
                       </div>
-                    </div>
+                    </Link>
                   ))
                 }
               </div>

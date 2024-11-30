@@ -4,7 +4,7 @@ import axios from "axios"
 import { useEffect, useState } from "react"
 import AddAddresses from "../../checkout/_components/addAddresses"
 import UpdateAddresses from "../../checkout/_components/updateAddresses"
-import LoadingPage from "../../loading/page"
+import LoadingPage from "../../loading/loadPage"
 
 type Props = {}
 
@@ -19,7 +19,7 @@ const AddressesPage = (props: Props) => {
     const [messageApi, handleContext] = message.useMessage()
     const queryClient = useQueryClient()
 
-    const { data: addresses ,isLoading: isLoadingAddress } = useQuery({
+    const { data: addresses, isLoading: isLoadingAddress } = useQuery({
         queryKey: ['addresses'],
         queryFn: async () => {
             return await axios.get(`http://127.0.0.1:8000/api/client/shippingaddress`, {
@@ -65,8 +65,8 @@ const AddressesPage = (props: Props) => {
 
     }
 
-      // Lấy tỉnh/thành phố
-      const { data: provinceData, isLoading: isLoadingProvinces } = useQuery({
+    // Lấy tỉnh/thành phố
+    const { data: provinceData, isLoading: isLoadingProvinces } = useQuery({
         queryKey: ['province'],
         queryFn: async () => {
             return await axios.get(`https://dev-online-gateway.ghn.vn/shiip/public-api/master-data/province`, {
@@ -101,12 +101,12 @@ const AddressesPage = (props: Props) => {
                     token: '4bd9602e-9ad5-11ef-8e53-0a00184fe694',
                 },
             });
-    
+
             const wardDictionary = data?.data.reduce((acc: Record<string, string>, ward: any) => {
                 acc[ward.WardCode] = ward.WardName;
                 return acc;
             }, {});
-    
+
             setWardsMap((prev) => ({
                 ...prev,
                 [districtId]: wardDictionary,
@@ -120,12 +120,12 @@ const AddressesPage = (props: Props) => {
             fetchWardsByDistrict(item.district);
         });
     }, [addresses]);
-    
+
     const getProvinceName = (id: string) => provinceData?.data.data.find((item: any) => item.ProvinceID === parseInt(id))?.ProvinceName || 'Unknown Province';
     const getDistrictName = (id: string) => districtData?.data.data.find((item: any) => item.DistrictID === parseInt(id))?.DistrictName || 'Unknown District';
-    
 
-    if(isLoadingAddress) return (<LoadingPage/>)
+
+    if (isLoadingAddress) return (<LoadingPage />)
     return (
         <div className="">
             {handleContext}
@@ -147,7 +147,7 @@ const AddressesPage = (props: Props) => {
                                         <span className='text-[16px] font-[700]'>{item.full_name}</span>
                                     </div>
                                     <div className="flex text-[14px] text-[#787878] font-[500]">
-                                        <div onClick={() => {setUpdateAddresses(!isUpdateAddresses), setIdAddresses(item)}} className="cursor-pointer">Cập nhật</div>
+                                        <div onClick={() => { setUpdateAddresses(!isUpdateAddresses), setIdAddresses(item) }} className="cursor-pointer">Cập nhật</div>
                                         {item?.is_default ? "" : (<div onClick={() => handleDeleteAddress(item.id)} className='ml-[12px] cursor-pointer'>Xóa địa chỉ</div>)}
                                     </div>
                                 </div>
@@ -176,7 +176,7 @@ const AddressesPage = (props: Props) => {
             </div>
 
             <UpdateAddresses isUpdateAddresses={isUpdateAddresses} isCheckAddresses={isCheckAddresses} setUpdateAddresses={setUpdateAddresses} setCheckAddresses={setCheckAddresses} idAddresses={idAddresses} />
-            <AddAddresses  isCheckAddresses={isCheckAddresses} isAddAddresses={isAddAddresses} setCheckAddresses={setCheckAddresses} setAddAddresses={setAddAddresses} />
+            <AddAddresses isCheckAddresses={isCheckAddresses} isAddAddresses={isAddAddresses} setCheckAddresses={setCheckAddresses} setAddAddresses={setAddAddresses} />
         </div>
     )
 }

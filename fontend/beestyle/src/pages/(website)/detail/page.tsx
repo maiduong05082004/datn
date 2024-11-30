@@ -3,15 +3,12 @@ import { message } from 'antd';
 import axios from 'axios';
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import LoadingPage from '../loading/page';
+import LoadingPage from '../loading/loadPage';
 import Favorite from './_components/favorite';
 import { useForm } from 'react-hook-form';
 import InfoProduct from './_components/infoProduct';
 import CommentEvaluate from './_components/commentEvaluate';
 
-type Props = {
-    //   onClicks: () => void;
-}
 interface Product {
     products_id: number;
     product_variation_value_id: number;

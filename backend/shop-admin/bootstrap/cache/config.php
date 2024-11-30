@@ -302,7 +302,11 @@
       array(
         'driver' => 'sqlite',
         'url' => NULL,
+<<<<<<< HEAD
         'database' => 'datnpro',
+=======
+        'database' => 'nmn_27_datn',
+>>>>>>> cd7386890993eda67c3bbb46b56ddbe1d85ef71a
         'prefix' => '',
         'foreign_key_constraints' => true,
       ),
@@ -312,7 +316,11 @@
         'url' => NULL,
         'host' => '127.0.0.1',
         'port' => '3306',
+<<<<<<< HEAD
         'database' => 'datnpro',
+=======
+        'database' => 'nmn_27_datn',
+>>>>>>> cd7386890993eda67c3bbb46b56ddbe1d85ef71a
         'username' => 'root',
         'password' => '',
         'unix_socket' => '',
@@ -331,7 +339,11 @@
         'url' => NULL,
         'host' => '127.0.0.1',
         'port' => '3306',
+<<<<<<< HEAD
         'database' => 'datnpro',
+=======
+        'database' => 'nmn_27_datn',
+>>>>>>> cd7386890993eda67c3bbb46b56ddbe1d85ef71a
         'username' => 'root',
         'password' => '',
         'charset' => 'utf8',
@@ -346,7 +358,11 @@
         'url' => NULL,
         'host' => '127.0.0.1',
         'port' => '3306',
+<<<<<<< HEAD
         'database' => 'datnpro',
+=======
+        'database' => 'nmn_27_datn',
+>>>>>>> cd7386890993eda67c3bbb46b56ddbe1d85ef71a
         'username' => 'root',
         'password' => '',
         'charset' => 'utf8',
@@ -954,4 +970,8 @@
       0 => 'App\\Nova',
     ),
   ),
+<<<<<<< HEAD
 );
+=======
+);
+>>>>>>> cd7386890993eda67c3bbb46b56ddbe1d85ef71a

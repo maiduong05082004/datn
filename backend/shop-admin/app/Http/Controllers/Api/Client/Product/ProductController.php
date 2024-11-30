@@ -503,27 +503,27 @@ class ProductController extends Controller
     public function showDetailOrder($orderId)
     {
         try {
-           
+
             $bill = Bill::with([
                 'shippingAddress:id,full_name,address_line,city,district,ward,phone_number',
                 'BillDetail.product:id,name,price',
                 'BillDetail.productVariationValue:id,product_variation_id,attribute_value_id,sku,stock,price,discount',
                 'BillDetail.productVariationValue.attributeValue:id,value',
                 'BillDetail.productVariationValue.productVariation.variationImages' => function ($query) {
-                    $query->select('product_variation_id', 'image_path'); 
+                    $query->select('product_variation_id', 'image_path');
                 },
                 'payments'
 
             ])->findOrFail($orderId);
 
-          
+
             $bill->status_description = $bill->getTrangThaiDonHang();
             $bill->payment_type_description = $bill->getLoaiThanhToan();
 
-      
+
             $dateTime = Carbon::parse($bill->created_at)->timezone('Asia/Ho_Chi_Minh');
-            $bill->order_date = $dateTime->format('d/m/Y'); 
-            $bill->order_time = $dateTime->format('H:i:s'); 
+            $bill->order_date = $dateTime->format('d/m/Y');
+            $bill->order_time = $dateTime->format('H:i:s');
 
             if ($bill->shippingAddress) {
                 $bill->shipping_address_id = $bill->shippingAddress->id;
@@ -559,8 +559,8 @@ class ProductController extends Controller
                 unset($detail->updated_at);
 
 
-                
-   
+
+
                 return [
                     'id' => $detail->id,
                     'bill_id' => $detail->bill_id,
@@ -607,14 +607,14 @@ class ProductController extends Controller
                 'user_id' => $bill->user_id,
                 'email_receiver' => $bill->email_receiver,
                 'note' => $bill->note,
-                'canceled_reason' => $bill->canceled_reason??null,
+                'canceled_reason' => $bill->canceled_reason ?? null,
                 'canceled_date' => $canceledReasonTime ? $canceledReasonTime->format('d/m/Y') : null,
                 'canceled_time' => $canceledReasonTime ? $canceledReasonTime->format('H:i:s') : null,
                 'payment_type' => $bill->payment_type,
                 'payment_type_description' => $bill->payment_type_description,
                 'status_bill' => $bill->status_bill,
                 'status_description' => $bill->status_description,
-                'payment_info' => $paymentInfo, 
+                'payment_info' => $paymentInfo,
                 'order_date' => $bill->order_date,
                 'order_time' => $bill->order_time,
                 'canceled_at' => $bill->canceled_at,
@@ -652,11 +652,11 @@ class ProductController extends Controller
         $validatedData = $request->validate([
             'reason' => 'required|string|max:255', // Thêm lý do hủy
         ]);
-    
+
         try {
             $bill = Bill::with('BillDetail.productVariationValue.productVariation.product', 'payments')
                 ->findOrFail($orderId);
-    
+
             // Kiểm tra trạng thái đơn hàng
             if (!$bill->isPending()) {
                 return response()->json([
@@ -664,32 +664,32 @@ class ProductController extends Controller
                     'current_status' => $bill->status_bill,
                 ], 400);
             }
-    
+
             // Kiểm tra nếu đơn hàng đã thanh toán
             if ($bill->payments->contains('status', Payment::STATUS_PAID)) {
                 return response()->json(['message' => 'Không thể hủy đơn hàng đã được thanh toán.'], 400);
             }
-    
+
             DB::beginTransaction();
-    
+
             // Hoàn lại kho hàng
             foreach ($bill->BillDetail as $billDetail) {
                 if ($billDetail->productVariationValue) {
                     $variationValue = $billDetail->productVariationValue;
-    
+
                     $variationValue->increment('stock', $billDetail->quantity);
                     $variationValue->productVariation->increment('stock', $billDetail->quantity);
                     $variationValue->productVariation->product->increment('stock', $billDetail->quantity);
                 }
             }
-    
+
             // Cập nhật trạng thái đơn hàng và lưu lý do hủy
             $bill->update([
                 'status_bill' => Bill::STATUS_CANCELED,
                 'canceled_at' => now(),
                 'canceled_reason' => $validatedData['reason'], // Lưu lý do hủy
             ]);
-    
+
             DB::commit();
             return response()->json(['message' => 'Đơn hàng đã được hủy thành công'], 200);
         } catch (ModelNotFoundException $e) {
@@ -700,7 +700,7 @@ class ProductController extends Controller
             return response()->json(['message' => 'Đã xảy ra lỗi khi hủy đơn hàng.', 'error' => $e->getMessage()], 500);
         }
     }
-    
+
 
 
 
@@ -718,7 +718,7 @@ class ProductController extends Controller
             $bill->update([
                 'status_bill' => Bill::STATUS_DELIVERED,
                 'canceled_at' => now(),
-                
+
             ]);
 
             return response()->json(['message' => 'Đơn hàng đã được xác nhận thành công!'], 200);

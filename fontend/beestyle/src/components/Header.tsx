@@ -1,7 +1,7 @@
 import Support from "@/pages/(website)/_components/Support";
 import EventsAudio from "@/pages/(website)/events/eventsAudio";
 import EventsCanvas from "@/pages/(website)/events/eventsCanvas";
-import LoadingPage from "@/pages/(website)/loading/page";
+import LoadingPage from "@/pages/(website)/loading/loadPage";
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
 import { Dispatch, SetStateAction, useState } from "react";
@@ -45,8 +45,8 @@ const Header = ({ isSearch, setIsSearch }: Props) => {
         enabled: !!token,
     })
 
-    if(isLoadingCarts) {<LoadingPage />}
-    
+    if (isLoadingCarts) { <LoadingPage /> }
+
     return (
         <>
             <div className="bg-black h-[42px] text-center flex">
@@ -255,7 +255,7 @@ const Header = ({ isSearch, setIsSearch }: Props) => {
                         </Link>
                     </div>
                 </div>
-                {user ? (<Support/>) : ""}
+                {user ? (<Support />) : ""}
                 <EventsAudio />
                 <EventsCanvas />
             </header>

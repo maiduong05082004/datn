@@ -15,8 +15,6 @@ const RecentlyPage = (props: Props) => {
     const [cartItem, setCartItem] = useState<any>()
     const [activeCart, setActiveCart] = useState<boolean>(false)
 
-
-
     const handleSelectProduct = (productId: any) => {
         if (selectedProductsId.includes(productId)) {
             setSelectProductsId(selectedProductsId.filter((id: any) => id !== productId))
@@ -39,9 +37,6 @@ const RecentlyPage = (props: Props) => {
             content: "Xóa thành công"
         })
     }
-
-
-
 
     return (
         <div>

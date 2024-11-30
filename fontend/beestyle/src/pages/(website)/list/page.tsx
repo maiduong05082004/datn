@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { useParams } from 'react-router-dom'
 import axios from 'axios'
 import { useQuery } from '@tanstack/react-query'
-import LoadingPage from '../loading/page'
+import LoadingPage from '../loading/loadPage'
 
 
 type Props = {}

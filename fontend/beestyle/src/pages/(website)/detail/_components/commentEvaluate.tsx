@@ -3,7 +3,7 @@ import axios from 'axios';
 import { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import Report from './report';
-import LoadingPage from '../../loading/page';
+import LoadingPage from '../../loading/loadPage';
 
 type Props = {
 }
@@ -13,7 +13,7 @@ const CommentEvaluate = () => {
     const [hover, setHover] = useState(0)
     const [isReport, setReport] = useState<boolean>(false)
     const [isReportTab, setReportTab] = useState<boolean>(false)
-    const [commentItem, setCommentItem ] = useState<any>()
+    const [commentItem, setCommentItem] = useState<any>()
 
     const { id } = useParams()
     const product_id = id
@@ -25,7 +25,7 @@ const CommentEvaluate = () => {
         },
     })
 
-    if(isLoading) return (<LoadingPage/>)
+    if (isLoading) return (<LoadingPage />)
     return (
         !isLoading &&
         <div className="">
@@ -102,7 +102,7 @@ const CommentEvaluate = () => {
                                                 </svg>
                                                 <span className='text-[#787878] text-[14px] font-[500] ml-[3px]'>{item.like} {item.like < 1000 ? "" : "k"}</span>
                                             </div>
-                                            <div onClick={() => {setReportTab(!isReportTab), setCommentItem(item)}} className="cursor-pointer px-[20px]">
+                                            <div onClick={() => { setReportTab(!isReportTab), setCommentItem(item) }} className="cursor-pointer px-[20px]">
                                                 <svg width="4px" height="16px" viewBox="0 0 4 16" version="1.1" xmlns="http://www.w3.org/2000/svg"><defs></defs><g stroke="none" strokeWidth="1" fillRule="evenodd"><g transform="translate(-1301.000000, -550.000000)" fill="#CCCCCC"><g transform="translate(155.000000, 92.000000)"><g transform="translate(40.000000, 184.000000)"><g transform="translate(0.000000, 161.000000)"><g><g transform="translate(50.000000, 2.000000)"><path d="M1058,122.2 C1056.895,122.2 1056,123.096 1056,124.2 C1056,125.306 1056.895,126.202 1058,126.202 C1059.104,126.202 1060,125.306 1060,124.2 C1060,123.096 1059.104,122.2 1058,122.2 M1058,116.6 C1056.895,116.6 1056,117.496 1056,118.6 C1056,119.706 1056.895,120.602 1058,120.602 C1059.104,120.602 1060,119.706 1060,118.6 C1060,117.496 1059.104,116.6 1058,116.6 M1058,111 C1056.895,111 1056,111.896 1056,113 C1056,114.106 1056.895,115.002 1058,115.002 C1059.104,115.002 1060,114.106 1060,113 C1060,111.896 1059.104,111 1058,111"></path></g></g></g></g></g></g></g></svg>
                                             </div>
                                         </div>
@@ -116,7 +116,7 @@ const CommentEvaluate = () => {
 
                 </div>
             </div>
-            <Report isReportTab={isReportTab} setReportTab={setReportTab} commentItem={commentItem}/>
+            <Report isReportTab={isReportTab} setReportTab={setReportTab} commentItem={commentItem} />
         </div>
     )
 }
