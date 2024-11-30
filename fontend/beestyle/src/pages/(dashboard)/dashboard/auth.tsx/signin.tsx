@@ -9,6 +9,7 @@ type FildType = {
     confirmPassword?: string;
 };
 
+
 const Signin = () => {
     const [form] = Form.useForm();
     const [messageAPI, contextHolder] = message.useMessage();
@@ -53,6 +54,7 @@ const Signin = () => {
                     initialValues={{ email: "", password: "" }}
                 >
                     {/* Email Input */}
+
                     <Form.Item<FildType>
                         label={<span className="font-semibold text-gray-800">Email</span>}
                         name="email"
@@ -65,6 +67,7 @@ const Signin = () => {
                     </Form.Item>
 
                     {/* Password Input */}
+
                     <Form.Item<FildType>
                         label={<span className="font-semibold text-gray-800">Mật khẩu</span>}
                         name="password"
@@ -77,6 +80,7 @@ const Signin = () => {
                     </Form.Item>
 
                     {/* Custom Remember Me and Forgot Password */}
+
                     <div className="flex items-center justify-between mb-4">
                         <Form.Item
                             name="remember"
@@ -95,6 +99,7 @@ const Signin = () => {
                     </div>
 
                     {/* Submit Button */}
+
                     <Form.Item>
                         <Button
                             type="primary"
@@ -105,7 +110,9 @@ const Signin = () => {
                             Đăng Nhập
                         </Button>
                     </Form.Item>
+
                     {/* Link to Signup */}
+
                     <div className="text-center">
                         <span className="text-gray-700">
                             Bạn chưa có tài khoản?{" "}
@@ -117,4 +124,5 @@ const Signin = () => {
         </div>
     );
 };
+
 export default Signin;
