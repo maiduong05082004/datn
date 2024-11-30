@@ -21,7 +21,7 @@ const OrderDetail = (props: Props) => {
     const { data: detail, isLoading: isLoadingOrderDetail } = useQuery({
         queryKey: ['orderDetail', oderId],
         queryFn: async () => {
-            return await axios.get(`http://127.0.0.1:8000/api/client/products/showDetailOrder/${oderId}`, {
+            return await axios.get(`http://127.0.0.1:8000/api/admins/orders/show_detailorder/${oderId}`, {
                 headers: {
                     Authorization: `Bearer ${localStorage.getItem('token')}`,
                 },
@@ -87,6 +87,9 @@ const OrderDetail = (props: Props) => {
         );
     };
 
+
+    console.log(detail);
+
     if (isLoadingOrderDetail) return <LoadingPage />
 
     return (
@@ -96,7 +99,21 @@ const OrderDetail = (props: Props) => {
                     <div className="border-b-[8px] border-[#F0F0F0] -mx-[15px] p-[15px] text-[18px] font-[700] lg:border-t-0 lg:border-b-black lg:border-b-[3px]">Thông tin sản phẩm đặt hàng</div>
                     <div className="p-[15px] lg:border-t-0 -mx-[15px] border-b-[#e8e8e8] border-b-[1px] *:font-[700] flex justify-between">
                         <div className="">{detail?.data.code_orders}</div>
-                        <div className="">Hủy đơn hàng</div>
+                        {detail?.data.status_bill === "pending" &&
+                            <div className="">Đang xử lý</div>
+                        }
+                        {detail?.data.status_bill === "processed" &&
+                            <div className="">Đã xử lý</div>
+                        }
+                        {detail?.data.status_bill === "shipped" &&
+                            <div className="">Đang giao hàng</div>
+                        }
+                        {detail?.data.status_bill === "delivered" &&
+                            <div className="">Đã giao hàng</div>
+                        }
+                        {detail?.data.status_bill === "canceled" || detail?.data.status_bill === "returned" &&
+                            <div className="">Đã hủy</div>
+                        }
                     </div>
                     <div className="grid gap-4 grid-cols-4 lg:gap-5 lg:grid-cols-12 py-[15px] border-b-[1px] border-b-[#e8e8e8] -mx-[15px] px-[15px]">
                         {detail?.data.bill_detail.map((item: any, index: any) => (
@@ -148,12 +165,14 @@ const OrderDetail = (props: Props) => {
                         <div className="border-t-[8px] border-[#F0F0F0] -mx-[15px] p-[15px] border-b-[1px] text-[18px] font-[700] lg:border-t-0 lg:border-b-black lg:border-b-[3px]">Địa chỉ nhận hàng</div>
                         <div className="flex justify-between py-[15px]">
                             <div className="*:text-[#787878] *:block *:text-[15px]">
-                                <span>Tên khách hàng</span>
+                                <span>Phương thức thanh toán</span>
+                                <span className='mt-[10px]'>Tên khách hàng</span>
                                 <span className='mt-[10px]'>Số điện thoại</span>
                                 <span className='mt-[10px]'>Địa chỉ</span>
                             </div>
                             <div className="flex flex-col items-end *:font-[500] *:text-[15px]">
-                                <div>{detail?.data.full_name}</div>
+                                <div>{detail?.data.payment_type_description}</div>
+                                <div className='mt-[10px]' >{detail?.data.full_name}</div>
                                 <div className='mt-[10px]'>{detail?.data.phone_number}</div>
                                 <div className='mt-[10px]'>{detail?.data.address_line},&nbsp;
                                     <LocationDisplay

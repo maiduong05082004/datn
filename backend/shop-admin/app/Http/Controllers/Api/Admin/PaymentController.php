@@ -369,13 +369,13 @@ class PaymentController extends Controller
                     \Log::error('Error sending email:', ['error' => $e->getMessage()]);
                 }
 
-                return response()->json([
-                    'code' => '00',
-                    'message' => 'Payment processed successfully',
-                    'bill_id' => $bill->id,
-                ]);
+                // return response()->json([
+                //     'code' => '00',
+                //     'message' => 'Payment processed successfully',
+                //     'bill_id' => $bill->id,
+                // ]);
 
-                // return redirect('http://localhost:5173/account?status=success');
+                return redirect('http://localhost:5173/account?status=success');
             } else {
                 // **5. Xử lý khi giao dịch thất bại**
                 $payment->update([
