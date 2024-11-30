@@ -231,14 +231,14 @@ const UpdateProduct: React.FC = () => {
     },
   });
 
-  const handleDeleteVariant = (colorId: number) => {
-    setRemovedVariants((prev) => [...prev, colorId]);
-    setVariants((prevVariants) => {
-      const updatedVariants = prevVariants.filter((variant) => variant.colorId !== colorId);
-      console.log("Updated Variants after Deletion:", updatedVariants);
-      return updatedVariants;
-    });
-  };
+  // const handleDeleteVariant = (colorId: number) => {
+  //   setRemovedVariants((prev) => [...prev, colorId]);
+  //   setVariants((prevVariants) => {
+  //     const updatedVariants = prevVariants.filter((variant) => variant.colorId !== colorId);
+  //     console.log("Updated Variants after Deletion:", updatedVariants);
+  //     return updatedVariants;
+  //   });
+  // };
 
   const handleAttributeValueChange = (attributeId: number, selectedValues: any[]) => {
     const updatedAttributes = attributes.map((attr) => {
