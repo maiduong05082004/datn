@@ -1,18 +1,9 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import axiosInstance from '@/configs/axios';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Form, Input, Button, Select, Row, Col, Typography, Card, message, Spin } from 'antd';
-import { MinusCircleOutlined, PlusOutlined } from '@ant-design/icons';
-import { FormProps } from 'react-hook-form';
-
-const { Title } = Typography;
-
-type Attribute = {
-    id: number;
-    name: string;
-    attribute_type: number;
-};
+import { Form, Input, Button, Upload, message, Spin } from 'antd';
+import { UploadOutlined } from '@ant-design/icons';
 
 const UpdateAttributeValues: React.FC = () => {
     const [messageApi, contextHolder] = message.useMessage();
@@ -20,8 +11,9 @@ const UpdateAttributeValues: React.FC = () => {
     const queryClient = useQueryClient();
     const navigate = useNavigate();
     const { id } = useParams();
+    const [fileList, setFileList] = useState<any[]>([]);
 
-    const { data: attributeUpdate , isLoading, isError } = useQuery({
+    const { data: attributeUpdate, isLoading, isError } = useQuery({
         queryKey: ['attributeUpdate', id],
         queryFn: async () => {
             const response = await axiosInstance.get(`http://127.0.0.1:8000/api/admins/attribute_values/${id}`);
@@ -34,26 +26,72 @@ const UpdateAttributeValues: React.FC = () => {
         return <div>Error loading data</div>;
     }
 
+    useEffect(() => {
+        if (attributeUpdate && attributeUpdate.image_path) {
+            setFileList([
+                {
+                    uid: '-1', 
+                    name: 'image.jpg', 
+                    status: 'done',
+                    url: attributeUpdate.image_path, 
+                },
+            ]);
+        }
+    }, [attributeUpdate]);
+
     const { mutate } = useMutation({
-        mutationFn: async (data: { attribute_id: number; values: string[] }) => {
-            return await axiosInstance.put(`http://127.0.0.1:8000/api/admins/attribute_values/${id}`, data);
+        mutationFn: async (data: FormData) => {
+            return await axiosInstance.post(`http://127.0.0.1:8000/api/admins/attribute_values/${id}`, data, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
+                params: {
+                    _method: 'PUT', 
+                },
+            });
         },
         onSuccess: () => {
             messageApi.success('Cập nhật giá trị thuộc tính thành công');
-            queryClient.invalidateQueries({ queryKey: ['attributes'] });
+            queryClient.invalidateQueries({ queryKey: ['attributeUpdate'] });
             form.resetFields();
+            setFileList([]); 
         },
         onError: (error: any) => {
             messageApi.error(`Lỗi: ${error.response?.data?.message || error.message}`);
         },
     });
 
-    const onFinish = (values: any) => {
-        mutate(values)
+    const { mutate: deleteImage } = useMutation({
+        mutationFn: async () => {
+            return await axiosInstance.delete(`/api/admins/attribute_values/${id}/image`);
+        },
+        onSuccess: () => {
+            messageApi.success('Xóa ảnh thành công!');
+            setFileList([]);
+        },
+        onError: (error: any) => {
+            const errorMessage = error.response?.data?.message || `Lỗi: ${error.message}`;
+            messageApi.error(errorMessage);
+        },
+    });
+
+    const handleFileChange = (info: any) => {
+        setFileList(info.fileList);
     };
-    
+
+    const onFinish = (values: any) => {
+        const formData = new FormData();
+        formData.append('attribute_id', values.attribute);
+        formData.append('value', values.value);
+        if (fileList.length > 0) {
+            formData.append('image_path', fileList[0]?.originFileObj);
+        }
+
+        mutate(formData);
+    };
 
     if (isLoading) return <Spin tip="Loading..." className="flex justify-center items-center h-screen" />;
+
     return (
         <>
             {contextHolder}
@@ -76,6 +114,31 @@ const UpdateAttributeValues: React.FC = () => {
                                 size="large"
                                 className="rounded-md"
                             />
+                        </Form.Item>
+
+                        <Form.Item
+                            label="Ảnh thuộc tính"
+                            name="image_path"
+                        >
+                            <Upload
+                                listType="picture"
+                                onChange={handleFileChange}
+                                beforeUpload={() => false}
+                                fileList={fileList}
+                                maxCount={1}
+                            >
+                                <Button icon={<UploadOutlined />}>Tải lên ảnh</Button>
+                            </Upload>
+                            {fileList.length > 0 && (
+                                <Button
+                                    type="primary"
+                                    danger
+                                    onClick={() => deleteImage()}
+                                    style={{ marginTop: '10px' }}
+                                >
+                                    Xóa ảnh
+                                </Button>
+                            )}
                         </Form.Item>
 
                         <Form.Item>

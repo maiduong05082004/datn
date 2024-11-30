@@ -75,6 +75,7 @@ import ListBannersCategory from "@/pages/(dashboard)/dashboard/Banner/list_banne
 import ListBannersCustom from "@/pages/(dashboard)/dashboard/Banner/list_banner_category";
 import ChatRealTime from "@/pages/(dashboard)/dashboard/ChatRealTime/chatrealtime";
 import DetailPro from "@/pages/(dashboard)/dashboard/Products/detailpro";
+import ShipNoGHN from "@/pages/(dashboard)/dashboard/Bill/ShipNoGHN";
 
 const Router = () => {
 
@@ -117,7 +118,8 @@ const Router = () => {
                     <Route path="bill/detail/:id" element={<DetailBill />} />
                     <Route path="bill/detailship/:id" element={<Detailship />} />
                     <Route path="bill/detailConfirm/:id" element={<DeatilConfirm />} />
-                    <Route path="bill/shiping/:id" element={<Shiping />} />
+                    {/* <Route path="bill/shiping/:id" element={<Shiping />} /> */}
+                    <Route path="bill/shiping/:id" element={<ShipNoGHN />} />
                     {/* <Route path="bill/address" element={<AddAddresses />} /> */}
                     {/* comments */}
                     {/* banners */}

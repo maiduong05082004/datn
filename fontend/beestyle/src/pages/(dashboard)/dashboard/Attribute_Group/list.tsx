@@ -91,24 +91,36 @@ const ListAttributeGroup = (props: Props) => {
                 {record.attributes.map((attr: any, index: any) => (
                     <div
                         key={index}
-                        className="p-4 border border-gray-300 rounded-lg bg-white shadow-md hover:shadow-lg transition-shadow duration-300 ease-in-out"
+                        className="p-5 border border-gray-300 rounded-lg bg-white shadow-md hover:shadow-lg transition-shadow duration-300 ease-in-out"
                     >
-                        <strong className="text-lg">{attr.name}:</strong>
-                        <div className="flex flex-wrap gap-2 mt-2">
-                            {attr.attribute_values.map((value: any, idx: any) => (
-                                <span
-                                    key={idx}
-                                    className="px-3 py-1 bg-gray-200 rounded-full text-sm font-medium shadow-sm hover:bg-gray-300 transition duration-300 ease-in-out"
-                                >
-                                    {value.value}
-                                </span>
-                            ))}
+                        <div className="flex items-center justify-between mb-3">
+                            <strong className="text-lg text-gray-800">{attr.name}:</strong>
+                        </div>
+                        <div className="overflow-hidden">
+                            <table className="min-w-full table-auto">
+                                <thead>
+                                    <tr className="bg-gray-100">
+                                        <th className="px-4 py-2 text-left text-sm font-semibold text-gray-600">Giá trị</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {attr.attribute_values.map((value: any, idx: any) => (
+                                        <tr
+                                            key={idx}
+                                            className="border-b hover:bg-gray-50 transition-colors duration-300 ease-in-out"
+                                        >
+                                            <td className="px-4 py-2 text-sm text-gray-700">{value.value}</td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 ))}
             </div>
         );
     };
+    
 
 
     return (

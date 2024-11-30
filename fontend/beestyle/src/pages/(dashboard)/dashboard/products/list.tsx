@@ -85,17 +85,44 @@ const ListProducts = () => {
       onFilter: (value: string, record: Product) => record.name.includes(value),
     },
     {
-      title: 'Giá',
+      title: 'Số Lượng',
+      dataIndex: 'stock',
+      key: 'stock',
+    },
+    {
+      title: 'Giá Nhập',
+      dataIndex: 'product_cost',
+      key: 'product_cost',
+      render: (product_cost: { cost_price: string }) => (
+        <span>{product_cost?.cost_price ? parseFloat(product_cost.cost_price).toLocaleString() : 'Không có'} VND</span>
+      ),
+    },
+    {
+      title: 'Nhà cung cấp',
+      dataIndex: 'product_cost',
+      key: 'supplier',
+      render: (product_cost: { supplier: string }) => (
+        <span>{product_cost?.supplier || 'Không có'}</span>
+      ),
+    },
+    
+    {
+      title: 'Ngày nhập',
+      dataIndex: 'product_cost',
+      key: 'import_date',
+      render: (product_cost: { import_date: string }) => (
+        <span>{product_cost ? format(new Date(product_cost.import_date), 'dd/MM/yyyy') : 'Không có'}</span>
+      ),
+    }
+    ,
+    {
+      title: 'Giá Bán',
       dataIndex: 'price',
       key: 'price',
       sorter: (a: Product, b: Product) => parseFloat(a.price) - parseFloat(b.price),
       render: (text: string) => <span>{parseFloat(text).toLocaleString()} VND</span>,
     },
-    {
-      title: 'Số Lượng',
-      dataIndex: 'stock',
-      key: 'stock',
-    },
+    ,
     {
       title: 'Mô tả',
       dataIndex: 'description',
@@ -114,7 +141,7 @@ const ListProducts = () => {
                   }}
                   className="text-indigo-600"
                   style={{ fontSize: '0.875rem' }}
-                  icon={<EyeOutlined/>}
+                  icon={<EyeOutlined />}
                 >
                 </Button>
               </span>
@@ -124,12 +151,6 @@ const ListProducts = () => {
           )}
         </div>
       ),
-    },
-    {
-      title: 'Ngày nhập',
-      dataIndex: 'input_day',
-      key: 'input_day',
-      render: (date: string) => <span>{format(new Date(date), 'dd/MM/yyyy')}</span>,
     },
     {
       title: 'Danh mục',

@@ -1,7 +1,5 @@
-import { joiResolver } from '@hookform/resolvers/joi';
-import Joi from 'joi';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import React, { Dispatch, SetStateAction, useEffect, useState } from 'react';
+import { Dispatch, SetStateAction, useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
 import { Button, Input, Spin, Select, message } from 'antd';
@@ -9,12 +7,13 @@ import { useForm } from 'react-hook-form';
 import axiosInstance from '@/configs/axios';
 import { toast, ToastContainer } from 'react-toastify';
 import {
-  CloseOutlined,
   EnvironmentOutlined,
-  InboxOutlined,
   MenuOutlined,
   MessageOutlined,
 } from '@ant-design/icons';
+import ChatRealTime from '../ChatRealTime/chatrealtime';
+import { joiResolver } from '@hookform/resolvers/joi';
+import Joi from 'joi';
 
 const { Option } = Select;
 type Props = {
@@ -34,11 +33,47 @@ interface TCheckout {
   is_default: boolean;
 }
 
+const checkoutSchema = Joi.object({
+  full_name: Joi.string().required().min(5).max(30).messages({
+      'any.required': 'Tên người nhận là bắt buộc',
+      'string.empty': 'Tên không được để trống',
+      'string.min': 'Tên người nhận phải có ít nhất 5 ký tự',
+      'string.max': 'Tên người nhận không được quá 50 ký tự',
+  }),
+  phone_number: Joi.string()
+      .required()
+      .min(10)
+      .max(15)
+      .pattern(/^[0-9]+$/)
+      .messages({
+          'any.required': 'Số điện thoại là bắt buộc',
+          'string.empty': 'Số điện thoại không được để trống',
+          'string.min': 'Số điện thoại phải có ít nhất 10 số',
+          'string.max': 'Số điện thoại phải có tối đa 15 số',
+          'string.pattern.base': 'Số điện thoại chỉ được chứa các ký tự số',
+      }),
+  address_line: Joi.string().required().messages({
+      'string.empty': 'Địa chỉ không được để trống',
+      'any.required': 'Địa chỉ là bắt buộc',
+  }),
+  city: Joi.string().required().messages({
+      'string.empty': 'Tỉnh/thành không được để trống',
+      'any.required': 'Tỉnh/thành là bắt buộc',
+  }),
+  district: Joi.string().required().messages({
+      'string.empty': 'Quận/huyện không được để trống',
+      'any.required': 'Quận/huyện là bắt buộc',
+  }),
+  ward: Joi.string().required().messages({
+      'string.empty': 'Phường/xã không được để trống',
+      'any.required': 'Phường/xã là bắt buộc',
+  }),
+  is_default: Joi.boolean(),
+});
+
 
 const DetailConfirm = ({ isCheckAddresses, idAddresses, isUpdateAddresses, setCheckAddresses, setUpdateAddresses }: Props) => {
   const [visible, setVisible] = useState(false);
-  const [messages, setMessages] = useState<string[]>([]);
-  const [newMessage, setNewMessage] = useState<string>('');
   const navigate = useNavigate();
   const [messageApi, contextHolder] = message.useMessage();
   const queryClient = useQueryClient();
@@ -47,11 +82,10 @@ const DetailConfirm = ({ isCheckAddresses, idAddresses, isUpdateAddresses, setCh
     setVisible(true);
   };
 
-  const handleSendMessage = () => {
-    if (newMessage.trim() === '') return;
-    setMessages((prevMessages) => [...prevMessages, newMessage]);
-    setNewMessage('');
+  const closeChatDrawer = () => {
+    setVisible(false);
   };
+
 
   const { id } = useParams();
   const token = localStorage.getItem('token');
@@ -60,18 +94,9 @@ const DetailConfirm = ({ isCheckAddresses, idAddresses, isUpdateAddresses, setCh
     setValue,
     watch,
     handleSubmit,
-    getValues,
     formState: { errors },
   } = useForm<TCheckout>({
-    defaultValues: {
-      full_name: '',
-      address_line: '',
-      city: '',
-      district: '',
-      ward: '',
-      phone_number: '',
-      is_default: false,
-    },
+    resolver: joiResolver(checkoutSchema)
   });
 
   const { data: detailConfirm, isLoading } = useQuery({
@@ -145,6 +170,19 @@ const DetailConfirm = ({ isCheckAddresses, idAddresses, isUpdateAddresses, setCh
     mutate(data);
   };
 
+
+  useEffect(() => {
+    if (detailConfirm) {
+        setValue("full_name", detailConfirm.full_name);
+        setValue("phone_number", detailConfirm.phone_number);
+        setValue("address_line", detailConfirm.address_line);
+        setValue("city", detailConfirm.city);
+        setValue("district", detailConfirm.district);
+        setValue("ward", detailConfirm.ward);
+        setValue("is_default", detailConfirm.is_default);
+    }
+}, [detailConfirm, setValue])
+
   const { data: province, isLoading: isLoadingProvinces } = useQuery({
     queryKey: ['province'],
     queryFn: async () => {
@@ -156,7 +194,12 @@ const DetailConfirm = ({ isCheckAddresses, idAddresses, isUpdateAddresses, setCh
     },
   });
 
+  // console.log(detailConfirm)
+  
+
   const cityId: any = watch('city');
+  console.log(cityId);
+  
   const province_id = parseInt(cityId)
   const { data: district, isLoading: isLoadingDistrict } = useQuery({
     queryKey: ['district', cityId],
@@ -171,6 +214,9 @@ const DetailConfirm = ({ isCheckAddresses, idAddresses, isUpdateAddresses, setCh
     enabled: !!cityId,
   });
 
+
+  console.log(district);
+  
   const districtId: any = watch('district');
   const district_id = parseInt(districtId)
   const { data: ward, isLoading: isLoadingWard } = useQuery({
@@ -195,17 +241,7 @@ const DetailConfirm = ({ isCheckAddresses, idAddresses, isUpdateAddresses, setCh
     setValue('ward', '');
   }, [districtId, setValue]);
 
-  useEffect(() => {
-    if (detailConfirm) {
-      setValue("full_name", detailConfirm.full_name);
-      setValue("phone_number", detailConfirm.phone_number);
-      setValue("address_line", detailConfirm.address_line);
-      setValue("city", detailConfirm.city);
-      setValue("district", detailConfirm.district);
-      setValue("ward", detailConfirm.ward);
-      setValue("is_default", detailConfirm.is_default);
-    }
-  }, [detailConfirm, setValue]);
+
 
   if (isLoading)
     return <Spin tip="Loading..." className="flex justify-center items-center h-screen" />;
@@ -214,8 +250,8 @@ const DetailConfirm = ({ isCheckAddresses, idAddresses, isUpdateAddresses, setCh
     <>
       {contextHolder}
       <ToastContainer />
-      <div className="flex min-h-screen pb-20 px-5">
-        <div className={`${visible ? 'w-2/3' : 'w-full'} transition-all duration-300`}>
+      <div className="flex min-h-screen pb-20 p-5">
+        <div className={`${visible ? 'w-[100%]' : 'w-full'} transition-all duration-300`}>
           <div className="bg-white shadow-md flex items-center justify-between px- py-2">
             <div className="flex items-center px-5">
               <MenuOutlined className="text-xl mr-4 cursor-pointer" />
@@ -223,13 +259,9 @@ const DetailConfirm = ({ isCheckAddresses, idAddresses, isUpdateAddresses, setCh
             </div>
 
             <div className="flex-grow px-4">
-              <Input
-                placeholder="Mã đơn / Mã vận chuyển / Tên / Địa chỉ / Số điện thoại / Ghich"
-                className="w-full rounded-full border-gray-300 shadow-sm px-4 py-2 text-gray-700 placeholder-gray-400"
-              />
             </div>
 
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-4 mr-5">
               <MessageOutlined className="text-2xl cursor-pointer" onClick={openChatDrawer} />
             </div>
           </div>
@@ -345,39 +377,9 @@ const DetailConfirm = ({ isCheckAddresses, idAddresses, isUpdateAddresses, setCh
         </div>
 
         {visible && (
-          <div className="w-1/3 p-6 border-l border-gray-200 transition-all duration-300 flex flex-col">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-xl font-bold">Chat Realtime</h3>
-              <CloseOutlined
-                className="text-2xl cursor-pointer text-gray-600 hover:text-gray-800"
-                onClick={() => setVisible(false)}
-              />
-            </div>
-            <div className="flex-grow overflow-y-auto bg-gray-100 p-4 rounded-lg mb-4">
-              {messages.map((message, index) => (
-                <div key={index} className={`flex ${index % 2 === 0 ? 'justify-start' : 'justify-end'} mb-2`}>
-                  <p
-                    className={`${index % 2 === 0 ? 'bg-blue-200 text-left' : 'bg-green-200 text-right'
-                      } p-2 rounded-lg max-w-xs`}
-                  >
-                    {message}
-                  </p>
-                </div>
-              ))}
-            </div>
-            <div className="flex items-center">
-              <Input
-                type="text"
-                value={newMessage}
-                onChange={(e) => setNewMessage(e.target.value)}
-                placeholder="Nhập tin nhắn..."
-                className="flex-grow rounded-lg mr-2"
-              />
-              <Button type="primary" onClick={handleSendMessage} className="rounded-lg">
-                Gửi
-              </Button>
-            </div>
-          </div>
+          <ChatRealTime
+            closeChat={closeChatDrawer}
+          />
         )}
       </div >
 

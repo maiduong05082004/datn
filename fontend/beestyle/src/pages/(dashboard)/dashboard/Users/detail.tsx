@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { Spin, Descriptions, Button, Card } from 'antd';
+import { Spin, Button, Input, Form, message } from 'antd';
 import axiosInstance from '@/configs/axios';
 
 type Props = {};
@@ -18,14 +18,12 @@ interface UserDetail {
   provider_name: string | null;
   provider_id: string | null;
   role: 'admin' | 'user' | 'moderator';
-  last_login_at: string | null;
-  is_active: boolean;
-  created_at: string;
-  updated_at: string;
 }
 
 const DetailUser: React.FC<Props> = () => {
+  const [form] = Form.useForm();
   const { id } = useParams();
+  const [messageApi, contextHolder] = message.useMessage();
   const navigate = useNavigate();
 
   // Fetch user detail using React Query
@@ -46,55 +44,66 @@ const DetailUser: React.FC<Props> = () => {
   }
 
   return (
-    <div className="p-5">
-        <Descriptions
-          bordered
-          size="middle"
-          column={{ xs: 1, sm: 1, md: 3 }}
-          className="w-full"
-        >
-          <Descriptions.Item label={<span className="font-semibold text-gray-800">Tên người dùng</span>}>
-            {userDetail.name}
-          </Descriptions.Item>
-          <Descriptions.Item label={<span className="font-semibold text-gray-800">Ngày sinh</span>}>
-            {userDetail.date_of_birth ? userDetail.date_of_birth : 'Chưa cập nhật'}
-          </Descriptions.Item>
-          <Descriptions.Item label={<span className="font-semibold text-gray-800">Email</span>}>
-            {userDetail.email}
-          </Descriptions.Item>
-          <Descriptions.Item label={<span className="font-semibold text-gray-800">Địa chỉ</span>}>
-            {userDetail.address ? userDetail.address : 'Chưa cập nhật'}
-          </Descriptions.Item>
-          <Descriptions.Item label={<span className="font-semibold text-gray-800">Số điện thoại</span>}>
-            {userDetail.phone ? userDetail.phone : 'Chưa cập nhật'}
-          </Descriptions.Item>
-          <Descriptions.Item label={<span className="font-semibold text-gray-800">Quyền</span>}>
-            {userDetail.role}
-          </Descriptions.Item>
-          <Descriptions.Item label={<span className="font-semibold text-gray-800">Trạng thái hoạt động</span>}>
-            {userDetail.is_active ? 'Hoạt động' : 'Không hoạt động'}
-          </Descriptions.Item>
-          <Descriptions.Item label={<span className="font-semibold text-gray-800">Ngày tạo</span>}>
-            {new Date(userDetail.created_at).toLocaleDateString()}
-          </Descriptions.Item>
-          <Descriptions.Item label={<span className="font-semibold text-gray-800">Ngày cập nhật</span>}>
-            {new Date(userDetail.updated_at).toLocaleDateString()}
-          </Descriptions.Item>
-          <Descriptions.Item label={<span className="font-semibold text-gray-800">Lần đăng nhập cuối</span>}>
-            {userDetail.last_login_at
-              ? new Date(userDetail.last_login_at).toLocaleDateString()
-              : 'Chưa có thông tin'}
-          </Descriptions.Item>
-          <Descriptions.Item label={<span className="font-semibold text-gray-800">Email đã xác thực</span>}>
-            {userDetail.email_verified_at ? 'Đã xác thực' : 'Chưa xác thực'}
-          </Descriptions.Item>
-        </Descriptions>      
-      <div className="flex justify-end mt-5">
-        <Button type="primary" onClick={() => navigate('/admin/dashboard/user/list')}>
-          Quay lại
-        </Button>
+    <>
+      {contextHolder}
+      <div className="min-h-screen p-5">
+        <div className="w-full max-w-8xl">
+          <Form
+            form={form}
+            name="updateUser"
+            layout="vertical"
+            className="space-y-6"
+            initialValues={{ ...userDetail }}
+            disabled 
+          >
+            <Form.Item
+              label="Tên Người Dùng"
+              name="name"
+              rules={[
+                { required: true, message: 'Tên người dùng là bắt buộc' },
+                { pattern: /^[a-zA-Z\s-]+$/, message: 'Tên chỉ chứa chữ cái, khoảng trắng và dấu gạch nối' },
+              ]}
+            >
+              <Input size="large" />
+            </Form.Item>
+
+            <Form.Item
+              label="Email"
+              name="email"
+              rules={[
+                { required: true, message: 'Email là bắt buộc' },
+                { type: 'email', message: 'Email không hợp lệ' },
+              ]}
+            >
+              <Input size="large" />
+            </Form.Item>
+
+            <Form.Item
+              label="Số điện thoại"
+              name="phone"
+              rules={[
+                { required: true, message: 'Số điện thoại là bắt buộc' },
+                { pattern: /^[0-9]{10,11}$/, message: 'Số điện thoại không hợp lệ' },
+              ]}
+            >
+              <Input size="large" />
+            </Form.Item>
+            <Form.Item
+              label="Địa chỉ"
+              name="address"
+              rules={[{ required: true, message: 'Địa chỉ là bắt buộc' }]}
+            >
+              <Input size="large" />
+            </Form.Item>
+            <Form.Item>
+              <div className="flex justify-end space-x-4">
+                <Button onClick={() => navigate('/admin/dashboard/user/list')}>Back</Button>
+              </div>
+            </Form.Item>
+          </Form>
+        </div>
       </div>
-    </div>
+    </>
   );
 };
 

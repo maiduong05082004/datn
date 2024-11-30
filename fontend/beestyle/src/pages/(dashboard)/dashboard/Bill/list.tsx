@@ -336,7 +336,7 @@ const ListBill: React.FC = () => {
             )}
             {record.status_bill === 'shipped' && (
               <>
-                <option value="shipping">Bàn Giao Đơn Vị Vận Chuyển</option>
+                <option value="shipped">Bàn Giao Đơn Vị Vận Chuyển</option>
                 <option value="delivered">Đã Giao Hàng</option>
                 <option value="canceled">Hủy Đơn Hàng</option>
               </>
@@ -384,7 +384,7 @@ const ListBill: React.FC = () => {
           )}
           {['processed'].includes(record.status_bill) && (
             <Button
-              icon={<EyeOutlined/>}
+              icon={<EyeOutlined />}
               type="default"
               onClick={() => navigate(`/admin/dashboard/bill/detailConfirm/${record.id}`)}
               className="bg-yellow-500 text-white hover:bg-yellow-600 focus:bg-yellow-700 rounded-md shadow-md"
@@ -414,14 +414,14 @@ const ListBill: React.FC = () => {
     <>
       <ToastContainer />
       <div className='p-5'>
-        <div className="w-[100%] border border-gray-200 shadow-xl rounded-xl">
-          <div className="flex justify-between items-center mb-6">
+        <div className="w-[100%]">
+          <div className="flex justify-between items-center mb-5">
             <div className="flex gap-4 w-full">
               {['all', 'pending', 'processing', 'shipping', 'delivered', 'canceled'].map((status, index) => (
                 <button
                   key={index}
                   onClick={() => handleFilterStatusChange(status)}
-                  className={` flex justify-center items-center px-5 py-2 pt-3 border-b-2 transition duration-300 ease-in-out
+                  className={` flex justify-center items-center py-2 pt-3 border-b-2 transition duration-300 ease-in-out
                   ${filterStatus === status ? 'border-blue-500 text-blue-600 font-semibold' : 'border-transparent text-gray-500'}
                   hover:text-blue-600 hover:border-gray-200`}
                 >
@@ -438,12 +438,11 @@ const ListBill: React.FC = () => {
                               ? `Chưa thanh toán (${billCounts.delivered})`
                               : `Đã Hủy (${billCounts.canceled})`}
                   </h2>
-
                 </button>
               ))}
             </div>
           </div>
-          <div className="w-[100%] h-auto px-5">
+          <div className="w-[100%] h-auto">
             <div className="flex gap-4 items-center">
               <Input
                 placeholder="Nhập mã đơn hàng để tìm kiếm..."
@@ -520,7 +519,7 @@ const ListBill: React.FC = () => {
           </Drawer>
 
 
-          <div className="overflow-x-auto p-5">
+          <div className="overflow-x-auto pt-5">
             <div className=''>
               <div className='w-[100%] mx-auto'>
                 <Table

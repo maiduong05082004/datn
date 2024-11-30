@@ -13,6 +13,7 @@ import {
   SettingOutlined,
   TagOutlined,
   DatabaseOutlined,
+  InfoCircleOutlined,
 } from '@ant-design/icons';
 import {
   Badge,
@@ -40,7 +41,7 @@ const items1: MenuProps['items'] = [
   },
   {
     key: '2',
-    icon: <UserOutlined />,
+    icon: <InfoCircleOutlined  />,
     label: "Banners",
     children: [
 

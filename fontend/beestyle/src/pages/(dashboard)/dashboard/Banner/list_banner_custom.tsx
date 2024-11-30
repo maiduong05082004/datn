@@ -156,7 +156,7 @@ const ListBannersCategory: React.FC = () => {
                 rowKey={(record) => record.id.toString()}
                 bordered
                 pagination={{
-                    pageSize: 10,
+                    pageSize: 7,
                     showTotal: (total) => `Tổng ${total} banner`,
                     className: 'text-gray-600',
                 }}
