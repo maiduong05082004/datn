@@ -11,6 +11,8 @@ use App\Models\Product;
 use App\Models\ProductVariationValue;
 use Illuminate\Http\Request;
 use App\Mail\OrderConfirmationMail;
+use App\Models\UserPromotion;
+use Auth;
 use DB;
 use Illuminate\Support\Facades\Mail;
 
@@ -39,6 +41,20 @@ class PaymentController extends Controller
             'discounted_shipping_fee' => 'nullable|numeric|min:0',
 
         ]);
+
+             // Kiểm tra xem user đã dùng promotion nào trong danh sách chưa
+             if ($request->has('promotion_ids') && is_array($request->promotion_ids)) {
+                $usedPromotions = UserPromotion::where('user_id', Auth::id())
+                    ->whereIn('promotion_id', $request->promotion_ids)
+                    ->pluck('promotion_id')
+                    ->toArray();
+    
+                if (!empty($usedPromotions)) {
+                    return response()->json([
+                        'error' => 'Bạn đã sử dụng các mã khuyến mãi này rồi. Vui lòng sử dụng mã khuyến mãi khác.'
+                    ], 400);
+                }
+            }
 
         $vnp_Url = "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html";
         $vnp_Returnurl = "http://localhost:8000/api/client/payment/callback";
@@ -71,6 +87,15 @@ class PaymentController extends Controller
                 'discounted_amount' => $discountedAmount,
                 'discounted_shipping_fee' => $discountedShippingFee,
             ]);
+
+            if ($request->has('promotion_ids') && is_array($request->promotion_ids)) {
+                foreach ($request->promotion_ids as $promotionId) {
+                    UserPromotion::create([
+                        'user_id' => $bill->user_id,
+                        'promotion_id' => $promotionId,
+                    ]);
+                }
+            }
 
             // Lấy danh sách cart_items dựa vào cart_id và thêm vào bill_details
             $cartItems = CartItem::whereIn('id', $request->input('cart_id'))->get();
