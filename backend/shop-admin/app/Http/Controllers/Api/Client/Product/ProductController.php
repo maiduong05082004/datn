@@ -17,6 +17,7 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Carbon\Carbon;
 use App\Mail\OrderConfirmationMail;
 use App\Models\Payment;
+use App\Models\UserPromotion;
 use Illuminate\Support\Facades\Mail;
 
 class ProductController extends Controller
@@ -76,6 +77,21 @@ class ProductController extends Controller
 
         ]);
 
+
+        // Kiểm tra xem user đã dùng promotion nào trong danh sách chưa
+        if ($request->has('promotion_ids') && is_array($request->promotion_ids)) {
+            $usedPromotions = UserPromotion::where('user_id', Auth::id())
+                ->whereIn('promotion_id', $request->promotion_ids)
+                ->pluck('promotion_id')
+                ->toArray();
+
+            if (!empty($usedPromotions)) {
+                return response()->json([
+                    'error' => 'Bạn đã sử dụng các mã khuyến mãi này rồi. Vui lòng sử dụng mã khuyến mãi khác.'
+                ], 400);
+            }
+        }
+
         // Kiểm tra và lấy địa chỉ giao hàng mặc định nếu không có `shipping_address_id`
         $validatedData['shipping_address_id'] = $this->getShippingAddressId($request, $validatedData);
 
@@ -102,6 +118,15 @@ class ProductController extends Controller
             // Gửi email xác nhận đơn hàng qua hàng đợi
             $orderData = $this->prepareOrderData($request, $bill, $orderItems);
             Mail::to($request->user()->email)->queue(new OrderConfirmationMail($orderData));
+
+            if ($request->has('promotion_ids') && is_array($request->promotion_ids)) {
+                foreach ($request->promotion_ids as $promotionId) {
+                    UserPromotion::create([
+                        'user_id' => $bill->user_id,
+                        'promotion_id' => $promotionId,
+                    ]);
+                }
+            }
 
             return response()->json(['message' => 'Đặt hàng thành công và email xác nhận sẽ được gửi!', 'bill' => $bill], 201);
         } catch (ModelNotFoundException $e) {
