@@ -18,7 +18,7 @@ class Product extends Model
         'description',
         'content',
         'view',
-        'input_day',
+        // 'input_day',
         'category_id',
         'is_collection',
         'is_hot',

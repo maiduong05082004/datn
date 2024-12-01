@@ -52,7 +52,7 @@ import AddressesPage from "@/pages/(website)/account/_components/addresses";
 import App from "@/pages/(dashboard)/dashboard/Bill/app";
 import Detailship from "@/pages/(dashboard)/dashboard/Bill/detailship";
 import DeatilConfirm from "@/pages/(dashboard)/dashboard/Bill/detailConfirm"
-import Comments from "@/pages/(dashboard)/dashboard/Products/comments";
+import Comments from "@/pages/(dashboard)/dashboard/products/comments";
 import DetailUser from "@/pages/(dashboard)/dashboard/Users/detail";
 import PrivateRouter from "./PrivateRoute";
 import OrderDetail from "@/pages/(website)/account/_components/orderDetail";
@@ -62,6 +62,8 @@ import InventoryManagement from "@/pages/(dashboard)/dashboard/Inventory/list";
 import Signin from "@/pages/(dashboard)/dashboard/auth.tsx/signin";
 import ForgotPasswordPage from "@/pages/(website)/ForgotPassword/page";
 import ResetPasswordPage from "@/pages/(website)/ResetPassword/page";
+import ListUserChat from "@/pages/(dashboard)/dashboard/ChatRealTime/ListUserChat";
+
 
 const Router = () => {
 
@@ -100,6 +102,7 @@ const Router = () => {
                     <Route index element={<DashboardPage />} />
                     <Route path="profile" element={<MyProfile />} />
                     {/* bills */}
+                    <Route path="chat" element={<ListUserChat />} />
                     <Route path="bill/app" element={<App />} />
                     <Route path="bill/list" element={<ListBill />} />
                     <Route path="bill/detail/:id" element={<DetailBill />} />

@@ -9,7 +9,6 @@ type Props = {
 
 const PrivateRouter = ({ children, userRole }: Props) => {
     const token = localStorage.getItem('token');
-    const user = JSON.parse(localStorage.getItem('user') || '{}');
     console.log(token, user);
 
     let check: boolean = true;

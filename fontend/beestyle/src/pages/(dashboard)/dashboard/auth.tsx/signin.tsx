@@ -1,6 +1,7 @@
 import instance from "@/configs/axios";
 import { useMutation } from "@tanstack/react-query";
 import { Button, Form, FormProps, Input, message } from "antd";
+import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
 
 type FildType = {
@@ -17,7 +18,7 @@ const Signin = () => {
     const { mutate } = useMutation({
         mutationFn: async (auth: FildType) => {
             try {
-                const response = await instance.post(`http://localhost:8000/api/admins/signin`, auth);
+                const response = await axios.post(`http://localhost:8000/api/admins/signin`, auth);
                 return response.data;
             } catch (error) {
                 throw error;
@@ -25,7 +26,7 @@ const Signin = () => {
         },
         onSuccess: (data) => {
             messageAPI.success("Đăng nhập thành công!");
-            localStorage.setItem("user", JSON.stringify(data));
+            localStorage.setItem("token", JSON.stringify(data.token));
             form.resetFields();
             navigate("/admin/dashboard");
         },

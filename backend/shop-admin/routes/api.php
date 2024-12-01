@@ -10,6 +10,7 @@ use App\Http\Controllers\Api\Client\Product\ProductController as ClientProductCo
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\Admin\CategoryController as AdminCategoryController;
 use App\Http\Controllers\Api\Admin\InventoryController;
+use App\Http\Controllers\Api\Admin\MessageController;
 use App\Http\Controllers\Api\Admin\Product\AttributeController;
 use App\Http\Controllers\Api\Admin\Product\AttributeGroupController;
 use App\Http\Controllers\Api\Admin\Product\AttributeValueController;
@@ -28,6 +29,7 @@ use App\Http\Controllers\Api\Admin\PaymentController;
 use App\Http\Controllers\Api\Admin\Product\ProductCostController;
 use App\Http\Controllers\Api\Admin\StatisticsController;
 use App\Http\Controllers\Api\Client\CommentController;
+use App\Http\Controllers\Api\Client\MessageController as ClientMessageController;
 
 Route::prefix('client')->as('client.')->group(function () {
     Route::prefix('auth')
@@ -114,6 +116,13 @@ Route::prefix('client')->as('client.')->group(function () {
         //     Route::post('/hide', [CommentController::class, 'hideComment'])->name('comment.hide'); // Ẩn bình luận nếu vi phạm 
         //     Route::post('/report', [CommentController::class, 'report'])->name('comment.report'); // Báo cáo bình luận
         //     Route::post('/manageUser', [CommentController::class, 'manageUser'])->name('comment.manageUser'); // quản lý user (khóa nếu comment bị báo cáo nhiều)
+
+        
+    });
+
+    Route::prefix('messages')->as('messages.')->group(function () {
+        Route::post('/send', [ClientMessageController::class, 'sendMessage'])->middleware('auth:sanctum');
+        Route::get('/', [ClientMessageController::class, 'getUserMessages'])->middleware('auth:sanctum');
     });
 });
 
@@ -219,6 +228,14 @@ Route::prefix('admins')
 
             Route::prefix('product_cost')->as('product_cost.')->group(function () {
                 Route::post('/store', [ProductCostController::class, 'store'])->name('product_cost.store');
+            });
+
+
+            Route::prefix('messages')->as('messages.')->group(function () {
+                Route::get('/chatted-users', [MessageController::class, 'getUserChatAdmin']);
+                Route::post('/send', [MessageController::class, 'sendMessage']);
+                Route::put('/{id}/read', [MessageController::class, 'markAsRead']);
+                Route::get('/{id}', [MessageController::class, 'getUserMessages']);
             });
         });
     });
