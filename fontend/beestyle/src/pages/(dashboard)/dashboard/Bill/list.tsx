@@ -273,10 +273,10 @@ const ListBill: React.FC = () => {
         let vietnameseStatus = '';
         switch (text) {
           case 'pending':
-            vietnameseStatus = 'Chưa xử lý giao hàng';
+            vietnameseStatus = 'Đang chờ xử lý';
             break;
           case 'processed':
-            vietnameseStatus = 'Chờ lấy hàng';
+            vietnameseStatus = 'Đã xử lý';
             break;
           case 'shipped':
             vietnameseStatus = 'Đang giao hàng';
@@ -328,7 +328,7 @@ const ListBill: React.FC = () => {
             )}
             {record.status_bill === 'processed' && (
               <>
-                <option value="processed">Đã Xác Nhận Đơn Hàng</option>
+                <option value="processed">Đã xử lý Đơn Hàng</option>
                 <option value="shipping">Bàn Giao Đơn Vị Vận Chuyển</option>
                 <option value="canceled">Hủy Đơn Hàng</option>
                 {/* <option value="remove">Xóa Đơn Hàng</option> */}
@@ -439,13 +439,13 @@ const ListBill: React.FC = () => {
                     {status === 'all'
                       ? `Tất Cả (${billCounts.all})`
                       : status === 'pending'
-                        ? `Chưa xử lý giao hàng (${billCounts.pending})`
+                        ? `Đang chờ xử lý (${billCounts.pending})`
                         : status === 'processing'
-                          ? `Chờ lấy hàng (${billCounts.processing})`
+                          ? `Đã xử lý (${billCounts.processing})`
                           : status === 'shipping'
                             ? `Đang giao hàng (${billCounts.shipping})`
                             : status === 'delivered'
-                              ? `Chưa thanh toán (${billCounts.delivered})`
+                              ? `Đã giao hàng (${billCounts.delivered})`
                               : `Đã Hủy (${billCounts.canceled})`}
                   </h2>
                 </button>

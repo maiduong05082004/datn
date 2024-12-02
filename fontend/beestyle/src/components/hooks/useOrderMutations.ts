@@ -24,7 +24,7 @@ export const useOrderMutations = () => {
         onSuccess: () => {
             messageApi.open({
                 type: "success",
-                content: "Mua hàng thành công!",
+                content: "Tạo đơn hàng thành công!",
             }),
                 queryClient.invalidateQueries({
                     queryKey: ["order"],
@@ -71,7 +71,7 @@ export const useOrderMutations = () => {
         onSuccess: () => {
             messageApi.open({
                 type: "success",
-                content: "Mua hàng thành công!",
+                content: "Tạo đơn hàng thành công!",
             }),
                 queryClient.invalidateQueries({
                     queryKey: ["order"],
