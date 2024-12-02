@@ -52,7 +52,7 @@ const Search = ({ isSearch, setIsSearch, setKeySearch }: any) => {
                 <div className="">
 
                     <form action="" className="relative">
-                        <input onChange={handlerInputSearch} value={inputValue} className="h-[48px] border-b-[3px] border-b-black px-[15px] w-[100%] outline-none text-[20px] text-black font-[500] leading-8" placeholder="#Giày MLB Chunky Liner" type="text" name="" id="" />
+                        <input onChange={handlerInputSearch} value={inputValue} className="h-[48px] border-b-[3px] border-b-black px-[15px] w-[100%] outline-none text-[20px] text-black font-[500] leading-8" placeholder="#Giày BEESTYLE Chunky Liner" type="text" name="" id="" />
                         <Link to={`/search?keyword=${inputValue}`} onClick={() => { setIsSearch(!isSearch); setInputValue(''); saveSearchHistory(inputValue); setKeySearch(inputValue) }} className="bg-transparent absolute bottom-[10px] right-[15px] w-[32px] h-[32px] flex items-center justify-center">
                             <div className='w-[40px] h-[40px] flex justify-center items-center text-center'>
                                 <img className=" ls-is-cached lazyloaded" src="https://file.hstatic.net/200000642007/file/icon-search_f3577f42c6314038a0636c20100bd8d9.svg" data-src="https://file.hstatic.net/200000642007/file/icon-search_f3577f42c6314038a0636c20100bd8d9.svg" alt="Icon search" width={24} height={24} />

@@ -14,7 +14,6 @@ import LayoutAdmin from "@/pages/(dashboard)/layout";
 import HomePage from "@/pages/(website)/home/page";
 import LayoutWebsite from "@/pages/(website)/layout";
 import { Route, Routes } from "react-router-dom";
-// import ListComments from "@/pages/(dashboard)/dashboard/Comment/list";
 import AddAttribute from "@/pages/(dashboard)/dashboard/Attribute/add";
 import AddAttributeValues from "@/pages/(dashboard)/dashboard/Attribute/Attribute_value/add";
 import UpdateAttributeValues from "@/pages/(dashboard)/dashboard/Attribute/Attribute_value/update";
@@ -23,7 +22,6 @@ import UpdateAttribute from "@/pages/(dashboard)/dashboard/Attribute/update";
 import AddtributeGroup from "@/pages/(dashboard)/dashboard/Attribute_Group/add";
 import ListAttributeGroup from "@/pages/(dashboard)/dashboard/Attribute_Group/list";
 import UpdateAttributeGroup from "@/pages/(dashboard)/dashboard/Attribute_Group/update";
-import DeatilConfirm from "@/pages/(dashboard)/dashboard/Bill/detailConfirm";
 import Detailship from "@/pages/(dashboard)/dashboard/Bill/detailship";
 import AddCategories from "@/pages/(dashboard)/dashboard/Category/add";
 import ListCategories from "@/pages/(dashboard)/dashboard/Category/list";
@@ -50,13 +48,11 @@ import DetailPage from "@/pages/(website)/detail/page";
 import ListPage from "@/pages/(website)/list/page";
 import SearchPage from "@/pages/(website)/search/page";
 import { useState } from "react";
-// import CartPage from "@/pages/(website)/cart/page";
 import Signin from "@/pages/(dashboard)/dashboard/auth.tsx/signin";
 import DetailBanner from "@/pages/(dashboard)/dashboard/Banner/detail";
 import InventoryManagement from "@/pages/(dashboard)/dashboard/Inventory/list";
 import ForgotPasswordPage from "@/pages/(website)/ForgotPassword/page";
 import ResetPasswordPage from "@/pages/(website)/ResetPassword/page";
-// import StatisticsProducts from "@/pages/(dashboard)/dashboard/Statistics/Statisticsproduct";
 import ListBannersMain from "@/pages/(dashboard)/dashboard/Banner/list";
 import ListBannersCustom from "@/pages/(dashboard)/dashboard/Banner/list_banner_category";
 import ListBannersCategory from "@/pages/(dashboard)/dashboard/Banner/list_banner_custom";
@@ -106,8 +102,10 @@ const Router = () => {
                     <Route path="bill/detail/:id" element={<DetailBill />} />
                     <Route path="bill/detailship/:id" element={<Detailship />} />
                     {/* <Route path="bill/detailConfirm/:id" element={<DeatilConfirm />} /> */}
-                    <Route path="bill/detailConfirm/:id" element={<DeatilConfirm />} />
+                    {/* <Route path="bill/detailConfirm/:id" element={<DeatilConfirm />} /> */}
                     <Route path="bill/cancel/:id" element={<CancelBill />} />
+                    {/* <Route path="bill/detailConfirm/:id" element={<DeatilConfirm />} /> */}
+                    <Route path="bill/cancel" element={<CancelBill />} />
                     {/* <Route path="bill/shiping/:id" element={<Shiping />} /> */}
                     <Route path="bill/shiping/:id" element={<ShipNoGHN />} />
                     {/* <Route path="bill/address" element={<AddAddresses />} /> */}
