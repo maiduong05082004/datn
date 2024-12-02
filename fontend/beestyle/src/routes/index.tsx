@@ -17,7 +17,7 @@ import UpdateBanners from "@/pages/(dashboard)/dashboard/Banner/update";
 import ListUser from "@/pages/(dashboard)/dashboard/Users/list";
 import AddUser from "@/pages/(dashboard)/dashboard/Users/add";
 import UpdateUser from "@/pages/(dashboard)/dashboard/Users/update";
-import ListComments from "@/pages/(dashboard)/dashboard/Comment/list";
+// import ListComments from "@/pages/(dashboard)/dashboard/Comment/list";
 import ListProducts from "@/pages/(dashboard)/dashboard/Products/list";
 import UpdateProduct from "@/pages/(dashboard)/dashboard/Products/update";
 import AddProduct from "@/pages/(dashboard)/dashboard/Products/add";
@@ -69,7 +69,7 @@ import ListAllChart from "@/pages/(dashboard)/dashboard/Statistics/ListAllChart"
 import ListNewPerson from "@/pages/(dashboard)/dashboard/Statistics/ListNewPerson";
 import ListCustomer from "@/pages/(dashboard)/dashboard/Statistics/ListCustomer";
 import ListTopSelling from "@/pages/(dashboard)/dashboard/Statistics/listtopselling";
-import StatisticsProducts from "@/pages/(dashboard)/dashboard/Statistics/Statisticsproduct";
+// import StatisticsProducts from "@/pages/(dashboard)/dashboard/Statistics/Statisticsproduct";
 import ListBannersMain from "@/pages/(dashboard)/dashboard/Banner/list";
 import ListBannersCategory from "@/pages/(dashboard)/dashboard/Banner/list_banner_custom";
 import ListBannersCustom from "@/pages/(dashboard)/dashboard/Banner/list_banner_category";
@@ -117,7 +117,7 @@ const Router = () => {
                     <Route path="bill/list" element={<ListBill />} />
                     <Route path="bill/detail/:id" element={<DetailBill />} />
                     <Route path="bill/detailship/:id" element={<Detailship />} />
-                    <Route path="bill/detailConfirm/:id" element={<DeatilConfirm />} />
+                    {/* <Route path="bill/detailConfirm/:id" element={<DeatilConfirm />} /> */}
                     {/* <Route path="bill/shiping/:id" element={<Shiping />} /> */}
                     <Route path="bill/shiping/:id" element={<ShipNoGHN />} />
                     {/* <Route path="bill/address" element={<AddAddresses />} /> */}
@@ -167,10 +167,10 @@ const Router = () => {
                     <Route path="statistic/selling" element={<ListTopSelling />} />
                     <Route path="statistic/user" element={<ListNewPerson />} />
                     <Route path="statistic/customer" element={<ListCustomer />} />
-                    <Route path="statistic/product" element={<StatisticsProducts />} />
+                    {/* <Route path="statistic/product" element={<StatisticsProducts />} /> */}
                     <Route path="statistic/list" element={<ListAllChart />} />
                     {/* chatrealtime */}
-                    <Route path="chat/main" element={<ChatRealTime />} />
+                    {/* <Route path="chat/main" element={<ChatRealTime />} /> */}
                 </Route>
             </Routes>
             <Search isSearch={isSearch} setIsSearch={setIsSearch} setKeySearch={setKeySearch} />

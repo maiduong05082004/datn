@@ -6,7 +6,7 @@ import Noel from "../events/eventsAudio";
 import ProductNew from "./_components/productNew";
 import BannerMain from "./_components/bannerMain";
 import ProductHot from "./_components/productHot";
-
+import Instagram from "./_components/instagram";
 type Props = {}
 
 const HomePage = (props: Props) => {
@@ -158,8 +158,8 @@ const HomePage = (props: Props) => {
         <div className="pt-[40px]">
           <div className="px-[15px] pc:px-[48px]">
             <div className="mb-[20px] flex">
-              <h3 className='text-[24px] font-[600] lg:text-[32px]'>MLB STYLING</h3>
-              <h3 className='text-[24px] font-[600] lg:text-[32px]'>@MLBKOREA_VN</h3>
+              <h3 className='text-[24px] font-[600] lg:text-[32px]'>BEESTYLE STYLING</h3>
+              <h3 className='text-[24px] font-[600] lg:text-[32px]'> @BEEST_YLES</h3>
             </div>
             <div className="">
               <div className="grid grid-cols-3 grid-rows-2 lg:grid-cols-4 lg:gap-3">
@@ -212,6 +212,7 @@ const HomePage = (props: Props) => {
           </div>
         </div>
       </section>
+      <Instagram />
       <div className="px-[15px] pc:px-[48px]">
         <div className="py-[40px]">
           <div className="text-center items-center">

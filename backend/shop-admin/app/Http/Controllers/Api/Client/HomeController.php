@@ -166,7 +166,6 @@ class HomeController extends Controller
         if (!empty($keyword)) {
             $productsQuery->where('name', 'like', '%' . $keyword . '%');
         }
-
         // Lọc theo danh mục
         if (!empty($categoryIds)) {
             if (!is_array($categoryIds)) {
@@ -216,7 +215,12 @@ class HomeController extends Controller
 
         // Lấy danh sách các sản phẩm đã lọc
         $products = $productsQuery->paginate(20);
-
+        if($keyword ==''){
+            $product='';
+            return response()->json([
+                'products'=> [],
+            ], 200);
+        }
         // Lấy danh sách màu sắc có sẵn
         $colorsWithImages = AttributeValue::whereHas('attribute', function ($query) {
             $query->where('name', 'Màu Sắc');
@@ -238,9 +242,11 @@ class HomeController extends Controller
 
         // Lấy danh sách danh mục
         $categories = Category::with('childrenRecursive')->get();
-        $filteredCategories = $categories->map(function ($category) {
+        $filteredCategories = $categories->filter(function ($category) {
+            return $category->children->isEmpty() && $category->name !== 'GIẢM GIÁ';
+        })->map(function ($category) {
             return $this->filterCategory($category);
-        });
+        })->values();
 
         // Lấy danh sách các thuộc tính sản phẩm
         $attributeOptions = $attributes->filter(function ($attribute) {
@@ -251,7 +257,7 @@ class HomeController extends Controller
                 'name' => $attribute->name,
                 'value' => $attribute->attributeValues->pluck('value')->toArray()
             ];
-        });
+        })->values();
 
 
         return response()->json([
@@ -278,9 +284,9 @@ class HomeController extends Controller
             'id' => $category->id,
             'name' => $category->name,
             'parent_id' => $category->parent_id,
-            'children' => $category->children->map(function ($child) {
-                return $this->filterCategory($child);
-            }),
+            // 'children' => $category->children->map(function ($child) {
+            //     return $this->filterCategory($child);
+            // }),
         ];
     }
 }

@@ -33,9 +33,9 @@ const Footer = () => {
                             </ul>
                         </div>
                         <div className="text-[12px] mt-[30px] text-center">
-                            Bản quyền thuộc về MLB Korea được phân phối độc quyền tại Việt Nam bởi CÔNG TY CỔ PHẦN MAISON RETAIL MANAGEMENT INTERNATIONAL
-                            Địa chỉ: 189 - 197, Dương Bá Trạc, Phường 1, Quận 8, TP.Hồ Chí Minh | MST: 0313175103
-                            Hotline: 1900 299268 | Email: customercare@maisonrmi.com
+                            Bản quyền thuộc về BeeStyle được phân phối độc quyền tại Việt Nam bởi CÔNG TY CỔ PHẦN MAISON RETAIL MANAGEMENT INTERNATIONAL
+                            Địa chỉ: 85 Tu Hoàng, Nam Từ Liêm, Hà Nội.
+                            Hotline: 0865643858 | Email: beestyle@gmail.com
                         </div>
                     </div>
                 </div>
