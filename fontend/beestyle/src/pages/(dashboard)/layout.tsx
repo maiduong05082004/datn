@@ -64,21 +64,21 @@ const items1: MenuProps['items'] = [
   {
     key: 'sub10',
     icon: React.createElement(SettingOutlined),
-    label: 'Attribute_Group',
+    label: 'Nhóm Thuộc Tính',
     children: [
-      { key: 'sub10-1', label: <NavLink to="/admin/dashboard/attribute_group/list">Danh sách Attribute_Group</NavLink> },
-      { key: 'sub10-2', label: <NavLink to="/admin/dashboard/attribute_group/add">Thêm Sản Attribute_Group</NavLink> },
+      { key: 'sub10-1', label: <NavLink to="/admin/dashboard/attribute_group/list">Danh sách Nhóm Thuộc Tính</NavLink> },
+      { key: 'sub10-2', label: <NavLink to="/admin/dashboard/attribute_group/add">Thêm Sản Nhóm Thuộc Tính</NavLink> },
 
     ],
   },
   {
     key: 'sub4',
     icon: React.createElement(TagOutlined),
-    label: 'Attributes',
+    label: 'Thuộc Tính',
     children: [
-      { key: 'sub4-1', label: <NavLink to="/admin/dashboard/attribute/list">Danh sách Attribute</NavLink> },
-      { key: 'sub4-4', label: <NavLink to="/admin/dashboard/attribute/add">Thêm Atrribute</NavLink> },
-      { key: 'sub4-2', label: <NavLink to="/admin/dashboard/attribute_value/add">Thêm Attribute_values</NavLink> },
+      { key: 'sub4-1', label: <NavLink to="/admin/dashboard/attribute/list">Danh sách Thuộc Tính</NavLink> },
+      { key: 'sub4-4', label: <NavLink to="/admin/dashboard/attribute/add">Thêm Thuộc Tính</NavLink> },
+      { key: 'sub4-2', label: <NavLink to="/admin/dashboard/attribute_value/add">Thêm Giá Trị Thuộc Tính</NavLink> },
 
     ],
   },
@@ -94,7 +94,7 @@ const items1: MenuProps['items'] = [
   {
     key: 'sub6',
     icon: React.createElement(ProductOutlined),
-    label: 'Bill',
+    label: 'Đơn Hàng',
     children: [
       // { key: 'sub6-1', label: <NavLink to="/admin/bill/list">Danh sách đơn hàng</NavLink> },
       { key: 'sub6-1', label: <NavLink to="/admin/dashboard/bill/list">Danh sách đơn hàng</NavLink> },

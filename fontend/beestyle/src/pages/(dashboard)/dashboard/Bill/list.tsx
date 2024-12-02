@@ -409,7 +409,7 @@ const ListBill: React.FC = () => {
               onClick={() => navigate(`/admin/dashboard/bill/cancel/${record.id}`)}
               className="bg-red-500 text-white hover:bg-red-600 focus:bg-red-700 rounded-md shadow-md"
             >
-              Đơn Hủy 
+              Đơn Hủy
             </Button>
           )}
 
@@ -426,7 +426,7 @@ const ListBill: React.FC = () => {
       <div className='p-5'>
         <div className="w-[100%]">
           <div className="flex justify-between items-center mb-5">
-            <div className="flex gap-4 w-full">
+            <div className="flex gap-6 w-full">
               {['all', 'pending', 'processing', 'shipping', 'delivered', 'canceled'].map((status, index) => (
                 <button
                   key={index}
@@ -436,6 +436,20 @@ const ListBill: React.FC = () => {
                   hover:text-blue-600 hover:border-gray-200`}
                 >
                   <h2 className="text-[16px]">
+                    {status === 'all'
+                      ? `Tất Cả`
+                      : status === 'pending'
+                        ? `Chưa xử lý giao hàng`
+                        : status === 'processing'
+                          ? `Chờ lấy hàng`
+                          : status === 'shipping'
+                            ? `Đang giao hàng`
+                            : status === 'delivered'
+                              ? `Chưa thanh toán`
+                              : `Đã Hủy`}
+                  </h2>
+
+                  {/* <h2 className="text-[16px]">
                     {status === 'all'
                       ? `Tất Cả (${billCounts.all})`
                       : status === 'pending'
@@ -447,7 +461,7 @@ const ListBill: React.FC = () => {
                             : status === 'delivered'
                               ? `Đã giao hàng (${billCounts.delivered})`
                               : `Đã Hủy (${billCounts.canceled})`}
-                  </h2>
+                  </h2> */}
                 </button>
               ))}
             </div>
