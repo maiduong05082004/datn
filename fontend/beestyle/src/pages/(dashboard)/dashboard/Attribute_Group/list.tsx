@@ -51,7 +51,6 @@ const ListAttributeGroup = (props: Props) => {
             title: 'Tên nhóm thuộc tính',
             dataIndex: 'name',
             key: 'name',
-            className: 'text-left text-lg font-semibold p-3',
         },
         {
             title: 'Action',

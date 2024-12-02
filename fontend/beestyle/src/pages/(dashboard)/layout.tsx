@@ -309,7 +309,7 @@ const App: React.FC = () => {
                       My Profile
                     </Link>
 
-                    <a
+                    {/* <a
                       href="#contacts"
                       className="flex items-center px-4 py-2 text-sm text-white hover:bg-gray-700 hover:translate-x-1 transform transition-transform duration-300 ease-in-out"
                       role="menuitem"
@@ -329,9 +329,9 @@ const App: React.FC = () => {
                         />
                       </svg>
                       My Contacts
-                    </a>
+                    </a> */}
 
-                    <a
+                    {/* <a
                       href="#settings"
                       className="flex items-center px-4 py-2 text-sm text-white hover:bg-gray-700 hover:translate-x-1 transform transition-transform duration-300 ease-in-out"
                       role="menuitem"
@@ -351,7 +351,7 @@ const App: React.FC = () => {
                         />
                       </svg>
                       Account Settings
-                    </a>
+                    </a> */}
 
                     <div className="border-t border-gray-600 my-1"></div>
 
