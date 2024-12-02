@@ -374,3 +374,11 @@ img {
 .section-blog-heading {
   margin-bottom: 66px;
 }/*# sourceMappingURL=style.css.map */
+
+.elfsight-app-02ba200d-1830-4567-8bc3-c4f5cf889a32 eapps-instagram-feed es-widget eapps-widget eapps-widget-show-toolbar .eapps-widget-toolbar-panel-wrapper {
+  display: none !important;
+}
+
+.eapps-widget-toolbar{
+  display: none !important;
+}

@@ -18,9 +18,9 @@ const HomePage = (props: Props) => {
 
   return (
     <main>
-      <BannerMain/>
+      <BannerMain />
       <ProductNew />
-      <ProductHot/>
+      <ProductHot />
       <section>
         <div className="pt-[40px]">
           <div className="px-[15px] pc:px-[48px]">
@@ -162,57 +162,12 @@ const HomePage = (props: Props) => {
               <h3 className='text-[24px] font-[600] lg:text-[32px]'> @BEEST_YLES</h3>
             </div>
             <div className="">
-              <div className="grid grid-cols-3 grid-rows-2 lg:grid-cols-4 lg:gap-3">
-                <div className="">
-                  <picture>
-                    <div className="pt-[100%] bg-cover bg-no-repeat bg-center" style={{ backgroundImage: "url('https://phosphor.utils.elfsightcdn.com/?url=https%3A%2F%2Fscontent-lhr8-2.cdninstagram.com%2Fv%2Ft51.29350-15%2F448092744_2179016699122753_1318207223775576540_n.jpg%3Fstp%3Ddst-jpg_e15_fr_p1080x1080%26_nc_ht%3Dscontent-lhr8-2.cdninstagram.com%26_nc_cat%3D101%26_nc_ohc%3DI9g2Yvjgh08Q7kNvgFbm9Ht%26edm%3DAPU89FABAAAA%26ccb%3D7-5%26oh%3D00_AYDtzmrO2fAqTDZu4TCQ3NDgaIJvqgzk_8lWzAUV8FoMOw%26oe%3D66979DFD%26_nc_sid%3Dbc0c2c')" }}></div>
-                  </picture>
-                </div>
-                <div className="">
-                  <picture>
-                    <div className="pt-[100%] bg-cover bg-no-repeat bg-center" style={{ backgroundImage: "url('https://phosphor.utils.elfsightcdn.com/?url=https%3A%2F%2Fscontent-lhr6-1.cdninstagram.com%2Fv%2Ft51.29350-15%2F450579721_1859066094590486_5168401850602305885_n.jpg%3Fstp%3Ddst-jpg_e15%26_nc_ht%3Dscontent-lhr6-1.cdninstagram.com%26_nc_cat%3D102%26_nc_ohc%3Dh_DFxFrNJJsQ7kNvgGI3xli%26edm%3DAPU89FABAAAA%26ccb%3D7-5%26oh%3D00_AYAHdfKvsJtuqAdMOsDVjPDx6V_RX76Ag3i3AG8QsUKl3g%26oe%3D669788B5%26_nc_sid%3Dbc0c2c')" }}></div>
-                  </picture>
-                </div>
-                <div className="">
-                  <picture>
-                    <div className="pt-[100%] bg-cover bg-no-repeat bg-center" style={{ backgroundImage: "url('https://phosphor.utils.elfsightcdn.com/?url=https%3A%2F%2Fscontent-lhr6-1.cdninstagram.com%2Fv%2Ft51.29350-15%2F450350647_501085719030062_2260161277216077692_n.jpg%3Fstp%3Ddst-jpg_e15_fr_p1080x1080%26_nc_ht%3Dscontent-lhr6-1.cdninstagram.com%26_nc_cat%3D102%26_nc_ohc%3Dm4iDK1pZO7sQ7kNvgH7u7b3%26edm%3DAPU89FABAAAA%26ccb%3D7-5%26oh%3D00_AYDgzwMJR3hmWS9L_59v_F85usaTC2Ate-E_MHHHgBhS_A%26oe%3D66979E66%26_nc_sid%3Dbc0c2c')" }}></div>
-                  </picture>
-                </div>
-                <div className="">
-                  <picture>
-                    <div className="pt-[100%] bg-cover bg-no-repeat bg-center" style={{ backgroundImage: "url('https://phosphor.utils.elfsightcdn.com/?url=https%3A%2F%2Fscontent-lhr8-2.cdninstagram.com%2Fv%2Ft51.29350-15%2F448983419_1505064780108450_3967112335408413913_n.jpg%3Fstp%3Ddst-jpg_e15%26_nc_ht%3Dscontent-lhr8-2.cdninstagram.com%26_nc_cat%3D106%26_nc_ohc%3DUa90FcOwbpcQ7kNvgHlNC9N%26edm%3DAPU89FABAAAA%26ccb%3D7-5%26oh%3D00_AYAPXvbojkrwdPYGD7PR6syCyFl2nCcBi-PuC1-EZ75OnQ%26oe%3D6697B411%26_nc_sid%3Dbc0c2c')" }}></div>
-                  </picture>
-                </div>
-                <div className="">
-                  <picture>
-                    <div className="pt-[100%] bg-cover bg-no-repeat bg-center" style={{ backgroundImage: "url('https://phosphor.utils.elfsightcdn.com/?url=https%3A%2F%2Fscontent-lhr8-1.cdninstagram.com%2Fv%2Ft51.29350-15%2F449426481_415212108180663_8446511118369768848_n.jpg%3Fstp%3Ddst-jpg_e15_fr_p1080x1080%26_nc_ht%3Dscontent-lhr8-1.cdninstagram.com%26_nc_cat%3D103%26_nc_ohc%3DJJS6YBhBL8cQ7kNvgEAN39m%26edm%3DAPU89FABAAAA%26ccb%3D7-5%26oh%3D00_AYB_Pz7dO5tHG2ick5mV7ei9Q04sUawoW1JFHf_RDI0HuA%26oe%3D66979A50%26_nc_sid%3Dbc0c2c')" }}></div>
-                  </picture>
-                </div>
-                <div className="">
-                  <picture>
-                    <div className="pt-[100%] bg-cover bg-no-repeat bg-center" style={{ backgroundImage: "url('https://phosphor.utils.elfsightcdn.com/?url=https%3A%2F%2Fscontent-lhr6-1.cdninstagram.com%2Fv%2Ft51.29350-15%2F449441680_829066788834705_4915270882764258659_n.jpg%3Fstp%3Ddst-jpg_e15%26_nc_ht%3Dscontent-lhr6-1.cdninstagram.com%26_nc_cat%3D109%26_nc_ohc%3DGMEe8PPgve8Q7kNvgFkLr-Q%26edm%3DAPU89FABAAAA%26ccb%3D7-5%26oh%3D00_AYABd2QBRtFxoYJbhi62xlEvsdQPpS9UtLlJRIaksrYt7Q%26oe%3D6697A992%26_nc_sid%3Dbc0c2c')" }}></div>
-                  </picture>
-                </div>
-                <div className="hidden lg:block">
-                  <picture>
-                    <div className="pt-[100%] bg-cover bg-no-repeat bg-center" style={{ backgroundImage: "url('https://phosphor.utils.elfsightcdn.com/?url=https%3A%2F%2Fscontent-lhr6-1.cdninstagram.com%2Fv%2Ft51.29350-15%2F449441680_829066788834705_4915270882764258659_n.jpg%3Fstp%3Ddst-jpg_e15%26_nc_ht%3Dscontent-lhr6-1.cdninstagram.com%26_nc_cat%3D109%26_nc_ohc%3DGMEe8PPgve8Q7kNvgFkLr-Q%26edm%3DAPU89FABAAAA%26ccb%3D7-5%26oh%3D00_AYABd2QBRtFxoYJbhi62xlEvsdQPpS9UtLlJRIaksrYt7Q%26oe%3D6697A992%26_nc_sid%3Dbc0c2c')" }}></div>
-                  </picture>
-                </div>
-                <div className="hidden lg:block">
-                  <picture>
-                    <div className="pt-[100%] bg-cover bg-no-repeat bg-center" style={{ backgroundImage: "url('https://phosphor.utils.elfsightcdn.com/?url=https%3A%2F%2Fscontent-lhr6-1.cdninstagram.com%2Fv%2Ft51.29350-15%2F449441680_829066788834705_4915270882764258659_n.jpg%3Fstp%3Ddst-jpg_e15%26_nc_ht%3Dscontent-lhr6-1.cdninstagram.com%26_nc_cat%3D109%26_nc_ohc%3DGMEe8PPgve8Q7kNvgFkLr-Q%26edm%3DAPU89FABAAAA%26ccb%3D7-5%26oh%3D00_AYABd2QBRtFxoYJbhi62xlEvsdQPpS9UtLlJRIaksrYt7Q%26oe%3D6697A992%26_nc_sid%3Dbc0c2c')" }}></div>
-                  </picture>
-                </div>
-
-              </div>
-              <div className="flex justify-center">
-                <button className='text-white bg-black rounded-[5px] w-[228px] h-[32px] mt-[30px] mx-auto'>Tải thêm</button>
-              </div>
+              <Instagram />
             </div>
           </div>
         </div>
       </section>
-      <Instagram />
+
       <div className="px-[15px] pc:px-[48px]">
         <div className="py-[40px]">
           <div className="text-center items-center">
