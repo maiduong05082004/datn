@@ -42,19 +42,19 @@ class PaymentController extends Controller
 
         ]);
 
-             // Kiểm tra xem user đã dùng promotion nào trong danh sách chưa
-             if ($request->has('promotion_ids') && is_array($request->promotion_ids)) {
-                $usedPromotions = UserPromotion::where('user_id', Auth::id())
-                    ->whereIn('promotion_id', $request->promotion_ids)
-                    ->pluck('promotion_id')
-                    ->toArray();
-    
-                if (!empty($usedPromotions)) {
-                    return response()->json([
-                        'error' => 'Bạn đã sử dụng các mã khuyến mãi này rồi. Vui lòng sử dụng mã khuyến mãi khác.'
-                    ], 400);
-                }
+        // Kiểm tra xem user đã dùng promotion nào trong danh sách chưa
+        if ($request->has('promotion_ids') && is_array($request->promotion_ids)) {
+            $usedPromotions = UserPromotion::where('user_id', Auth::id())
+                ->whereIn('promotion_id', $request->promotion_ids)
+                ->pluck('promotion_id')
+                ->toArray();
+
+            if (!empty($usedPromotions)) {
+                return response()->json([
+                    'error' => 'Bạn đã sử dụng các mã khuyến mãi này rồi. Vui lòng sử dụng mã khuyến mãi khác.'
+                ], 400);
             }
+        }
 
         $vnp_Url = "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html";
         $vnp_Returnurl = "http://localhost:8000/api/client/payment/callback";
@@ -407,8 +407,10 @@ class PaymentController extends Controller
                     'status' => Payment::STATUS_FAILED,
                     'canceled_reason' => 'Transaction failed',
                 ]);
-                $bill->update(['status_bill' => 'failed']);
-                return response()->json(['message' => 'Transaction failed'], 400);
+                $bill->update(['status_bill' => BILL::STATUS_CANCELED]);
+                // return response()->json(['message' => 'Thanh toán thành công và trạng thái đã được cập nhật.', 'bill_id' => $bill->id]);
+                return redirect('http://localhost:5173/account?status=failed');
+                // return response()->json(['message' => 'Transaction failed'], 400);
             }
         } else {
             return response()->json(['message' => 'Invalid signature'], 400);
