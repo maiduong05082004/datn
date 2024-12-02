@@ -126,11 +126,11 @@ const AddBanners: React.FC = () => {
                 </Form.Item>
               )}
 
-              {bannerType !== 'main' && (
+              {/* {bannerType !== 'main' && (
                 <Form.Item name="link" label="Đường link (Tùy chọn)">
                   <Input placeholder="Nhập đường link" />
                 </Form.Item>
-              )}
+              )} */}
 
               <Form.Item name="status" label="Trạng thái">
                 <Radio.Group>
