@@ -45,11 +45,11 @@ class StatisticsController extends Controller
     // Thống kê doanh thu, lợi nhuận
     public function getRevenueAndProfit(Request $request)
     {
-        $isSummary = $request->get('summary', false); // Mặc định là false nếu không có tham số truyền vào
+        $isSummary = $request->get('summary', false);
         // $date = $request->get('date');
         $year = $request->get('year');
         $month = $request->get('month');
-        $groupByType = $request->get('group_by', 'month'); // Mặc định là 'day'
+        $groupByType = $request->get('group_by', 'month');
 
         switch ($groupByType) {
             case 'month':
@@ -100,9 +100,9 @@ class StatisticsController extends Controller
                 ->join('bills', 'bill_details.bill_id', '=', 'bills.id')
                 ->join('products', 'bill_details.product_id', '=', 'products.id')
                 ->join('product_variation_values as size_variation', 'bill_details.product_variation_value_id', '=', 'size_variation.id')
-                ->join('attribute_values as size_attribute', 'size_variation.attribute_value_id', '=', 'size_attribute.id') // Join lấy size
+                ->join('attribute_values as size_attribute', 'size_variation.attribute_value_id', '=', 'size_attribute.id')
                 ->join('product_variations', 'size_variation.product_variation_id', '=', 'product_variations.id')
-                ->join('attribute_values as color_attribute', 'product_variations.attribute_value_id', '=', 'color_attribute.id') // Join lấy color
+                ->join('attribute_values as color_attribute', 'product_variations.attribute_value_id', '=', 'color_attribute.id')
                 ->join('table_product_costs', 'products.id', '=', 'table_product_costs.product_id');
             // ->when($date, function ($query, $date) {
             //     $query->whereBetween('bills.created_at', [$date['start'], $date['end']]);
@@ -123,9 +123,9 @@ class StatisticsController extends Controller
 
     public function getRevenueAndProfitByCategory(Request $request)
     {
-        $isSummary = $request->get('summary', false); // Mặc định là false nếu không có tham số truyền vào
+        $isSummary = $request->get('summary', false);
         $date = $request->get('date');
-        $groupByType = $request->get('group_by', 'day'); // Mặc định là 'day'
+        $groupByType = $request->get('group_by', 'month');
 
         // Chọn nhóm theo ngày, tháng, hoặc năm
         switch ($groupByType) {
@@ -169,12 +169,12 @@ class StatisticsController extends Controller
         ")
                 ->join('bills', 'bill_details.bill_id', '=', 'bills.id')
                 ->join('products', 'bill_details.product_id', '=', 'products.id')
-                ->join('categories', 'products.category_id', '=', 'categories.id')  // Tham gia bảng categories
+                ->join('categories', 'products.category_id', '=', 'categories.id')
                 ->join('table_product_costs', 'bill_details.product_id', '=', 'table_product_costs.product_id')
                 ->when($date, function ($query, $date) {
                     $query->whereBetween('bills.created_at', [$date['start'], $date['end']]);
                 })
-                ->groupBy('period', 'product_name', 'category_name')  // Nhóm theo sản phẩm và danh mục
+                ->groupBy('period', 'product_name', 'category_name')
                 ->get();
         }
 
@@ -183,14 +183,13 @@ class StatisticsController extends Controller
 
     public function getProductStock(Request $request)
     {
-        $date = $request->get('date'); // Ngày, tháng, hoặc năm nếu có
+        $date = $request->get('date');
 
         $stockStats = Product::selectRaw("
         products.name as product_name,
         products.stock as stock
     ")
             ->when($date, function ($query, $date) {
-                // Nếu có tham số ngày tháng, lọc theo ngày
                 $query->whereDate('products.created_at', '>=', $date['start'])
                     ->whereDate('products.created_at', '<=', $date['end']);
             })
@@ -217,7 +216,7 @@ class StatisticsController extends Controller
 
     public function getCustomerBehavior(Request $request)
     {
-        $date = $request->get('date'); // Ngày, tháng hoặc năm
+        $date = $request->get('date');
 
         $stats = [
             'total_product_views' => Product::when($date, function ($query, $date) {
@@ -239,10 +238,10 @@ class StatisticsController extends Controller
     // Đơn hàng thành công
     public function getDeliveredOrderProducts(Request $request)
     {
-        $date = $request->get('date'); // Nhận tham số ngày từ request
+        $date = $request->get('date');
 
         $completedOrderProducts = BillDetail::join('bills', 'bill_details.bill_id', '=', 'bills.id')
-            ->join('products', 'bill_details.product_id', '=', 'products.id')  // Join bảng sản phẩm
+            ->join('products', 'bill_details.product_id', '=', 'products.id')
             ->select(
                 'bill_details.product_id',
                 'products.name as product_name',
@@ -251,11 +250,10 @@ class StatisticsController extends Controller
                 \DB::raw('SUM(bill_details.quantity) as total_sold'),
                 \DB::raw('SUM(bill_details.quantity * bill_details.don_gia) as total_revenue')
             )
-            ->where('bills.status_bill', Bill::STATUS_DELIVERED) // Sửa lại tên cột `status_bill` nếu cần
+            ->where('bills.status_bill', Bill::STATUS_DELIVERED)
             ->when(
                 $date,
                 function ($query) use ($date) {
-                    // Kiểm tra nếu có tham số 'date' trong request
                     $query->whereBetween('bills.created_at', [$date['start'], $date['end']]);
                 }
             )
@@ -271,10 +269,10 @@ class StatisticsController extends Controller
     // đơn hàng bị hủy
     public function getCancelledOrderProducts(Request $request)
     {
-        $date = $request->get('date'); // Nhận tham số ngày từ request
+        $date = $request->get('date');
 
         $cancelledOrderProducts = BillDetail::join('bills', 'bill_details.bill_id', '=', 'bills.id')
-            ->join('products', 'bill_details.product_id', '=', 'products.id')  // Join bảng sản phẩm
+            ->join('products', 'bill_details.product_id', '=', 'products.id')
             ->select(
                 'bill_details.product_id',
                 'products.name as product_name',
@@ -283,11 +281,10 @@ class StatisticsController extends Controller
                 \DB::raw('SUM(bill_details.quantity) as total_sold'),
                 \DB::raw('SUM(bill_details.quantity * bill_details.don_gia) as total_revenue')
             )
-            ->where('bills.status_bill', Bill::STATUS_CANCELED) // Trạng thái đơn hàng hủy
+            ->where('bills.status_bill', Bill::STATUS_CANCELED)
             ->when(
                 $date,
                 function ($query) use ($date) {
-                    // Kiểm tra nếu có tham số 'date' trong request
                     $query->whereBetween('bills.created_at', [$date['start'], $date['end']]);
                 }
             )
@@ -359,13 +356,11 @@ class StatisticsController extends Controller
             ->orderByDesc('total_sold')
             ->first();
 
-        // Nếu có sản phẩm bán chạy nhất, thêm thông tin vào thống kê
         if ($topProduct) {
             $statistics['top_selling_product_id'] = $topProduct->product_id;
             $statistics['top_selling_quantity'] = $topProduct->total_sold;
         }
 
-        // Cập nhật hoặc tạo mới bản ghi thống kê
         Statistic::updateOrCreate(['date' => $today], $statistics);
 
         return response()->json($statistics);

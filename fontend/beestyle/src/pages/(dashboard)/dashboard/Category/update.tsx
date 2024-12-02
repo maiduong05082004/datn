@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import axiosInstance from '@/configs/axios';
 import { Button, Form, Input, Select, message, Spin, Checkbox } from 'antd';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -20,6 +20,7 @@ const UpdateCategories: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const [file, setFile] = useState<File | null>(null);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
+  const queryClient = useQueryClient();
 
   const { data: categories, isLoading: isLoadingCategories } = useQuery<Category[]>({
     queryKey: ['categories'],
@@ -51,13 +52,14 @@ const UpdateCategories: React.FC = () => {
 
   const { mutate } = useMutation({
     mutationFn: async (categoryData: FormData) => {
-      return await axiosInstance.put(`http://127.0.0.1:8000/api/admins/categories/${id}`, categoryData, {
+      return await axiosInstance.post(`http://127.0.0.1:8000/api/admins/categories/${id}`, categoryData, {
         headers: { 'Content-Type': 'multipart/form-data' },
+        params: { _method: 'PUT' },
       });
     },
     onSuccess: () => {
       messageApi.success('Cập nhật danh mục thành công!');
-      form.resetFields();
+      queryClient.invalidateQueries({ queryKey: ['categories'] });
       setFile(null);
     },
     onError: (error: any) => {

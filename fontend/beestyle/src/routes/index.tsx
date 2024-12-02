@@ -1,81 +1,69 @@
+import AddBanners from "@/pages/(dashboard)/dashboard/Banner/add";
+import UpdateBanners from "@/pages/(dashboard)/dashboard/Banner/update";
+import DetailBill from "@/pages/(dashboard)/dashboard/Bill/detail";
+import ListBill from "@/pages/(dashboard)/dashboard/Bill/list";
 import DashboardPage from "@/pages/(dashboard)/dashboard/page";
 import MyProfile from "@/pages/(dashboard)/dashboard/profile";
 import AddPromotion from "@/pages/(dashboard)/dashboard/promotions/add";
 import ListPromotions from "@/pages/(dashboard)/dashboard/promotions/list";
 import UpdatePromotion from "@/pages/(dashboard)/dashboard/promotions/update";
+import AddUser from "@/pages/(dashboard)/dashboard/Users/add";
+import ListUser from "@/pages/(dashboard)/dashboard/Users/list";
+import UpdateUser from "@/pages/(dashboard)/dashboard/Users/update";
 import LayoutAdmin from "@/pages/(dashboard)/layout";
 import HomePage from "@/pages/(website)/home/page";
 import LayoutWebsite from "@/pages/(website)/layout";
 import { Route, Routes } from "react-router-dom";
-// Bill
-import ListBill from "@/pages/(dashboard)/dashboard/Bill/list";
-import DetailBill from "@/pages/(dashboard)/dashboard/Bill/detail";
-// banner
-import AddBanners from "@/pages/(dashboard)/dashboard/Banner/add";
-import ListBanners from "@/pages/(dashboard)/dashboard/Banner/list";
-import UpdateBanners from "@/pages/(dashboard)/dashboard/Banner/update";
-import ListUser from "@/pages/(dashboard)/dashboard/Users/list";
-import AddUser from "@/pages/(dashboard)/dashboard/Users/add";
-import UpdateUser from "@/pages/(dashboard)/dashboard/Users/update";
 // import ListComments from "@/pages/(dashboard)/dashboard/Comment/list";
-import ListProducts from "@/pages/(dashboard)/dashboard/Products/list";
-import UpdateProduct from "@/pages/(dashboard)/dashboard/Products/update";
-import AddProduct from "@/pages/(dashboard)/dashboard/Products/add";
-import DetailProduct from "@/pages/(dashboard)/dashboard/Products/detail";
+import AddAttribute from "@/pages/(dashboard)/dashboard/Attribute/add";
+import AddAttributeValues from "@/pages/(dashboard)/dashboard/Attribute/Attribute_value/add";
+import UpdateAttributeValues from "@/pages/(dashboard)/dashboard/Attribute/Attribute_value/update";
+import ListAttribute from "@/pages/(dashboard)/dashboard/Attribute/list";
+import UpdateAttribute from "@/pages/(dashboard)/dashboard/Attribute/update";
+import AddtributeGroup from "@/pages/(dashboard)/dashboard/Attribute_Group/add";
+import ListAttributeGroup from "@/pages/(dashboard)/dashboard/Attribute_Group/list";
+import UpdateAttributeGroup from "@/pages/(dashboard)/dashboard/Attribute_Group/update";
+import DeatilConfirm from "@/pages/(dashboard)/dashboard/Bill/detailConfirm";
+import Detailship from "@/pages/(dashboard)/dashboard/Bill/detailship";
 import AddCategories from "@/pages/(dashboard)/dashboard/Category/add";
 import ListCategories from "@/pages/(dashboard)/dashboard/Category/list";
 import UpdateCategories from "@/pages/(dashboard)/dashboard/Category/update";
+import AddProduct from "@/pages/(dashboard)/dashboard/Products/add";
+import Comments from "@/pages/(dashboard)/dashboard/Products/comments";
+import ListProducts from "@/pages/(dashboard)/dashboard/Products/list";
+import UpdateProduct from "@/pages/(dashboard)/dashboard/Products/update";
+import DetailUser from "@/pages/(dashboard)/dashboard/Users/detail";
+import ErrorPage from "@/pages/(website)/404/page";
 import Search from "@/pages/(website)/_components/Search";
+import AddressesPage from "@/pages/(website)/account/_components/addresses";
+import InfoPage from "@/pages/(website)/account/_components/info";
+import OrderDetail from "@/pages/(website)/account/_components/orderDetail";
+import RecentlyPage from "@/pages/(website)/account/_components/recently";
+import ViewAccount from "@/pages/(website)/account/_components/view";
+import WishlistPage from "@/pages/(website)/account/_components/wishlist";
+import AccountPage from "@/pages/(website)/account/page";
 import PageSignin from "@/pages/(website)/auth/signin/page";
 import PageSignup from "@/pages/(website)/auth/signup/page";
+import CartPage from "@/pages/(website)/cart/page";
 import CheckOutPage from "@/pages/(website)/checkout/page";
 import DetailPage from "@/pages/(website)/detail/page";
 import ListPage from "@/pages/(website)/list/page";
 import SearchPage from "@/pages/(website)/search/page";
 import { useState } from "react";
-import ListAttribute from "@/pages/(dashboard)/dashboard/Attribute/list";
-import Shiping from "@/pages/(dashboard)/dashboard/Bill/shiping";
-import AddAttribute from "@/pages/(dashboard)/dashboard/Attribute/add";
-import UpdateAttribute from "@/pages/(dashboard)/dashboard/Attribute/update";
-import AddAttributeValues from "@/pages/(dashboard)/dashboard/Attribute/Attribute_value/add";
-import UpdateAttributeValues from "@/pages/(dashboard)/dashboard/Attribute/Attribute_value/update";
-import AddtributeGroup from "@/pages/(dashboard)/dashboard/Attribute_Group/add";
-import ListAttributeGroup from "@/pages/(dashboard)/dashboard/Attribute_Group/list";
-import UpdateAttributeGroup from "@/pages/(dashboard)/dashboard/Attribute_Group/update";
-import CartPage from "@/pages/(website)/cart/page";
-import WishlistPage from "@/pages/(website)/account/_components/wishlist";
-import AccountPage from "@/pages/(website)/account/page";
-import ViewAccount from "@/pages/(website)/account/_components/view";
-import InfoPage from "@/pages/(website)/account/_components/info";
-import RecentlyPage from "@/pages/(website)/account/_components/recently";
-import AddressesPage from "@/pages/(website)/account/_components/addresses";
-import Detailship from "@/pages/(dashboard)/dashboard/Bill/detailship";
-import DeatilConfirm from "@/pages/(dashboard)/dashboard/Bill/detailConfirm"
-import Comments from "@/pages/(dashboard)/dashboard/Products/comments";
-import DetailUser from "@/pages/(dashboard)/dashboard/Users/detail";
-import PrivateRouter from "./PrivateRoute";
-import OrderDetail from "@/pages/(website)/account/_components/orderDetail";
-import ErrorPage from "@/pages/(website)/404/page";
 // import CartPage from "@/pages/(website)/cart/page";
-import InventoryManagement from "@/pages/(dashboard)/dashboard/Inventory/list";
 import Signin from "@/pages/(dashboard)/dashboard/auth.tsx/signin";
 import DetailBanner from "@/pages/(dashboard)/dashboard/Banner/detail";
+import InventoryManagement from "@/pages/(dashboard)/dashboard/Inventory/list";
 import ForgotPasswordPage from "@/pages/(website)/ForgotPassword/page";
 import ResetPasswordPage from "@/pages/(website)/ResetPassword/page";
-import axios from "axios";
-import PrivateRoute from './PrivateRoute';
-import ListStatistics from "@/pages/(dashboard)/dashboard/Statistics/list";
-import ListAllChart from "@/pages/(dashboard)/dashboard/Statistics/ListAllChart";
-import ListNewPerson from "@/pages/(dashboard)/dashboard/Statistics/ListNewPerson";
-import ListCustomer from "@/pages/(dashboard)/dashboard/Statistics/ListCustomer";
-import ListTopSelling from "@/pages/(dashboard)/dashboard/Statistics/listtopselling";
 // import StatisticsProducts from "@/pages/(dashboard)/dashboard/Statistics/Statisticsproduct";
 import ListBannersMain from "@/pages/(dashboard)/dashboard/Banner/list";
-import ListBannersCategory from "@/pages/(dashboard)/dashboard/Banner/list_banner_custom";
 import ListBannersCustom from "@/pages/(dashboard)/dashboard/Banner/list_banner_category";
-import ChatRealTime from "@/pages/(dashboard)/dashboard/ChatRealTime/chatrealtime";
-import DetailPro from "@/pages/(dashboard)/dashboard/Products/detailpro";
+import ListBannersCategory from "@/pages/(dashboard)/dashboard/Banner/list_banner_custom";
+import CancelBill from "@/pages/(dashboard)/dashboard/Bill/cancel";
 import ShipNoGHN from "@/pages/(dashboard)/dashboard/Bill/ShipNoGHN";
+import DetailPro from "@/pages/(dashboard)/dashboard/Products/detailpro";
+import ListAllChart from "@/pages/(dashboard)/Statistics/page";
 
 const Router = () => {
 
@@ -118,6 +106,8 @@ const Router = () => {
                     <Route path="bill/detail/:id" element={<DetailBill />} />
                     <Route path="bill/detailship/:id" element={<Detailship />} />
                     {/* <Route path="bill/detailConfirm/:id" element={<DeatilConfirm />} /> */}
+                    <Route path="bill/detailConfirm/:id" element={<DeatilConfirm />} />
+                    <Route path="bill/cancel" element={<CancelBill />} />
                     {/* <Route path="bill/shiping/:id" element={<Shiping />} /> */}
                     <Route path="bill/shiping/:id" element={<ShipNoGHN />} />
                     {/* <Route path="bill/address" element={<AddAddresses />} /> */}
@@ -163,7 +153,7 @@ const Router = () => {
                     {/* inventory */}
                     <Route path="inventory/list" element={<InventoryManagement />} />
                     {/*{/* statistic */}
-                    <Route path="statistic/revenue" element={<ListStatistics />} />
+                    {/* <Route path="statistic/revenue" element={<ListStatistics />} />
                     <Route path="statistic/selling" element={<ListTopSelling />} />
                     <Route path="statistic/user" element={<ListNewPerson />} />
                     <Route path="statistic/customer" element={<ListCustomer />} />

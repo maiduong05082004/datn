@@ -243,7 +243,7 @@ const UpdateBanners: React.FC = () => {
           <Form.Item>
             <div className="flex justify-end space-x-4">
               <Button type="primary" htmlType="submit">
-                Cập nhật
+                Submit
               </Button>
               <Button onClick={() => navigate('/admin/dashboard/banner/list')}>Quay lại</Button>
             </div>
