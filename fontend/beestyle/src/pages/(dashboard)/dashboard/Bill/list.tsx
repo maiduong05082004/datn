@@ -1,4 +1,4 @@
-import { ShoppingCartOutlined, EyeOutlined, FilterOutlined } from '@ant-design/icons';
+import { ShoppingCartOutlined, EyeOutlined, FilterOutlined, SearchOutlined } from '@ant-design/icons';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { Button, Spin, Table, DatePicker, Input, Select, Drawer } from 'antd';
 import axiosInstance from '@/configs/axios';
@@ -402,6 +402,16 @@ const ListBill: React.FC = () => {
               Đơn Hàng
             </Button>
           )}
+          {['canceled'].includes(record.status_bill) && (
+            <Button
+              icon={<EyeOutlined />}
+              type="default"
+              onClick={() => navigate(`/admin/dashboard/bill/cancel/${record.id}`)}
+              className="bg-red-500 text-white hover:bg-red-600 focus:bg-red-700 rounded-md shadow-md"
+            >
+              Đơn Hủy 
+            </Button>
+          )}
 
         </div>
       ),
@@ -450,7 +460,7 @@ const ListBill: React.FC = () => {
                 onChange={(e) => setSearchCode(e.target.value)}
                 className="w-[1000px] h-[40px]"
               />
-              <Button type="primary" onClick={searchBill} className="h-[40px] bg-blue-500 text-white hover:bg-blue-600 focus:bg-blue-700 rounded-md">
+              <Button type="primary" icon={<SearchOutlined />} onClick={searchBill} className="h-[40px] bg-blue-500 text-white hover:bg-blue-600 focus:bg-blue-700 rounded-md">
                 Tìm Kiếm
               </Button>
               <Button

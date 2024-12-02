@@ -21,7 +21,6 @@ const InventoryChart = () => {
     // Kiểm tra trạng thái tải dữ liệu
     if (isLoading) return <Spin tip="Loading..." className="flex justify-center items-center h-screen" />;
 
-    // Xử lý dữ liệu API thành dữ liệu cho biểu đồ
     const inStock = Inventory.filter((item :any) => item.stock > 0).length; 
     const outOfStock = Inventory.filter((item : any) => item.stock === 0).length;  
     const awaitingStock = Inventory.filter((item : any) => item.stock < 0).length;  
