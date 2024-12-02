@@ -74,7 +74,7 @@ const ProductNew = () => {
                                             {item.products.slice(0, 3).map((product: any) => (
                                                 <Link to={`/products/${product.id}`}
                                                     key={product.id}
-                                                    className="max-w-[47%] grow-0 basis-[47%] shrink-0 relative"
+                                                    className="max-w-[50%] grow-0 basis-[48%] shrink-0 relative"
                                                 >
                                                     <div onClick={() => { setCartItem(product), setActiveCart(!activeCart) }} className="absolute cursor-pointer top-[16px] right-[16px]">
                                                         <div className="bg-black flex justify-center w-[40px] h-[40px] rounded-[100%] items-center opacity-10">
@@ -108,7 +108,7 @@ const ProductNew = () => {
                                             {item.products.slice(1, 6).map((product: any) => (
                                                 <Link to={`/products/${product.id}`}
                                                     key={product.id}
-                                                    className="max-w-[47%] grow-0 basis-[47%] shrink-0 relative"
+                                                    className="max-w-[50%] grow-0 basis-[48%] shrink-0 relative"
                                                 >
                                                     <div onClick={() => { setCartItem(product), setActiveCart(!activeCart) }} className="absolute cursor-pointer top-[16px] right-[16px]">
                                                         <div className="bg-black flex justify-center w-[40px] h-[40px] rounded-[100%] items-center opacity-10">
@@ -144,7 +144,7 @@ const ProductNew = () => {
                                             {item.products.map((product: any) => (
                                                 <Link to={`/products/${product.id}`}
                                                     key={product.id}
-                                                    className="max-w-[47%] grow-0 basis-[47%] shrink-0 relative"
+                                                    className="max-w-[50%] grow-0 basis-[48%] shrink-0 relative"
                                                 >
                                                     <div className="absolute top-[16px] right-[16px]">
                                                         <div className="bg-black flex justify-center w-[40px] h-[40px] rounded-[100%] items-center opacity-10">
