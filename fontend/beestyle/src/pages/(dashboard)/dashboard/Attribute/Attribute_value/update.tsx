@@ -30,10 +30,10 @@ const UpdateAttributeValues: React.FC = () => {
         if (attributeUpdate && attributeUpdate.image_path) {
             setFileList([
                 {
-                    uid: '-1', 
-                    name: 'image.jpg', 
+                    uid: '-1',
+                    name: 'image.jpg',
                     status: 'done',
-                    url: attributeUpdate.image_path, 
+                    url: attributeUpdate.image_path,
                 },
             ]);
         }
@@ -41,20 +41,21 @@ const UpdateAttributeValues: React.FC = () => {
 
     const { mutate } = useMutation({
         mutationFn: async (data: FormData) => {
-            return await axiosInstance.post(`http://127.0.0.1:8000/api/admins/attribute_values/${id}`, data, {
-                headers: {
-                    'Content-Type': 'multipart/form-data',
-                },
-                params: {
-                    _method: 'PUT', 
-                },
-            });
+            // Sử dụng PUT request để cập nhật
+            return await axiosInstance.post(
+                `http://127.0.0.1:8000/api/admins/attribute_values/${id}`,
+                data,
+                {
+                    headers: { 'Content-Type': 'multipart/form-data' },
+                    params: { _method: 'PUT' },
+                }
+            );
         },
         onSuccess: () => {
             messageApi.success('Cập nhật giá trị thuộc tính thành công');
             queryClient.invalidateQueries({ queryKey: ['attributeUpdate'] });
             form.resetFields();
-            setFileList([]); 
+            setFileList([]); // Reset file list after successful upload
         },
         onError: (error: any) => {
             messageApi.error(`Lỗi: ${error.response?.data?.message || error.message}`);
@@ -67,7 +68,7 @@ const UpdateAttributeValues: React.FC = () => {
         },
         onSuccess: () => {
             messageApi.success('Xóa ảnh thành công!');
-            setFileList([]);
+            setFileList([]); 
         },
         onError: (error: any) => {
             const errorMessage = error.response?.data?.message || `Lỗi: ${error.message}`;
@@ -81,14 +82,15 @@ const UpdateAttributeValues: React.FC = () => {
 
     const onFinish = (values: any) => {
         const formData = new FormData();
-        formData.append('attribute_id', values.attribute);
         formData.append('value', values.value);
         if (fileList.length > 0) {
-            formData.append('image_path', fileList[0]?.originFileObj);
+            formData.append('image_file', fileList[0].originFileObj);
         }
-
+    
         mutate(formData);
     };
+    
+    
 
     if (isLoading) return <Spin tip="Loading..." className="flex justify-center items-center h-screen" />;
 
@@ -116,16 +118,13 @@ const UpdateAttributeValues: React.FC = () => {
                             />
                         </Form.Item>
 
-                        <Form.Item
-                            label="Ảnh thuộc tính"
-                            name="image_path"
-                        >
+                        <Form.Item label="Ảnh thuộc tính" name="image_path">
                             <Upload
                                 listType="picture"
                                 onChange={handleFileChange}
-                                beforeUpload={() => false}
+                                beforeUpload={() => false} // Prevent automatic upload
                                 fileList={fileList}
-                                maxCount={1}
+                                maxCount={1} // Only allow one image
                             >
                                 <Button icon={<UploadOutlined />}>Tải lên ảnh</Button>
                             </Upload>

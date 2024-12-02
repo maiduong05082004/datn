@@ -40,35 +40,34 @@ const AddCategories: React.FC = () => {
     onError: (error: any) => {
       const errorMessage = error.response?.data?.message || `Lỗi: ${error.message}`;
       messageApi.error(errorMessage);
-    },
+    }
+
   });
 
   const onFinish = (values: any) => {
     const formData = new FormData();
     formData.append('name', values.name);
-    
     if (!values.name) {
-        message.error('Tên danh mục là bắt buộc.');
-        return;
+      message.error('Tên danh mục là bắt buộc.');
+      return;
     }
-
     if (values.parent_id) {
-        if (file) {
-            message.error('Không được thêm ảnh khi có danh mục cha.');
-            return;
-        }
+      if (file) {
+        message.error('Không được thêm ảnh khi có danh mục cha.');
+        return;
+      }
+      formData.append('parent_id', values.parent_id);  
     } else {
-        if (!file) {
-            message.error('Ảnh là bắt buộc nếu không có danh mục cha.');
-            return;
-        }
-        formData.append('image', file);
+      if (!file) {
+        message.error('Ảnh là bắt buộc nếu không có danh mục cha.');
+        return;
+      }
+      formData.append('image', file);
     }
-
     formData.append('status', values.status ? '1' : '0');
-    
     mutate(formData);
   };
+
 
   if (isLoading) {
     return <Spin tip="Đang tải..." className="flex justify-center items-center h-screen" />;
@@ -118,13 +117,13 @@ const AddCategories: React.FC = () => {
               label={<span className="font-medium text-gray-700">Ảnh</span>}
               name="image"
             >
-              <input 
-                type="file" 
+              <input
+                type="file"
                 onChange={(e) => {
                   if (e.target.files && e.target.files[0]) {
                     setFile(e.target.files[0]);
                   }
-                }} 
+                }}
               />
             </Form.Item>
 
