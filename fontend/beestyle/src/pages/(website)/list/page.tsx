@@ -84,21 +84,21 @@ const ListPage = (props: Props) => {
                         <p className="text-center">
                             Bộ sưu tập&nbsp;
                             <strong>Quần</strong>&nbsp;
-                            <strong>Áo MLB</strong>&nbsp;
-                            tại MLB Việt Nam - Thời trang thể thao đa dạng.
+                            <strong>Áo BEESTYLE</strong>&nbsp;
+                            tại BEESTYLE Việt Nam - Thời trang thể thao đa dạng.
                         </p>
                         <p className="text-center">
                             &nbsp;
                         </p>
                         <p className="text-center">
-                            <strong>MLB Việt Nam</strong>&nbsp;
-                            tự hào giới thiệu bộ sưu tập Áo MLB với thiết kế
+                            <strong>BEESTYLE Việt Nam</strong>&nbsp;
+                            tự hào giới thiệu bộ sưu tập Áo BEESTYLE với thiết kế
                             đa dạng từ áo phông, áo hoodie đến áo khoác, sử dụng
                             chất liệu thoáng khí và co giãn để mang đến sự thoải
                             mái và linh hoạt khi bạn vận động. Khám phá bộ sưu tập&nbsp;
                             <strong>Quần</strong>
                             &nbsp;
-                            <strong>Áo MLB</strong>
+                            <strong>Áo BEESTYLE</strong>
                             &nbsp;
                             và tạo nên phong cách thể thao đẳng cấp và nổi bật.
                         </p>

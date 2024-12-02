@@ -115,7 +115,7 @@ const ItemProducts = ({promotionAdd, promotionShip, promotionProduct, checkouts,
 
                                     <div className="w-full pl-[12px] flex flex-col">
                                         <div className="leading-5">
-                                            <b className='text-[16px]'>MLB</b><br />
+                                            <b className='text-[16px]'>BEESTYLE</b><br />
                                             <span className='text-[14px] mb-[4px]'>{item.product.name}</span>
                                         </div>
                                         <span className='text-[12px] mb-[4px]'>50CRS / {item.variation_values.value} / {item.variation_values.sku}</span>

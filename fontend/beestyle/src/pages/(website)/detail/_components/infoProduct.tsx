@@ -22,7 +22,7 @@ const InfoProduct = (props: Props) => {
                     sàng thay bạn khẳng định phong cách thời trang của
                     mình.</p>
                 <p>
-                    Thương hiệu: MLB&nbsp;
+                    Thương hiệu: BEESTYLE&nbsp;
                     <br />
                     Xuất xứ: Hàn Quốc&nbsp;
                     <br />
