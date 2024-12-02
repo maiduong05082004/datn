@@ -537,7 +537,7 @@ const ViewAccount = (props: Props) => {
 
                 {isStep === 6 &&
                     order?.data?.bills
-                        ?.filter((item: any) => item.status_bill === "canceled" && item.status_bill === "returned")
+                        ?.filter((item: any) => item.status_bill === "canceled" || item.status_bill === "returned")
                         .map((item: any, index: number) => (
                             <div key={item.id || index} className="">
                                 <div className="flex p-[10px] -mx-[15px] lg:m-0 border-t-[#dadada] border-t-[1px] border-b-[#dadada] border-b-[1px] justify-between items-center bg-slate-100 lg:p-[15px]">

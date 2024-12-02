@@ -356,8 +356,9 @@ class CheckoutController extends Controller
         } else {
             Log::warning("Không tìm thấy bản ghi Payment để hủy cho bill_id: {$bill->id}");
         }
-
-        return response()->json(['message' => 'Đơn hàng đã được hủy thành công.']);
+        // return response()->json(['message' => 'Thanh toán thành công và trạng thái đã được cập nhật.', 'bill_id' => $bill->id]);
+        return redirect('http://localhost:5173/account?status=failed');
+        // return response()->json(['message' => 'Đơn hàng đã được hủy thành công.']);
     }
 
 
