@@ -26,6 +26,11 @@ class CategoryController extends Controller
             'image' => 'nullable|image|max:2048',
         ]);
 
+        // Kiểm tra trùng tên danh mục
+        if (Category::where('name', $request->name)->exists()) {
+            return response()->json(['error' => 'Tên danh mục đã tồn tại.'], 400);
+        }
+
         $data = $request->only('name', 'parent_id', 'status');
 
         if (is_null($request->parent_id)) {
@@ -66,6 +71,11 @@ class CategoryController extends Controller
             'parent_id' => 'nullable|exists:categories,id',
             'delete_image' => 'nullable|boolean',
         ]);
+
+        // Kiểm tra trùng tên danh mục
+        if (Category::where('name', $request->name)->where('id', '!=', $id)->exists()) {
+            return response()->json(['error' => 'Tên danh mục đã tồn tại.'], 400);
+        }
 
         $data = $request->only('name', 'parent_id', 'status');
 
