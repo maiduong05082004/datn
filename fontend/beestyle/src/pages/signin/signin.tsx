@@ -31,7 +31,7 @@ const Signin = () => {
             <div className="text-[14px] font-[500]">
               Đăng ký thành viên và nhận ngay ưu đãi 10% cho đơn hàng đầu tiên
               <br />
-              Nhập mã: <b>MLBWELCOME</b>
+              Nhập mã: <b>BEESTYLEWELCOME</b>
             </div>
           </div>
 

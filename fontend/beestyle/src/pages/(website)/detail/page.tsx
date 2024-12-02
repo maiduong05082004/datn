@@ -351,10 +351,10 @@ const DetailPage = () => {
                                 </div>
 
                                 <div className="p-[12px] my-[10px] bg-[#fafafa] border-[1px] border-[dfdfdf] border-solid rounded-[4px]">
-                                    <b className='font-[700] text-[15px] leading-7'>MLB Chào bạn mới</b>
+                                    <b className='font-[700] text-[15px] leading-7'>BEESTYLE Chào bạn mới</b>
                                     <br />
                                     <p className='font-[500] text-[14px] leading-7'>Nhận ngay ưu đãi 5% khi đăng ký thành viên và mua đơn hàng nguyên giá đầu tiên tại website*</p>
-                                    <p className='font-[500] text-[14px] leading-7'>Nhập mã: MLBWELCOME</p>
+                                    <p className='font-[500] text-[14px] leading-7'>Nhập mã: BEESTYLEWELCOME</p>
                                     <p className='font-[500] text-[14px] leading-7'> Ưu đãi không áp dụng cùng với các CTKM khác</p>
                                 </div>
 
@@ -425,7 +425,7 @@ const DetailPage = () => {
                                         </div>
                                         <div className="w-[100%] text-wrap px-[8px] pt-[10px]">
                                             <div className="">
-                                                <h4 className='description2 mb-[5px] text-[14px] font-[600]'>MLB - Áo thun cổ tròn tay ngắn Varsity Number Overfit</h4>
+                                                <h4 className='description2 mb-[5px] text-[14px] font-[600]'>BEESTYLE - Áo thun cổ tròn tay ngắn Varsity Number Overfit</h4>
                                                 <div className="text-[14px] font-[700]">
                                                     <span className=''>1.090.000</span><sup className='underline'>đ</sup>
                                                 </div>
@@ -462,7 +462,7 @@ const DetailPage = () => {
                                         </div>
                                         <div className="w-[100%] text-wrap px-[8px] pt-[10px]">
                                             <div className="">
-                                                <h4 className='description2 mb-[5px] text-[14px] font-[600]'>MLB - Áo thun cổ tròn tay ngắn Varsity Number Overfit</h4>
+                                                <h4 className='description2 mb-[5px] text-[14px] font-[600]'>BEESTYLE - Áo thun cổ tròn tay ngắn Varsity Number Overfit</h4>
                                                 <div className="text-[14px] font-[700]">
                                                     <span className=''>1.090.000</span><sup className='underline'>đ</sup>
                                                 </div>

@@ -126,7 +126,7 @@ const PageSignup = (props: Props) => {
                             Đăng ký thành viên và nhận ngay ưu đãi 10% cho đơn hàng đầu tiên
                             <br />
                             Nhập mã:
-                            <b>MLBWELCOME</b>
+                            <b>BEESTYLEWELCOME</b>
                         </div>
                     </div>
 
