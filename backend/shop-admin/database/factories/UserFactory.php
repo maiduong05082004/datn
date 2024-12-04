@@ -3,7 +3,6 @@
 namespace Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 
 /**
@@ -11,11 +10,6 @@ use Illuminate\Support\Str;
  */
 class UserFactory extends Factory
 {
-    /**
-     * The current password being used by the factory.
-     */
-    protected static ?string $password;
-
     /**
      * Define the model's default state.
      *
@@ -27,8 +21,16 @@ class UserFactory extends Factory
             'name' => fake()->name(),
             'email' => fake()->unique()->safeEmail(),
             'email_verified_at' => now(),
-            'password' => static::$password ??= Hash::make('password'),
+            'password' => bcrypt('password'),
             'remember_token' => Str::random(10),
+            'date_of_birth' => fake()->date(),
+            'sex' => fake()->randomElement(['male', 'female', 'other']),
+            'address' => fake()->address(),
+            'phone' => fake()->phoneNumber(),
+            'role' => fake()->randomElement(['admin', 'user']),
+            'is_active' => fake()->boolean(),
+            'points' => fake()->numberBetween(0, 1000),
+            'tier' => fake()->randomElement(['bronze', 'silver', 'gold']),
         ];
     }
 
