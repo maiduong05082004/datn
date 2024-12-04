@@ -1,6 +1,6 @@
 import React from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Table, Button, Space, Popconfirm, message, Tag } from 'antd';
+import { Table, Button, Space, Popconfirm, message, Tag, Spin } from 'antd';
 import { EditOutlined, DeleteOutlined, PlusOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import { fetchPromotions, deletePromotion } from '@/services/promotions';
@@ -59,28 +59,28 @@ const ListPromotions: React.FC = () => {
         },
         { title: 'Bắt đầu', dataIndex: 'start_date', key: 'start_date' },
         { title: 'Kết thúc', dataIndex: 'end_date', key: 'end_date' },
-        {
-            title: 'Danh mục',
-            dataIndex: 'categories',
-            key: 'categories',
-            render: (categories: { id: number; name: string }[]) =>
-                categories?.length ? (
-                    categories.map((category) => <Tag key={category.id}>{category.name}</Tag>)
-                ) : (
-                    ''
-                ),
-        },
-        {
-            title: 'Sản phẩm',
-            dataIndex: 'products',
-            key: 'products',
-            render: (products: { id: number; name: string }[]) =>
-                products?.length ? (
-                    products.map((product) => <Tag key={product.id}>{product.name}</Tag>)
-                ) : (
-                    ''
-                ),
-        },
+        // {
+        //     title: 'Danh mục',
+        //     dataIndex: 'categories',
+        //     key: 'categories',
+        //     render: (categories: { id: number; name: string }[]) =>
+        //         categories?.length ? (
+        //             categories.map((category) => <Tag key={category.id}>{category.name}</Tag>)
+        //         ) : (
+        //             ''
+        //         ),
+        // },
+        // {
+        //     title: 'Sản phẩm',
+        //     dataIndex: 'products',
+        //     key: 'products',
+        //     render: (products: { id: number; name: string }[]) =>
+        //         products?.length ? (
+        //             products.map((product) => <Tag key={product.id}>{product.name}</Tag>)
+        //         ) : (
+        //             ''
+        //         ),
+        // },
         { title: 'Trạng thái', dataIndex: 'status', key: 'status' },
         {
             title: 'Hành động',
@@ -106,7 +106,9 @@ const ListPromotions: React.FC = () => {
         },
     ];
 
-    if (isLoading) return <div>Đang tải danh sách khuyến mãi...</div>;
+    if (isLoading) {
+        return <Spin tip="Đang tải dữ liệu..." className="flex justify-center items-center h-screen" />;
+      }
     if (isError) return <div>Lỗi khi tải danh sách khuyến mãi</div>;
 
     return (

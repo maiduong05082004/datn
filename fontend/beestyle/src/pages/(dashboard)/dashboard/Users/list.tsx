@@ -1,9 +1,10 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Table, Spin, message, Button, Space } from 'antd';
 import { EditOutlined, PlusOutlined, EyeOutlined } from '@ant-design/icons';
 import axiosInstance from '@/configs/axios';
+import SearchComponent from '@/components/ui/search';
 
 interface User {
   id: number;
@@ -22,6 +23,17 @@ const UserList: React.FC = () => {
   const [messageApi, contextHolder] = message.useMessage();
   const navigate = useNavigate();
 
+  const [searchQuery, setSearchQuery] = useState('');
+  const [sortKey, setSortKey] = useState('');
+
+  const handleSearch = (query: string) => {
+    setSearchQuery(query);
+  };
+
+  const handleSortChange = (sortKey: string) => {
+    setSortKey(sortKey);
+  };
+
   const { data: userManager = [], isLoading } = useQuery<User[]>({
     queryKey: ['userManager'],
     queryFn: async () => {
@@ -34,7 +46,21 @@ const UserList: React.FC = () => {
     return <Spin tip="Đang tải dữ liệu..." className="flex justify-center items-center h-screen" />;
   }
 
-  const dataSource = userManager.map((user: any, index: any) => ({
+  const filteredUsers = userManager.filter(user => 
+    user.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+    user.email.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const sortedUsers = [...filteredUsers].sort((a, b) => {
+    if (sortKey === 'name') {
+      return a.name.localeCompare(b.name); // Sắp xếp theo tên A-Z
+    } else if (sortKey === 'email') {
+      return a.email.localeCompare(b.email); // Sắp xếp theo email A-Z
+    }
+    return 0;
+  });
+
+  const dataSource = sortedUsers.map((user: any, index: any) => ({
     key: user.id, ...user,
     index: index + 1,
   }));
@@ -115,6 +141,12 @@ const UserList: React.FC = () => {
     <>
       {contextHolder}
       <div className="w-full mx-auto px-6 py-8">
+        <SearchComponent 
+          items={filteredUsers} 
+          onSearch={handleSearch} 
+          onSortChange={handleSortChange} 
+          sortOptions={['name', 'email']} 
+        />
         <div className="flex justify-between items-center mb-6">
           <Button
             type="default"

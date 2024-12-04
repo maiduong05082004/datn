@@ -13,43 +13,43 @@ const AddPromotion: React.FC = () => {
     const [promotionScope, setPromotionScope] = useState<'category' | 'product' | 'none'>('category');
     const [discountType, setDiscountType] = useState<'amount' | 'percent'>('percent');
     const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
-    const [products, setProducts] = useState<Product[]>([]);
+    // const [products, setProducts] = useState<Product[]>([]);
 
-    const { data: categories = [], isLoading: isLoadingCategories } = useQuery<Category[]>({
-        queryKey: ['categories'],
-        queryFn: fetchCategories,
-    });
+    // const { data: categories = [], isLoading: isLoadingCategories } = useQuery<Category[]>({
+    //     queryKey: ['categories'],
+    //     queryFn: fetchCategories,
+    // });
 
     const { mutate: addPromotion, isPending } = useMutation({
         mutationFn: createPromotion,
         onSuccess: () => {
             message.success('Khuyến mãi đã được tạo thành công!');
             form.resetFields();
-            navigate('/admin/promotions/list');
+            navigate('/admin/dashboard/promotions/list');
         },
         onError: () => {
             message.error('Có lỗi xảy ra. Vui lòng thử lại!');
         },
     });
 
-    useEffect(() => {
-        const fetchProducts = async () => {
-            if (selectedCategory && promotionScope === 'product') {
-                try {
-                    const fetchedProducts = await fetchProductsByCategory(selectedCategory);
-                    setProducts(fetchedProducts || []);
-                } catch (error) {
-                    console.error('Lỗi khi tải sản phẩm:', error);
-                    message.error('Không thể tải sản phẩm. Vui lòng thử lại sau.');
-                    setProducts([]);
-                }
-            } else {
-                setProducts([]);
-            }
-        };
+    // useEffect(() => {
+    //     const fetchProducts = async () => {
+    //         if (selectedCategory && promotionScope === 'product') {
+    //             try {
+    //                 const fetchedProducts = await fetchProductsByCategory(selectedCategory);
+    //                 setProducts(fetchedProducts || []);
+    //             } catch (error) {
+    //                 console.error('Lỗi khi tải sản phẩm:', error);
+    //                 message.error('Không thể tải sản phẩm. Vui lòng thử lại sau.');
+    //                 setProducts([]);
+    //             }
+    //         } else {
+    //             setProducts([]);
+    //         }
+    //     };
 
-        fetchProducts();
-    }, [selectedCategory, promotionScope]);
+    //     fetchProducts();
+    // }, [selectedCategory, promotionScope]);
 
     const onFinish = (values: any) => {
         let promotionType = '';
@@ -92,7 +92,7 @@ const AddPromotion: React.FC = () => {
                     name="start_date"
                     rules={[{ required: true, message: 'Vui lòng chọn ngày bắt đầu!' }]}
                 >
-                    <DatePicker format="YYYY-MM-DD" style={{ width: '100%' }} />
+                    <DatePicker format="YYYY-DD-MM" style={{ width: '100%' }} />
                 </Form.Item>
 
                 <Form.Item
@@ -100,7 +100,7 @@ const AddPromotion: React.FC = () => {
                     name="end_date"
                     rules={[{ required: true, message: 'Vui lòng chọn ngày kết thúc!' }]}
                 >
-                    <DatePicker format="YYYY-MM-DD" style={{ width: '100%' }} />
+                    <DatePicker format="YYYY-DD-MM" style={{ width: '100%' }} />
                 </Form.Item>
 
                 <Form.Item
@@ -167,7 +167,7 @@ const AddPromotion: React.FC = () => {
                     </Select>
                 </Form.Item>
 
-                <Form.Item label="Phạm Vi Khuyến Mãi" name="promotion_scope">
+                {/* <Form.Item label="Phạm Vi Khuyến Mãi" name="promotion_scope">
                     <Radio.Group
                         onChange={(e) => {
                             setPromotionScope(e.target.value);
@@ -237,7 +237,7 @@ const AddPromotion: React.FC = () => {
                             </Select>
                         </Form.Item>
                     </>
-                )}
+                )} */}
 
                 <Form.Item label="Kích Hoạt" name="is_active" valuePropName="checked">
                     <Switch />
