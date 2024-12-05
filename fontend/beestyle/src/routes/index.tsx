@@ -26,10 +26,10 @@ import Detailship from "@/pages/(dashboard)/dashboard/Bill/detailship";
 import AddCategories from "@/pages/(dashboard)/dashboard/Category/add";
 import ListCategories from "@/pages/(dashboard)/dashboard/Category/list";
 import UpdateCategories from "@/pages/(dashboard)/dashboard/Category/update";
-import AddProduct from "@/pages/(dashboard)/dashboard/Products/add";
-import Comments from "@/pages/(dashboard)/dashboard/Products/comments";
-import ListProducts from "@/pages/(dashboard)/dashboard/Products/list";
-import UpdateProduct from "@/pages/(dashboard)/dashboard/Products/update";
+import AddProduct from "@/pages/(dashboard)/dashboard/Product/add";
+import Comments from "@/pages/(dashboard)/dashboard/Product/comments";
+import ListProducts from "@/pages/(dashboard)/dashboard/Product/list";
+import UpdateProduct from "@/pages/(dashboard)/dashboard/Product/update";
 import DetailUser from "@/pages/(dashboard)/dashboard/Users/detail";
 import ErrorPage from "@/pages/(website)/404/page";
 import Search from "@/pages/(website)/_components/Search";
@@ -58,8 +58,9 @@ import ListBannersCustom from "@/pages/(dashboard)/dashboard/Banner/list_banner_
 import ListBannersCategory from "@/pages/(dashboard)/dashboard/Banner/list_banner_custom";
 import CancelBill from "@/pages/(dashboard)/dashboard/Bill/cancel";
 import ShipNoGHN from "@/pages/(dashboard)/dashboard/Bill/ShipNoGHN";
-import DetailPro from "@/pages/(dashboard)/dashboard/Products/detailpro";
+import DetailProduct from "@/pages/(dashboard)/dashboard/Product/detail";
 import ListAllChart from "@/pages/(dashboard)/Statistics/page";
+import ListUserChat from "@/pages/(dashboard)/dashboard/ChatRealTime/ListUserChat";
 
 const Router = () => {
 
@@ -97,6 +98,7 @@ const Router = () => {
                 <Route path="admin/dashboard" element={<LayoutAdmin />}>
                     <Route index element={<DashboardPage />} />
                     <Route path="profile" element={<MyProfile />} />
+                    <Route path="chat" element={<ListUserChat />} />
                     {/* bills */}
                     <Route path="bill/list" element={<ListBill />} />
                     <Route path="bill/detail/:id" element={<DetailBill />} />
@@ -128,7 +130,7 @@ const Router = () => {
                     <Route path="products/add" element={<AddProduct />} />
                     <Route path="products/update/:id" element={<UpdateProduct />} />
                     {/* <Route path="products/detail/:id" element={<DetailProduct />} /> */}
-                    <Route path="products/detail/:id" element={<DetailPro />} />
+                    <Route path="products/detail/:id" element={<DetailProduct />} />
                     {/* attribute_group */}
                     <Route path="attribute_group/add" element={<AddtributeGroup />} />
                     <Route path="attribute_group/list" element={<ListAttributeGroup />} />

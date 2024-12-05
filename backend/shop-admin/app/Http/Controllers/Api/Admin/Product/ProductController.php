@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\ProductRequest;
 use App\Http\Requests\UpdateProductRequest;
 use App\Http\Resources\ProductResource;
+use App\Models\CartItem;
 use App\Models\Product;
 use App\Models\ProductImage;
 use App\Models\ProductVariation;
@@ -570,37 +571,31 @@ class ProductController extends Controller
         try {
             $product = Product::findOrFail($id);
     
-            $variations = ProductVariation::where('product_id', $product->id)->get();
-            foreach ($variations as $variation) {
-                // Xóa mềm các hình ảnh của biến thể
-                $variationImages = ProductVariationImage::where('product_variation_id', $variation->id)->get();
-                foreach ($variationImages as $variationImage) {
-                    $variationImage->delete(); 
-                }
-    
-                ProductVariationValue::where('product_variation_id', $variation->id)->delete();
-                $variation->delete(); 
+            $carts = CartItem::where('product_id', $id)->get();
+                foreach ($carts as $cart) {
+                $cart->delete(); 
             }
-    
-
-            $productImages = ProductImage::where('product_id', $product->id)->get();
-            foreach ($productImages as $productImage) {
-                $productImage->delete(); 
-            }
-    
             $product->delete();
     
             DB::commit();
     
             return response()->json([
                 'success' => true,
-                'message' => 'Xóa sản phẩm thành công'
+                'message' => 'Xóa sản phẩm và các cart_id liên quan thành công'
             ], 200);
-        } catch (\Exception $e) {
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            // Nếu không tìm thấy sản phẩm
             DB::rollback();
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to delete product: ' . $e->getMessage(),
+                'message' => 'Sản phẩm không tồn tại'
+            ], 404);
+        } catch (\Exception $e) {
+            // Nếu có lỗi khác
+            DB::rollback();
+            return response()->json([
+                'success' => false,
+                'message' => 'Không thể xóa sản phẩm: ' . $e->getMessage(),
             ], 500);
         }
     }
