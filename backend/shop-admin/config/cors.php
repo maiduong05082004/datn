@@ -2,12 +2,11 @@
 
 return [
 
-    'paths' => ['api/*', 'sanctum/csrf-cookie'],
+    'paths' => ['api/*', 'sanctum/csrf-cookie', 'broadcasting/auth'],
 
     'allowed_methods' => ['*'],
 
-    // Chỉ cho phép từ nguồn localhost:3000 (ứng dụng React)
-    'allowed_origins' => ['http://localhost:5173','http://localhost:5174','http://127.0.0.1:8000'],
+    'allowed_origins' => ['http://localhost:5173', 'http://localhost:5174', 'http://127.0.0.1:8000'],
 
     'allowed_origins_patterns' => [],
 

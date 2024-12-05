@@ -125,6 +125,17 @@ const items1: MenuProps['items'] = [
       { key: 'inventory-1', label: <NavLink to="/admin/dashboard/inventory/list">Danh sách tồn kho</NavLink> },
     ],
   },
+
+  {
+    key: 'sub12',
+    icon: React.createElement(TagOutlined),
+    label: 'Chat',
+    children: [
+      { key: 'sub12-1', label: <NavLink to="/admin/dashboard/chat">ChatRealTime</NavLink> },
+
+    ],
+  },
+
 ];
 
 const DashboardPage: React.FC<{ isDarkMode: boolean }> = ({ isDarkMode }) => {

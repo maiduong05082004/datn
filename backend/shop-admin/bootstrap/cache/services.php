@@ -36,10 +36,11 @@
     32 => 'Srmklive\\PayPal\\Providers\\PayPalServiceProvider',
     33 => 'App\\Providers\\AppServiceProvider',
     34 => 'App\\Providers\\AuthServiceProvider',
-    35 => 'App\\Providers\\EventServiceProvider',
-    36 => 'App\\Providers\\RouteServiceProvider',
-    37 => 'Laravel\\Sanctum\\SanctumServiceProvider',
-    38 => 'Srmklive\\PayPal\\Providers\\PayPalServiceProvider',
+    35 => 'App\\Providers\\BroadcastServiceProvider',
+    36 => 'App\\Providers\\EventServiceProvider',
+    37 => 'App\\Providers\\RouteServiceProvider',
+    38 => 'Laravel\\Sanctum\\SanctumServiceProvider',
+    39 => 'Srmklive\\PayPal\\Providers\\PayPalServiceProvider',
   ),
   'eager' => 
   array (
@@ -62,10 +63,11 @@
     16 => 'Srmklive\\PayPal\\Providers\\PayPalServiceProvider',
     17 => 'App\\Providers\\AppServiceProvider',
     18 => 'App\\Providers\\AuthServiceProvider',
-    19 => 'App\\Providers\\EventServiceProvider',
-    20 => 'App\\Providers\\RouteServiceProvider',
-    21 => 'Laravel\\Sanctum\\SanctumServiceProvider',
-    22 => 'Srmklive\\PayPal\\Providers\\PayPalServiceProvider',
+    19 => 'App\\Providers\\BroadcastServiceProvider',
+    20 => 'App\\Providers\\EventServiceProvider',
+    21 => 'App\\Providers\\RouteServiceProvider',
+    22 => 'Laravel\\Sanctum\\SanctumServiceProvider',
+    23 => 'Srmklive\\PayPal\\Providers\\PayPalServiceProvider',
   ),
   'deferred' => 
   array (
