@@ -68,6 +68,7 @@ Route::prefix('client')->as('client.')->group(function () {
         Route::get('/bannermain', [HomeController::class, 'bannerMain'])->name('bannerMain');
         Route::get('/productnew', [HomeController::class, 'productNew'])->name('productNew');
         Route::get('/productnewhot', [HomeController::class, 'productNewHot'])->name('productNewHot');
+        Route::get('/productcollection', [HomeController::class, 'productCollection'])->name('productCollection');
         Route::get('/bannercustom', [HomeController::class, 'bannerCustom'])->name('bannerCustom');
         Route::post('search', [HomeController::class, 'search'])->name('search');
     });
@@ -80,6 +81,8 @@ Route::prefix('client')->as('client.')->group(function () {
         Route::get('/showDetailOrder/{oderId}', [ProductProductController::class, 'showDetailOrder'])->name('showDetailOrder')->middleware('auth:sanctum');
         Route::post('orders/cancel/{orderId}', [ProductProductController::class, 'cancelOrder']);
         Route::post('orders/confirm/{orderId}', [ProductProductController::class, 'confirmOrder']);
+        Route::get('/pelatedproducts', [ProductProductController::class, 'relatedProducts'])->name('relatedProducts');
+
     });
     Route::prefix('cart')->as('cart.')->middleware('auth:sanctum')->group(function () {
         Route::get('/', [ProductCartController::class, 'getCartItems'])->name('index');

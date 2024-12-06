@@ -25,6 +25,7 @@ class Banner extends Model
     const TYPE_MAIN = 'main'; // banner chính nhé 
     const TYPE_CATEGORY = 'category'; // banner danh mục
     const TYPE_CUSTOM = 'custom'; // banner tự do
+    const TYPE_COLLECTION = 'collection'; // banner tự do
 
     // Hàm kiểm tra loại banner
     public function isMain()
