@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from 'react'
-import Promotions from './promotions'
 import { useQuery } from '@tanstack/react-query'
 import axios from 'axios'
+import { useEffect, useState } from 'react'
+import Promotions from './promotions'
 
 type Props = {
     checkouts: any,
@@ -18,7 +18,7 @@ type Props = {
 }
 
 const ItemProducts = ({promotionAdd, promotionShip, promotionProduct, checkouts, selectedAddress, priceShip, setPriceShip, setPromotionShip, setPromotionProduct, setPromotionAdd}: Props) => {
-    const [todos, setTodos] = useState<boolean>(true)
+    const [todos, setTodos] = useState<boolean>(false)
     const [isPromotion, setPromotion] = useState<boolean>(false)   
     const [checkShip, setCheckShip] = useState<any>({})
 

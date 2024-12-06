@@ -1,14 +1,9 @@
-import React, { useEffect, useRef, useState } from 'react'
-import { Link } from 'react-router-dom'
-import "slick-carousel/slick/slick.css";
+import React, { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import "slick-carousel/slick/slick-theme.css";
+import "slick-carousel/slick/slick.css";
 import AddProductCart from '../../_components/AddProductCart';
-import EventsAudio from '../../events/eventsAudio';
-import EventsCanvas from '../../events/eventsCanvas';
 import EventsIconListProducts from '../../events/eventsIconListProducts';
-
-
-type Props = {}
 
 const ProductsList = ({ products }: any) => {
 
@@ -64,10 +59,10 @@ const ProductsList = ({ products }: any) => {
 
                         <EventsIconListProducts />
 
-                        <div className="absolute flex flex-col items-start m-[6px]">
+                        {/* <div className="absolute flex flex-col items-start m-[6px]">
                             <div className="bg-[#FF0000] rounded-[3px] text-white text-[12px] font-[500] p-[3px_5px]">{item?.variations[0]?.variation_values[0]?.discount} %</div>
                             <div className="leading-5 bg-white text-black text-[12px] font-[500] p-[3px_10px] mt-[5px]">Hết hàng</div>
-                        </div>
+                        </div> */}
                         <Link to={`/products/${item.id}`} onClick={() => handleShowView(item)} className="">
                             <picture className='group'>
                                 <div className="group-hover:hidden pt-[124%] bg-cover bg-center bg-no-repeat cursor-pointer" style={{ backgroundImage: `url(${item?.variations[0].variation_album_images[0]})` }} ></div>
@@ -79,13 +74,9 @@ const ProductsList = ({ products }: any) => {
                                 <Link to={`/products/${item.id}`} onClick={() => handleShowView(item)}>
                                     <h4 className='description2 mb-[5px] text-[14px] font-[600] cursor-pointer hover:text-[#BB9244] lg:text-[16px]'>{item.name}</h4>
                                 </Link>
-
                                 <div className={` text-[14px] font-[700]`}>
-
                                     <span className={``}>{new Intl.NumberFormat('vi-VN').format(item.price)} VND</span>
-
                                 </div>
-
                             </div>
                             <div className="flex gap-1 justify-start mt-[18px]">
                                 {item.variations.map((value: any) => (

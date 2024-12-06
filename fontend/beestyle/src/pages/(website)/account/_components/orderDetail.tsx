@@ -1,15 +1,11 @@
 import { useQuery } from '@tanstack/react-query'
 import axios from 'axios'
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import LoadingPage from '../../loading/loadPage'
-import LoadingDetail from '../../loading/loadDetail'
 
-type Props = {}
+const OrderDetail = () => {
 
-const OrderDetail = (props: Props) => {
-
-    const [provinceId, setProvinceId] = useState<number | null>(null);
     const [districtId, setDistrictId] = useState<number | null>(null);
     const { oderId } = useParams()
 
@@ -36,7 +32,7 @@ const OrderDetail = (props: Props) => {
     }, [detail]);
 
     // Lấy tỉnh/thành phố
-    const { data: province, isLoading: isLoadingProvinces } = useQuery({
+    const { data: province} = useQuery({
         queryKey: ['province'],
         queryFn: async () => {
             return await axios.get(`https://dev-online-gateway.ghn.vn/shiip/public-api/master-data/province`, {
@@ -48,7 +44,7 @@ const OrderDetail = (props: Props) => {
     });
 
     // Lấy quận/huyện
-    const { data: district, isLoading: isLoadingDistrict } = useQuery({
+    const { data: district} = useQuery({
         queryKey: ['district'],
         queryFn: async () => {
             return await axios.get(`https://dev-online-gateway.ghn.vn/shiip/public-api/master-data/district`, {
@@ -60,7 +56,7 @@ const OrderDetail = (props: Props) => {
     });
 
     // Lấy phường/xã
-    const { data: ward, isLoading: isLoadingWard } = useQuery({
+    const { data: ward} = useQuery({
         queryKey: ['ward', districtId],
         queryFn: async () => {
             if (!districtId) return;
@@ -111,7 +107,7 @@ const OrderDetail = (props: Props) => {
                         {detail?.data.status_bill === "delivered" &&
                             <div className="">Đã giao hàng</div>
                         }
-                        {detail?.data.status_bill === "canceled" || detail?.data.status_bill === "returned" &&
+                        {(detail?.data.status_bill === "canceled" || detail?.data.status_bill === "returned") &&
                             <div className="">Đã hủy</div>
                         }
                     </div>
@@ -170,7 +166,7 @@ const OrderDetail = (props: Props) => {
                                 <span className='mt-[10px]'>Số điện thoại</span>
                                 <span className='mt-[10px]'>Địa chỉ</span>
                             </div>
-                            <div className="flex flex-col items-end *:font-[500] *:text-[15px]">
+                            <div className="flex flex-col items-end *:font-[500] *:text-[15px] w-[50%]">
                                 <div>{detail?.data.payment_type_description}</div>
                                 <div className='mt-[10px]' >{detail?.data.full_name}</div>
                                 <div className='mt-[10px]'>{detail?.data.phone_number}</div>

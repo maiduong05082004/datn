@@ -2,17 +2,10 @@ import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import LoadingPage from '../../loading/loadPage';
 
-type Props = {}
-
-const Favorite = (props: Props) => {
+const Favorite = () => {
     const { id } = useParams()
-
-
-
     const [favoriteStatus, setFavoriteStatus] = useState<boolean>();
-
     const token = localStorage.getItem('token');
 
     const onSubmitFavorite = async (status: boolean) => {

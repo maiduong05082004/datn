@@ -16,7 +16,7 @@ const Report = ({ setReportTab, isReportTab, commentItem }: Props) => {
 
     const [messageApi, handleContext] = message.useMessage()
 
-    const { register, handleSubmit, formState: { errors }, reset } = useForm<TReport>({
+    const { register, handleSubmit, reset } = useForm<TReport>({
         defaultValues: {
             reason: ""
         }

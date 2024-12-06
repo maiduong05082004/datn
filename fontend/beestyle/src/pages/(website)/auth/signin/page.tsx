@@ -1,18 +1,16 @@
 import { useMutation } from '@tanstack/react-query'
 import { message } from 'antd'
 import axios from 'axios'
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { Link, useNavigate } from 'react-router-dom'
 
-type Props = {}
-
-const PageSignin = (props: Props) => {
+const PageSignin = () => {
 
     const [eye, setEye] = useState<boolean>(true)
     const [messageApi, contextHolder] = message.useMessage()
     const navigater = useNavigate()
-    const { register, handleSubmit, formState: { errors }, reset } = useForm<any>()
+    const { register, handleSubmit } = useForm<any>()
     
     useEffect(() => {
         window.scrollTo(0, 0);

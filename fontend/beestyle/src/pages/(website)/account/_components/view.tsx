@@ -1,6 +1,5 @@
 import { useOrderViewMutations } from '@/components/hooks/useOrderViewMutations';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { message } from 'antd';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import axios from 'axios';
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
@@ -8,19 +7,21 @@ import { Link } from 'react-router-dom';
 import LoadingPage from '../../loading/loadPage';
 import Reason from './reason';
 
-type Props = {}
 interface TDanh {
     content: string
     stars: number
 }
 
-const ViewAccount = (props: Props) => {
+const ViewAccount = () => {
 
     const [isCommentEvaluate, setCommentEvaluate] = useState<boolean>(false)
     const [itemProduct, setItemProduct] = useState<any>()
     const [start, setStart] = useState(5);
     const [isStep, setStep] = useState<number>(1)
-    const { cancelOrder, evaluateOrder, handleContext } = useOrderViewMutations()
+    const [bill_id, setBillId] = useState<any>(null)
+    const [isReason, setReason] = useState<boolean>(false)
+    const queryClient = useQueryClient();
+    const { evaluateOrder, handleContext } = useOrderViewMutations()
     const { register, handleSubmit, setValue, reset } = useForm<TDanh>()
     const status = [{ id: 1, name: "Tất cả" }, { id: 2, name: "Đang chờ xử lý" }, { id: 3, name: "Đã xử lý" }, { id: 4, name: "Đang giao hàng" }, { id: 5, name: "Đã giao hàng" }, { id: 6, name: "Đã hủy" }]
 
@@ -28,18 +29,6 @@ const ViewAccount = (props: Props) => {
     useEffect(() => {
         window.scrollTo(0, 0);
     }, []);
-
-    const token = localStorage.getItem("token")
-
-    const { data: user } = useQuery({
-        queryKey: ['user', token],
-        queryFn: () => {
-            if (!token) return null;
-            return axios.get(`http://127.0.0.1:8000/api/client/auth/profile`, {
-                headers: { Authorization: `Bearer ${token}` }
-            })
-        }
-    })
 
     // Lấy tất cả oder theo id người dùng
     const { data: order, isLoading: isLoadingOrder } = useQuery({
@@ -53,8 +42,11 @@ const ViewAccount = (props: Props) => {
         }
     })
 
-    console.log(order)
-
+    // useEffect(() => {
+    //     if (order) {
+    //         queryClient.invalidateQueries({ queryKey: ['order'] });
+    //     }
+    // }, [order]);
 
     setValue("stars", start)
     const onSubmit = (data: any) => {
@@ -65,19 +57,13 @@ const ViewAccount = (props: Props) => {
             setStart(5)
             reset()
         }
-        console.log(data);
-
-    }
-
-    const handleDeleteOrder = (id: number) => {
-        cancelOrder.mutate(id);
     }
 
     if (isLoadingOrder) return (<LoadingPage />)
 
     return (
         <>
-            <Reason />
+            <Reason bill_id={bill_id} isReason={isReason} setReason={setReason}/>
             {handleContext}
             <div className="flex flex-col">
                 <div className="flex justify-between overflow-x-auto whitespace-nowrap cursor-pointer select-none *:p-[15px]">
@@ -109,7 +95,7 @@ const ViewAccount = (props: Props) => {
                                             {item?.status_bill === "delivered" &&
                                                 <div className="mr-[10px] font-[700]">Đã giao hàng |</div>
                                             }
-                                            {item?.status_bill === "canceled" || item?.status_bill === "returned" &&
+                                            {(item?.status_bill === "canceled" || item?.status_bill === "returned") &&
                                                 <div className="mr-[10px] font-[700]">Đã hủy |</div>
                                             }
                                             <Link to={`orders/${item.id}`} className='text-[14px] text-[#787878] underline cursor-pointer'>Xem chi tiết</Link>
@@ -150,7 +136,9 @@ const ViewAccount = (props: Props) => {
                                                                         }}
                                                                         className="cursor-pointer rounded-[3px] text-center w-[80px] py-[4px] border-[1px] border-[#B01722] mb-[5px] text-[#B01722]">Đánh giá</div>
                                                                     : ""}
-                                                                <div className=" cursor-pointer bg-[#B01722] text-white text-center rounded-[3px] w-[80px] py-[4px]">Mua lại</div>
+                                                                <Link to={`/products/${value.product_id}`} className="p-[14px] cursor-pointer bg-[#B01722] text-white text-center rounded-[3px] w-[80px] py-[5px]">
+                                                                    Mua lại
+                                                                </Link>
                                                             </div>
                                                         ) : ""}
                                                         {item.status_bill === "shipped" && index == 0 ? (
@@ -164,12 +152,12 @@ const ViewAccount = (props: Props) => {
                                                             : ""}
                                                     </div>
                                                 </div>
-                                                {/* {item.status_bill === "pending" && index == item?.bill_detail.length - 1 ? (
+                                                {item.status_bill === "pending" && index == item?.bill_detail.length - 1 ? (
                                                 <div className='flex justify-end gap-4 mt-[20px] border-t-[1px] border-t-[#e8e8e8] pt-[20px]'>
                                                     <div className="cursor-pointer rounded-[3px] text-center p-[5px_10px] border-[1px] border-black mb-[5px] text-black">Thay đổi đại chỉ</div>
-                                                    <div onClick={() => handleDeleteOrder(value.bill_id)} className=" cursor-pointer rounded-[3px] text-center p-[5px_10px] border-[1px] border-black mb-[5px] text-black">Hủy đơn hàng</div>
+                                                    <div onClick={() => {setBillId(value.bill_id), setReason(true)}} className=" cursor-pointer rounded-[3px] text-center p-[5px_10px] border-[1px] border-black mb-[5px] text-black">Hủy đơn hàng</div>
                                                 </div>
-                                            ) : ""} */}
+                                            ) : ""}
                                             </div>
 
                                         ))}
@@ -512,9 +500,9 @@ const ViewAccount = (props: Props) => {
                                                                     }}
                                                                     className="cursor-pointer rounded-[3px] text-center w-[80px] py-[4px] border-[1px] border-[#B01722] mb-[5px] text-[#B01722]">Đánh giá</div>
                                                                 : ""}
-                                                            <div className="cursor-pointer bg-[#B01722] text-white text-center rounded-[3px] w-[80px] py-[4px]">
+                                                            <Link to={`/products/${value.product_id}`} className="p-[14px] cursor-pointer bg-[#B01722] text-white text-center rounded-[3px] w-[80px] py-[5px]">
                                                                 Mua lại
-                                                            </div>
+                                                            </Link>
                                                         </div>
                                                     )}
 

@@ -9,15 +9,15 @@ export const useOrderViewMutations = () => {
     const navigater = useNavigate()
 
     const cancelOrder = useMutation({
-        mutationFn: async (bill_id: number) => {
+        mutationFn: async (data: any) => {
             try {
-                console.log(bill_id);
-                
-                await axios.post(`http://127.0.0.1:8000/api/client/products/orders/cancel/${bill_id}`,{
-                    headers: {
-                        Authorization: `Bearer ${localStorage.getItem("token")}`,
-                    }
-                })
+                await axios.post(`http://127.0.0.1:8000/api/client/products/orders/cancel/${data.bill_id}`,
+                    { reason: data.reason },
+                    {
+                        headers: {
+                            Authorization: `Bearer ${localStorage.getItem("token")}`,
+                        }
+                    })
             } catch (error) {
                 throw new Error("Thao tác thất bại!!")
             }
@@ -27,9 +27,9 @@ export const useOrderViewMutations = () => {
                 type: "success",
                 content: "Hủy đơn hàng thành công",
             }),
-            queryClient.invalidateQueries({
-                queryKey: ["order"],
-            })
+                queryClient.invalidateQueries({
+                    queryKey: ["order"],
+                })
         },
         onError: (error) => {
             messageApi.open({
@@ -41,7 +41,7 @@ export const useOrderViewMutations = () => {
     const evaluateOrder = useMutation({
         mutationFn: async (data: any) => {
             try {
-                await axios.post(`http://127.0.0.1:8000/api/client/comment/store`, data , {
+                await axios.post(`http://127.0.0.1:8000/api/client/comment/store`, data, {
                     headers: {
                         Authorization: `Bearer ${localStorage.getItem("token")}`,
                     }
@@ -54,7 +54,10 @@ export const useOrderViewMutations = () => {
             messageApi.open({
                 type: "success",
                 content: "Đánh giá sản phẩm thành công",
-            })
+            }),
+                queryClient.invalidateQueries({
+                    queryKey: ["order"],
+                })
         },
         onError: (error) => {
             messageApi.open({
@@ -65,5 +68,5 @@ export const useOrderViewMutations = () => {
     })
 
 
-    return { cancelOrder, evaluateOrder, handleContext}
+    return { cancelOrder, evaluateOrder, handleContext }
 }
