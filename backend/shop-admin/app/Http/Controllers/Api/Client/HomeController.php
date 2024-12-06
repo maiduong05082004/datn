@@ -70,6 +70,30 @@ class HomeController extends Controller
     }
 
 
+    public function productCollection()
+    {
+
+
+            $productCollections = Product::where('is_collection', 1)
+                ->orderBy('id', 'desc') // Lấy theo ID giảm dần
+                ->take(12)
+                ->get();
+
+            $banner = Banner::where('type', Banner::TYPE_COLLECTION)
+                ->where('status', 1)
+                ->orderBy('id', 'desc')
+                ->first();
+
+            $imagePath = $banner ? $banner->image_path : null;
+
+            $productCollection =  [
+                'image_path' => $imagePath,
+                'data' => ProductResource::collection($productCollections)
+            ];
+
+        // Trả về kết quả
+        return response()->json($productCollection);
+    }
 
 
     public function productNewHot()
