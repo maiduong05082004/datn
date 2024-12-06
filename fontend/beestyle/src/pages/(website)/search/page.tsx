@@ -10,7 +10,6 @@ type Props = {
 }
 
 const SearchPage = ({ isKeySearch }: Props) => {
-    const [todo, setTodo] = useState<boolean>(false)
     const [filter, setFilter] = useState<boolean>(false)
     const [isColorMenuOpen, setIsColorMenuOpen] = useState(false);
     const [isSizeMenuOpen, setIsSizeMenuOpen] = useState(false);
@@ -42,7 +41,7 @@ const SearchPage = ({ isKeySearch }: Props) => {
     
 
     // console.log(searchName);
-    const { data: products, isLoading, isError, error } = useQuery({
+    const { data: products } = useQuery({
         queryKey: ['search', searchName],
         queryFn: async () => {
             return axios.post(`http://127.0.0.1:8000/api/client/home/search?keyword=${searchName}`)
@@ -56,11 +55,6 @@ const SearchPage = ({ isKeySearch }: Props) => {
         }
     }, [])
 
-    console.log(products);
-    
-    
-
-
     return (
         <main>
             <div className="pt-[20px] lg:pt-[110px]">
@@ -73,8 +67,6 @@ const SearchPage = ({ isKeySearch }: Props) => {
                     </Link>
                 </form>
             </div>
-
-
             {products?.data?.products.length ? (
                 <>
                     <div className="px-[15px] py-[10px] mb-[20px] mt-[30px] border-t-[##e8e8e8] border-b-[#e8e8e8] border-t-[1px] border-b-[1px] lg:py-[20px] lg:mb-[8px] lg:mt-[85px] lg:border-none pc:px-[48px] ">

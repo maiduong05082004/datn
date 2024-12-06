@@ -1,8 +1,4 @@
-import React from 'react'
-
-type Props = {}
-
-const LoadingDetail = (props: Props) => {
+const LoadingDetail = () => {
   return (
     <div className=" w-full h-full text-center bg-white">
       <div className="absolute top-[50%] translate-y-[-50%] left-[50%] translate-x-[-50%]">

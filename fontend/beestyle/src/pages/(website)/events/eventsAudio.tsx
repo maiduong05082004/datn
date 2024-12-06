@@ -1,8 +1,6 @@
-import React, { useEffect, useRef, useState } from 'react'
+import { useRef, useState } from 'react';
 
-type Props = {}
-
-const EventsAudio = (props: Props) => {
+const EventsAudio = () => {
 
   const audioRef1 = useRef<HTMLAudioElement | null>(null);
 

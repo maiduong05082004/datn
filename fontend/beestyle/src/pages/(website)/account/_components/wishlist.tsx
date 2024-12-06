@@ -1,12 +1,10 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { message } from 'antd';
 import axios from 'axios';
-import React, { useEffect } from 'react'
+import { useEffect } from 'react';
 import LoadingPage from '../../loading/loadPage';
 
-type Props = {}
-
-const WishlistPage = (props: Props) => {
+const WishlistPage = () => {
 
     const [messageApi, contextHodle] = message.useMessage()
     const queryClient = useQueryClient()

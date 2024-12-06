@@ -290,6 +290,7 @@ class CommentController extends Controller
     public function listCommentClient(Request $request)
     {
         $productId = $request->input('product_id');
+        $ratingData = $this->getProductRating($request);
 
         $comments = Comment::with([
             'user',
@@ -340,6 +341,7 @@ class CommentController extends Controller
         }
         return response()->json([
             'comment_list' => $commentListClient,
+            'product_rating' => $ratingData,
             'pagination' => [
                 'current_page' => $comments->currentPage(),
                 'total_pages' => $comments->lastPage(),

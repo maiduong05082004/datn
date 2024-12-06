@@ -1,15 +1,11 @@
-import { Select, Space } from 'antd'
-import ProductsList from './_components/product'
+import { useQuery } from '@tanstack/react-query'
+import axios from 'axios'
 import { useState } from 'react'
 import { useParams } from 'react-router-dom'
-import axios from 'axios'
-import { useQuery } from '@tanstack/react-query'
 import LoadingPage from '../loading/loadPage'
+import ProductsList from './_components/product'
 
-
-type Props = {}
-
-const ListPage = (props: Props) => {
+const ListPage = () => {
 
     const [filter, setFilter] = useState<boolean>(false)
     const [isColorMenuOpen, setIsColorMenuOpen] = useState(false);

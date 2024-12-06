@@ -1,8 +1,5 @@
-import React from 'react'
 
-type Props = {}
-
-const EventsIconListProducts = (props: Props) => {
+const EventsIconListProducts = () => {
     return (
         <>
             <div className="absolute cursor-pointer bottom-[100px] -left-[3%] w-[20%] z-10 lg:bottom-[90px] lg:-right-[4%]">

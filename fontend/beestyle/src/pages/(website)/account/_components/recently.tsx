@@ -1,11 +1,9 @@
 import { message } from 'antd'
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import { Link } from 'react-router-dom'
 import AddProductCart from '../../_components/AddProductCart'
 
-type Props = {}
-
-const RecentlyPage = (props: Props) => {
+const RecentlyPage = () => {
 
     const [selectedProductsId, setSelectProductsId] = useState<any>([])
     const [isEditShowView, setEditShowView] = useState<boolean>(false)

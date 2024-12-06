@@ -3,11 +3,10 @@ import { useMutation } from '@tanstack/react-query'
 import { message } from 'antd'
 import axios from 'axios'
 import Joi from 'joi'
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { Link, useNavigate } from 'react-router-dom'
 
-type Props = {}
 interface TAuth {
     name: string;
     email: string;
@@ -56,7 +55,7 @@ const authSchema = Joi.object({
 });
 
 
-const PageSignup = (props: Props) => {
+const PageSignup = () => {
 
     const [eye, setEye] = useState<boolean>(true)
     const [eyes, setEyes] = useState<boolean>(true)
