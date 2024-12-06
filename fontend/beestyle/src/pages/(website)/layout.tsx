@@ -5,8 +5,7 @@ import { Dispatch, SetStateAction } from 'react'
 import { Outlet } from 'react-router-dom'
 type Props = {
     isSearch: boolean
-    // closes: boolean;
-    // onClicks: () => void;
+
     setIsSearch: Dispatch<SetStateAction<boolean>>;
   }
 const Layout = ({ isSearch ,setIsSearch}: Props) => {

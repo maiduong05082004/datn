@@ -6,16 +6,12 @@ import AddAddresses from "../../checkout/_components/addAddresses"
 import UpdateAddresses from "../../checkout/_components/updateAddresses"
 import LoadingPage from "../../loading/loadPage"
 
-type Props = {}
-
-const AddressesPage = (props: Props) => {
+const AddressesPage = () => {
 
     const [isAddAddresses, setAddAddresses] = useState<boolean>(false)
     const [isCheckAddresses, setCheckAddresses] = useState<boolean>(false)
     const [isUpdateAddresses, setUpdateAddresses] = useState<boolean>(false)
     const [idAddresses, setIdAddresses] = useState<any>()
-
-
     const [messageApi, handleContext] = message.useMessage()
     const queryClient = useQueryClient()
 
@@ -66,7 +62,7 @@ const AddressesPage = (props: Props) => {
     }
 
     // Lấy tỉnh/thành phố
-    const { data: provinceData, isLoading: isLoadingProvinces } = useQuery({
+    const { data: provinceData} = useQuery({
         queryKey: ['province'],
         queryFn: async () => {
             return await axios.get(`https://dev-online-gateway.ghn.vn/shiip/public-api/master-data/province`, {
@@ -78,7 +74,7 @@ const AddressesPage = (props: Props) => {
     });
 
     // Lấy quận/huyện
-    const { data: districtData, isLoading: isLoadingDistrict } = useQuery({
+    const { data: districtData} = useQuery({
         queryKey: ['district'],
         queryFn: async () => {
             return await axios.get(`https://dev-online-gateway.ghn.vn/shiip/public-api/master-data/district`, {

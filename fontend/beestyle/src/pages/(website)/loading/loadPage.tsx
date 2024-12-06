@@ -1,8 +1,4 @@
-import React from 'react'
-
-type Props = {}
-
-const LoadingPage = (props: Props) => {
+const LoadingPage = () => {
   return (
     <div className="fixed z-20 top-0 left-0 w-full h-[100%] text-center bg-black bg-opacity-[0.5]">
       <div className="absolute top-[50%] translate-y-[-50%] left-[50%] translate-x-[-50%]">

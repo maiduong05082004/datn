@@ -5,8 +5,6 @@ import { Link } from 'react-router-dom';
 import LoadingPage from '../../loading/loadPage';
 import AddProductCart from '../../_components/AddProductCart';
 
-type Props = {}
-
 const ProductNew = () => {
 
     const [categoryId, setCategoryId] = useState<any>({})
@@ -34,6 +32,24 @@ const ProductNew = () => {
         }
     }, [newpr?.data?.data]);
 
+    const ProductVaritions = ({ product }: any) => (
+        <div className="flex gap-1 justify-start mt-[18px]">
+            {product.variations.map((value: any) => (
+                <React.Fragment >
+                    <input
+                        className='hidden'
+                        id={``}
+                        name={`options-`}
+                        value="1"
+                    />
+                    <label htmlFor={``} className="w-[12px] h-[12px] cursor-pointer">
+                        <img className="w-[12px] h-[12px] rounded-[100%]" src={value.attribute_value_image_variant.image_path} alt="" />
+                    </label>
+                </React.Fragment>
+            ))}
+        </div>
+    )
+
     if (isLoading) return <LoadingPage />
 
     return (
@@ -54,12 +70,12 @@ const ProductNew = () => {
                     {newpr?.data.data.map((item: any, index: any) => (
                         <div key={index + 1}
                             className={`${item.name === categoryId.name ? "" : "hidden"} -mx-[15px] overflow-x-auto whitespace-nowrap flex scrollbar lg:mx-[0]`}>
-                            <div className="w-[100%] shrink-0 lg:grid lg:grid-cols-12">
+                            <div className="w-[100%] shrink-0 lg:flex">
                                 <Link
                                     to={`/categories/${item.category_id}`}
-                                    className="lg:col-span-7 relative group cursor-pointer">
+                                    className="lg:w-[55%] relative group cursor-pointer">
                                     <picture className=''>
-                                        <div className="pt-[101%] bg-cover bg-center bg-no-repeat" style={{ backgroundImage: `url(${item.image_path})` }}></div>
+                                        <div className="pt-[130%] bg-cover bg-center bg-no-repeat" style={{ backgroundImage: `url(${item.image_path})` }}></div>
                                     </picture>
                                     <div className="absolute top-0 left-0 w-full h-full group-hover:bg-black opacity-0 group-hover:opacity-50 transition-opacity duration-300">
                                         <div className="text-white font-[700] absolute top-[50%] left-[50%] translate-x-[-50%] translate-y-[-50%] p-[15px_35px] border-[1px] rounded-[5px]">
@@ -68,11 +84,11 @@ const ProductNew = () => {
                                     </div>
                                 </Link>
 
-                                <div className="flex items-center p-[15px] bg-white lg:col-span-5 lg:bg-[#F3F3F3] lg:p-[32px]">
+                                <div className="flex items-center p-[15px] bg-white lg:w-[45%] lg:bg-[#F3F3F3] lg:p-[32px]">
                                     <div className="hidden lg:flex overflow-x-auto whitespace-nowrap scrollbar flex-col gap-4">
                                         <div className="flex gap-4">
                                             {item.products.slice(0, 3).map((product: any) => (
-                                                <Link to={`/products/${product.id}`}
+                                                <div
                                                     key={product.id}
                                                     className="max-w-[50%] grow-0 basis-[48%] shrink-0 relative"
                                                 >
@@ -86,27 +102,24 @@ const ProductNew = () => {
                                                             </div>
                                                         </div>
                                                     </div>
-                                                    <div>
+                                                    <Link to={`/products/${product.id}`}>
                                                         <picture className='group'>
                                                             <div className="group-hover:hidden pt-[124%] bg-cover bg-center bg-no-repeat cursor-pointer" style={{ backgroundImage: `url(${product?.variations[0].variation_album_images[0]})` }} ></div>
                                                             <div className="hidden group-hover:block pt-[124%] bg-cover bg-center bg-no-repeat cursor-pointer" style={{ backgroundImage: `url(${product?.variations[0].variation_album_images[1]})` }} ></div>
                                                         </picture>
-                                                    </div>
-                                                    <div className="w-[100%] text-wrap px-[8px] pt-[10px]">
+                                                    </Link>
+                                                    <Link to={`/products/${product.id}`} className="w-[100%] text-wrap px-[8px] pt-[10px]">
                                                         <h4 className="description mb-[30px] text-[14px] font-[600]">
                                                             {product.name}
                                                         </h4>
-                                                        <div className="flex gap-1 justify-start">
-                                                            <div className="w-[12px] h-[12px] rounded-[100%] border-black border-[6px] bg-black"></div>
-                                                            <div className="w-[12px] h-[12px] rounded-[100%] border-red-500 border-[6px] bg-red-500"></div>
-                                                        </div>
-                                                    </div>
-                                                </Link>
+                                                        <ProductVaritions product={product} />
+                                                    </Link>
+                                                </div>
                                             ))}
                                         </div>
                                         <div className="flex gap-4">
                                             {item.products.slice(1, 6).map((product: any) => (
-                                                <Link to={`/products/${product.id}`}
+                                                <div
                                                     key={product.id}
                                                     className="max-w-[50%] grow-0 basis-[48%] shrink-0 relative"
                                                 >
@@ -120,29 +133,26 @@ const ProductNew = () => {
                                                             </div>
                                                         </div>
                                                     </div>
-                                                    <div>
+                                                    <Link to={`/products/${product.id}`}>
                                                         <picture className='group'>
                                                             <div className="group-hover:hidden pt-[124%] bg-cover bg-center bg-no-repeat cursor-pointer" style={{ backgroundImage: `url(${product?.variations[0].variation_album_images[0]})` }} ></div>
                                                             <div className="hidden group-hover:block pt-[124%] bg-cover bg-center bg-no-repeat cursor-pointer" style={{ backgroundImage: `url(${product?.variations[0].variation_album_images[1]})` }} ></div>
                                                         </picture>
-                                                    </div>
-                                                    <div className="w-[100%] text-wrap px-[8px] pt-[10px]">
+                                                    </Link>
+                                                    <Link to={`/products/${product.id}`} className="w-[100%] text-wrap px-[8px] pt-[10px]">
                                                         <h4 className="description mb-[30px] text-[14px] font-[600]">
                                                             {product.name}
                                                         </h4>
-                                                        <div className="flex gap-1 justify-start">
-                                                            <div className="w-[12px] h-[12px] rounded-[100%] border-black border-[6px] bg-black"></div>
-                                                            <div className="w-[12px] h-[12px] rounded-[100%] border-red-500 border-[6px] bg-red-500"></div>
-                                                        </div>
-                                                    </div>
-                                                </Link>
+                                                        <ProductVaritions product={product} />
+                                                    </Link>
+                                                </div>
                                             ))}
                                         </div>
                                     </div>
                                     <div className="overflow-x-auto whitespace-nowrap scrollbar flex flex-col gap-4 lg:hidden">
                                         <div className="flex gap-4">
                                             {item.products.map((product: any) => (
-                                                <Link to={`/products/${product.id}`}
+                                                <div
                                                     key={product.id}
                                                     className="max-w-[50%] grow-0 basis-[48%] shrink-0 relative"
                                                 >
@@ -156,22 +166,19 @@ const ProductNew = () => {
                                                             </div>
                                                         </div>
                                                     </div>
-                                                    <div>
+                                                    <Link to={`/products/${product.id}`}>
                                                         <picture className='group'>
                                                             <div className="group-hover:hidden pt-[124%] bg-cover bg-center bg-no-repeat cursor-pointer" style={{ backgroundImage: `url(${product?.variations[0].variation_album_images[0]})` }} ></div>
                                                             <div className="hidden group-hover:block pt-[124%] bg-cover bg-center bg-no-repeat cursor-pointer" style={{ backgroundImage: `url(${product?.variations[0].variation_album_images[1]})` }} ></div>
                                                         </picture>
-                                                    </div>
-                                                    <div className="w-[100%] text-wrap px-[8px] pt-[10px]">
+                                                    </Link>
+                                                    <Link to={`/products/${product.id}`} className="w-[100%] text-wrap px-[8px] pt-[10px]">
                                                         <h4 className="description mb-[30px] text-[14px] font-[600]">
                                                             {product.name}
                                                         </h4>
-                                                        <div className="flex gap-1 justify-start">
-                                                            <div className="w-[12px] h-[12px] rounded-[100%] border-black border-[6px] bg-black"></div>
-                                                            <div className="w-[12px] h-[12px] rounded-[100%] border-red-500 border-[6px] bg-red-500"></div>
-                                                        </div>
-                                                    </div>
-                                                </Link>
+                                                        <ProductVaritions product={product} />
+                                                    </Link>
+                                                </div>
                                             ))}
                                         </div>
                                     </div>

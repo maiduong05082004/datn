@@ -1,8 +1,6 @@
-import React, { useEffect, useRef } from 'react'
+import { useEffect, useRef } from 'react';
 
-type Props = {}
-
-const EventsCanvas = (props: Props) => {
+const EventsCanvas = () => {
     const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
     useEffect(() => {

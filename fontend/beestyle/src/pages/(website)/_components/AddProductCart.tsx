@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { message } from 'antd'
 import axios from 'axios'
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Slider from 'react-slick'
 
@@ -69,7 +69,6 @@ const AddProductCart = ({ cartItem, activeCart, setActiveCart }: Props) => {
     useEffect(() => {
         window.scrollTo(0, 0);
     }, []);
-
 
     const settings = {
         dots: true,

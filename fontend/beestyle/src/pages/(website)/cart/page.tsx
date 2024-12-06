@@ -1,20 +1,15 @@
 import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
 import { useCallback, useEffect, useState } from 'react';
-import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
+import "slick-carousel/slick/slick.css";
 
 import { useProductMutations } from '@/components/hooks/useProductMutations';
-import NavigationButton from './_components/navigationButton';
-import Slider from 'react-slick';
 import { Link, useNavigate } from 'react-router-dom';
-import LoadingPage from '../loading/loadPage';
+import Slider from 'react-slick';
+import NavigationButton from './_components/navigationButton';
 
-type Props = {
-
-}
-
-const CartPage = ({ }: any) => {
+const CartPage = () => {
 
     const [selectedProducts, setSelectedProducts] = useState<string[]>([]);
     const [totalPrice, setTotalPrice] = useState(0);
@@ -25,10 +20,11 @@ const CartPage = ({ }: any) => {
     const [variationValuesDf, setVariationValuesDf] = useState<any>()
     const [quantity, setQuantity] = useState<any>()
     const [cartItem, setCartItem] = useState<any>()
+    const navigater = useNavigate()
     const { contextHolder, updateProductMutation, deleteProductMutation } = useProductMutations();
 
     const token = localStorage.getItem("token")
-    const { data: carts, isLoading: isLoadingCarts } = useQuery({
+    const { data: carts } = useQuery({
         queryKey: ['carts', token],
         queryFn: async () => {
             return await axios.get('http://127.0.0.1:8000/api/client/cart', {
@@ -38,6 +34,12 @@ const CartPage = ({ }: any) => {
             });
         },
     })
+
+    useEffect(() => {
+        if(!token) {
+            navigater(`/signin`)
+        }
+    }, [token])
 
     useEffect(() => {
         if (variationId !== variationIdDf) {

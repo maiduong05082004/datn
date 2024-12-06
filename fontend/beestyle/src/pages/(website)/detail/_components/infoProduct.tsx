@@ -1,8 +1,6 @@
-import React, { useState } from 'react'
+import { useState } from 'react'
 
-type Props = {}
-
-const InfoProduct = (props: Props) => {
+const InfoProduct = () => {
     const [ activeInfo, setActiveInfo ] = useState<string>("active_01")
     return (
         <div className="lg:w-[55%] px-[15px] lg:px-0">

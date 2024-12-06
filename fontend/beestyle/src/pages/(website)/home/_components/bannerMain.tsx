@@ -1,11 +1,9 @@
 import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react';
 import LoadingPage from '../../loading/loadPage';
 
-type Props = {}
-
-const BannerMain = (props: Props) => {
+const BannerMain = () => {
     const [currentIndex, setCurrentIndex] = useState<number>(0);
 
     const { data: banner, isLoading } = useQuery({

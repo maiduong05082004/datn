@@ -1,8 +1,3 @@
-type Props = {
-    closes: boolean;
-    onClick: () => void;
-}
-
 const Footer = () => {
     
     return (

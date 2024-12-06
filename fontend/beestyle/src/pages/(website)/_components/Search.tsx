@@ -1,9 +1,7 @@
 
-import React, { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import AddProductCart from './AddProductCart';
-
-type Props = {}
 
 const Search = ({ isSearch, setIsSearch, setKeySearch }: any) => {
 
@@ -43,7 +41,7 @@ const Search = ({ isSearch, setIsSearch, setKeySearch }: any) => {
     };
 
 
-    const [products, setProducts] = useState<any>(JSON.parse(localStorage.getItem('suggest') || '[]'));
+    const [products] = useState<any>(JSON.parse(localStorage.getItem('suggest') || '[]'));
 
     return (
         <div className={`${isSearch ? "fixed" : "hidden"} p-[15px] top-0 bg-white min-h-[100%] w-[100%] z-30 lg:p-0 lg:min-h-[584px]`}>

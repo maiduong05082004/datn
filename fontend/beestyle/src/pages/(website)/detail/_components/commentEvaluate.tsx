@@ -5,13 +5,7 @@ import { useParams } from 'react-router-dom';
 import Report from './report';
 import LoadingPage from '../../loading/loadPage';
 
-type Props = {
-}
-
 const CommentEvaluate = () => {
-    const [rating, setRating] = useState(3);
-    const [hover, setHover] = useState(0)
-    const [isReport, setReport] = useState<boolean>(false)
     const [isReportTab, setReportTab] = useState<boolean>(false)
     const [commentItem, setCommentItem] = useState<any>()
 
@@ -24,7 +18,6 @@ const CommentEvaluate = () => {
             return await axios.post(`http://localhost:8000/api/client/comment/list`, { product_id });
         },
     })
-    console.log(comment?.data.comment_list)
 
     if (isLoading) return (<LoadingPage />)
     return (
@@ -35,20 +28,14 @@ const CommentEvaluate = () => {
                     <h3 className='text-[18px] mb-[20px] font-[700]'>ĐÁNH GIÁ SẢN PHẨM</h3>
                     {comment?.data?.comment_list.length > 0 ? (
                         <div className="p-[15px] bg-slate-100">
-                            {/* <div className="font-[600] mb-[20px] bg-slate-50 p-[15px]">
-                                <span className='text-[30px] font-[700]'>{comment?.data
-                                    .map((item: any) => item.stars)
-                                    .reduce((total: number, stars: number) => total + stars, 0)
-                                    / (comment?.data.length || 1)}</span> trên 5
+                            <div className="font-[600] mb-[20px] bg-slate-50 p-[15px]">
+                                <span className='text-[30px] font-[700]'>{comment?.data?.product_rating?.original?.average_rating}</span> trên 5
                                 <div style={{ display: 'flex' }}>
                                     {[...Array(5)].map((_, index) => {
                                         const ratingValue = index + 1;
                                         return (
                                             <svg key={index + 1} xmlns="http://www.w3.org/2000/svg"
-                                                fill={ratingValue <= comment?.data
-                                                    .map((item: any) => item.stars)
-                                                    .reduce((total: number, stars: number) => total + stars, 0)
-                                                    / (comment?.data.length || 1) ? "gold" : "gray"}
+                                                fill={ratingValue <= comment?.data?.product_rating?.original?.average_rating / (comment?.data.length || 1) ? "gold" : "gray"}
                                                 viewBox="0 0 24 24"
                                                 strokeWidth={1.5}
                                                 stroke="none"
@@ -58,9 +45,7 @@ const CommentEvaluate = () => {
                                         );
                                     })}
                                 </div>
-                            </div> */}
-
-
+                            </div>
                             {comment?.data?.comment_list.map((item: any) => (
                                 <div key={item?.comment_id} className="flex justify-start items-start border-b-[1px] border-b-[#e8e8e8] lg:py-[20px]">
                                     <div className="overflow-hidden bg-slate-200 rounded-[50%] w-[40px] h-[40px] flex items-center justify-center mr-[15px]">
