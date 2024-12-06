@@ -754,4 +754,17 @@ class ProductController extends Controller
             return response()->json(['message' => 'Đã xảy ra lỗi khi xác nhận đơn hàng', 'error' => $e->getMessage()], 500);
         }
     }
+
+
+    public function relatedProducts()
+    {
+        $product = Product::inRandomOrder()
+            ->take(12)
+            ->get();
+        return response()->json(
+          [
+            'data' =>  ProductResource::collection($product)
+          ]
+        );
+    }
 }

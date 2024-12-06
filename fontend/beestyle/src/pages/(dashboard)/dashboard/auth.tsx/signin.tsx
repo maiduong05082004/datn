@@ -25,7 +25,7 @@ const Signin = () => {
         },
         onSuccess: (data) => {
             messageAPI.success("Đăng nhập thành công!");
-            // localStorage.setItem("user", JSON.stringify(data));
+            localStorage.setItem("user", JSON.stringify(data.token));
             form.resetFields();
             navigate("/admin/dashboard");
         },

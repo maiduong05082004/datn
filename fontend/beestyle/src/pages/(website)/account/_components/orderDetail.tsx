@@ -17,7 +17,7 @@ const OrderDetail = () => {
     const { data: detail, isLoading: isLoadingOrderDetail } = useQuery({
         queryKey: ['orderDetail', oderId],
         queryFn: async () => {
-            return await axios.get(`http://127.0.0.1:8000/api/admins/orders/show_detailorder/${oderId}`, {
+            return await axios.get(`http://127.0.0.1:8000/api/client/products/showDetailOrder/${oderId}`, {
                 headers: {
                     Authorization: `Bearer ${localStorage.getItem('token')}`,
                 },
