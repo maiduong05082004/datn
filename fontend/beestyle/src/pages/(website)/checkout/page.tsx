@@ -27,10 +27,6 @@ const checkoutSchema = Joi.object({
     })
 });
 
-
-type Props = {
-}
-
 const CheckOutPage = () => {
 
     const [isAddAddresses, setAddAddresses] = useState<boolean>(false)
@@ -40,7 +36,6 @@ const CheckOutPage = () => {
 
     const [provinceId, setProvinceId] = useState<number | null>(null);
     const [districtId, setDistrictId] = useState<number | null>(null);
-    const [wardId, setWardId] = useState<number | null>(null);
     const [selectedAddress, setSelectedAddress] = useState<any>(null);
 
     const [priceShip, setPriceShip] = useState<number>(0)
@@ -94,7 +89,6 @@ const CheckOutPage = () => {
         if (selectedAddress) {
             setProvinceId(selectedAddress.city);
             setDistrictId(selectedAddress.district);
-            setWardId(selectedAddress.ward);
         }
     }, [selectedAddress]);
 

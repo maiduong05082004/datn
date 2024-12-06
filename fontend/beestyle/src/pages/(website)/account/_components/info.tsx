@@ -1,24 +1,27 @@
 import { useQuery } from '@tanstack/react-query'
 import axios from 'axios'
-import React, { useEffect } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link } from 'react-router-dom'
+import UpdateInfo from './updateInfo'
+import { useState } from 'react'
 
-type Props = {}
+const InfoPage = () => {
 
-const InfoPage = (props: Props) => {
-
+  const [isInfo, setInfo] = useState<boolean>(false)
   const token = localStorage.getItem("token")
 
   const { data: user } = useQuery({
-      queryKey: ['user', token],
-      queryFn: () => {
-          if (!token) return null;
-          return axios.get(`http://127.0.0.1:8000/api/client/auth/profile` , {
-              headers: { Authorization: `Bearer ${token}` }
-          })
-      }
+    queryKey: ['user', token],
+    queryFn: () => {
+      if (!token) return null;
+      return axios.get(`http://127.0.0.1:8000/api/client/auth/profile`, {
+        headers: { Authorization: `Bearer ${token}` }
+      })
+    }
   })
+
+  console.log(user);
   
+
   return (
     <div className="">
       <div className="">
@@ -55,9 +58,9 @@ const InfoPage = (props: Props) => {
             <span className='w-[50%]'>{user?.data.user.phone}</span>
           </div>
         </div>
-        <div className="flex items-center justify-center h-[45px] bg-black text-white rounded-[2px] font-[600] text-[16px] mt-[20px] lg:w-[200px] cursor-pointer">Cập nhật thông tin</div>
+        <div onClick={() => setInfo(true)} className="flex items-center justify-center h-[45px] bg-black text-white rounded-[2px] font-[600] text-[16px] mt-[20px] lg:w-[200px] cursor-pointer">Cập nhật thông tin</div>
       </div>
-
+      <UpdateInfo user={user} isInfo={isInfo} setInfo={setInfo}/>
     </div>
   )
 }

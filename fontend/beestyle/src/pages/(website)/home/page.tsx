@@ -1,15 +1,9 @@
-import { useQuery } from "@tanstack/react-query";
-import axios from "axios";
-import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
-import Noel from "../events/eventsAudio";
-import ProductNew from "./_components/productNew";
+import { useEffect } from "react";
 import BannerMain from "./_components/bannerMain";
 import ProductHot from "./_components/productHot";
-import Instagram from "./_components/instagram";
-type Props = {}
+import ProductNew from "./_components/productNew";
 
-const HomePage = (props: Props) => {
+const HomePage = () => {
 
   // Load dau trang
   useEffect(() => {

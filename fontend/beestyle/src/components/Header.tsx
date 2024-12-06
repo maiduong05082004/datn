@@ -24,7 +24,7 @@ const Header = ({ isSearch, setIsSearch }: Props) => {
 
     const token = localStorage.getItem("token")
 
-    const { data: user, isLoading } = useQuery({
+    const { data: user } = useQuery({
         queryKey: ['user', token],
         queryFn: () => {
             return axios.get(`http://127.0.0.1:8000/api/client/auth/profile`, {

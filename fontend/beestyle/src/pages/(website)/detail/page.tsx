@@ -3,22 +3,18 @@ import { message } from 'antd';
 import axios from 'axios';
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import LoadingPage from '../loading/loadPage';
-import Favorite from './_components/favorite';
-import { useForm } from 'react-hook-form';
-import InfoProduct from './_components/infoProduct';
 import CommentEvaluate from './_components/commentEvaluate';
+import Favorite from './_components/favorite';
+import InfoProduct from './_components/infoProduct';
+import SuggestedProducts from './_components/suggestedProducts';
 
-interface Product {
-    products_id: number;
-    product_variation_value_id: number;
-    quantity: number;
-}
 const DetailPage = () => {
 
     const [variations, setVariations] = useState<any>("")
     const [variationValues, setVariatonValues] = useState<any>("")
-
+    const [checkStock, setCheckStock] = useState<any>([])
+    console.log(checkStock);
+    
     const [quantity, setQuantity] = useState<number>(1)
 
     const { id } = useParams();
@@ -30,7 +26,7 @@ const DetailPage = () => {
 
     if (quantity <= 0) setQuantity(1)
 
-    const { data: products, isLoading, isError, error } = useQuery({
+    const { data: products, isLoading } = useQuery({
         queryKey: ['products', id],
         queryFn: async () => {
             return await axios.get(`http://127.0.0.1:8000/api/client/products/showDetail/${id}`);
@@ -42,6 +38,13 @@ const DetailPage = () => {
             setVariations(products?.data?.product.variations[0])
         }
     }, [products])
+
+    useEffect(() => {
+        if (variations) {
+            setCheckStock(variations.variation_values.filter((item: any) => item.stock !== 0));
+        }
+    }, [variations])
+
 
     useEffect(() => {
         if (variations) {
@@ -262,8 +265,8 @@ const DetailPage = () => {
 
                                 </div>
 
-
-                                <div className={` flex items-end px-[20px] my-[18px] lg:px-0`} >
+                                {checkStock.length !== 0 ?
+                                <div className={`flex items-end px-[20px] my-[18px] lg:px-0`} >
                                     <span className="text-[20px] font-[500]">{new Intl.NumberFormat('vi-VN').format(variationValues?.price)} VND</span>
                                     {variationValues?.discount !== 0 ? (
                                         <>
@@ -271,7 +274,9 @@ const DetailPage = () => {
                                             <span className={` bg-[#FF0000] rounded-[3px] text-white text-[14px] font-[500] p-[2px_5px] ml-[5px]`}>-{variationValues?.discount}%</span>
                                         </>
                                     ) : ""}
-                                </div>
+                                </div>:
+                                <div className="flex items-end px-[20px] my-[18px] font-[600] lg:px-0">Sẩn phẩm đã hết hàng</div>
+                                }
 
 
                                 <div className="flex justify-start gap-3 px-[20px] mb-[20px] lg:px-0">
@@ -298,10 +303,10 @@ const DetailPage = () => {
                             <div className="px-[20px] lg:px-0">
                                 <div className="flex justify-between mb-[25px]">
                                     <h4 className='text-[16px] font-[500]'>Chọn kích thước</h4>
-                                    <span className='cursor-pointer flex items-center text-[14px] font-[500]'>
+                                    {/* <span className='cursor-pointer flex items-center text-[14px] font-[500]'>
                                         <svg className='mr-[5px]' xmlns="http://www.w3.org/2000/svg" width="20" height="9" viewBox="0 0 20 9" fill="none"> <rect x="0.5" y="0.5" width="19" height="8" rx="0.5" stroke="black"></rect> <rect x="3.5" y="4" width="1" height="4" fill="black"></rect> <rect x="6.5" y="6" width="1" height="2" fill="black"></rect> <rect x="12.5" y="6" width="1" height="2" fill="black"></rect> <rect x="9.5" y="4" width="1" height="4" fill="black"></rect> <rect x="15.5" y="4" width="1" height="4" fill="black"></rect> </svg>
                                         Hướng dẫn kích thước
-                                    </span>
+                                    </span> */}
                                 </div>
 
                                 <div className="">
@@ -342,13 +347,18 @@ const DetailPage = () => {
                                     </div>
                                 </div>
 
-                                <div className="*:h-[56px] flex fixed bottom-0 w-[100%] left-0 z-10 lg:relative">
-                                    <button onClick={() => handleSubmitCart(id, 0)} className='text-white bg-black w-[50%]'>THÊM VÀO GIỎ HÀNG</button>
-                                    <button onClick={() => handleSubmitCart(id, 1)} className='w-[50%] text-white bg-[#b01722]'>MUA NGAY</button>
-                                    <div className="absolute right-[-20px] top-[-30px]">
-                                        <div className="w-[50px] h-[60px] bg-cover bg-center bg-no-repeat z-40" style={{ backgroundImage: `url(https://png.pngtree.com/png-clipart/20220125/original/pngtree-snowflake-icon-png-image_7221622.png)` }}></div>
+                                {checkStock.length == 0 ?
+                                    <div className="*:h-[56px] flex fixed bottom-0 w-[100%] left-0 z-10 lg:relative">
+                                        <button className='text-white bg-black w-[100%] pointer-events-none bg-opacity-60'>HẾT HÀNG</button>
+                                    </div> :
+                                    <div className="*:h-[56px] flex fixed bottom-0 w-[100%] left-0 z-10 lg:relative">
+                                        <button onClick={() => handleSubmitCart(id, 0)} className='text-white bg-black w-[50%]'>THÊM VÀO GIỎ HÀNG</button>
+                                        <button onClick={() => handleSubmitCart(id, 1)} className='w-[50%] text-white bg-[#b01722]'>MUA NGAY</button>
+                                        <div className="absolute right-[-20px] top-[-30px]">
+                                            <div className="w-[50px] h-[60px] bg-cover bg-center bg-no-repeat z-40" style={{ backgroundImage: `url(https://png.pngtree.com/png-clipart/20220125/original/pngtree-snowflake-icon-png-image_7221622.png)` }}></div>
+                                        </div>
                                     </div>
-                                </div>
+                                }
 
                                 <div className="p-[12px] my-[10px] bg-[#fafafa] border-[1px] border-[dfdfdf] border-solid rounded-[4px]">
                                     <b className='font-[700] text-[15px] leading-7'>BEESTYLE Chào bạn mới</b>
@@ -360,127 +370,12 @@ const DetailPage = () => {
 
                             </div>
                         </div>
-
-
                         <InfoProduct />
-
                     </div>
-
-                    {/* <div style={{ display: 'flex' }}>
-                        {[...Array(5)].map((_, index) => {
-                            const ratingValue = index + 1;
-
-                            return (
-                                // <svg
-                                //     key={index}
-                                //     xmlns="http://www.w3.org/2000/svg"
-                                //     fill={ratingValue <= (hover || rating) ? "gold" : "gray"}
-                                //     viewBox="0 0 24 24"
-                                //     stroke="currentColor"
-                                //     width="24px"
-                                //     height="24px"
-                                //     onMouseEnter={() => setHover(ratingValue)}
-                                //     onMouseLeave={() => setHover(0)}
-                                //     onClick={() => setRating(ratingValue)}
-                                //     style={{ cursor: 'pointer' }}
-                                // >
-                                //     <path d="M12 .587l3.668 7.431L24 9.57l-6 5.843L19.335 24 12 20.25 4.665 24 6 15.413 0 9.57l8.332-1.552L12 .587z" />
-                                // </svg>
-                                <svg xmlns="http://www.w3.org/2000/svg"
-                                    fill={ratingValue <= rating ? "gold" : "gray"}
-                                    viewBox="0 0 24 24"
-                                    strokeWidth={1.5}
-                                    stroke="none"
-                                    className="size-7">
-                                    <path strokeLinecap="round" strokeLinejoin="round" d="M11.48 3.499a.562.562 0 0 1 1.04 0l2.125 5.111a.563.563 0 0 0 .475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 0 0-.182.557l1.285 5.385a.562.562 0 0 1-.84.61l-4.725-2.885a.562.562 0 0 0-.586 0L6.982 20.54a.562.562 0 0 1-.84-.61l1.285-5.386a.562.562 0 0 0-.182-.557l-4.204-3.602a.562.562 0 0 1 .321-.988l5.518-.442a.563.563 0 0 0 .475-.345L11.48 3.5Z" />
-                                </svg>
-                            );
-                        })}
-                    </div> */}
-
                     <CommentEvaluate />
+                    <SuggestedProducts />
 
 
-                    <div className="">
-                        <div className="mt-[48px]">
-                            <div className="px-[15px] pc:px-[48px]">
-                                <h3 className='text-[18px] mb-[20px] font-[700]'>CÓ THỂ BẠN CŨNG THÍCH</h3>
-                                <div className="flex gap-2 overflow-x-auto whitespace-nowrap scrollbar lg:gap-4">
-
-                                    <div className="max-w-[38.8%] basis-[38.8%] shrink-0 relative relatives lg:max-w-[19.157%] lg:basis-[19.157%]">
-                                        <div className="absolute top-[16px] right-[16px]">
-                                            <div className="bg-black flex justify-center w-[40px] h-[40px] rounded-[100%] items-center opacity-10">
-                                                <div className="w-[24px] h-[24px]">
-                                                    <img src="https://file.hstatic.net/200000642007/file/shopping-cart_3475f727ea204ccfa8fa7c70637d1d06.svg" alt="" />
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div className="absolute bg-black h-[30px] w-[30px] top-0 left-0 z-1 flex items-center justify-center">
-                                            <div className="text-white text-[18px] font-[700]">1</div>
-                                        </div>
-                                        <div className="">
-                                            <picture>
-                                                <div className="pt-[124%] bg-cover bg-center bg-no-repeat" style={{ backgroundImage: "url('https://product.hstatic.net/200000642007/product/50ivs_3atsv2143_1_bc24aeae61864aac8fd717a2e5837448_34181f53e68d4b439b1bc95d333cbd79_grande.jpg')", }}></div>
-                                            </picture>
-                                        </div>
-                                        <div className="w-[100%] text-wrap px-[8px] pt-[10px]">
-                                            <div className="">
-                                                <h4 className='description2 mb-[5px] text-[14px] font-[600]'>BEESTYLE - Áo thun cổ tròn tay ngắn Varsity Number Overfit</h4>
-                                                <div className="text-[14px] font-[700]">
-                                                    <span className=''>1.090.000</span><sup className='underline'>đ</sup>
-                                                </div>
-                                            </div>
-                                            <div className="flex gap-1 justify-start mt-[18px]">
-                                                <div className="w-[12px] h-[12px] rounded-[100%] border-black border-[6px] bg-black"></div>
-                                                <div className="w-[12px] h-[12px] rounded-[100%] border-red-500 border-[6px] bg-red-500"></div>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                </div>
-                            </div>
-
-                            <div className="px-[15px] mt-[48px] pc:px-[48px]">
-                                <h3 className='text-[20px] mb-[20px] font-[700]'>Sản phẩm đã xem</h3>
-                                <div className="flex gap-2 overflow-x-auto whitespace-nowrap scrollbar lg:gap-4">
-
-                                    <div className="max-w-[38.8%] basis-[38.8%] shrink-0 relative relatives lg:max-w-[19.157%] lg:basis-[19.157%]">
-                                        <div className="absolute top-[16px] right-[16px]">
-                                            <div className="bg-black flex justify-center w-[40px] h-[40px] rounded-[100%] items-center opacity-10">
-                                                <div className="w-[24px] h-[24px]">
-                                                    <img src="https://file.hstatic.net/200000642007/file/shopping-cart_3475f727ea204ccfa8fa7c70637d1d06.svg" alt="" />
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div className="absolute bg-black h-[30px] w-[30px] top-0 left-0 z-1 flex items-center justify-center">
-                                            <div className="text-white text-[18px] font-[700]">1</div>
-                                        </div>
-                                        <div className="">
-                                            <picture>
-                                                <div className="pt-[124%] bg-cover bg-center bg-no-repeat" style={{ backgroundImage: "url('https://product.hstatic.net/200000642007/product/50ivs_3atsv2143_1_bc24aeae61864aac8fd717a2e5837448_34181f53e68d4b439b1bc95d333cbd79_grande.jpg')", }}></div>
-                                            </picture>
-                                        </div>
-                                        <div className="w-[100%] text-wrap px-[8px] pt-[10px]">
-                                            <div className="">
-                                                <h4 className='description2 mb-[5px] text-[14px] font-[600]'>BEESTYLE - Áo thun cổ tròn tay ngắn Varsity Number Overfit</h4>
-                                                <div className="text-[14px] font-[700]">
-                                                    <span className=''>1.090.000</span><sup className='underline'>đ</sup>
-                                                </div>
-                                            </div>
-                                            <div className="flex gap-1 justify-start mt-[18px]">
-                                                <div className="w-[12px] h-[12px] rounded-[100%] border-black border-[6px] bg-black"></div>
-                                                <div className="w-[12px] h-[12px] rounded-[100%] border-red-500 border-[6px] bg-red-500"></div>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                </div>
-                            </div>
-                        </div>
-
-
-
-                    </div>
                 </div>
                 <div className={` fixed w-full h-full top-0 left-0 bg-black z-10 bg-opacity-[0.5] hidden justify-center items-center`}>
                     <div className="max-w-[900px] p-[16px] rounded-[7px] bg-white">

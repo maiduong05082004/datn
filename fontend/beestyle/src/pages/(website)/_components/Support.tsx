@@ -1,9 +1,7 @@
-import React, { useState } from 'react'
+import { useState } from 'react'
 import Loader from '../loading/loadSupport'
 
-type Props = {}
-
-const Support = (props: Props) => {
+const Support = () => {
     const [isSupport, setSupport] = useState<boolean>(false)
 
     return (

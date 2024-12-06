@@ -1,16 +1,18 @@
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
-import React, { useEffect } from 'react'
+import { useEffect } from 'react';
 import { Link, Outlet, useNavigate } from 'react-router-dom';
 
-type Props = {}
-
-const AccountPage = (props: Props) => {
+const AccountPage = () => {
     
-
-    const navigate = useNavigate()
-
+    const navigater = useNavigate()
     const token = localStorage.getItem("token")
+
+    useEffect(() => {
+        if(!token) {
+            navigater(`/signin`)
+        }
+    }, [token])
 
     const { data: user, isLoading } = useQuery({
         queryKey: ['user', token],
@@ -29,7 +31,7 @@ const AccountPage = (props: Props) => {
                 }
             });
             localStorage.removeItem('token');
-            navigate(`/signin`)
+            navigater(`/signin`)
         } catch (error) {
             console.error('Error logging out', error);
         }
@@ -37,7 +39,7 @@ const AccountPage = (props: Props) => {
 
     useEffect(() => {
         if (token && isLoading) return
-        if (!user) navigate(`/signin`)
+        if (!user) navigater(`/signin`)
     }, [user])
 
     return (
