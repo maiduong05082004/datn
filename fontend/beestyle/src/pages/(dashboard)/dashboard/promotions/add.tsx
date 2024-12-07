@@ -1,4 +1,4 @@
-import { Category, Product } from '@/common/types/promotion';
+// import { Category, Product } from '@/common/types/promotion';
 import { createPromotion, fetchCategories, fetchProductsByCategory } from '@/services/promotions';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { Button, DatePicker, Form, Input, InputNumber, Radio, Select, Switch, message } from 'antd';
@@ -10,9 +10,9 @@ const { Option } = Select;
 const AddPromotion: React.FC = () => {
     const navigate = useNavigate();
     const [form] = Form.useForm();
-    const [promotionScope, setPromotionScope] = useState<'category' | 'product' | 'none'>('category');
+    // const [promotionScope, setPromotionScope] = useState<'category' | 'product' | 'none'>('category');
     const [discountType, setDiscountType] = useState<'amount' | 'percent'>('percent');
-    const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
+    // const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
     // const [products, setProducts] = useState<Product[]>([]);
 
     // const { data: categories = [], isLoading: isLoadingCategories } = useQuery<Category[]>({
@@ -127,9 +127,9 @@ const AddPromotion: React.FC = () => {
                             <InputNumber min={0} max={100} style={{ width: '100%' }} />
                         </Form.Item>
                         <Form.Item
-                            label="Giảm Tối Đa"
+                            label="Triết Khấu Tối Đa"
                             name="max_discount_amount"
-                            rules={[{ required: true, message: 'Vui lòng nhập giá trị giảm tối đa!' }]}
+                            rules={[{ required: true, message: 'Trường số tiền chiết khấu tối đa là bắt buộc khi loại giảm giá là phần trăm!' }]}
                         >
                             <InputNumber min={0} style={{ width: '100%' }} />
                         </Form.Item>

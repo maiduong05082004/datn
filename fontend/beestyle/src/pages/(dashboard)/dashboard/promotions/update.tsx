@@ -12,16 +12,16 @@ const UpdatePromotion: React.FC = () => {
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
     const [form] = Form.useForm();
-    const [promotionScope, setPromotionScope] = useState<'category' | 'product'>('category');
+    // const [promotionScope, setPromotionScope] = useState<'category' | 'product'>('category');
     const [discountType, setDiscountType] = useState<'amount' | 'percent'>('percent');
-    const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
-    const [products, setProducts] = useState<Product[]>([]);
+    // const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
+    // const [products, setProducts] = useState<Product[]>([]);
     const token = localStorage.getItem('token');
 
-    const { data: categories = [], isLoading: isLoadingCategories } = useQuery<Category[]>({
-        queryKey: ['categories'],
-        queryFn: fetchCategories,
-    });
+    // const { data: categories = [], isLoading: isLoadingCategories } = useQuery<Category[]>({
+    //     queryKey: ['categories'],
+    //     queryFn: fetchCategories,
+    // });
 
     const { data: promotionData, isLoading, isError } = useQuery<Promotion>({
         queryKey: ['promotion', id],
@@ -32,29 +32,29 @@ const UpdatePromotion: React.FC = () => {
         mutationFn: (values: any) => updatePromotion(Number(id), values),
         onSuccess: () => {
             message.success('Cập nhật khuyến mãi thành công!');
-            navigate('/admin/listPromotions');
+            navigate('/admin/dashboard/promotions/list');
         },
         onError: () => {
             message.error('Có lỗi xảy ra. Vui lòng thử lại!');
         },
     });
 
-    useEffect(() => {
-        const fetchProducts = async () => {
-            if (selectedCategory && promotionScope === 'product') {
-                try {
-                    const fetchedProducts = await fetchProductsByCategory(selectedCategory);
-                    setProducts(fetchedProducts || []);
-                } catch (error) {
-                    message.error('Không thể tải sản phẩm. Vui lòng thử lại sau.');
-                }
-            } else {
-                setProducts([]);
-            }
-        };
+    // useEffect(() => {
+    //     const fetchProducts = async () => {
+    //         if (selectedCategory && promotionScope === 'product') {
+    //             try {
+    //                 const fetchedProducts = await fetchProductsByCategory(selectedCategory);
+    //                 setProducts(fetchedProducts || []);
+    //             } catch (error) {
+    //                 message.error('Không thể tải sản phẩm. Vui lòng thử lại sau.');
+    //             }
+    //         } else {
+    //             setProducts([]);
+    //         }
+    //     };
 
-        fetchProducts();
-    }, [selectedCategory, promotionScope]);
+    //     fetchProducts();
+    // }, [selectedCategory, promotionScope]);
 
     useEffect(() => {
         const fetchPromotion = async () => {
@@ -68,6 +68,8 @@ const UpdatePromotion: React.FC = () => {
                 });
 
                 const data = await response.json();
+                setDiscountType(data.discount_type);
+                
                 form.setFieldsValue({
                     code: data.code,
                     description: data.description,
@@ -79,6 +81,7 @@ const UpdatePromotion: React.FC = () => {
                     usage_limit: data.usage_limit,
                     min_order_value: data.min_order_value,
                     promotion_type: data.promotion_type,
+                    promotion_subtype: data.promotion_subtype,
                     promotion_scope: data.products.length > 0 ? 'product' : 'category',
                     is_active: data.is_active,
                     status: data.status,
@@ -94,8 +97,16 @@ const UpdatePromotion: React.FC = () => {
     }, [id]);
 
     const onFinish = (values: any) => {
+        let promotionType = '';
+        if (values.promotion_subtype === 'shipping') {
+            promotionType = 'shipping';
+        } else {
+            promotionType = 'product';
+        }
+
         updatePromotionMutate({
             ...values,
+            promotion_type: promotionType,
             start_date: values.start_date.format('YYYY-MM-DD'),
             end_date: values.end_date.format('YYYY-MM-DD'),
             is_active: values.is_active || false,
@@ -153,19 +164,28 @@ const UpdatePromotion: React.FC = () => {
                     </Radio.Group>
                 </Form.Item>
 
-                <Form.Item
-                    label="Số Tiền Giảm"
-                    name="discount_amount"
-                    rules={[{ required: true, message: 'Vui lòng nhập số tiền giảm!' }]}
-                >
-                    <InputNumber min={0} style={{ width: '100%' }} />
-                </Form.Item>
-
-                {discountType === 'percent' && (
+                {discountType === 'percent' ? (
+                    <>
+                        <Form.Item
+                            label="Số Phần Trăm Giảm"
+                            name="discount_amount"
+                            rules={[{ required: true, message: 'Vui lòng nhập số phần trăm giảm!' }]}
+                        >
+                            <InputNumber min={0} max={100} style={{ width: '100%' }} />
+                        </Form.Item>
+                        <Form.Item
+                            label="Triết Khấu Tối Đa"
+                            name="max_discount_amount"
+                            rules={[{ required: true, message: 'Trường số tiền chiết khấu tối đa là bắt buộc khi loại giảm giá là phần trăm!' }]}
+                        >
+                            <InputNumber min={0} style={{ width: '100%' }} />
+                        </Form.Item>
+                    </>
+                ) : (
                     <Form.Item
-                        label="Giảm Tối Đa"
-                        name="max_discount_amount"
-                        rules={[{ required: true, message: 'Vui lòng nhập giá trị giảm tối đa!' }]}
+                        label="Số Tiền Giảm"
+                        name="discount_amount"
+                        rules={[{ required: true, message: 'Vui lòng nhập số tiền giảm!' }]}
                     >
                         <InputNumber min={0} style={{ width: '100%' }} />
                     </Form.Item>
@@ -180,7 +200,7 @@ const UpdatePromotion: React.FC = () => {
 
                 <Form.Item
                     label="Loại Khuyến Mãi"
-                    name="promotion_type"
+                    name="promotion_subtype"
                     rules={[{ required: true, message: 'Vui lòng chọn loại khuyến mãi!' }]}
                 >
                     <Select placeholder="Chọn loại khuyến mãi">
@@ -190,7 +210,7 @@ const UpdatePromotion: React.FC = () => {
                         <Option value="first_order">Giảm giá đơn hàng đầu tiên</Option>
                     </Select>
                 </Form.Item>
-                <Form.Item label="Phạm Vi Khuyến Mãi" name="promotion_scope">
+                {/* <Form.Item label="Phạm Vi Khuyến Mãi" name="promotion_scope">
                     <Radio.Group
                         onChange={(e) => setPromotionScope(e.target.value)}
                         value={promotionScope}
@@ -234,7 +254,7 @@ const UpdatePromotion: React.FC = () => {
                             </Select>
                         </Form.Item>
                     </>
-                )}
+                )} */}
 
                 <Form.Item label="Kích Hoạt" name="is_active" valuePropName="checked">
                     <Switch />
