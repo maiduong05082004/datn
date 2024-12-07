@@ -228,4 +228,3 @@ input[type="radio"]:checked::before, input[type="checkbox"]:checked::before {
     transform: translateX(0%);
   }
 }
-

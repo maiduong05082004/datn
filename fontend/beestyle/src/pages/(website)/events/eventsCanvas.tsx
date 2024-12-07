@@ -26,7 +26,7 @@ const EventsCanvas = () => {
 
                 function drawSnowflakes() {
                     ctx.clearRect(0, 0, canvas.width, canvas.height);
-                    ctx.fillStyle = 'lightblue';
+                    ctx.fillStyle = 'white';
                     ctx.beginPath();
                     for (const flake of snowflakes) {
                         ctx.moveTo(flake.x, flake.y);
