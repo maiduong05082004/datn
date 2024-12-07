@@ -1,7 +1,4 @@
 import { useOrderViewMutations } from '@/components/hooks/useOrderViewMutations'
-import { useMutation } from '@tanstack/react-query'
-import { message } from 'antd'
-import axios from 'axios'
 import { useForm } from 'react-hook-form'
 
 type Props = {
@@ -36,6 +33,7 @@ const Reason = ({bill_id, isReason, setReason} : any) => {
         if (data && bill_id) {
             cancelOrder.mutate({bill_id, ...data});
             setReason(false)
+            reset()
         }
     }
 

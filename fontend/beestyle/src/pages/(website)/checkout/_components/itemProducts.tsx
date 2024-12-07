@@ -12,28 +12,35 @@ type Props = {
     setPromotionShip: any,
     setPromotionProduct: any,
     promotionProduct: any,
-
     setPromotionAdd: any,
     promotionAdd: any
 }
 
-const ItemProducts = ({promotionAdd, promotionShip, promotionProduct, checkouts, selectedAddress, priceShip, setPriceShip, setPromotionShip, setPromotionProduct, setPromotionAdd}: Props) => {
+const ItemProducts = ({ promotionAdd, promotionShip, promotionProduct, checkouts, selectedAddress, priceShip, setPriceShip, setPromotionShip, setPromotionProduct, setPromotionAdd }: Props) => {
     const [todos, setTodos] = useState<boolean>(false)
-    const [isPromotion, setPromotion] = useState<boolean>(false)   
+    const [isPromotion, setPromotion] = useState<boolean>(false)
     const [checkShip, setCheckShip] = useState<any>({})
+
+
 
     useEffect(() => {
         if (promotionAdd && promotionAdd.length > 0) {
             promotionAdd.map((item: any) => {
-                item.promotion_type === 'shipping' ?
-                    setPromotionShip(item.discount_amount) :
-                    setPromotionProduct(item.discount_amount)
+                if (item.promotion_type === 'shipping') {
+                    setPromotionShip(item.discount_type === "percent" ? (priceShip * parseInt(item.discount_amount) / 100) : (item.discount_amount > priceShip ? priceShip : item.discount_amount))
+                } else {
+                    item.max_discount_amount ?
+                        setPromotionProduct(checkouts?.totalPrice * parseInt(item.discount_amount) / 100 > item.max_discount_amount ? item.max_discount_amount : checkouts?.totalPrice * parseInt(item.discount_amount) / 100) :
+                        setPromotionProduct(item.discount_type === "percent" ? (checkouts?.totalPrice * parseInt(item.discount_amount) / 100) : (item.discount_amount > checkouts?.totalPrice ? checkouts?.totalPrice : item.discount_amount))
+                }
             })
         } else {
             setPromotionShip(0)
             setPromotionProduct(0)
         }
     }, [promotionAdd])
+
+
 
 
     useEffect(() => {
@@ -163,12 +170,10 @@ const ItemProducts = ({promotionAdd, promotionShip, promotionProduct, checkouts,
                                     <span className='mr-[13px]'>Phí vận chuyển</span>
                                 </div>
 
-
                                 <span className='text-[14px]'>
-                                   + {new Intl.NumberFormat('vi-VN').format(priceShip ? priceShip : 0)} VND
+                                    + {new Intl.NumberFormat('vi-VN').format(priceShip ? priceShip : 0)} VND
                                 </span>
                             </div>
-
 
                             {promotionAdd && promotionAdd.map((item: any) => (
                                 item.promotion_type !== 'shipping' ? (
@@ -180,7 +185,19 @@ const ItemProducts = ({promotionAdd, promotionShip, promotionProduct, checkouts,
                                                 <span className='ml-[5px] text-red-400 text-[12px]'>{item.code}</span>
                                             </span>
                                         </div>
-                                        <span>- {new Intl.NumberFormat('vi-VN').format(item.discount_amount) || 0} VND</span>
+                                        <span>
+                                            - {item.discount_type === "percent"
+                                                ?
+                                                (item.max_discount_amount ?
+                                                    `(${new Intl.NumberFormat('vi-VN').format(item.discount_amount)}%) ` + `${new Intl.NumberFormat('vi-VN').format((checkouts?.totalPrice * parseInt(item.discount_amount) / 100 > item.max_discount_amount ? item.max_discount_amount : checkouts?.totalPrice * parseInt(item.discount_amount) / 100))} VND` :
+                                                    `(${new Intl.NumberFormat('vi-VN').format(item.discount_amount)}%) ` + `${new Intl.NumberFormat('vi-VN').format((checkouts?.totalPrice * parseInt(item.discount_amount) / 100 > item.max_discount_amount ? item.max_discount_amount : checkouts?.totalPrice * parseInt(item.discount_amount) / 100))} VND`
+                                                )
+                                                :
+                                                `${new Intl.NumberFormat('vi-VN').format(item.discount_amount > checkouts?.totalPrice ? checkouts?.totalPrice : item.discount_amount)}VND`
+
+
+                                            }
+                                        </span>
                                     </div>
                                 ) : (
                                     <div key={item.id} className="flex justify-between mt-[3px]">
@@ -191,9 +208,11 @@ const ItemProducts = ({promotionAdd, promotionShip, promotionProduct, checkouts,
                                                 <span className='ml-[5px] text-red-400 text-[12px]'>{item.code}</span>
                                             </span>
                                         </div>
-
-
-                                        <span>- {new Intl.NumberFormat('vi-VN').format(item.discount_amount) || 0} VND</span>
+                                        <span>
+                                            - {item.discount_type === "percent"
+                                                ? `(${new Intl.NumberFormat('vi-VN').format(item.discount_amount)}%) ` + new Intl.NumberFormat('vi-VN').format((priceShip * parseInt(item.discount_amount) / 100))
+                                                : new Intl.NumberFormat('vi-VN').format(item.discount_amount > priceShip ? priceShip : item.discount_amount)} VND
+                                        </span>
 
                                     </div>
                                 )

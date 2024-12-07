@@ -46,10 +46,6 @@ export const useOrderMutations = () => {
 
     const orderATM = useMutation({
         mutationFn: async (order: any) => {
-
-            console.log(order);
-            
-
             let status
             try {
                 const { payment_method } = order
