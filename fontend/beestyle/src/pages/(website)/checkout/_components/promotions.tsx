@@ -24,6 +24,7 @@ const Promotions = ({ isPromotion, setPromotion, setPromotionAdd }: Props) => {
     console.log(promotions);
 
     const [promotion, setPromotionList] = useState<any>(JSON.parse(localStorage.getItem('promotions') || '[]'))
+    // console.log(promotion)
 
     const handleClickPromotion = (item: any) => {
         const existingShipping = promotion.find((promo: any) => promo.promotion_type === "shipping");
@@ -95,13 +96,14 @@ const Promotions = ({ isPromotion, setPromotion, setPromotionAdd }: Props) => {
                                         <div className="p-[10px_16px] flex justify-between items-end">
                                             <div>
                                                 <ul className='text-[14px]'>
-                                                    <li>Giảm {new Intl.NumberFormat('vi-VN').format(item.discount_amount)} VND sản phẩm</li>
-                                                    <li>Nhóm khách hàng được chỉ định</li>
-                                                    <li>Nhóm sản phẩm</li>
-                                                    <li>Hàng mới về</li>
+                                                    <li>Giảm {item?.discount_type == 'percent' ?
+                                                        `${new Intl.NumberFormat('vi-VN').format(item?.discount_amount)}% ` :
+                                                        `${new Intl.NumberFormat('vi-VN').format(item?.discount_amount)}VND `
+                                                    }cho {item.promotion_type === "product" ? "sản phẩm" : "phí giao hàng"}</li>
+                                                    <li>{item.description}</li>
+                                                    <li>Nhóm {item.promotion_type === "product" ? "sản phẩm" : "phí giao hàng"}</li>
                                                 </ul>
                                             </div>
-                                            <div className="text-[12px] text-[#787878]">x{item.usage_limit}</div>
                                         </div>
                                     </div>
                                     <div className="w-[20px] m-[10px]">
