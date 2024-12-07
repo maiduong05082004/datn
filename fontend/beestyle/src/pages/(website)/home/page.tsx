@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import BannerMain from "./_components/bannerMain";
 import ProductHot from "./_components/productHot";
 import ProductNew from "./_components/productNew";
+import Instagram from "./_components/instagram";
 
 const HomePage = () => {
 
