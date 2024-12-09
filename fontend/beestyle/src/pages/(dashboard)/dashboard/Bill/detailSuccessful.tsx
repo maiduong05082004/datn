@@ -158,7 +158,7 @@ const Detailship: React.FC = () => {
       <span className="text-[18px]">{icon}</span>
       <div>
         <p className="text-[16px] text-gray-500">{label}</p>
-        <p className={`font-medium ${value === 'Đơn Hàng Đã Giao' ? 'text-green-500' : 'text-gray-800'}`}>{value}</p>
+        <p className={`font-medium ${value === 'Đã Giao Hàng' ? 'text-green-500' : 'text-gray-800'}`}>{value}</p>
       </div>
     </div>
   );
@@ -221,7 +221,7 @@ const Detailship: React.FC = () => {
               />
               <DetailRow
                 label="Trạng Thái"
-                value={detailBill?.status_bill === 'delivered' ? 'Đơn Hàng Đã Giao' : detailBill?.status_bill}
+                value={detailBill?.status_bill === 'delivered' ? 'Đã Giao Hàng' : detailBill?.status_bill}
                 icon="🚚"
               />
               <DetailRow
