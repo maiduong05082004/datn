@@ -9,7 +9,7 @@ import { useQuery } from '@tanstack/react-query';
 
 const { Option } = Select;
 
-const DetailProduct: React.FC = () => {
+const DetailPro: React.FC = () => {
   const [form] = Form.useForm();
   const { id } = useParams();
   const [content, setContent] = useState<string>('');
@@ -215,4 +215,4 @@ const DetailProduct: React.FC = () => {
   );
 };
 
-export default DetailProduct;
+export default DetailPro;
