@@ -69,36 +69,6 @@ const Router = () => {
 
     const [isSearch, setIsSearch] = useState<boolean>(false)
     const [isKeySearch, setKeySearch] = useState<string>("")
-    const [userRole, setUserRole] = useState<string | null>(null)
-    const [loading, setLoading] = useState<boolean>(true)
-
-    useEffect(() => {
-        const fetchUserProfile = async () => {
-            const token = localStorage.getItem("token")
-            if (token) {
-                try {
-                    const response = await axios.get("http://127.0.0.1:8000/api/client/auth/profile", {
-                        headers: {
-                            Authorization: `Bearer ${token}`,
-                        },
-                    })
-                    setUserRole(response.data.user.role)
-                } catch (error) {
-                    console.error("Error fetching user profile:", error)
-                } finally {
-                    setLoading(false)
-                }
-            } else {
-                setLoading(false)
-            }
-        }
-
-        fetchUserProfile()
-    }, [])
-
-    if (loading) {
-        return <div>Loading...</div>
-    }
 
     return (
 
@@ -129,7 +99,7 @@ const Router = () => {
                 {/* Admin Routes */}
                 <Route path="admin" element={<Signin />} />
                 <Route path="admin/dashboard" element={
-                    <PrivateRoute userRole={userRole}>
+                    <PrivateRoute>
                         <LayoutAdmin />
                     </PrivateRoute>
                 }>
