@@ -8,6 +8,7 @@ use App\Models\Attribute;
 use App\Models\AttributeValue;
 use App\Models\Category;
 use App\Models\Product;
+use App\Models\TableProductCost;
 use Illuminate\Http\Request;
 
 class CategoryController extends Controller
@@ -189,7 +190,12 @@ class CategoryController extends Controller
         }
 
         $productsQuery = Product::whereIn('category_id', $categoryIds)
-            ->with(['variations.variationValues.attributeValue']);
+            ->with(['variations.variationValues.attributeValue'])
+            ->whereHas('cost', function ($query) {
+                $query->where('sale_status', TableProductCost::SALE_STATUS_ACTIVE);
+            }
+        );
+            
 
         // Lọc theo màu sắc
         if ($request->filled('colors')) {
