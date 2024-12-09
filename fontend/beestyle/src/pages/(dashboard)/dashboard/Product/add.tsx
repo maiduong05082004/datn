@@ -3,7 +3,7 @@ import { PlusOutlined, UploadOutlined } from '@ant-design/icons';
 import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
 import { CKEditor } from '@ckeditor/ckeditor5-react';
 import { useMutation, useQuery } from '@tanstack/react-query';
-import { Button, DatePicker, Form, Input, InputNumber, Select, Spin, Table, Upload } from 'antd';
+import { Button, Cascader, Checkbox, DatePicker, Form, Input, InputNumber, Select, Spin, Table, Upload } from 'antd';
 import moment from 'moment';
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -60,6 +60,7 @@ const AddProduct: React.FC = () => {
   const [albumList, setAlbumList] = useState<any[]>([]);
   const navigate = useNavigate();
   const [showVariantForm, setShowVariantForm] = useState<boolean>(true);
+  const [loading, setLoading] = useState<boolean>(false);
 
   const { data: variantgroup, isLoading: isLoadingVariantGroup } = useQuery({
     queryKey: ['variantgroup'],
@@ -77,6 +78,24 @@ const AddProduct: React.FC = () => {
     },
   });
 
+  const categoryOptions = categories?.map((category: any) => ({
+    value: category.id,
+    label: category.name,
+    children: category.children_recursive && category.children_recursive.length > 0
+      ? category.children_recursive.map((child: any) => ({
+        value: child.id,
+        label: child.name,
+        children: child.children_recursive && child.children_recursive.length > 0
+          ? child.children_recursive.map((subChild: any) => ({
+            value: subChild.id,
+            label: subChild.name,
+          }))
+          : [],
+      }))
+      : [],
+  }));
+
+
   const { mutate } = useMutation({
     mutationFn: async (data: FormData) => {
       const response = await AxiosInstance.post('http://localhost:8000/api/admins/products', data);
@@ -90,6 +109,9 @@ const AddProduct: React.FC = () => {
       setAttributes([]);
       setVariants([]);
       setAlbumList([]);
+      setLoading(false);
+
+
     },
     onError: (error) => {
       console.error('Lỗi khi thêm sản phẩm:', error);
@@ -172,18 +194,21 @@ const AddProduct: React.FC = () => {
     setVariants(updatedVariants);
   };
   const onFinish = async (values: any) => {
+    setLoading(true);
     const formData = new FormData();
     const formattedInputDay = moment(values.import_date).format("YYYY-MM-DD");
+    const selectedCategoryId = Array.isArray(values.category_id) 
+      ? values.category_id[values.category_id.length - 1] 
+      : values.category_id;
 
     formData.append('name', values.name);
     formData.append('price', values.price.toString());
     formData.append('description', values.description);
     formData.append('content', content);
     formData.append('import_date', formattedInputDay);
-    formData.append('category_id', values.category_id.toString());
+    formData.append('category_id', selectedCategoryId.toString());
     formData.append('stock', values.stock ? values.stock.toString() : '0');
     formData.append('group_id', values.variant_group ? values.variant_group.toString() : '');
-
     formData.append('cost_price', values.product_cost);
     formData.append('supplier', values.supplier);
 
@@ -229,95 +254,111 @@ const AddProduct: React.FC = () => {
       <div className="w-full px-6 py-8">
         <ToastContainer />
         <Form form={form} layout="vertical" onFinish={onFinish}>
-          <Form.Item
-            label="Tên sản phẩm"
-            name="name"
-            rules={[{ required: true, message: 'Tên sản phẩm bắt buộc' }]}
-          >
-            <Input />
-          </Form.Item>
+          <div className='grid grid-cols-2 gap-4'>
+            <div>
+              <Form.Item
+                className='mb-[10px]'
+                label="Tên sản phẩm"
+                name="name"
+                rules={[{ required: true, message: 'Tên sản phẩm bắt buộc' }]}
+              >
+                <Input className='h-10' />
+              </Form.Item>
+              <Form.Item
+                className='mb-[10px]'
 
-          <Form.Item
-            label="Giá Nhập"
-            name="product_cost"
-            rules={[{ required: true, message: 'Giá Nhập sản phẩm bắt buộc' }]}
-          >
-            <Input />
-          </Form.Item>
+                label="Giá Nhập"
+                name="product_cost"
+                rules={[{ required: true, message: 'Giá Nhập sản phẩm bắt buộc' }]}
+              >
+                <Input className='h-10' />
+              </Form.Item>
 
-          <Form.Item
-            label="Nhà Cung Cấp"
-            name="supplier"
-            rules={[{ required: true, message: 'Nhà Cung Cấp bắt buộc' }]}
-          >
-            <Input />
-          </Form.Item>
+              <Form.Item
+                className='mb-[10px]'
 
-          <Form.Item
-            label="Ngày nhập"
-            name="import_date"
-            rules={[{ required: true, message: "Ngày nhập sản phẩm bắt buộc phải điền" }]}
-          >
-            <DatePicker format="YYYY-MM-DD" style={{ width: '100%' }} />
-          </Form.Item>
+                label="Nhà Cung Cấp"
+                name="supplier"
+                rules={[{ required: true, message: 'Nhà Cung Cấp bắt buộc' }]}
+              >
+                <Input className='h-10' />
+              </Form.Item>
 
-          <Form.Item
-            label="Giá Bán sản phẩm"
-            name="price"
-            rules={[{ required: true, message: "Giá sản phẩm bắt buộc phải điền" }]}
-          >
-            <InputNumber min={0} style={{ width: '100%' }} />
-          </Form.Item>
+              <Form.Item
+                className='mb-[10px]'
+                label="Ngày nhập"
+                name="import_date"
+                rules={[{ required: true, message: "Ngày nhập sản phẩm bắt buộc phải điền" }]}
+              >
+                <DatePicker format="YYYY-MM-DD" style={{ width: '100%' }} className='h-10' />
+              </Form.Item>
 
-          <Form.Item
-            label="Mô tả sản phẩm"
-            name="description"
-            rules={[{ required: true, message: "Mô tả sản phẩm bắt buộc phải điền" }]}
-          >
-            <Input.TextArea rows={4} placeholder="Nhập mô tả sản phẩm ngắn gọn" />
-          </Form.Item>
+              <Form.Item
+                className='mb-[10px]'
+                label="Giá Bán Sản Phẩm"
+                name="price"
+                rules={[{ required: true, message: "Giá sản phẩm bắt buộc phải điền" }]}
+              >
+                <InputNumber min={0} style={{ width: '100%' }} className='p-[5px]' />
+              </Form.Item>
+            </div>
+            <div>
+              <Form.Item
+                className='mb-[10px]'
+                label="Mô tả sản phẩm"
+                name="description"
+                rules={[{ required: true, message: "Mô tả sản phẩm bắt buộc phải điền" }]}
+              >
+                <Input.TextArea rows={4} placeholder="Nhập mô tả sản phẩm ngắn gọn" />
+              </Form.Item>
 
-          <Form.Item
-            label="Nội dung chi tiết"
-            name="content"
-            rules={[{ required: true, message: "Nội dung chi tiết sản phẩm bắt buộc phải điền" }]}
-          >
-            <CKEditor
-              editor={ClassicEditor}
-              data={content}
-              onChange={(event, editor: any) => {
-                const data = editor.getData();
-                setContent(data);
-              }}
-            />
-          </Form.Item>
-
+              <Form.Item
+                className='mb-[10px]'
+                label="Nội dung chi tiết"
+                name="content"
+                rules={[{ required: true, message: "Nội dung chi tiết sản phẩm bắt buộc phải điền" }]}
+              >
+                <CKEditor
+                  editor={ClassicEditor}
+                  data={content}
+                  onChange={(event, editor: any) => {
+                    const data = editor.getData();
+                    setContent(data);
+                  }}
+                />
+              </Form.Item>
+            </div>
+          </div>
           <Form.Item
             label="Danh mục"
             name="category_id"
-            rules={[{ required: true, message: "Danh mục sản phẩm bắt buộc phải chọn" }]}
+            className='mb-[10px]'
+            rules={[{ required: true, message: "Danh mục sản phẩm bắt buộc!" }]}
           >
-            <select id="category" className="border border-gray-300 rounded-md p-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-400 font-normal">
-              <option value="" className="text-gray-500">--Chọn danh mục--</option>
-              {categories?.map((category: any) => (
-                <optgroup key={category.id} label={category.name} className="text-gray-600 font-medium">
-                  {category.children_recursive?.map((child: any) => (
-                    <option key={child.id} value={child.id} className="text-gray-700 font-normal">
-                      {child.name}
-                    </option>
-                  ))}
-                </optgroup>
-              ))}
-            </select>
+            <Cascader options={categoryOptions} className='h-10' />
           </Form.Item>
+          <div className='flex gap-5 pt-5'>
+            <Form.Item name="is_collection" valuePropName="checked" initialValue={false}>
+              <Checkbox>Bộ sưu tập</Checkbox>
+            </Form.Item>
+
+            {/* <Form.Item name="is_hot" valuePropName="checked" initialValue={false}>
+              <Checkbox>Nổi bật</Checkbox>
+            </Form.Item>
+
+            <Form.Item name="is_new" valuePropName="checked" initialValue={false}>
+              <Checkbox>Sản phẩm mới</Checkbox>
+            </Form.Item> */}
+          </div>
+
           {showVariantForm && (
             <>
               <Form.Item
                 label="Chọn nhóm biến thể"
+                className='mb-[10px] '
                 name="variant_group"
-                rules={[{ required: true, message: 'Vui lòng chọn nhóm biến thể' }]}
-              >
-                <Select placeholder="Chọn nhóm biến thể" onChange={setSelectedVariantGroup}>
+                rules={[{ required: true, message: 'Vui lòng chọn nhóm biến thể' }]}              >
+                <Select className='h-[40px]' placeholder="Chọn nhóm biến thể" onChange={setSelectedVariantGroup}>
                   {variantgroup?.map((group: { group_id: number; group_name: string }) => (
                     <Option key={group.group_id} value={group.group_id}>
                       {group.group_name}
@@ -327,8 +368,9 @@ const AddProduct: React.FC = () => {
               </Form.Item>
 
               {attributes.map((attribute, index) => (
-                <Form.Item key={attribute.id} label={`Thuộc Tính (${attribute.name})`}>
+                <Form.Item key={attribute.id} label={`Thuộc Tính (${attribute.name})`} className='mb-[15px]'>
                   <Select
+                    className='h-[40px]'
                     mode="tags"
                     style={{ width: '100%' }}
                     placeholder={`Nhập giá trị cho ${attribute.name}`}
@@ -346,7 +388,7 @@ const AddProduct: React.FC = () => {
                 </Form.Item>
               ))}
 
-              <Button type="default" className='mb-5' onClick={generateVariants} icon={<PlusOutlined />}>
+              <Button type="default" className='mb-4' onClick={generateVariants} icon={<PlusOutlined />}>
                 Tạo Biến Thể
               </Button>
 
@@ -373,7 +415,7 @@ const AddProduct: React.FC = () => {
                               updatedVariants[index].combinations[combinationIndex].stock = value || 0;
                               setVariants(updatedVariants);
                             }}
-                            className="w-full border border-gray-300 rounded-md p-2"
+                            className="w-full border border-gray-300 rounded-md py-1"
                             placeholder="Số Lượng"
                           />
                           <InputNumber
@@ -383,7 +425,7 @@ const AddProduct: React.FC = () => {
                               updatedVariants[index].combinations[combinationIndex].discount = value || 0;
                               setVariants(updatedVariants);
                             }}
-                            className="w-full border border-gray-300 rounded-md p-2"
+                            className="w-full border border-gray-300 rounded-md py-1"
                             placeholder="Giảm Giá (%)"
                           />
                         </div>
@@ -395,7 +437,7 @@ const AddProduct: React.FC = () => {
                     dataIndex: 'albumImages',
                     key: 'albumImages',
                     render: (_: any, record: any, index: any) => (
-                      <div className="flex flex-col items-center justify-center gap-2 p-4 border border-gray-300 rounded-md shadow-sm bg-white">
+                      <div className="flex flex-col items-center justify-center p-4">
                         <Upload
                           listType="picture-card"
                           multiple
@@ -412,12 +454,12 @@ const AddProduct: React.FC = () => {
                           )}
                         </Upload>
                         <Button
-                          type="dashed"
+                        className='mt-2'
+                          type="primary"
                           danger
-                          className="mt-2 w-full"
                           onClick={() => handleResetImage(index, 'albumImages')}
                         >
-                          Reset Album Ảnh
+                          Reset
                         </Button>
                       </div>
                     ),
@@ -431,7 +473,7 @@ const AddProduct: React.FC = () => {
           )}
           <Form.Item>
             <div className='flex justify-end space-x-4 pt-5'>
-              <Button type="primary" htmlType="submit">
+              <Button type="primary" htmlType="submit" loading={loading}>
                 Submit
               </Button>
               <Button

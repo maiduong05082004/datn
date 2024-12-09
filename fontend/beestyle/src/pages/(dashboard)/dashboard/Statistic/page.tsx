@@ -10,7 +10,7 @@ type Props = {}
 
 const ListAllChart = (props: Props) => {
   return (
-    <div className="p-[20px] bg-[#131734] h-auto">
+    <div className="p-[20px] bg-white h-auto">
       <div className="grid grid-cols-12 gap-4">
         <div className="col-span-8 sticky top-0 h-fit">
           <div className="grid grid-cols-9 gap-4">
