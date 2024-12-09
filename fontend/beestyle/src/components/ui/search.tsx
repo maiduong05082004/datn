@@ -6,9 +6,16 @@ interface SearchProps<T> {
   onSearch: (query: string) => void;
   onSortChange?: (sortKey: string) => void;
   sortOptions?: string[];
+  sortOptionsName?: string[];
 }
 
-const SearchComponent = <T,>({ items, onSearch, onSortChange, sortOptions }: SearchProps<T>) => {
+const SearchComponent = <T,>({ 
+  items, 
+  onSearch, 
+  onSortChange, 
+  sortOptions, 
+  sortOptionsName,
+}: SearchProps<T>) => {
   const [query, setQuery] = useState('');
   const [selectedSort, setSelectedSort] = useState('');
 
@@ -47,10 +54,10 @@ const SearchComponent = <T,>({ items, onSearch, onSortChange, sortOptions }: Sea
           value={selectedSort}
           onChange={handleSortChange}
         >
-          <option value="">Chọn sắp xếp</option>
-          {sortOptions.map((option) => (
+          <option value="">Sắp xếp theo</option>
+          {sortOptions.map((option, index) => (
             <option key={option} value={option}>
-              Sắp xếp {option} theo A-Z
+              Sắp xếp {sortOptionsName && sortOptionsName[index] ? sortOptionsName[index] : `Sắp xếp ${option} theo A-Z`} theo A-Z
             </option>
           ))}
         </select>

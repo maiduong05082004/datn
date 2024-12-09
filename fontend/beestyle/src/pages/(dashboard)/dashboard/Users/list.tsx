@@ -26,7 +26,14 @@ const UserList: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [sortKey, setSortKey] = useState('');
 
+  const sortOptions = ['name', 'email'];
+  const sortOptionsName = ['tên', 'email'];
+
   const handleSearch = (query: string) => {
+    if (!query.trim()) {
+      setSearchQuery('');
+      return;
+    }
     setSearchQuery(query);
   };
 
@@ -145,7 +152,8 @@ const UserList: React.FC = () => {
           items={filteredUsers} 
           onSearch={handleSearch} 
           onSortChange={handleSortChange} 
-          sortOptions={['name', 'email']} 
+          sortOptions={sortOptions}
+          sortOptionsName={sortOptionsName}
         />
         <div className="flex justify-between items-center mb-6">
           <Button
