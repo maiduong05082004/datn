@@ -4,6 +4,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { Form, Input, Button, Select, Row, Col, message, Spin, Upload } from 'antd';
 import { MinusCircleOutlined, PlusOutlined, UploadOutlined } from '@ant-design/icons';
+import { toast, ToastContainer } from 'react-toastify';
 
 type Attribute = {
     id: number;
@@ -12,7 +13,6 @@ type Attribute = {
 };
 
 const AddAttributeValues: React.FC = () => {
-    const [messageApi, contextHolder] = message.useMessage();
     const [form] = Form.useForm();
     const queryClient = useQueryClient();
     const navigate = useNavigate();
@@ -36,15 +36,15 @@ const AddAttributeValues: React.FC = () => {
             });
         },
         onSuccess: () => {
-            messageApi.success('Thêm giá trị thuộc tính thành công');
+            toast.success('Thêm Giá Trị Thuộc Tính Thành Công')
             setFileList([]);
             queryClient.invalidateQueries({ queryKey: ['attributes'] });
             form.resetFields();
             setLoading(false);
 
         },
-        onError: (error: any) => {
-            messageApi.error(`Lỗi: ${error.response?.data?.message || error.message}`);
+        onError: () => {
+            toast.success('Thêm Giá Trị Thuộc Tính Thất Bại!')
         },
     });
 
@@ -79,7 +79,7 @@ const AddAttributeValues: React.FC = () => {
 
     return (
         <>
-            {contextHolder}
+            <ToastContainer />
             <div className="min-h-screen p-5">
                 <div className="w-full max-w-8xl">
                     <Form

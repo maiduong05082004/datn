@@ -1,15 +1,13 @@
 import { useMutation, useQuery } from '@tanstack/react-query';
-import { Form, Input, Button, message, Space, Divider, Select, Typography } from 'antd';
+import { Form, Input, Button, Select } from 'antd';
 import axiosInstance from '@/configs/axios';
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { toast, ToastContainer } from 'react-toastify';
 
 type Props = {};
 
-const { Title } = Typography;
-
 const AddAttributeGroup = (props: Props) => {
-  const [messageApi, contextHolder] = message.useMessage();
   const navigate = useNavigate();
   const [form] = Form.useForm();
   const [selectedAttributes, setSelectedAttributes] = useState<number[]>([]);
@@ -27,13 +25,12 @@ const AddAttributeGroup = (props: Props) => {
       return await axiosInstance.post('http://127.0.0.1:8000/api/admins/attribute_groups', attributeGroup);
     },
     onSuccess: () => {
-      messageApi.success('Thêm nhóm thuộc tính thành công!');
+      toast.success('Thêm Nhóm Thuộc Tính Thành Công')
       form.resetFields();
       setSelectedAttributes([]);
     },
-    onError: (error: any) => {
-      const errorMessage = error.response?.data?.message || `Lỗi: ${error.message}`;
-      messageApi.error(errorMessage);
+    onError: () => {
+      toast.error('Thêm Nhóm Thuộc Tính Thất Bại!')
     },
   });
 
@@ -47,7 +44,7 @@ const AddAttributeGroup = (props: Props) => {
 
   return (
     <>
-      {contextHolder}
+      <ToastContainer />
       <div className="min-h-screen">
         <div className="w-full max-w-8xl p-5 rounded-xl">
           <Form form={form} layout="vertical" onFinish={handleFinish}>

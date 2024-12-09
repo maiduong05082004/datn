@@ -5,6 +5,7 @@ import { Button, message, Modal, Popconfirm, Spin, Table } from 'antd';
 import { Link, useNavigate } from 'react-router-dom';
 import { PlusCircleFilled, DeleteOutlined, EyeOutlined, EditOutlined } from '@ant-design/icons';
 import { ColumnsType } from 'antd/es/table';
+import { toast, ToastContainer } from 'react-toastify';
 
 type AttributeValue = {
     value_id: number;
@@ -52,14 +53,15 @@ const ListAttribute: React.FC = () => {
             await axiosInstance.delete(`http://127.0.0.1:8000/api/admins/attributes/${id}`);
         },
         onSuccess: () => {
-            messageApi.success('Xóa thuộc tính thành công');
+            toast.success('Xóa Thuộc Tính Thành Công')
             queryClient.invalidateQueries({
                 queryKey: ['attributes'],
             })
 
         },
-        onError: (error: any) => {
-            messageApi.error(`Lỗi: ${error.message}`);
+        onError: () => {
+            toast.error('Xóa Thuộc Tính Thất Bại')
+
         },
     });
 
@@ -68,13 +70,13 @@ const ListAttribute: React.FC = () => {
             await axiosInstance.delete(`http://127.0.0.1:8000/api/admins/attribute_values/${valueId}`);
         },
         onSuccess: () => {
-            messageApi.success('Xóa giá trị thành công');
+            toast.success('Xóa Giá Trị Thuộc Tính Thành Công')
             queryClient.invalidateQueries({
                 queryKey: ['attributesvalue'],
             })
         },
-        onError: (error: any) => {
-            messageApi.error(`Lỗi: ${error.message}`);
+        onError: () => {
+            toast.success('Xóa Giá Trị Thuộc Tính Thất Bại!')
         },
     });
 
@@ -226,7 +228,7 @@ const ListAttribute: React.FC = () => {
 
     return (
         <>
-            {contextHolder}
+            <ToastContainer />
             <div className="w-full mx-auto px-5 py-8">
                 <div className="flex gap-5 items-center mb-6">
                     <Button
@@ -281,7 +283,7 @@ const ListAttribute: React.FC = () => {
                                 columns={columns2}
                                 rowKey="key"
                                 bordered
-                                pagination={false} 
+                                pagination={false}
                             />
                         </div>
                     </div>

@@ -3,12 +3,12 @@ import { Form, Input, Button, message, Card, Select } from 'antd';
 import axiosInstance from '@/configs/axios';
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { toast, ToastContainer } from 'react-toastify';
 
 const { Option } = Select;
 
 const AddAttribute: React.FC = () => {
     const navigate = useNavigate();
-    const [messageApi, contextHolder] = message.useMessage();
     const [form] = Form.useForm();
 
     const { mutate } = useMutation({
@@ -16,13 +16,11 @@ const AddAttribute: React.FC = () => {
             return await axiosInstance.post('http://127.0.0.1:8000/api/admins/attributes', newAttribute);
         },
         onSuccess: () => {
-            messageApi.success('Thêm thuộc tính thành công!');
+            toast.success('Thêm Thuộc Tính Thành Công')
             form.resetFields();
         },
-        onError: (error: any) => {
-            messageApi.error(
-                `Trùng Tên`
-            );
+        onError: () => {
+            toast.error('Thêm Thuộc Tính Thất Bại!')
         },
     });
 
@@ -32,7 +30,7 @@ const AddAttribute: React.FC = () => {
 
     return (
         <>
-            {contextHolder}
+            <ToastContainer />
             <div className="min-h-screen p-5">
                 <div className="w-full max-w-8xl">
                     <Form

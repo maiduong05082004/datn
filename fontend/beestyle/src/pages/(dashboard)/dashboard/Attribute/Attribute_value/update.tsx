@@ -4,9 +4,9 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Form, Input, Button, Upload, message, Spin } from 'antd';
 import { UploadOutlined } from '@ant-design/icons';
+import { toast, ToastContainer } from 'react-toastify';
 
 const UpdateAttributeValues: React.FC = () => {
-    const [messageApi, contextHolder] = message.useMessage();
     const [form] = Form.useForm();
     const queryClient = useQueryClient();
     const navigate = useNavigate();
@@ -14,19 +14,13 @@ const UpdateAttributeValues: React.FC = () => {
     const [fileList, setFileList] = useState<any[]>([]);
     const [loading, setLoading] = useState<boolean>(false);
 
-    const { data: attributeUpdate, isLoading, isError } = useQuery({
+    const { data: attributeUpdate, isLoading } = useQuery({
         queryKey: ['attributeUpdate', id],
         queryFn: async () => {
             const response = await axiosInstance.get(`http://127.0.0.1:8000/api/admins/attribute_values/${id}`);
             return response.data;
         },
     });
-
-    if (isError) {
-        messageApi.error('Lỗi khi tải dữ liệu thuộc tính');
-        return <div>Error loading data</div>;
-    }
-
     useEffect(() => {
         if (attributeUpdate && attributeUpdate.image_path) {
             setFileList([
@@ -53,13 +47,13 @@ const UpdateAttributeValues: React.FC = () => {
             );
         },
         onSuccess: () => {
-            messageApi.success('Cập nhật giá trị thuộc tính thành công');
+            toast.success('Cập Nhật Giá Trị Thuộc Tính Thành Công')
             queryClient.invalidateQueries({ queryKey: ['attributeUpdate'] });
             setFileList([]);
             setLoading(false);
         },
-        onError: (error: any) => {
-            messageApi.error(`Lỗi: ${error.response?.data?.message || error.message}`);
+        onError: () => {
+            toast.error('Cập Nhật Giá Trị Thành Công!')
         },
     });
 
@@ -68,12 +62,11 @@ const UpdateAttributeValues: React.FC = () => {
             return await axiosInstance.delete(`/api/admins/attribute_values/${id}/image`);
         },
         onSuccess: () => {
-            messageApi.success('Xóa ảnh thành công!');
+            toast.success('Xóa Ảnh Thành Công')
             setFileList([]);
         },
-        onError: (error: any) => {
-            const errorMessage = error.response?.data?.message || `Lỗi: ${error.message}`;
-            messageApi.error(errorMessage);
+        onError: () => {
+            toast.error('Xóa Ảnh Thất Bại!')
         },
     });
 
@@ -97,7 +90,7 @@ const UpdateAttributeValues: React.FC = () => {
 
     return (
         <>
-            {contextHolder}
+            <ToastContainer />
             <div className="min-h-screen p-5">
                 <div className="w-full max-w-8xl">
                     <Form

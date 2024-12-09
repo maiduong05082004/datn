@@ -3,6 +3,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import axiosInstance from '@/configs/axios';
 import { Button, Form, Input, Select, message, Spin, Checkbox } from 'antd';
 import { useNavigate, useParams } from 'react-router-dom';
+import { toast, ToastContainer } from 'react-toastify';
 
 interface Category {
   id: number;
@@ -15,7 +16,6 @@ interface Category {
 
 const UpdateCategories: React.FC = () => {
   const [form] = Form.useForm();
-  const [messageApi, contextHolder] = message.useMessage();
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const [file, setFile] = useState<File | null>(null);
@@ -59,14 +59,13 @@ const UpdateCategories: React.FC = () => {
       });
     },
     onSuccess: () => {
-      messageApi.success('Cập nhật danh mục thành công!');
+      toast.success('Cập Nhật Danh Mục Thành Công!')
       queryClient.invalidateQueries({ queryKey: ['categories'] });
       setFile(null);
       setLoading(false);
     },
-    onError: (error: any) => {
-      const errorMessage = error.response?.data?.message || `Lỗi: ${error.message}`;
-      messageApi.error(errorMessage);
+    onError: () => {
+      toast.error('Cập Nhật Danh Mục Thất Bại!')
     },
   });
 
@@ -107,7 +106,7 @@ const UpdateCategories: React.FC = () => {
     if (e.target.files && e.target.files[0]) {
       const selectedFile = e.target.files[0];
       setFile(selectedFile);
-      setPreviewImage(URL.createObjectURL(selectedFile)); // Update preview with the new file
+      setPreviewImage(URL.createObjectURL(selectedFile)); 
     }
   };
 
@@ -117,7 +116,7 @@ const UpdateCategories: React.FC = () => {
 
   return (
     <>
-      {contextHolder}
+      <ToastContainer />
       <div className="min-h-screen p-5">
         <div className="w-full max-w-8xl">
           <Form
