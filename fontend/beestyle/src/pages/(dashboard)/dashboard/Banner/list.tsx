@@ -4,6 +4,7 @@ import { Table, Button, Space, Popconfirm, Spin, message } from 'antd';
 import { EditOutlined, DeleteOutlined, PlusOutlined, EyeOutlined } from '@ant-design/icons';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import axiosInstance from '@/configs/axios';
+import { ColumnsType } from 'antd/es/table';
 
 type Banner = {
     id: number;
@@ -63,48 +64,42 @@ const ListBannersMain: React.FC = () => {
         typeLabel: 'Ảnh chính', // Chỉ hiển thị loại main nên gán trực tiếp
     }));
 
-    const columns = [
+    const columns: ColumnsType<any> = [
         {
             title: 'STT',
             dataIndex: 'stt',
             key: 'stt',
+            align: 'center',
+            width:"50px"
         },
         {
-            title: 'Title',
+            title: 'Tiêu Đề',
             dataIndex: 'title',
             key: 'title',
+            align: 'center',
             render: (text: string | null) => text || 'Không có',
         },
         {
-            title: 'Image',
+            title: 'Ảnh',
             dataIndex: 'image_path',
             key: 'image_path',
+            align: 'center',
             render: (text: string) => (
-                <img src={text} alt="banner" style={{ width: 100, height: 50, objectFit: 'cover' }} />
+                <img src={text} alt="banner" style={{ width: 100, height: 50, objectFit: 'cover' }} className='m-auto'/>
             ),
-        },
-        {
-            title: 'Link',
-            dataIndex: 'link',
-            key: 'link',
-            render: (text: string | null) =>
-                text ? (
-                    <a href={text} target="_blank" rel="noopener noreferrer">
-                        {text}
-                    </a>
-                ) : (
-                    'Không có'
-                ),
         },
         {
             title: 'Trạng Thái',
             dataIndex: 'status',
             key: 'status',
+            align: 'center',
             render: (status: number) => (status === 1 ? 'Hoạt động' : 'Không hoạt động'),
         },
         {
-            title: 'Action',
+            title: 'Hành Động',
             key: 'actions',
+            align: 'center',
+            width:"50px",
             render: (_: any, record: Banner) => (
                 <Space size="middle">
                     <Button

@@ -28,7 +28,6 @@ import { NavLink } from 'react-router-dom'; // Import NavLink for navigation
 
 const { Header, Content, Sider } = Layout;
 
-// Sidebar items
 const items1: MenuProps['items'] = [
   {
     key: '1',
@@ -36,7 +35,7 @@ const items1: MenuProps['items'] = [
     label: "Tài Khoản",
     children: [
       { key: 'sub1-1', label: <NavLink to="/admin/dashboard/user/list">Danh sách tài Khoản</NavLink> },
-      { key: 'sub1-2', label: <NavLink to="/admin/dashboard/user/add">Thêm Tài Khoản</NavLink> },
+      // { key: 'sub1-2', label: <NavLink to="/admin/dashboard/user/add">Thêm Tài Khoản</NavLink> },
     ],
   },
   {
@@ -185,8 +184,7 @@ const App: React.FC = () => {
           </div>
         </div>
 
-        {/* Sidebar Menu */}
-        <Menu theme="dark" mode="inline" defaultSelectedKeys={['dashboard']} items={items1} style={{ marginTop: '16px' }} />
+        <Menu theme="dark" mode="inline" defaultSelectedKeys={['dashboard']} className='font-bold text-[14px]' items={items1} style={{ marginTop: '16px' }} />
       </Sider>
 
       <Layout>

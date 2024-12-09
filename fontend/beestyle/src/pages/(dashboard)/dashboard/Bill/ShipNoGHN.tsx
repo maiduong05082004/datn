@@ -80,22 +80,83 @@ const ShipNoGHN: React.FC = () => {
         return <Spin tip="Loading..." className="flex justify-center items-center h-screen" />;
     }
 
-    // const dataSource = detailBill?.bill_detail.map((item: any, index: number) => ({
-    //     key: index,
-    //     productName: item.name,
-    //     price: parseFloat(item.price).toLocaleString() + ' đ',
-    //     color: item.attribute_value_color,
-    //     size: item.attribute_value_size,
-    //     quantity: item.quantity,
-    //     discount: item.discount + '%',
-    //     totalAmount: parseFloat(item.total_amount).toLocaleString() + ' đ',
-    //     images: item.variation_images,
-    // })) || [];
+    const dataSource = detailBill?.bill_detail.map((item: any, index: number) => ({
+        key: index,
+        productName: item.name,
+        price: parseFloat(item.price).toLocaleString() + ' đ',
+        color: item.attribute_value_color,
+        size: item.attribute_value_size,
+        quantity: item.quantity,
+        discount: item.discount + '%',
+        totalAmount: parseFloat(item.total_amount).toLocaleString() + ' đ',
+        images: item.variation_images,
+    })) || [];
+
+    const columns = [
+        {
+            title: 'Sản Phẩm',
+            key: 'productName',
+            render: (record: any) => (
+                <div className="flex items-center gap-4">
+                    <div className="w-[200px] h-[200px]">
+                        <Carousel autoplay className="rounded-lg shadow-lg">
+                            {record.images && record.images.length > 0 ? (
+                                record.images.map((image: string, index: number) => (
+                                    <div key={index} className="flex justify-center items-center">
+                                        <img
+                                            src={image}
+                                            alt={`Product Variation ${index + 1}`}
+                                            className="w-[200px] h-[200px] object-cover rounded-md border border-gray-200"
+                                        />
+                                    </div>
+                                ))
+                            ) : (
+                                <img
+                                    src="https://via.placeholder.com/100"
+                                    alt="No Product Image"
+                                    className="w-24 h-24 object-cover rounded-md border border-gray-200"
+                                />
+                            )}
+                        </Carousel>
+                    </div>
+                    <div>
+                        <p className="font-semibold text-lg text-black">{record.productName}</p>
+                        <p className="text-gray-600">Màu: {record.color} | Size: {record.size}</p>
+                    </div>
+                </div>
+            ),
+        },
+        {
+            title: 'Giá',
+            dataIndex: 'price',
+            key: 'price',
+            render: (text: string) => <span className="text-black font-semibold">{text}</span>,
+        },
+        {
+            title: 'Số Lượng',
+            dataIndex: 'quantity',
+            key: 'quantity',
+            render: (text: number) => <span className="text-black font-semibold">{text}</span>,
+        },
+        {
+            title: 'Giảm Giá',
+            dataIndex: 'discount',
+            key: 'discount',
+            render: (text: string) => <span className="text-black font-semibold">{text}</span>,
+        },
+        {
+            title: 'Thành Tiền',
+            dataIndex: 'totalAmount',
+            key: 'totalAmount',
+            render: (text: string) => <span className="text-red-500 font-bold">{text}</span>,
+        },
+    ];
+
     const DetailRow = ({ label, value, icon }: { label: any, icon: any, value: any }) => (
         <div className="flex items-center space-x-3">
-            <span className="text-xl">{icon}</span>
+            <span className="text-[18px]">{icon}</span>
             <div>
-                <p className="text-sm text-gray-500">{label}</p>
+                <p className="text-[16px] text-gray-500">{label}</p>
                 <p className={`font-medium ${value === 'Đang Giao Hàng' ? 'text-green-500' : 'text-gray-800'}`}>{value}</p>
             </div>
         </div>
@@ -110,18 +171,18 @@ const ShipNoGHN: React.FC = () => {
 
     return (
         <div className="px-6 py-8 bg-gray-50 min-h-screen">
-            <div className="bg-white shadow-md rounded-lg p-6 mb-6 border-l-4 border-blue-500">
-                <h2 className="text-3xl font-bold text-gray-800">
+            <div className="bg-white shadow-md rounded-lg p-6 mb-4 border-l-4 border-blue-500">
+                <h2 className="text-[18px] font-bold text-gray-800">
                     Đơn Hàng:
                     <span className="text-blue-500 ml-2">{detailBill?.code_orders}</span>
                 </h2>
-                <p className="text-gray-500">Chi tiết đơn hàng của bạn</p>
+                <p className="text-gray-500 text-[16px]">Chi tiết đơn hàng của bạn</p>
             </div>
 
-            <div className="grid md:grid-cols-2 gap-6 mb-6">
+            <div className="grid md:grid-cols-2 gap-4 mb-4">
                 {/* Customer Details */}
                 <div className="bg-white rounded-lg shadow-md p-6 border">
-                    <h3 className="text-xl font-semibold text-gray-700 border-b pb-2 mb-4">Thông Tin Khách Hàng</h3>
+                    <h3 className="text-[18px] font-semibold text-gray-700 border-b pb-2 mb-4">Thông Tin Khách Hàng</h3>
                     <div className="space-y-3">
                         <DetailRow
                             label="Người Nhận"
@@ -148,7 +209,7 @@ const ShipNoGHN: React.FC = () => {
 
                 {/* Order Details */}
                 <div className="bg-white rounded-lg shadow-md p-6 border">
-                    <h3 className="text-xl font-semibold text-gray-700 border-b pb-2 mb-4">Chi Tiết Đơn Hàng</h3>
+                    <h3 className="text-[18px] font-semibold text-gray-700 border-b pb-2 mb-4">Chi Tiết Đơn Hàng</h3>
                     <div className="space-y-3">
                         <DetailRow
                             label="Hình Thức Thanh Toán"
@@ -176,14 +237,24 @@ const ShipNoGHN: React.FC = () => {
                 </div>
             </div>
             {/* Khuyến mãi */}
+            <div className="bg-white rounded-lg shadow-md overflow-hidden mb-4">
+                <Table
+                    dataSource={dataSource}
+                    columns={columns}
+                    bordered
+                    pagination={false}
+                    className="w-full"
+                />
+            </div>
+
             {detailBill?.promotions?.length > 0 && (
-                <div className="bg-white rounded-lg shadow-md p-6 mb-6 border">
-                    <h3 className="text-xl font-semibold text-gray-700 border-b pb-2 mb-4">Khuyến Mãi Đã Áp Dụng</h3>
+                <div className="bg-white rounded-lg shadow-md p-6 mb-4 border">
+                    <h3 className="text-[18px] font-semibold text-gray-700 border-b pb-2 mb-4">Khuyến Mãi Đã Áp Dụng</h3>
                     <ul className="space-y-2">
                         {detailBill.promotions.map((promotion: any, index: number) => (
                             <li key={index} className="flex items-center space-x-3 text-gray-700">
                                 <span className="text-green-500">🎁</span>
-                                <span>
+                                <span className='text-[16px]'>
                                     <strong>{promotion.code}:</strong> {promotion.description} - Giảm {promotion.discount_amount}%
                                 </span>
                             </li>
@@ -191,9 +262,9 @@ const ShipNoGHN: React.FC = () => {
                     </ul>
                 </div>
             )}
-            <div className="bg-white rounded-lg shadow-md p-6 mt-6 border">
-                <h3 className="text-xl font-semibold text-gray-700 border-b pb-2 mb-4">Chi Tiết Thanh Toán</h3>
-                <div className="grid md:grid-cols-2 gap-4">
+            <div className="bg-white rounded-lg shadow-md p-6 border ">
+                <h3 className="text-[18px] font-semibold text-gray-700 border-b pb-2 mb-4">Chi Tiết Thanh Toán</h3>
+                <div className="grid md:grid-cols-2 gap-4 text-[16px]">
                     <FinancialRow
                         label="Tổng Phụ"
                         value={parseFloat(detailBill?.subtotal).toLocaleString()}
@@ -208,7 +279,7 @@ const ShipNoGHN: React.FC = () => {
                     />
                     <div className="md:col-span-2 mt-4 border-t pt-4">
                         <div className="flex justify-between items-center">
-                            <span className="text-xl font-bold text-gray-800">Tổng Cộng</span>
+                            <span className="text-[18px] font-bold text-gray-800">Tổng Cộng</span>
                             <span className="text-2xl font-bold text-red-500">
                                 {parseFloat(detailBill?.total).toLocaleString()} đ
                             </span>

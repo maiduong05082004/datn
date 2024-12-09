@@ -31,15 +31,18 @@ const ListPromotions: React.FC = () => {
             title: 'ID',
             dataIndex: 'id',
             key: 'id',
+            align: 'center',
+            width: "50px",
             sorter: (a: Promotion, b: Promotion) => a.id - b.id,
             sortDirections: ['ascend', 'descend'],
         },
-        { title: 'Mã khuyến mãi', dataIndex: 'code', key: 'code' },
-        { title: 'Mô tả', dataIndex: 'description', key: 'description' },
+        { title: 'Mã khuyến mãi', dataIndex: 'code', key: 'code' ,align: 'center'},
+        { title: 'Mô tả', dataIndex: 'description', key: 'description',align: 'center' },
         {
             title: 'Giảm giá',
             dataIndex: 'discount_amount',
-            key: 'discount_amount',
+            key: 'discount_amount',      
+            align: 'center',
             render: (_: any, record: Promotion) =>
                 record.discount_type === 'percent'
                     ? `${record.discount_amount} %` + (record.max_discount_amount ? ` (tối đa ${record.max_discount_amount}) ₫` : '')
@@ -48,12 +51,14 @@ const ListPromotions: React.FC = () => {
         {
             title: 'Đơn hàng tối thiểu',
             dataIndex: 'min_order_value',
+            align: 'center',
             key: 'min_order_value',
             render: (value) => (value ? `${value} ₫` : 'Không áp dụng'),
         },
         {
             title: 'Số lần sử dụng',
             dataIndex: 'usage_limit',
+            align: 'center',
             key: 'usage_limit',
             render: (value) => (value ? `${value} lần` : 'Không giới hạn'),
         },
@@ -85,6 +90,8 @@ const ListPromotions: React.FC = () => {
         {
             title: 'Hành động',
             key: 'action',
+            align: 'center',
+            width: "50px",
             render: (_: any, record: Promotion) => (
                 <Space size="middle">
                     <Button
@@ -99,7 +106,7 @@ const ListPromotions: React.FC = () => {
                         cancelText="Không"
                         okButtonProps={{ type: 'default' }}
                     >
-                        <Button  type="default" danger  icon={<DeleteOutlined />} />
+                        <Button type="default" danger icon={<DeleteOutlined />} />
                     </Popconfirm>
                 </Space>
             ),

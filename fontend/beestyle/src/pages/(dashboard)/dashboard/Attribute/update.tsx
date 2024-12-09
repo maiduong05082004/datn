@@ -63,16 +63,17 @@ const UpdateAttribute: React.FC = () => {
             <Form.Item
               label="Tên thuộc tính"
               name="name"
+              className='mb-[10px] '
               rules={[{ required: true, message: 'Vui lòng nhập tên thuộc tính' }]}
             >
-              <Input placeholder="Nhập tên thuộc tính" />
+              <Input placeholder="Nhập tên thuộc tính" className='h-10' />
             </Form.Item>
             <Form.Item
               label="Phân cấp thuộc tính"
               name="attribute_type"
               rules={[{ required: true, message: 'Vui lòng chọn loại thuộc tính' }]}
             >
-              <Select placeholder="Chọn loại thuộc tính">
+              <Select placeholder="Chọn loại thuộc tính" className='h-10'>
                 <Option value={0}>Cấp bậc cha</Option>
                 <Option value={1}>Cấp bậc con</Option>
               </Select>
