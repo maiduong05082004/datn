@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { Spin } from 'antd';
+import { Carousel, Spin, Table } from 'antd';
 import axios from 'axios';
 
 const CancelBill: React.FC = () => {
@@ -54,11 +54,83 @@ const CancelBill: React.FC = () => {
     const provinceName = provinces?.data?.find((p: any) => p.ProvinceID === parseInt(cancelBill?.city))?.ProvinceName || "Không có tỉnh";
     const districtName = districts?.data?.find((d: any) => d.DistrictID === parseInt(cancelBill?.district))?.DistrictName || "Không có quận";
 
+    const dataSource = cancelBill?.bill_detail.map((item: any, index: number) => ({
+        key: index,
+        productName: item.name,
+        price: parseFloat(item.price).toLocaleString() + ' đ',
+        color: item.attribute_value_color,
+        size: item.attribute_value_size,
+        quantity: item.quantity,
+        discount: item.discount + '%',
+        totalAmount: parseFloat(item.total_amount).toLocaleString() + ' đ',
+        images: item.variation_images,
+    })) || [];
+
+    const columns = [
+        {
+            title: 'Sản Phẩm',
+            key: 'productName',
+            render: (record: any) => (
+                <div className="flex items-center gap-4">
+                    <div className="w-[200px] h-[200px]">
+                        <Carousel autoplay className="rounded-lg shadow-lg">
+                            {record.images && record.images.length > 0 ? (
+                                record.images.map((image: string, index: number) => (
+                                    <div key={index} className="flex justify-center items-center">
+                                        <img
+                                            src={image}
+                                            alt={`Product Variation ${index + 1}`}
+                                            className="w-[200px] h-[200px] object-cover rounded-md border border-gray-200"
+                                        />
+                                    </div>
+                                ))
+                            ) : (
+                                <img
+                                    src="https://via.placeholder.com/100"
+                                    alt="No Product Image"
+                                    className="w-24 h-24 object-cover rounded-md border border-gray-200"
+                                />
+                            )}
+                        </Carousel>
+                    </div>
+                    <div>
+                        <p className="font-semibold text-lg text-black">{record.productName}</p>
+                        <p className="text-gray-600">Màu: {record.color} | Size: {record.size}</p>
+                    </div>
+                </div>
+            ),
+        },
+        {
+            title: 'Giá',
+            dataIndex: 'price',
+            key: 'price',
+            render: (text: string) => <span className="text-black font-semibold">{text}</span>,
+        },
+        {
+            title: 'Số Lượng',
+            dataIndex: 'quantity',
+            key: 'quantity',
+            render: (text: number) => <span className="text-black font-semibold">{text}</span>,
+        },
+        {
+            title: 'Giảm Giá',
+            dataIndex: 'discount',
+            key: 'discount',
+            render: (text: string) => <span className="text-black font-semibold">{text}</span>,
+        },
+        {
+            title: 'Thành Tiền',
+            dataIndex: 'totalAmount',
+            key: 'totalAmount',
+            render: (text: string) => <span className="text-red-500 font-bold">{text}</span>,
+        },
+    ];
+
     const DetailRow = ({ label, value, icon }: { label: string, value: string, icon: string }) => (
         <div className="flex items-center space-x-3">
-            <span className="text-xl">{icon}</span>
+            <span className="text-[18px]">{icon}</span>
             <div>
-                <p className="text-sm text-gray-500">{label}</p>
+                <p className="text-[16px] text-gray-500">{label}</p>
                 <p className={`font-medium ${value === 'Đã hủy đơn hàng' ? 'text-red-500' : 'text-gray-800'}`}>{value}</p>
             </div>
         </div>
@@ -77,22 +149,21 @@ const CancelBill: React.FC = () => {
 
     return (
         <div className="p-5">
-            <div className="max-w-7xl mx-auto">
+            <div className="max-w-8xl mx-auto">
                 {/* Header */}
-                <div className="bg-white shadow-md rounded-lg p-6 mb-6 border-l-4 border-red-500">
-                    <h2 className="text-3xl font-bold text-gray-800 mb-2">
+                <div className="bg-white shadow-md rounded-lg p-6 mb-4 border-l-4 border-red-500">
+                    <h2 className="text-[18px] font-bold text-gray-800 mb-2">
                         Đơn Hàng Hủy:
                         <span className="text-red-500 ml-2">{cancelBill?.code_orders}</span>
                     </h2>
-                    <p className="text-gray-500">Chi tiết đơn hàng đã bị hủy</p>
+                    <p className="text-gray-500 text-[16px]">Chi tiết đơn hàng đã bị hủy</p>
                 </div>
 
-                {/* Order Details Grid */}
-                <div className="grid md:grid-cols-2 gap-6 bg-white rounded-lg shadow-md p-6 border">
+                <div className="grid md:grid-cols-2 gap-4 mb-4">
                     {/* Customer Information */}
-                    <div className="space-y-4 border-b md:border-b-0 md:border-r border-gray-200 pr-4">
-                        <h3 className="text-xl font-semibold text-gray-700 border-b pb-2">Thông Tin Người Nhận</h3>
-                        <div className="space-y-2">
+                    <div className="bg-white rounded-lg shadow-md p-6 border">
+                        <h3 className="text-[18px] font-semibold text-gray-700 border-b pb-2 mb-4">Thông Tin Khách Hàng</h3>
+                        <div className="space-y-3">
                             <DetailRow
                                 label="Người Nhận"
                                 value={cancelBill?.full_name}
@@ -117,9 +188,9 @@ const CancelBill: React.FC = () => {
                     </div>
 
                     {/* Order Cancellation Details */}
-                    <div className="space-y-4">
-                        <h3 className="text-xl font-semibold text-gray-700 border-b pb-2">Chi Tiết Hủy Đơn</h3>
-                        <div className="space-y-2">
+                    <div className="bg-white rounded-lg shadow-md p-6 border">
+                        <h3 className="text-[18px] font-semibold text-gray-700 border-b pb-2 mb-4">Chi Tiết Hủy Đơn</h3>
+                        <div className="space-y-3">
                             <DetailRow
                                 label="Trạng Thái"
                                 value={cancelBill?.status_bill === 'canceled' ? 'Đã hủy đơn hàng' : cancelBill?.status_bill}
@@ -143,11 +214,35 @@ const CancelBill: React.FC = () => {
                         </div>
                     </div>
                 </div>
+                <div className="bg-white rounded-lg shadow-md overflow-hidden mb-4">
+                    <Table
+                        dataSource={dataSource}
+                        columns={columns}
+                        bordered
+                        pagination={false}
+                        className="w-full"
+                    />
+                </div>
 
-                {/* Financial Details */}
-                <div className="bg-white rounded-lg shadow-md p-6 mt-6 border">
-                    <h3 className="text-xl font-semibold text-gray-700 border-b pb-2 mb-4">Chi Tiết Thanh Toán</h3>
-                    <div className="grid md:grid-cols-2 gap-4">
+                {cancelBill?.promotions?.length > 0 && (
+                    <div className="bg-white rounded-lg shadow-md p-6 mb-4 border">
+                        <h3 className="text-[18px] font-semibold text-gray-700 border-b pb-2 mb-4">Khuyến Mãi Đã Áp Dụng</h3>
+                        <ul className="space-y-2">
+                            {cancelBill.promotions.map((promotion: any, index: number) => (
+                                <li key={index} className="flex items-center space-x-3 text-gray-700">
+                                    <span className="text-green-500">🎁</span>
+                                    <span className='text-[16px]'>
+                                        <strong>{promotion.code}:</strong> {promotion.description} - Giảm {promotion.discount_amount}%
+                                    </span>
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
+                )}
+                
+                <div className="bg-white rounded-lg shadow-md p-6 mt-4 border">
+                    <h3 className="text-[18px] font-semibold text-gray-700 border-b pb-2 mb-4">Chi Tiết Thanh Toán</h3>
+                    <div className="grid md:grid-cols-2 gap-4 text-[16px]">
                         <FinancialRow
                             label="Tổng Phụ"
                             value={parseFloat(cancelBill?.subtotal).toLocaleString()}
@@ -162,7 +257,7 @@ const CancelBill: React.FC = () => {
                         />
                         <div className="md:col-span-2 mt-4 border-t pt-4">
                             <div className="flex justify-between items-center">
-                                <span className="text-xl font-bold text-gray-800">Tổng Cộng</span>
+                                <span className="text-[18px] font-bold text-gray-800">Tổng Cộng</span>
                                 <span className="text-2xl font-bold text-red-500">
                                     {parseFloat(cancelBill?.total).toLocaleString()} đ
                                 </span>
