@@ -113,8 +113,7 @@ const AddProduct: React.FC = () => {
 
 
     },
-    onError: (error) => {
-      console.error('Lỗi khi thêm sản phẩm:', error);
+    onError: () => {
       toast.error('Thêm sản phẩm thất bại!');
     },
   });

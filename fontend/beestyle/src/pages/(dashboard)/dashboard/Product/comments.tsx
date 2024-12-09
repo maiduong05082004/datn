@@ -5,6 +5,7 @@ import { Spin, Button, message, Input, Table, Tag, Modal } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import { useParams } from 'react-router-dom';
 import { EyeInvisibleOutlined, HddOutlined } from '@ant-design/icons';
+import { toast, ToastContainer } from 'react-toastify';
 
 type Props = {};
 
@@ -77,11 +78,11 @@ const Comments = (props: Props) => {
       return response.data;
     },
     onSuccess: () => {
-      messageAPI.success('Ẩn bình luận thành công');
+      toast.success('Ấn Bình Luận Thành Công')
       refetch();
     },
     onError: () => {
-      messageAPI.error('Lỗi khi ẩn bình luận');
+      toast.error('Ấn Bình Luận Thất Bại!')
     },
   });
   // Khóa comment
@@ -364,7 +365,7 @@ const Comments = (props: Props) => {
 
   return (
     <>
-      {contextHolder}
+      <ToastContainer />
       <div className="w-full mx-auto px-6 py-8">
         <Table
           columns={columns}

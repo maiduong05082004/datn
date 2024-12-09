@@ -4,13 +4,13 @@ import { UploadOutlined } from '@ant-design/icons';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import axiosInstance from '@/configs/axios';
+import { toast, ToastContainer } from 'react-toastify';
 
 const { Option } = Select;
 
 const UpdateBanners: React.FC = () => {
   const { id } = useParams();
   const [form] = Form.useForm();
-  const [messageApi, contextHolder] = message.useMessage();
   const navigate = useNavigate();
   const [fileList, setFileList] = useState<any[]>([]);
   const [bannerType, setBannerType] = useState<string>('');
@@ -60,13 +60,12 @@ const UpdateBanners: React.FC = () => {
       });
     },
     onSuccess: () => {
-      messageApi.success('Cập nhật banner thành công!');
+      toast.success('Cập Nhật Banner Thành Công')
       setFileList([]);
       setLoading(false);
     },
-    onError: (error: any) => {
-      const errorMessage = error.response?.data?.message || `Lỗi: ${error.message}`;
-      messageApi.error(errorMessage);
+    onError: () => {
+      toast.error('Cập Nhật Banner Thất Bại!')
     },
   });
 
@@ -75,19 +74,18 @@ const UpdateBanners: React.FC = () => {
       return await axiosInstance.delete(`/api/admins/banners/${id}/image`);
     },
     onSuccess: () => {
-      messageApi.success('Xóa ảnh thành công!');
+      toast.success('Xóa Ảnh Thành Công')
       setFileList([]);
     },
-    onError: (error: any) => {
-      const errorMessage = error.response?.data?.message || `Lỗi: ${error.message}`;
-      messageApi.error(errorMessage);
+    onError: () => {
+      toast.error('Xóa Ảnh Thất Bại!')
     },
   });
 
   const onFinish = (values: any) => {
     setLoading(true);
     const selectedCategoryId = Array.isArray(values.category_id)
-      ? values.category_id[values.category_id.length - 1] 
+      ? values.category_id[values.category_id.length - 1]
       : values.category_id;
     const formData = new FormData();
     formData.append('title', values.title || '');
@@ -149,7 +147,7 @@ const UpdateBanners: React.FC = () => {
 
   return (
     <>
-      {contextHolder}
+      <ToastContainer />
       <div className="min-h-screen p-5">
         <Form
           form={form}

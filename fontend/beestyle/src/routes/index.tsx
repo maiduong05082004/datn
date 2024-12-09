@@ -63,6 +63,7 @@ import ShipNoGHN from "@/pages/(dashboard)/dashboard/Bill/ShipNoGHN";
 import ListUserChat from "@/pages/(dashboard)/dashboard/ChatRealTime/ListUserChat";
 import DetailPro from "@/pages/(dashboard)/dashboard/Product/detailpro";
 import ListAllChart from "@/pages/(dashboard)/dashboard/Statistic/page";
+import DetailProduct from "@/pages/(dashboard)/dashboard/Product/detail";
 
 const Router = () => {
 
@@ -131,7 +132,7 @@ const Router = () => {
                     <Route path="comments/list/:id" element={<Comments />} />
                     <Route path="products/add" element={<AddProduct />} />
                     <Route path="products/update/:id" element={<UpdateProduct />} />
-                    {/* <Route path="products/detail/:id" element={<DetailProduct />} /> */}
+                    <Route path="products/show/:id" element={<DetailProduct />} />
                     <Route path="products/detail/:id" element={<DetailPro />} />
                     {/* attribute_group */}
                     <Route path="attribute_group/add" element={<AddtributeGroup />} />

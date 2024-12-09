@@ -3,6 +3,7 @@ import { useMutation, useQuery } from '@tanstack/react-query';
 import axiosInstance from '@/configs/axios';
 import { Button, Form, Input, Select, message, Spin, Checkbox } from 'antd';
 import { useNavigate } from 'react-router-dom';
+import { toast, ToastContainer } from 'react-toastify';
 
 interface Category {
   id: number;
@@ -15,7 +16,6 @@ interface Category {
 
 const AddCategories: React.FC = () => {
   const [form] = Form.useForm();
-  const [messageApi, contextHolder] = message.useMessage();
   const navigate = useNavigate();
   const [file, setFile] = useState<File | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
@@ -34,14 +34,13 @@ const AddCategories: React.FC = () => {
       });
     },
     onSuccess: () => {
-      messageApi.success('Thêm danh mục thành công!');
+      toast.success('Thêm Danh Mục Thành Công')
       form.resetFields();
       setFile(null);
       setLoading(false);
     },
-    onError: (error: any) => {
-      const errorMessage = error.response?.data?.message || `Lỗi: ${error.message}`;
-      messageApi.error(errorMessage);
+    onError: () => {
+      toast.error('Thêm Danh Mục Thất Bại!')
     }
 
   });
@@ -78,7 +77,7 @@ const AddCategories: React.FC = () => {
 
   return (
     <>
-      {contextHolder}
+      <ToastContainer />
       <div className="min-h-screen p-5">
         <div className="w-full max-w-8xl">
           <Form
