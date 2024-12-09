@@ -3,6 +3,7 @@ import { Form, Input, Button, message, Card, Select, Spin } from 'antd';
 import axiosInstance from '@/configs/axios';
 import React, { useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { toast, ToastContainer } from 'react-toastify';
 
 const { Option } = Select;
 
@@ -30,13 +31,11 @@ const UpdateAttribute: React.FC = () => {
       );
     },
     onSuccess: () => {
-      messageApi.success('Cập nhật thuộc tính thành công!');
+      toast.success(`Cập Nhật Thuộc Tính Thành Công`)
       queryClient.invalidateQueries({ queryKey: ['attribute'] });
     },
-    onError: (error: any) => {
-      messageApi.error(
-        `Cập nhật thuộc tính thất bại: ${error.response?.data?.message || error.message}`
-      );
+    onError: () => {
+      toast.success(`Cập Nhật Thuộc Tính Thất Bại!`)
     },
   });
 
@@ -47,11 +46,9 @@ const UpdateAttribute: React.FC = () => {
   if (isLoading) {
     return <Spin tip="Loading..." className="flex justify-center items-center h-screen" />;
   }
-
-
   return (
     <>
-      {contextHolder}
+      <ToastContainer />
       <div className="min-h-screen p-5">
         <div className="w-full max-w-8xl">
           <Form

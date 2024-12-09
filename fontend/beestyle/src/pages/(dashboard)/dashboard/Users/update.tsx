@@ -4,6 +4,7 @@ import axiosInstance from '@/configs/axios';
 
 import React, { useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { toast, ToastContainer } from 'react-toastify';
 
 interface Users {
   name: string;
@@ -41,13 +42,13 @@ const UpdateUser: React.FC = () => {
       return response.data;
     },
     onSuccess: () => {
-      messageApi.success('Cập nhật người dùng thành công');
+      toast.success('Cập Nhật Người DÙng Thành Công')
       queryClient.invalidateQueries({
         queryKey: ['userManager'],
       })
     },
-    onError: (error: Error) => {
-      messageApi.error(`Lỗi: ${error.message}`);
+    onError: () => {
+      toast.error('Cập Nhật Người DÙng Thất Bại!')
     },
   });
 
@@ -61,7 +62,7 @@ const UpdateUser: React.FC = () => {
 
   return (
     <>
-      {contextHolder}
+      <ToastContainer />
       <div className="min-h-screen p-5">
         <div className="w-full max-w-8xl">
           <Form

@@ -5,14 +5,13 @@ import axiosInstance from '@/configs/axios';
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ColumnsType } from 'antd/es/table';
+import { toast, ToastContainer } from 'react-toastify';
 
 type Props = {};
 
 const ListAttributeGroup = (props: Props) => {
     const queryClient = useQueryClient();
     const navigate = useNavigate();
-    const [messageApi, contextHolder] = message.useMessage();
-
     const { data: attributeGroups, isLoading } = useQuery({
         queryKey: ['attribute_group'],
         queryFn: async () => {
@@ -26,11 +25,11 @@ const ListAttributeGroup = (props: Props) => {
             return await axiosInstance.delete(`http://127.0.0.1:8000/api/admins/attribute_groups/${id}`);
         },
         onSuccess: () => {
-            messageApi.success('Xóa nhóm thuộc tính thành công');
+            toast.success('Xóa Nhóm Thuộc Tính Thành Công');
             queryClient.invalidateQueries({ queryKey: ['attribute_group'] });
         },
         onError: () => {
-            messageApi.error('Xóa nhóm thuộc tính thất bại');
+            toast.error('Xóa Nhóm Thuộc Tính Thất Bại');
         }
     });
 
@@ -63,8 +62,8 @@ const ListAttributeGroup = (props: Props) => {
             render: (record) => (
                 <div className="space-y-3">
                     {record.attributes.map((attr: any, index: number) => (
-                        <div 
-                            key={index} 
+                        <div
+                            key={index}
                             className="bg-gray-50 rounded-lg p-3 border border-gray-200 hover:shadow-sm transition-shadow duration-300"
                         >
                             <div className="flex items-center mb-2">
@@ -73,8 +72,8 @@ const ListAttributeGroup = (props: Props) => {
                             </div>
                             <div className="grid grid-cols-3 gap-2">
                                 {attr.attribute_values.map((value: any, idx: number) => (
-                                    <div 
-                                        key={idx} 
+                                    <div
+                                        key={idx}
                                         className="bg-white border rounded px-2 py-1 text-sm text-gray-700 
                                                     hover:bg-blue-50 hover:border-blue-200 
                                                     transition-colors duration-200 text-center"
@@ -120,7 +119,7 @@ const ListAttributeGroup = (props: Props) => {
 
     return (
         <div className="list-attribute-group-container w-full mx-auto p-5">
-            {contextHolder}
+            <ToastContainer />
             <Button
                 icon={<PlusOutlined />}
                 type="default"

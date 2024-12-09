@@ -5,6 +5,7 @@ import axiosInstance from '@/configs/axios';
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { HomeOutlined, LockOutlined, MailOutlined, PhoneOutlined, UserOutlined } from '@ant-design/icons';
+import { toast, ToastContainer } from 'react-toastify';
 
 interface Users {
   name: string;
@@ -16,9 +17,7 @@ interface Users {
 
 const AddUser: React.FC = () => {
   const [form] = Form.useForm();
-  const [messageApi, contextHolder] = message.useMessage();
   const navigate = useNavigate();
-
   const { mutate } = useMutation({
     mutationFn: async (user: Users) => {
       try {
@@ -40,11 +39,10 @@ const AddUser: React.FC = () => {
       }
     },
     onSuccess: () => {
-      messageApi.success('Thêm người dùng thành công');
-      form.resetFields();
+      toast.success('Thêm Người Dùng Thành Công')
     },
-    onError: (error: Error) => {
-      messageApi.error(`Lỗi: ${error.message}`);
+    onError: () => {
+      toast.error('Thêm Sẩn Phẩm Thất Bại!')
     },
   });
 
@@ -54,7 +52,7 @@ const AddUser: React.FC = () => {
 
   return (
     <>
-      {contextHolder}
+      <ToastContainer />
       <div className="min-h-screen p-5">
         <div className="w-full max-w-8xl">
           <Form

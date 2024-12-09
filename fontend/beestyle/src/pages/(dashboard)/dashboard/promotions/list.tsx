@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import { fetchPromotions, deletePromotion } from '@/services/promotions';
 import { Promotion } from '@/common/types/promotion';
 import { ColumnsType } from 'antd/es/table';
+import { toast } from 'react-toastify';
 
 const ListPromotions: React.FC = () => {
     const navigate = useNavigate();
@@ -19,11 +20,11 @@ const ListPromotions: React.FC = () => {
     const { mutate: removePromotion } = useMutation({
         mutationFn: deletePromotion,
         onSuccess: () => {
-            message.success('Xóa khuyến mãi thành công');
+            toast.success(`Xóa Khuyến Mại Thành Công`)
             queryClient.invalidateQueries({ queryKey: ['promotions'] });
         },
         onError: () => {
-            message.error('Xóa khuyến mãi thất bại');
+            toast.success(`Xóa Khuyến Mại Thất Bại`)
         },
     });
     const columns: ColumnsType<Promotion> = [

@@ -5,6 +5,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Table, Spin, message, Button, Popconfirm, Space, Image } from 'antd';
 import { DeleteOutlined, EditOutlined, PlusOutlined } from '@ant-design/icons';
 import { ColumnsType } from 'antd/es/table';
+import { toast, ToastContainer } from 'react-toastify';
 
 type Category = {
   id: number;
@@ -18,8 +19,6 @@ type Category = {
 const ListCategories: React.FC = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const [messageApi, contextHolder] = message.useMessage();
-
   const { data: categories = [], isLoading } = useQuery<Category[]>({
     queryKey: ['categories'],
     queryFn: async () => {
@@ -33,18 +32,17 @@ const ListCategories: React.FC = () => {
       await AxiosInstance.delete(`http://127.0.0.1:8000/api/admins/categories/${id}`);
     },
     onSuccess: () => {
-      messageApi.success('Đã xóa danh mục thành công');
+      toast.success('Xóa Danh Mục Thành Công')
       queryClient.invalidateQueries({ queryKey: ['categories'] });
     },
-    onError: (error: any) => {
-      const errorMessage = error.response?.data?.message || 'Đã có lỗi xảy ra';
-      messageApi.error(errorMessage);
+    onError: () => {
+      toast.error('Xóa Danh Mục Thất Bại!')
     },
   });
 
   const handleDelete = (category: Category) => {
     if (category.children_recursive.length > 0) {
-      messageApi.warning('Không thể xóa danh mục này. Vui lòng xóa các danh mục con trước.');
+      toast.warning('Không thể xóa danh mục này. Vui lòng xóa các danh mục con trước.')
       return;
     }
     deleteCategory(category.id);
@@ -142,7 +140,7 @@ const ListCategories: React.FC = () => {
 
   return (
     <>
-      {contextHolder}
+      <ToastContainer />
       <div className="w-full mx-auto p-5">
         <div className="flex justify-between items-center mb-6">
           <Button
