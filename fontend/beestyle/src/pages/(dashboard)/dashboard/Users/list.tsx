@@ -156,7 +156,7 @@ const UserList: React.FC = () => {
 
   return (
     <>
-      <div className="w-full mx-auto px-6 py-8">
+      <div className="w-full mx-auto p-5">
         <SearchComponent 
           items={filteredUsers} 
           onSearch={handleSearch} 

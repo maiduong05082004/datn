@@ -59,9 +59,9 @@ import ListBannersCustom from "@/pages/(dashboard)/dashboard/Banner/list_banner_
 import ListBannersCategory from "@/pages/(dashboard)/dashboard/Banner/listbanner_category";
 import CancelBill from "@/pages/(dashboard)/dashboard/Bill/cancel";
 import ShipNoGHN from "@/pages/(dashboard)/dashboard/Bill/ShipNoGHN";
-import DetailProduct from "@/pages/(dashboard)/dashboard/Product/detail";
+// import DetailProduct from "@/pages/(dashboard)/dashboard/Product/detail";
 import ListUserChat from "@/pages/(dashboard)/dashboard/ChatRealTime/ListUserChat";
-// import DetailPro from "@/pages/(dashboard)/dashboard/Products/detailpro";
+import DetailPro from "@/pages/(dashboard)/dashboard/Product/detailpro";
 import ListAllChart from "@/pages/(dashboard)/dashboard/Statistic/page";
 
 const Router = () => {
@@ -132,7 +132,7 @@ const Router = () => {
                     <Route path="products/add" element={<AddProduct />} />
                     <Route path="products/update/:id" element={<UpdateProduct />} />
                     {/* <Route path="products/detail/:id" element={<DetailProduct />} /> */}
-                    <Route path="products/detail/:id" element={<DetailProduct />} />
+                    <Route path="products/detail/:id" element={<DetailPro />} />
                     {/* attribute_group */}
                     <Route path="attribute_group/add" element={<AddtributeGroup />} />
                     <Route path="attribute_group/list" element={<ListAttributeGroup />} />
