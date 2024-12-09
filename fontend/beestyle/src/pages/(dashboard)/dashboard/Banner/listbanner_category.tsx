@@ -1,9 +1,10 @@
-import React from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Table, Button, Space, Popconfirm, Spin, message } from 'antd';
-import { EditOutlined, DeleteOutlined, PlusOutlined, EyeOutlined } from '@ant-design/icons';
+import React, { useState, useEffect } from 'react';
+import { Table, Space, Button, Popconfirm, message, Spin } from 'antd';
+import { EditOutlined, DeleteOutlined, EyeOutlined, PlusOutlined } from '@ant-design/icons';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import axiosInstance from '@/configs/axios';
+import { useNavigate } from 'react-router-dom';
+import { ColumnsType } from 'antd/es/table';
 
 type Banner = {
     id: number;
@@ -15,7 +16,7 @@ type Banner = {
     status: number;
 };
 
-const ListBannersCustom: React.FC = () => {
+const ListBannersCategory: React.FC = () => {
     const navigate = useNavigate();
     const [messageApi, contextHolder] = message.useMessage();
     const queryClient = useQueryClient();
@@ -36,6 +37,30 @@ const ListBannersCustom: React.FC = () => {
         },
     });
 
+    // Chuyển đổi danh mục thành map với key là category.id và value là tên danh mục
+    const buildCategoryMap = (categories: any[]) => {
+        const map: Record<number, string> = {};
+
+        const traverse = (category: any) => {
+            map[category.id] = category.name;
+            if (category.children_recursive && category.children_recursive.length > 0) {
+                category.children_recursive.forEach(traverse); // Đệ quy để xử lý các cấp con
+            }
+        };
+
+        categories.forEach(traverse);
+        return map;
+    };
+
+    const categoryMap = categoryData ? buildCategoryMap(categoryData) : {};
+
+    // Lọc banners chỉ có type === 'category'
+    const dataSource = BannerData?.filter((item: Banner) => item.type === 'category').map((item: Banner, index: number) => ({
+        key: item.id,
+        stt: index + 1,
+        ...item,
+    }));
+
     const mutation = useMutation({
         mutationFn: async (id: number) => {
             return await axiosInstance.delete(`http://127.0.0.1:8000/api/admins/banners/${id}`);
@@ -46,65 +71,52 @@ const ListBannersCustom: React.FC = () => {
         },
         onError: () => {
             messageApi.error('Xóa banner thất bại');
-        }
+        },
     });
 
-    const categoryMap = categoryData?.reduce((map: Record<number, string>, category: any) => {
-        map[category.id] = category.name;
-        return map;
-    }, {});
-
-    // Lọc banners chỉ có type === 'custom'
-    const dataSource = BannerData?.filter((item: Banner) => item.type === 'custom').map((item: Banner, index: number) => ({
-        key: item.id,
-        stt: index + 1,
-        ...item,
-        categoryName: categoryMap?.[item.category_id] || 'Không có',
-        typeLabel: 'Ảnh tự do', // Chỉ hiển thị loại custom nên gán trực tiếp
-    }));
-
-    const columns = [
+    const columns: ColumnsType<any> = [
         {
             title: 'STT',
             dataIndex: 'stt',
             key: 'stt',
+            align: 'center',
+            width:"50px",
         },
         {
-            title: 'Title',
+            title: 'Tiêu Đề',
             dataIndex: 'title',
             key: 'title',
+            align: 'center',
             render: (text: string | null) => text || 'Không có',
         },
         {
-            title: 'Image',
+            title: 'Ảnh',
             dataIndex: 'image_path',
             key: 'image_path',
+            align: 'center',
             render: (text: string) => (
-                <img src={text} alt="banner" style={{ width: 100, height: 50, objectFit: 'cover' }} />
+                <img src={text} alt="banner" style={{ width: 100, height: 50, objectFit: 'cover' }} className='m-auto' />
             ),
         },
         {
-            title: 'Link',
-            dataIndex: 'link',
-            key: 'link',
-            render: (text: string | null) =>
-                text ? (
-                    <a href={text} target="_blank" rel="noopener noreferrer">
-                        {text}
-                    </a>
-                ) : (
-                    'Không có'
-                ),
+            title: 'Danh Mục',
+            dataIndex: 'category_id',
+            key: 'category_id',
+            align: 'center',
+            render: (categoryId: number) => categoryMap?.[categoryId] || 'Không có danh mục',
         },
         {
-            title: 'Trạng Thái',
+            title: 'Trạng thái',
             dataIndex: 'status',
             key: 'status',
-            render: (status: number) => (status === 1 ? 'Hoạt động' : 'Không hoạt động'),
+            align: 'center',
+            render: (status: number) => status === 1 ? 'Hoạt động' : 'Không hoạt động',
         },
         {
-            title: 'Action',
+            title: 'Hành Động',
             key: 'actions',
+            align: 'center',
+            width:"50px",
             render: (_: any, record: Banner) => (
                 <Space size="middle">
                     <Button
@@ -129,9 +141,6 @@ const ListBannersCustom: React.FC = () => {
             ),
         },
     ];
-
-    if (isLoading)
-        return <Spin tip="Loading..." className="flex justify-center items-center h-screen" />;
 
     return (
         <div className="w-full mx-auto items-center justify-center p-5">
@@ -160,4 +169,4 @@ const ListBannersCustom: React.FC = () => {
     );
 };
 
-export default ListBannersCustom;
+export default ListBannersCategory;

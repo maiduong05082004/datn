@@ -1,353 +1,778 @@
+import React, { useEffect, useState } from 'react';
+import { CKEditor } from '@ckeditor/ckeditor5-react';
+import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import { useMutation, useQuery } from '@tanstack/react-query';
-import React, { useState } from 'react';
-import axiosInstance from '@/configs/axios';
-import { Spin, Button, message, Input, Table, Tag, Modal } from 'antd';
-import type { ColumnsType } from 'antd/es/table';
-import { useParams } from 'react-router-dom';
-import { EyeInvisibleOutlined, HddOutlined } from '@ant-design/icons';
+import { Form, Input, Button, Checkbox, InputNumber, Upload, DatePicker, Spin, Select, Table, Modal } from 'antd';
+import { DeleteOutlined, PlusOutlined, UploadOutlined } from '@ant-design/icons';
+import { useNavigate, useParams } from 'react-router-dom';
+import moment from 'moment';
+import AxiosInstance from '@/configs/axios';
 
-type Props = {};
-
-interface ReplyComment {
-  comment_id: number;
-  content: string;
-  commentDate: string;
-  user_name: string;
+interface Size {
+  sizeId: number;
+  stock: number;
+  discount: number;
 }
 
-interface Comment {
-  comment_id: number;
-  user_id: number;
-  content: string;
-  commentDate: string;
-  user_name: string;
-  product_id?: number;
-  size?: string;
-  color?: string;
-  reported_count?: number;
-  is_reported?: boolean;
-  is_visible?: boolean;
-  moderation_status?: string;
-  bill_detail_id?: number;
-  stars?: number;
-  reply_comment: ReplyComment[];
+interface Variant {
+  colorId: number;
+  colorName: string;
+  sizes: Size[];
+  colorImage: any[];
+  albumImages: any[];
+  [key: string]: any;
 }
 
-const Comments = (props: Props) => {
-  const { id } = useParams(); // Lấy ID sản phẩm từ URL
-  const [messageAPI, contextHolder] = message.useMessage();
-  const [replyContent, setReplyContent] = useState<{ [key: number]: string }>({}); // Quản lý nội dung trả lời
-  const [isReportModalVisible, setIsReportModalVisible] = useState(false);
-  const [reportReason, setReportReason] = useState('');
-  const [currentCommentId, setCurrentCommentId] = useState<number | null>(null);
+const { Option } = Select;
 
-  // Fetch danh sách bình luận
-  const { data: CommentsData, isLoading, refetch } = useQuery({
-    queryKey: ['comments', id],
+const UpdateProduct: React.FC = () => {
+  const [form] = Form.useForm();
+  const [content, setContent] = useState<string>('');
+  const [selectedVariantGroup, setSelectedVariantGroup] = useState<number | null>(null);
+  const [attributes, setAttributes] = useState<any[]>([]);
+  const [variants, setVariants] = useState<Variant[]>([]);
+  const [showVariantForm, setShowVariantForm] = useState<boolean>(true);
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const [removedVariants, setRemovedVariants] = useState<number[]>([]);
+  const [productData, setProductData] = useState<any>(null);
+  const [selectedGroup, setSelectedGroup] = useState<any>(null);
+  const [deletingImage, setDeletingImage] = useState<{ [key: string]: boolean }>({});
+
+  // State để lưu trữ các tệp ảnh mới
+  const [newColorImages, setNewColorImages] = useState<{ [key: number]: File[] }>({});
+  const [newAlbumImages, setNewAlbumImages] = useState<{ [key: number]: File[] }>({});
+  const [newVariationAlbumImages, setNewVariationAlbumImages] = useState<File[]>([]);
+
+  const { data: variantgroup, isLoading: isLoadingVariantGroup } = useQuery({
+    queryKey: ['variantgroup'],
     queryFn: async () => {
-      const response = await axiosInstance.post('http://localhost:8000/api/admins/comment/list', {
-        product_id: id,
-      });
-      return response.data.comment_list;
+      const response = await AxiosInstance.get('http://localhost:8000/api/admins/attribute_groups');
+      return response?.data?.variation;
     },
   });
 
-  const { data: ProductData } = useQuery({
-    queryKey: ['detailProduct', id],
+  const { data: UpdateVariant, isLoading: isLoadingProduct } = useQuery({
+    queryKey: ['updatevariant', id],
     queryFn: async () => {
-      const response = await axiosInstance.get(`http://localhost:8000/api/admins/products/${id}`);
-      return response?.data?.data || {};
+      const response = await AxiosInstance.get(`http://localhost:8000/api/admins/products/${id}`);
+      return response?.data?.data;
     },
   });
 
-  const { mutate: hideComment } = useMutation({
-    mutationFn: async (id: number) => {
-      const response = await axiosInstance.post('http://localhost:8000/api/admins/comment/hide', {
-        id: id,
+  const { data: categories, isLoading: isLoadingCategories } = useQuery({
+    queryKey: ['categories'],
+    queryFn: async () => {
+      const response = await AxiosInstance.get('http://localhost:8000/api/admins/categories');
+      return response?.data;
+    },
+  });
+
+  const deleteImageMutation = useMutation({
+    mutationFn: async ({ imageUrl }: { imageUrl: string; type: 'product' | 'variation' }) => {
+      const base64FileUrl = btoa(imageUrl);
+      const response = await AxiosInstance.delete(`http://127.0.0.1:8000/api/admins/images/variation/${base64FileUrl}`, {
+        headers: { 'Content-Type': 'application/json' },
       });
       return response.data;
     },
     onSuccess: () => {
-      messageAPI.success('Ẩn bình luận thành công');
-      refetch();
+      toast.success('Image deleted successfully!');
     },
-    onError: () => {
-      messageAPI.error('Lỗi khi ẩn bình luận');
-    },
-  });
-  const { mutate: manageUser } = useMutation({
-    mutationFn: async (user_id: number) => {
-      const response = await axiosInstance.post('http://localhost:8000/api/admins/comment/manageUser', {
-        user_id: user_id,
-      });
-      return response.data;
-    },
-    onSuccess: (data) => {
-      if (data.message === 'User is in good standing.') {
-        messageAPI.info('Người dùng đang ở trạng thái tốt. Không cần khóa.');
-      } else {
-        messageAPI.success('Người dùng đã bị khóa thành công!');
-      }
-      refetch(); 
-    },
-    onError: () => {
-      messageAPI.error('Lỗi khi khóa người dùng.');
+    onError: (error: any) => {
+      toast.error(`Failed to delete image: ${error.message}`);
     },
   });
 
-  // Báo cáo 
-  const { mutate: reportComment } = useMutation({
-    mutationFn: async ({ comment_id, reason }: { comment_id: number; reason: string }) => {
-      const response = await axiosInstance.post('http://localhost:8000/api/admins/comment/report', {
-        comment_id,
-        reason,
-      });
-      return response.data;
-    },
-    onSuccess: () => {
-      messageAPI.success('Báo cáo bình luận thành công');
-      refetch();
-      setIsReportModalVisible(false);
-      setReportReason('');
-    },
-    onError: () => {
-      messageAPI.error('Lỗi khi báo cáo bình luận');
-    },
-  });
-  const showReportModal = (commentId: number) => {
-    setCurrentCommentId(commentId);
-    setIsReportModalVisible(true);
+  const handleDeleteImage = (imageUrl: string, variantIndex: number, field: string, type: 'product' | 'variation') => {
+    Modal.confirm({
+      title: 'Bạn có chắc chắn muốn xóa ảnh này?',
+      onOk: () => {
+        setDeletingImage((prev) => ({ ...prev, [imageUrl]: true }));
+        deleteImageMutation.mutate(
+          { imageUrl, type },
+          {
+            onSuccess: () => {
+              const updatedVariants = [...variants];
+              updatedVariants[variantIndex][field] = updatedVariants[variantIndex][field].filter(
+                (img: any) => img.url !== imageUrl
+              );
+              setVariants(updatedVariants);
+              setNewColorImages((prev) => {
+                const updatedImages = { ...prev };
+                if (updatedImages[variants[variantIndex].colorId]) {
+                  updatedImages[variants[variantIndex].colorId] = updatedImages[variants[variantIndex].colorId].filter(
+                    (file) => file.name !== imageUrl
+                  );
+                }
+                return updatedImages;
+              });
+
+              setDeletingImage((prev) => ({ ...prev, [imageUrl]: false }));
+              toast.success('Xóa ảnh thành công!');
+            },
+            onError: (error: any) => {
+              setDeletingImage((prev) => ({ ...prev, [imageUrl]: false }));
+              toast.error(`Không thể xóa ảnh: ${error.message}`);
+            },
+          }
+        );
+      },
+    });
   };
 
-  const handleReport = () => {
-    if (!currentCommentId || !reportReason) {
-      messageAPI.error('Vui lòng nhập lý do báo cáo.');
+  useEffect(() => {
+    if (UpdateVariant && variantgroup) {
+      form.setFieldsValue({
+        ...UpdateVariant,
+        import_date: UpdateVariant.product_cost?.import_date ? moment(UpdateVariant.product_cost.import_date, 'YYYY-MM-DD', true) : null,
+        category_id: UpdateVariant.category_id,
+        variant_group: UpdateVariant.group?.id,
+        product_cost: UpdateVariant.product_cost?.cost_price || '',
+        supplier: UpdateVariant.product_cost?.supplier || '',
+      });
+      setContent(UpdateVariant.content || '');
+      setProductData(UpdateVariant);
+
+      const group = variantgroup.find((g: any) => g.group_id === UpdateVariant.group?.id);
+      setSelectedGroup(group);
+
+      if (group && group.attributes) {
+        const formattedAttributes = group.attributes.map((attribute: any) => {
+          const selectedValues: any[] = [];
+          UpdateVariant.variations.forEach((variation: any) => {
+            if (attribute.attribute_type === 0 && variation.attribute_value_image_variant) {
+              const attrValue = attribute.attribute_values.find(
+                (av: any) => av.id === variation.attribute_value_image_variant.id
+              );
+              if (attrValue) {
+                selectedValues.push({
+                  key: attrValue.id,
+                  label: attrValue.value,
+                });
+              }
+            }
+            if (attribute.attribute_type === 1) {
+              variation.variation_values.forEach((value: any) => {
+                const attrValue = attribute.attribute_values.find(
+                  (av: any) => av.id === value.attribute_value_id
+                );
+                if (attrValue) {
+                  selectedValues.push({
+                    key: attrValue.id,
+                    label: attrValue.value,
+                  });
+                }
+              });
+            }
+          });
+          const uniqueSelectedValues = selectedValues.filter(
+            (v, i, a) => a.findIndex((t) => t.key === v.key) === i
+          );
+          return {
+            ...attribute,
+            selectedValues: uniqueSelectedValues,
+          };
+        });
+        setAttributes(formattedAttributes);
+      }
+
+      const formattedVariants: Variant[] = UpdateVariant.variations.map((variation: any) => ({
+        colorId: variation.attribute_value_image_variant.id,
+        colorName: variation.attribute_value_image_variant.value,
+        sizes: variation.variation_values.map((value: any) => ({
+          sizeId: value.attribute_value_id,
+          size: value.value,
+          stock: value.stock,
+          discount: value.discount,
+        })),
+        colorImage: variation.attribute_value_image_variant.image_path
+          ? [
+            {
+              name: variation.attribute_value_image_variant.image_path,
+              uid: variation.attribute_value_image_variant.image_path,
+              status: 'done',
+              url: variation.attribute_value_image_variant.image_path,
+              isExisting: true,
+            },
+          ]
+          : [],
+        albumImages: variation.variation_album_images.map((image: string) => ({
+          name: image,
+          uid: image,
+          status: 'done',
+          url: image,
+          isExisting: true,
+        })),
+      }));
+      setVariants(formattedVariants);
+    }
+  }, [UpdateVariant, form, variantgroup]);
+
+  // Đã chỉnh sửa để destructure mutateAsync
+  const { mutateAsync: updateProductMutation } = useMutation({
+    mutationFn: async (formData: FormData) => {
+      const response = await AxiosInstance.post(`http://127.0.0.1:8000/api/admins/products/${id}`, formData, {
+        headers: { 'Content-Type': 'application/json' },
+        params: {
+          _method: 'PUT',
+        },
+      });
+      return response.data;
+    },
+    onSuccess: () => {
+      toast.success('Cập nhật sản phẩm thành công!');
+
+    },
+    onError: (error: any) => {
+      toast.error(`Cập nhật sản phẩm thất bại: ${error.message}`);
+    },
+  });
+
+  // const handleDeleteVariant = (colorId: number) => {
+  //   setRemovedVariants((prev) => [...prev, colorId]);
+  //   setVariants((prevVariants) => {
+  //     const updatedVariants = prevVariants.filter((variant) => variant.colorId !== colorId);
+  //     console.log("Updated Variants after Deletion:", updatedVariants);
+  //     return updatedVariants;
+  //   });
+  // };
+
+  const handleAttributeValueChange = (attributeId: number, selectedValues: any[]) => {
+    const updatedAttributes = attributes.map((attr) => {
+      if (attr.id === attributeId) {
+        return {
+          ...attr,
+          selectedValues,
+        };
+      }
+      return attr;
+    });
+    setAttributes(updatedAttributes);
+  };
+
+  const handleVariantChange = (
+    colorId: number,
+    key: string,
+    index: number,
+    subKey: string,
+    value: any
+  ) => {
+    const updatedVariants = [...variants];
+    const variant = updatedVariants.find((v) => v.colorId === colorId);
+    if (variant) {
+      variant[key][index][subKey] = value;
+    }
+    setVariants(updatedVariants);
+  };
+
+  const generateVariants = () => {
+    const colorAttribute = attributes.find((attr) => attr.attribute_type === 0);
+    const sizeAttribute = attributes.find((attr) => attr.attribute_type === 1);
+
+    if (!colorAttribute || !sizeAttribute) {
+      toast.error('Thiếu thuộc tính Màu Sắc hoặc Kích Thước');
       return;
     }
-    reportComment({ comment_id: currentCommentId, reason: reportReason });
-  };
 
-  const { mutate } = useMutation({
-    mutationFn: async ({ parentId, content }: { parentId: number; content: string }) => {
-      const response = await axiosInstance.post('http://localhost:8000/api/admins/comment/reply', {
-        parent_id: parentId,
-        content: content,
-      });
-      return response.data;
-    },
-    onSuccess: () => {
-      messageAPI.success('Trả lời bình luận thành công');
-      refetch();
-    },
-    onError: () => {
-      messageAPI.error('Admin đã trả lời rồi');
-    },
-  });
-  // Xử lý trả lời bình luận
-  const handleReply = (commentId: number) => {
-    const content = replyContent[commentId];
-    if (content) {
-      mutate({ parentId: commentId, content });
-      setReplyContent({ ...replyContent, [commentId]: '' });
-    } else {
-      messageAPI.error('Vui lòng nhập nội dung trả lời trước khi gửi.');
+    const selectedColors = colorAttribute.selectedValues || [];
+    const selectedSizes = sizeAttribute.selectedValues || [];
+
+    if (selectedColors.length === 0 || selectedSizes.length === 0) {
+      console.log('No colors or sizes selected');
+      toast.error('Vui lòng chọn ít nhất một màu sắc và một kích thước để tạo biến thể.');
+      return;
     }
+
+    const newVariants = selectedColors.map((color: any) => ({
+      colorId: color.key,
+      colorName: color.label,
+      sizes: selectedSizes.map((size: any) => ({
+        sizeId: size.key,
+        size: size.label,
+        stock: 0,
+        discount: 0,
+      })),
+      colorImage: [],
+      albumImages: [],
+    }));
+
+    const mergedVariants = [...variants];
+
+    newVariants.forEach((newVariant: any) => {
+      const existingVariantIndex = mergedVariants.findIndex(
+        (variant) => variant.colorId === newVariant.colorId
+      );
+
+      if (existingVariantIndex > -1) {
+        const existingSizes = mergedVariants[existingVariantIndex].sizes;
+
+        newVariant.sizes.forEach((newSize: any) => {
+          if (!existingSizes.find((size: any) => size.sizeId === newSize.sizeId)) {
+            existingSizes.push(newSize);
+          }
+        });
+      } else {
+        mergedVariants.push(newVariant);
+      }
+    });
+
+    setVariants(mergedVariants);
   };
 
-  const filteredComments = CommentsData?.filter((comment: Comment) => {
-    const isReply = CommentsData.some((item: any) =>
-      item.reply_comment.some((reply: any) => reply.comment_id === comment.comment_id)
-    );
-    return !isReply;
-  });
-
-  const columns: ColumnsType<Comment> = [
+  const columns = [
     {
-      title: 'STT',
-      dataIndex: 'stt',
-      key: 'stt',
-      render: (_: any, __: any, index: number) => index + 1,
+      title: 'Màu Sắc',
+      dataIndex: 'colorName',
+      key: 'colorName',
     },
     {
-      title: 'Người bình luận',
-      dataIndex: 'user_name',
-      key: 'user_name',
-      render: (text) => <strong>{text}</strong>,
+      title: 'Kích Thước',
+      dataIndex: 'sizes',
+      key: 'sizes',
+      render: (sizes: any[], record: any) =>
+        sizes.map((size, index) => (
+          <div key={index} className="flex items-center gap-3 mb-3">
+            <span className="font-semibold w-20">{size.size}</span>
+            <InputNumber
+              value={size.stock}
+              onChange={(value) => handleVariantChange(record.colorId, 'sizes', index, 'stock', value)}
+              className="w-full border border-gray-300 rounded-md p-2"
+              placeholder="Số Lượng"
+            />
+            <InputNumber
+              value={size.discount}
+              max={100}
+              onChange={(value) =>
+                handleVariantChange(record.colorId, 'sizes', index, 'discount', value)
+              }
+              className="w-full border border-gray-300 rounded-md p-2"
+              placeholder="Giảm Giá (%)"
+            />
+          </div>
+        )),
     },
     {
-      title: 'Thông tin sản phẩm',
-      key: 'product_info',
-      render: () => (
-        <div>
-          <p><strong>Tên sản phẩm:</strong> {ProductData?.name || 'N/A'}</p>
-          <p><strong>Giá:</strong> {ProductData?.price ? `${ProductData.price} VNĐ` : 'N/A'}</p>
-          <p><strong>Danh mục:</strong> {ProductData?.category_name || 'N/A'}</p>
-        </div>
-      ),
-    },
-    {
-      title: 'Nội dung bình luận và trả lời',
-      key: 'content_with_replies',
-      render: (_, record) => (
-        <div className="p-4 bg-white rounded-lg shadow-md">
-          {/* Phần nội dung bình luận chính */}
-          <p className="text-gray-800 font-semibold">
-            <strong>Nội dung:</strong> {record.content}
-          </p>
-
-          {/* Phần trả lời nếu có */}
-          {record.reply_comment.length > 0 && (
-            <div className="pl-4 border-l-2 border-gray-300 mt-4">
-              <strong className="block text-gray-600">Trả lời:</strong>
-              {record.reply_comment.map(reply => (
-                <div
-                  key={reply.comment_id}
-                  className="mt-2 bg-gray-100 p-2 rounded-md shadow-inner"
-                >
-                  <p className="text-sm text-gray-800">
-                    <strong>{reply.user_name}:</strong> {reply.content}
-                  </p>
-                  <p className="text-xs text-gray-500 italic">{reply.commentDate}</p>
-                </div>
-              ))}
-            </div>
+      title: 'Ảnh Màu',
+      dataIndex: 'colorImage',
+      key: 'colorImage',
+      render: (_: any, record: any, index: number) => (
+        <div className="flex flex-col items-center gap-3 p-4 border border-gray-200 rounded-md shadow-sm">
+          <Upload
+            listType="picture-card"
+            fileList={record.colorImage || []}
+            onChange={({ fileList }) => {
+              const filesToUpload = fileList.filter(file => file.originFileObj);
+              setNewColorImages(prev => ({
+                ...prev,
+                [record.colorId]: filesToUpload.map(file => file.originFileObj as File),
+              }));
+              const updatedColorImage = fileList.map((file) => ({
+                ...file,
+                url: file.url || (file.originFileObj ? URL.createObjectURL(file.originFileObj) : ''),
+              }));
+              const updatedRecord = { ...record, colorImage: updatedColorImage };
+              setVariants((prev) => {
+                const updatedVariants = [...prev];
+                updatedVariants[index] = updatedRecord;
+                return updatedVariants;
+              });
+            }}
+            beforeUpload={() => false}
+            showUploadList={{ showPreviewIcon: true, showRemoveIcon: true, showDownloadIcon: false }}
+            className="upload-inline"
+          >
+            {record.colorImage?.length < 1 && (
+              <div className="w-20 h-20 border border-dashed border-gray-300 rounded-md flex items-center justify-center cursor-pointer">
+                <UploadOutlined className="text-blue-500 text-xl" />
+              </div>
+            )}
+          </Upload>
+          {record.colorImage?.length > 0 && (
+            <Button
+              icon={<DeleteOutlined />}
+              type="primary"
+              danger
+              loading={deletingImage[record.colorImage[0].url] || false} 
+              onClick={() => handleDeleteImage(record.colorImage[0].url, index, 'colorImage', 'variation')}
+            >
+              Delete
+            </Button>
           )}
-
-          {/* Input và nút gửi trả lời */}
-          <Input
-            placeholder="Nhập nội dung trả lời..."
-            value={replyContent[record.comment_id] || ''}
-            onChange={(e) =>
-              setReplyContent({ ...replyContent, [record.comment_id]: e.target.value })
-            }
-            className="mt-4 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
-          />
-          <Button
-            type="primary"
-            className="mt-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg px-4 py-2"
-            onClick={() => handleReply(record.comment_id)}
-          >
-            Gửi trả lời
-          </Button>
         </div>
       ),
     },
     {
-      title: 'Số lần báo cáo',
-      dataIndex: 'reported_count',
-      key: 'reported_count',
-      render: (count, record) => (
-        <div className="flex items-center space-x-2">
-          <Tag
-            color={count > 0 ? 'red' : 'green'}
-            style={{ fontSize: '16px', padding: '6px 12px', borderRadius: '8px' }}
-          >
-            {count || 0}
-          </Tag>
+      title: 'Album Ảnh',
+      dataIndex: 'albumImages',
+      key: 'albumImages',
+      render: (_: any, record: any, index: number) => (
+        <div className="flex flex-wrap gap-3">
+          {record.albumImages?.map((image: any, imageIndex: number) => (
+            <div
+              key={image.uid || imageIndex}
+              className="relative flex flex-col items-center p-2 border border-gray-200 rounded-md shadow-sm"
+              style={{ width: 100, height: 100 }}
+            >
+              <img
+                src={image.url}
+                alt={image.name}
+                className="object-cover w-full h-full rounded-md"
+              />
+              <div className="absolute inset-0 flex items-center justify-center opacity-0 hover:opacity-100 bg-black bg-opacity-50 rounded-md">
+                <Button
+                  icon={<DeleteOutlined />}
+                  type="primary"
+                  danger
+                  size="small"
+                  className="m-1"
+                  loading={deletingImage[image.url] || false}
+                  onClick={() => handleDeleteImage(image.url, index, 'albumImages', 'variation')}
+                />
+              </div>
+            </div>
+          ))}
+          {(!record.albumImages || record.albumImages.length < 3) && (
+            <Upload
+              listType="picture-card"
+              multiple
+              onChange={({ fileList }) => {
+                const filesToUpload = fileList.filter(file => file.originFileObj);
 
-          <Button type="default" danger onClick={() => showReportModal(record.comment_id)}>
-            Báo cáo
-          </Button>
+                setNewAlbumImages(prev => ({
+                  ...prev,
+                  [record.colorId]: [
+                    ...(prev[record.colorId] || []),
+                    ...filesToUpload.map(file => file.originFileObj as File),
+                  ],
+                }));
+
+                const updatedAlbumImages = [
+                  ...(record.albumImages || []),
+                  ...fileList.map((file) => ({
+                    ...file,
+                    url: file.url || (file.originFileObj ? URL.createObjectURL(file.originFileObj) : ''),
+                  })),
+                ];
+
+                const updatedRecord = { ...record, albumImages: updatedAlbumImages };
+                setVariants((prev) => {
+                  const updatedVariants = [...prev];
+                  updatedVariants[index] = updatedRecord;
+                  return updatedVariants;
+                });
+              }}
+              beforeUpload={() => false}
+              showUploadList={false}
+              className="upload-inline"
+            >
+              <div className="w-20 h-20 border border-dashed border-gray-300 rounded-md flex items-center justify-center cursor-pointer">
+                <UploadOutlined className="text-green-500 text-xl" />
+              </div>
+            </Upload>
+          )}
         </div>
       ),
     },
-    {
-      title: 'Trạng thái hiển thị',
-      dataIndex: 'is_visible',
-      key: 'is_visible',
-      render: (isVisible) =>
-        <Tag
-          color={isVisible ? 'green' : 'red'}
-          style={{
-            fontSize: '16px', // Tăng kích thước chữ
-            padding: '6px 12px', // Tăng khoảng cách bên trong
-            borderRadius: '8px', // Bo góc
-            display: 'inline-block', // Giữ thẻ hiển thị gọn gàng
-            textAlign: 'center', // Căn giữa nội dung
-          }}
-        >
-          {isVisible ? 'Hiển thị' : 'Ẩn'}
-        </Tag>
-    },
-    {
-      title: 'Số sao',
-      dataIndex: 'stars',
-      key: 'stars',
-      render: (stars) => <Tag
-      color="gold"
-      style={{
-        fontSize: '16px', // Tăng kích thước chữ
-        padding: '6px 12px', // Tăng khoảng cách bên trong
-        borderRadius: '8px', // Bo tròn góc
-        display: 'inline-flex', // Giữ nội dung tag trong một hàng
-        alignItems: 'center', // Căn giữa nội dung theo chiều dọc
-      }}
-    >
-      {stars || 0} ⭐
-    </Tag>,
-    },
-    {
-      title: 'Hành động',
-      key: 'actions',
-      render: (_, record) => (
-        <div className="flex space-x-2">
-          <Button
-            type="default"
-            danger
-            onClick={() => hideComment(record.comment_id)}
-            icon={<EyeInvisibleOutlined />}
-          >
-            Ẩn
-          </Button>
-    
-          {/* Nút Khóa User */}
-          <Button
-            type="default"
-            onClick={() => manageUser(record.user_id)}
-            icon={<HddOutlined />}
-          >
-            Khóa User
-          </Button>
-        </div>
-      ),
-    }
-    
-
+    // {
+    //   title: 'Hành động',
+    //   key: 'action',
+    //   render: ( record: any) => (
+    //     <Button
+    //       type="primary"
+    //       danger
+    //       icon={<DeleteOutlined />}
+    //       onClick={() => handleDeleteVariant(record.colorId)}
+    //     >
+    //       Xóa
+    //     </Button>
+    //   ),
+    // },
   ];
 
-  if (isLoading) return <Spin tip="Loading..." className="flex justify-center items-center h-screen" />;
+  const onFinish = async (values: any) => {
+    const formattedDate = values.import_date ? moment(values.import_date).format('YYYY-MM-DD') : null;
+
+    if (!formattedDate) {
+      toast.error('Ngày nhập không hợp lệ. Vui lòng chọn một ngày!');
+      return;
+    }
+
+    if (!values.name || !values.price || !values.category_id) {
+      toast.error('Vui lòng điền đầy đủ các trường bắt buộc.');
+      return;
+    }
+
+    const variations: Record<number, Record<number, { stock: number; discount: number }>> = {};
+
+    variants.forEach((variant: Variant) => {
+      if (!removedVariants.includes(variant.colorId)) {
+        variations[variant.colorId] = {};
+        variant.sizes.forEach((size: Size) => {
+          variations[variant.colorId][size.sizeId] = {
+            stock: size.stock || 0,
+            discount: size.discount || 0,
+          };
+        });
+      }
+    });
+
+    const formData = new FormData();
+    formData.append('name', values.name);
+    formData.append('price', values.price.toString());
+    formData.append('variations', JSON.stringify(variations));
+    formData.append('group_id', selectedVariantGroup?.toString() || '');
+    formData.append('category_id', values.category_id.toString());
+    formData.append('description', values.description || '');
+    formData.append('content', content || '');
+    formData.append('import_date', formattedDate);
+    formData.append('cost_price', values.product_cost);
+    formData.append('supplier', values.supplier);
+    Object.keys(newColorImages).forEach(colorId => {
+      newColorImages[Number(colorId)].forEach(file => {
+        formData.append(`color_image_${colorId}`, file);
+      });
+    });
+
+    Object.keys(newAlbumImages).forEach(colorId => {
+      newAlbumImages[Number(colorId)].forEach(file => {
+        formData.append(`album_images_${colorId}[]`, file);
+      });
+    });
+
+    newVariationAlbumImages.forEach(file => {
+      formData.append('variation_album_images[]', file);
+    });
+
+    console.log('Final FormData:', formData);
+
+    try {
+      await updateProductMutation(formData);
+    } catch (error: any) {
+      toast.error(`Cập nhật sản phẩm thất bại: ${error.message}`);
+    }
+  };
+
+
+  const handleGroupChange = (groupId: number) => {
+    const group = variantgroup?.find((g: any) => g.group_id === groupId);
+    setSelectedGroup(group);
+
+    if (group && group.attributes) {
+      setVariants([]);
+
+      const formattedAttributes = group.attributes.map((attribute: any) => ({
+        ...attribute,
+        selectedValues: [],
+      }));
+      setAttributes(formattedAttributes);
+    }
+  };
+
+  useEffect(() => {
+    if (selectedGroup) {
+      setSelectedVariantGroup(selectedGroup.group_id);
+    }
+  }, [selectedGroup]);
+
+  if (isLoadingVariantGroup || isLoadingCategories || isLoadingProduct) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <Spin tip="Loading..." />
+      </div>
+    );
+  }
 
   return (
-    <>
-      {contextHolder}
-      <div className="w-full mx-auto px-6 py-8">
-        <Table
-          columns={columns}
-          dataSource={filteredComments}
-          rowKey="comment_id"
-          bordered
-          pagination={{
-            pageSize: 7,
-            showTotal: (total) => `Tổng ${total} bình luận`,
-          }}
-        />
-        <Modal
-          title="Báo cáo bình luận"
-          visible={isReportModalVisible}
-          onOk={handleReport}
-          onCancel={() => setIsReportModalVisible(false)}
+    <div className="w-full px-6 py-8">
+      <ToastContainer />
+      <h2 className="text-4xl font-bold mb-6">Cập nhật sản phẩm</h2>
+      <Form form={form} layout="vertical" onFinish={onFinish} >
+        <div className='grid grid-cols-2 gap-4'>
+          <div>
+            <Form.Item
+              className='mb-[10px]'
+              label="Tên sản phẩm"
+              name="name"
+              rules={[{ required: true, message: 'Tên sản phẩm bắt buộc' }]}
+            >
+              <Input className='p-[10px]' />
+            </Form.Item>
+
+            <Form.Item
+              className='mb-[10px]'
+              label="Giá Nhập"
+              name="product_cost"
+              rules={[{ required: true, message: 'Giá Nhập sản phẩm bắt buộc' }]}
+            >
+              <Input className='p-[10px]' />
+            </Form.Item>
+
+            <Form.Item
+              className='mb-[10px]'
+              label="Nhà Cung Cấp"
+              name="supplier"
+              rules={[{ required: true, message: 'Nhà Cung Cấp bắt buộc' }]}
+            >
+              <Input className='p-[10px]' />
+            </Form.Item>
+
+            <Form.Item
+              className='mb-[10px]'
+              label="Ngày nhập"
+              name="import_date"
+              rules={[{ required: true, message: "Ngày nhập sản phẩm bắt buộc phải điền" }]}
+            >
+              <DatePicker format="YYYY-MM-DD" style={{ width: '100%' }} className='p-[10px]' />
+            </Form.Item>
+
+            <Form.Item
+              className='mb-[10px]'
+              label="Giá sản phẩm"
+              name="price"
+              rules={[{ required: true, message: 'Giá sản phẩm bắt buộc phải điền' }]}
+            >
+              <InputNumber min={0} style={{ width: '100%' }} className='py-[10px]' />
+            </Form.Item>
+          </div>
+          <div>
+            <Form.Item
+              className='mb-[10px]'
+              label="Mô tả sản phẩm"
+              name="description"
+              rules={[{ required: true, message: 'Mô tả sản phẩm bắt buộc phải điền' }]}
+            >
+              <Input.TextArea rows={4} placeholder="Nhập mô tả sản phẩm ngắn gọn" />
+            </Form.Item>
+
+            <Form.Item
+              className='mb-[10px]'
+              label="Nội dung chi tiết"
+              name="content"
+              rules={[{ required: true, message: 'Nội dung chi tiết sản phẩm bắt buộc phải điền' }]}
+            >
+              <CKEditor
+                editor={ClassicEditor}
+                data={content}
+                onChange={(editor: any) => {
+                  const data = editor.getData();
+                  setContent(data);
+                }}
+              />
+            </Form.Item>
+          </div>
+        </div>
+        {/* <Form.Item
+          label="Danh mục"
+          name="category_id"
+          rules={[{ required: true, message: 'Danh mục sản phẩm bắt buộc phải chọn' }]}
+          style={{ display: 'none' }}
         >
-          <Input.TextArea
-            rows={4}
-            placeholder="Nhập lý do báo cáo..."
-            value={reportReason}
-            onChange={(e) => setReportReason(e.target.value)}
-          />
-        </Modal>
-      </div>
-      
-    </>
+          <Input />
+        </Form.Item> */}
+
+        <Form.Item
+          label="Danh mục"
+          name="category_id"
+          rules={[{ required: true, message: 'Danh mục sản phẩm bắt buộc phải chọn' }]}
+        >
+          <Select
+            placeholder="Chọn danh mục"
+            className="border border-gray-300 rounded-md"
+            onChange={(value) => {
+              const selectedCategory = categories.find((category: any) => category.id === value);
+              form.setFieldsValue({
+                category_id: selectedCategory?.id,
+                category_name: selectedCategory?.name,
+              });
+            }}
+          >
+            {categories?.map((category: any) => (
+              <Option key={category.id} value={category.id}>
+                {category.name}
+              </Option>
+            ))}
+          </Select>
+        </Form.Item>
+        {showVariantForm && (
+          <>
+            <Form.Item
+              label="Chọn nhóm biến thể"
+              name="variant_group"
+              rules={[{ required: true, message: 'Vui lòng chọn nhóm biến thể' }]}
+            >
+              <Select placeholder="Chọn nhóm biến thể" onChange={handleGroupChange} className="border border-gray-300 rounded-md">
+                {variantgroup?.map((group: any) => (
+                  <Option key={group.group_id} value={group.group_id}>
+                    {group.group_name}
+                  </Option>
+                ))}
+              </Select>
+            </Form.Item>
+
+            {attributes &&
+              attributes.length > 0 &&
+              attributes.map((attribute: any) => (
+                <Form.Item key={attribute.id} label={attribute.name}>
+                  <Select
+                    mode="multiple"
+                    style={{ width: '100%' }}
+                    placeholder={`Chọn giá trị cho ${attribute.name}`}
+                    onChange={(values) =>
+                      handleAttributeValueChange(
+                        attribute.id,
+                        values.map((value: any) => ({
+                          key: value,
+                          label: attribute.attribute_values.find((av: any) => av.id === value)?.value,
+                        }))
+                      )
+                    }
+                    value={attribute.selectedValues.map((val: any) => val.key)}
+                  >
+                    {attribute.attribute_values.map((val: any) => (
+                      <Option key={val.id} value={val.id}>
+                        {val.value}
+                      </Option>
+                    ))}
+                  </Select>
+                </Form.Item>
+              ))}
+
+            <Button
+              type="default"
+              className="mb-5 bg-blue-500 text-white hover:bg-blue-700"
+              onClick={generateVariants}
+              icon={<PlusOutlined />}
+            >
+              Tạo Biến Thể
+            </Button>
+
+            <Table
+              dataSource={variants}
+              columns={columns}
+              rowKey={(index) => (index !== undefined ? index.toString() : Math.random().toString())}
+              pagination={false}
+              className="w-full border-collapse border border-gray-300"
+            />
+          </>
+        )}
+        <Form.Item>
+          <div className='flex justify-end space-x-4 pt-5'>
+            <Button type="primary" htmlType="submit">
+              Submit
+            </Button>
+            <Button
+              onClick={() => navigate('/admin/dashboard/attribute/list')}
+            >
+              Back
+            </Button>
+          </div>
+        </Form.Item>
+      </Form>
+    </div>
   );
 };
 
-export default Comments;
+export default UpdateProduct;

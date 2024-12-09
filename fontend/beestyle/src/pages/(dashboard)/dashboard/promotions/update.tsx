@@ -123,39 +123,44 @@ const UpdatePromotion: React.FC = () => {
                 <Form.Item
                     label="Mã Khuyến Mãi"
                     name="code"
+                    className='mb-[10px]'
                     rules={[{ required: true, message: 'Vui lòng nhập mã khuyến mãi!' }]}
                     initialValue={{...promotionData}}
                 >
-                    <Input />
+                    <Input className='h-10'/>
                 </Form.Item>
 
                 <Form.Item
                     label="Mô tả"
                     name="description"
+                    className='mb-[10px]'
                     rules={[{ required: true, message: 'Vui lòng nhập mô tả!' }]}
                 >
-                    <Input.TextArea rows={4} />
+                    <Input.TextArea rows={5} />
                 </Form.Item>
 
                 <Form.Item
                     label="Ngày Bắt Đầu"
                     name="start_date"
+                    className='mb-[10px]'
                     rules={[{ required: true, message: 'Vui lòng chọn ngày bắt đầu!' }]}
                 >
-                    <DatePicker format="YYYY-MM-DD" style={{ width: '100%' }} />
+                    <DatePicker format="YYYY-MM-DD" style={{ width: '100%' }} className='h-10'/>
                 </Form.Item>
 
                 <Form.Item
                     label="Ngày Kết Thúc"
                     name="end_date"
+                    className='mb-[10px]'
                     rules={[{ required: true, message: 'Vui lòng chọn ngày kết thúc!' }]}
                 >
-                    <DatePicker format="YYYY-MM-DD" style={{ width: '100%' }} />
+                    <DatePicker format="YYYY-MM-DD" style={{ width: '100%' }} className='h-10' />
                 </Form.Item>
 
                 <Form.Item
                     label="Loại Giảm Giá"
                     name="discount_type"
+                    className='mb-[10px]'
                     rules={[{ required: true, message: 'Vui lòng chọn loại giảm giá!' }]}
                 >
                     <Radio.Group onChange={(e) => setDiscountType(e.target.value)} value={discountType}>
@@ -187,23 +192,24 @@ const UpdatePromotion: React.FC = () => {
                         name="discount_amount"
                         rules={[{ required: true, message: 'Vui lòng nhập số tiền giảm!' }]}
                     >
-                        <InputNumber min={0} style={{ width: '100%' }} />
+                        <InputNumber min={0} style={{ width: '100%' }} className='py-1' />
                     </Form.Item>
                 )}
 
-                <Form.Item label="Số Lần Sử Dụng" name="usage_limit">
-                    <InputNumber min={1} style={{ width: '100%' }} />
+                <Form.Item label="Số Lần Sử Dụng" name="usage_limit" className='mb-[10px]'>
+                    <InputNumber min={1} style={{ width: '100%' }} className='py-1'/>
                 </Form.Item>
-                <Form.Item label="Giá Trị Đơn Hàng Tối Thiểu" name="min_order_value">
-                    <InputNumber min={0} style={{ width: '100%' }} />
+                <Form.Item label="Giá Trị Đơn Hàng Tối Thiểu" name="min_order_value" className='mb-[10px]'>
+                    <InputNumber min={0} style={{ width: '100%' }} className='py-1'/>
                 </Form.Item>
 
                 <Form.Item
                     label="Loại Khuyến Mãi"
+                    className='mb-[10px]'
                     name="promotion_subtype"
                     rules={[{ required: true, message: 'Vui lòng chọn loại khuyến mãi!' }]}
                 >
-                    <Select placeholder="Chọn loại khuyến mãi">
+                    <Select placeholder="Chọn loại khuyến mãi" className='h-10'>
                         <Option value="shipping">Miễn phí vận chuyển</Option>
                         <Option value="product_discount">Giảm giá sản phẩm</Option>
                         <Option value="voucher_discount">Giảm giá bằng voucher</Option>
@@ -221,8 +227,8 @@ const UpdatePromotion: React.FC = () => {
                 </Form.Item>
 
                 {promotionScope === 'category' && (
-                    <Form.Item label="Danh Mục" name="category_ids">
-                        <Select mode="multiple" placeholder="Chọn danh mục" loading={isLoadingCategories}>
+                    <Form.Item label="Danh Mục" name="category_ids" className='mb-[10px]'>
+                        <Select mode="multiple" placeholder="Chọn danh mục" loading={isLoadingCategories} className='h-10'>
                             {categories.map((category) => (
                                 <Option key={category.id} value={category.id}>
                                     {category.name}
@@ -234,8 +240,8 @@ const UpdatePromotion: React.FC = () => {
 
                 {promotionScope === 'product' && (
                     <>
-                        <Form.Item label="Chọn Danh Mục" name="filter_category">
-                            <Select onChange={(value) => setSelectedCategory(value)} loading={isLoadingCategories}>
+                        <Form.Item label="Chọn Danh Mục" name="filter_category" className='mb-[10px]'>
+                            <Select onChange={(value) => setSelectedCategory(value)} loading={isLoadingCategories} className='h-10'>
                                 {categories.map((category) => (
                                     <Option key={category.id} value={category.id}>
                                         {category.name}
@@ -244,8 +250,8 @@ const UpdatePromotion: React.FC = () => {
                             </Select>
                         </Form.Item>
 
-                        <Form.Item label="Chọn Sản Phẩm" name="product_ids">
-                            <Select mode="multiple" disabled={products.length === 0}>
+                        <Form.Item label="Chọn Sản Phẩm" name="product_ids" className='mb-[10px]'>
+                            <Select mode="multiple" disabled={products.length === 0} className='h-10'>
                                 {products.map((product) => (
                                     <Option key={product.id} value={product.id}>
                                         {product.name}
@@ -256,12 +262,12 @@ const UpdatePromotion: React.FC = () => {
                     </>
                 )} */}
 
-                <Form.Item label="Kích Hoạt" name="is_active" valuePropName="checked">
+                <Form.Item label="Kích Hoạt" name="is_active" valuePropName="checked" className='mb-[10px]'>
                     <Switch />
                 </Form.Item>
 
                 <Form.Item label="Trạng Thái" name="status">
-                    <Select>
+                    <Select className='h-10'>
                         <Option value="active">Đang diễn ra</Option>
                         <Option value="expired">Đã hết hạn</Option>
                         <Option value="upcoming">Sắp diễn ra</Option>

@@ -4,6 +4,7 @@ import { Table, Button, Space, Popconfirm, Spin, message } from 'antd';
 import { EditOutlined, DeleteOutlined, PlusOutlined, EyeOutlined } from '@ant-design/icons';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import axiosInstance from '@/configs/axios';
+import { ColumnsType } from 'antd/es/table';
 
 type Banner = {
     id: number;
@@ -15,7 +16,7 @@ type Banner = {
     status: number;
 };
 
-const ListBannersCategory: React.FC = () => {
+const ListBannersCustom: React.FC = () => {
     const navigate = useNavigate();
     const [messageApi, contextHolder] = message.useMessage();
     const queryClient = useQueryClient();
@@ -54,62 +55,51 @@ const ListBannersCategory: React.FC = () => {
         return map;
     }, {});
 
-    // Lọc banners chỉ có type === 'category'
-    const dataSource = BannerData?.filter((item: Banner) => item.type === 'category').map((item: Banner, index: number) => ({
+    // Lọc banners chỉ có type === 'custom'
+    const dataSource = BannerData?.filter((item: Banner) => item.type === 'custom').map((item: Banner, index: number) => ({
         key: item.id,
         stt: index + 1,
         ...item,
         categoryName: categoryMap?.[item.category_id] || 'Không có',
-        typeLabel: 'Ảnh danh mục', // Chỉ hiển thị loại category nên gán trực tiếp
+        typeLabel: 'Ảnh tự do', // Chỉ hiển thị loại custom nên gán trực tiếp
     }));
 
-    const columns = [
+    const columns: ColumnsType<any> = [
         {
             title: 'STT',
             dataIndex: 'stt',
             key: 'stt',
+            width:"50px",
+            align: 'center',
         },
         {
-            title: 'Title',
+            title: 'Tiêu Đề',
             dataIndex: 'title',
             key: 'title',
+            align: 'center',
             render: (text: string | null) => text || 'Không có',
         },
         {
-            title: 'Image',
+            title: 'Ảnh',
             dataIndex: 'image_path',
             key: 'image_path',
+            align: 'center',
             render: (text: string) => (
-                <img src={text} alt="banner" style={{ width: 100, height: 50, objectFit: 'cover' }} />
+                <img src={text} alt="banner" style={{ width: 100, height: 50, objectFit: 'cover' }} className='m-auto' />
             ),
-        },
-        {
-            title: 'Category',
-            dataIndex: 'categoryName',
-            key: 'categoryName',
-        },
-        {
-            title: 'Link',
-            dataIndex: 'link',
-            key: 'link',
-            render: (text: string | null) =>
-                text ? (
-                    <a href={text} target="_blank" rel="noopener noreferrer">
-                        {text}
-                    </a>
-                ) : (
-                    'Không có'
-                ),
         },
         {
             title: 'Trạng Thái',
             dataIndex: 'status',
             key: 'status',
+            align: 'center',
             render: (status: number) => (status === 1 ? 'Hoạt động' : 'Không hoạt động'),
         },
         {
-            title: 'Action',
+            title: 'Hành Động',
             key: 'actions',
+            align: 'center',
+            width:"50px",
             render: (_: any, record: Banner) => (
                 <Space size="middle">
                     <Button
@@ -165,4 +155,4 @@ const ListBannersCategory: React.FC = () => {
     );
 };
 
-export default ListBannersCategory;
+export default ListBannersCustom;

@@ -52,15 +52,17 @@ const AddAttributeGroup = (props: Props) => {
         <div className="w-full max-w-8xl p-5 rounded-xl">
           <Form form={form} layout="vertical" onFinish={handleFinish}>
             <Form.Item
+              className='mb-[10px] '
               label="Tên Nhóm Biến Thể"
               name="group_name"
               rules={[{ required: true, message: 'Vui lòng nhập tên nhóm biến thể' }]}
             >
-              <Input placeholder="Nhập tên nhóm biến thể" />
+              <Input placeholder="Nhập tên nhóm biến thể" className='h-10' />
             </Form.Item>
 
             <Form.Item label="Thuộc Tính">
               <Select
+              className='h-10'
                 mode="multiple"
                 placeholder="Chọn thuộc tính"
                 value={selectedAttributes}

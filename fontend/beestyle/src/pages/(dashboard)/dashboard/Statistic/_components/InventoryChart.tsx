@@ -1,5 +1,9 @@
-import { ArcElement, Chart as ChartJS, Legend, Tooltip } from 'chart.js';
+import React from 'react';
 import { Doughnut } from 'react-chartjs-2';
+import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
+import { useQuery } from '@tanstack/react-query';
+import { Spin } from 'antd';
+import AxiosInstance from '@/configs/axios';
 
 // Đăng ký các thành phần của Chart.js
 ChartJS.register(ArcElement, Tooltip, Legend);

@@ -1,9 +1,9 @@
 import instance from '@/configs/axios';
 import { useQuery } from '@tanstack/react-query';
+import axios from 'axios';
 import { BarElement, CategoryScale, Chart as ChartJS, Legend, LinearScale, Title, Tooltip } from 'chart.js';
 import { Bar } from 'react-chartjs-2';
 // Đăng ký các thành phần của Chart.js
-
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
 const HorizontalBarChart = () => {
@@ -16,6 +16,7 @@ const HorizontalBarChart = () => {
     },
   })
   
+
   const data = {
     labels: top_12_products_sell_well?.data.map((item: any) => item.product.slug),
     datasets: [
