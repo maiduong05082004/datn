@@ -68,6 +68,8 @@ class ProductController extends Controller
                 'cost_price' => $request->cost_price,
                 'supplier' => $request->supplier,
                 'import_date' => $request->import_date,
+                'sale_status' => TableProductCost::SALE_STATUS_ACTIVE,
+                'sale_start_date' => now(),
              ]);
 
             // Kiểm tra nếu có biến thể

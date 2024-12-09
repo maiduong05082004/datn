@@ -24,7 +24,7 @@ class StatisticsController extends Controller
     {
         $currentDate = Carbon::now();
 
-        $startDate = $currentDate->copy()->subMonth(3)->startOfMonth();
+        $startDate = $currentDate->copy()->subMonth(1)->startOfMonth();
         $endDate = $currentDate->copy()->endOfMonth();
         // $date = $request->get('date', [
         //     'start' => $startOfOeriod->toDateString(),
@@ -32,7 +32,8 @@ class StatisticsController extends Controller
         // ]);
         $products = BillDetail::selectRaw('product_id,SUM(quantity) as total_sold')
             ->whereHas('bill', function ($query) use ($startDate, $endDate) {
-                $query->whereBetween('created_at', [$startDate, $endDate]);
+                $query->whereBetween('created_at', [$startDate, $endDate])
+                ->whereIn('status_bill', ['delivered']);
             })
             ->groupBy('product_id')
             ->orderByDesc('total_sold')

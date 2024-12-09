@@ -3,7 +3,13 @@
 namespace App\Http\Controllers\Api\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\GroupResource;
+use App\Http\Resources\ProductResource;
+use App\Http\Resources\VariationResource;
+use App\Models\Category;
 use App\Models\Product;
+use App\Models\ProductVariationValue;
+use App\Models\TableProductCost;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 
@@ -23,6 +29,7 @@ class InventoryController extends Controller
         $productsWithFewSizes = Product::whereHas('variations.variationValues', function ($query) {
             $query->where('stock', '>', 0); // Chỉ lấy các biến thể còn hàng
         })
+
             ->whereHas('variations', function ($query) use ($maxRemainingSizes) {
                 $query->withCount(['variationValues' => function ($subQuery) {
                     $subQuery->where('stock', '>', 0); // Đếm các biến thể còn hàng
@@ -148,4 +155,300 @@ class InventoryController extends Controller
             ]
         ]);
     }
+
+    public function getInStockBySize(Request $request)
+    {
+        // Lấy giá trị remaining_sizes từ request (hoặc mặc định là 200)
+        $maxRemainingSizes = $request->input('remaining_sizes', 20);
+
+        // Lọc các sản phẩm có tồn kho size lẻ
+        $productsWithFewSizes = Product::whereHas('variations.variationValues', function ($query) {
+            $query->where('stock', '>', 0); // Lọc các biến thể còn hàng (stock > 0)
+        })
+            ->whereHas('variations', function ($query) use ($maxRemainingSizes) {
+                // Đếm số biến thể còn hàng
+                $query->withCount(['variationValues' => function ($subQuery) {
+                    $subQuery->where('stock', '>', 0);
+                }])
+                    // Kiểm tra số lượng size lẻ, chỉ lấy sản phẩm có size lẻ <= maxRemainingSizes
+                    ->having('variation_values_count', '<=', $maxRemainingSizes);
+            })
+            ->paginate(10); // Phân trang, lấy 10 sản phẩm mỗi trang
+
+        // Thêm status_messages cho từng sản phẩm
+        $productsWithFewSizes->getCollection()->transform(function ($product) use ($maxRemainingSizes) {
+            $statusMessages = [];
+
+            // Lấy tất cả các size còn tồn kho
+            $remainingSizes = $product->variations->flatMap(function ($variation) {
+                return $variation->variationValues->where('stock', '>', 0)->pluck('attributeValue.value');
+            })->unique()->values();
+
+            // Kiểm tra xem sản phẩm có size lẻ không và có ít hơn hoặc bằng số size lẻ tối đa
+            if ($remainingSizes->count() <= $maxRemainingSizes) {
+                $sizes = $remainingSizes->implode(', '); // Chuyển mảng thành chuỗi
+                $statusMessages[] = "Chỉ còn size lẻ: {$sizes}"; // Thêm thông báo size lẻ
+            }
+
+            // Gán status_messages vào sản phẩm
+            $product->status_messages = $statusMessages;
+
+            return $product; // Trả lại sản phẩm đã được cập nhật
+        });
+
+        // Chuyển đổi các sản phẩm thành định dạng Resource (để trả về kết quả)
+        $productsWithFewSizes = $productsWithFewSizes->map(function ($product) {
+            return [
+                'id' => $product->id,
+                'name' => $product->name,
+                'slug' => $product->slug,
+                'price' => $product->price,
+                'stock' => $product->stock,
+                'description' => $product->description,
+                'category_name' => $product->category->name,
+                'group' => $product->group ? new GroupResource($product->group) : null,
+                'variations' => $product->variations->isNotEmpty() ? VariationResource::collection($product->variations) : [],
+                'status_messages' => $product->status_messages, // Đảm bảo status_messages được đưa vào kết quả
+            ];
+        });
+
+        // Trả về kết quả dưới dạng JSON
+        return response()->json([
+            'data' => $productsWithFewSizes,
+        ]);
+    }
+
+
+
+
+    // tồn kho
+
+    //list sản phẩm đang bán
+    public function listProductActive()
+    {
+        $products = Product::with(
+            [
+                'variations.attributeValue',
+                'variations.group',
+                'variations.variationValues',
+                'variations.variationImages',
+                'cost'
+            ]
+        )
+            ->whereHas('cost', function ($query) {
+                $query->where('sale_status', TableProductCost::SALE_STATUS_ACTIVE);
+            })
+            ->paginate(10);
+
+
+        return response()->json([
+            'data' =>  ProductResource::collection($products),
+            'pagination' => [
+                'current_page' => $products->currentPage(),
+                'last_page' => $products->lastPage(),
+                'per_page' => $products->perPage(),
+                'total' => $products->total(),
+            ]
+        ], 200);
+    }
+
+    //list sản phẩm Hàng tồn(ngưng bán)
+
+    public function listProductInactive()
+    {
+        $products = Product::with(
+            [
+                'variations.attributeValue',
+                'variations.group',
+                'variations.variationValues',
+                'variations.variationImages',
+                'cost'
+            ]
+        )
+            ->whereHas('cost', function ($query) {
+                $query->where('sale_status', TableProductCost::SALE_STATUS_INACTIVE);
+            })
+            ->paginate(10);
+
+
+        return response()->json([
+            'data' =>  ProductResource::collection($products),
+            'pagination' => [
+                'current_page' => $products->currentPage(),
+                'last_page' => $products->lastPage(),
+                'per_page' => $products->perPage(),
+                'total' => $products->total(),
+            ]
+        ], 200);
+    }
+
+    // ngưng bán sản phẩm
+    public function updateProductInactive($id)
+    {
+        $product = Product::findOrFail($id);
+        $product->cost()->update([
+            'sale_status' => TableProductCost::SALE_STATUS_INACTIVE,
+            'sale_end_date' => now(),
+        ]);
+
+        return response()->json(['message' => 'sản phẩm đã đưa vào tồn kho tức là ngừng bán'], 200);
+    }
+
+    // mở bán sản phẩm
+
+    public function updateProductActivete($id)
+    {
+        $product = Product::findOrFail($id);
+        $product->cost()->update([
+            'sale_status' => TableProductCost::SALE_STATUS_ACTIVE,
+            'sale_start_date' => now(),
+        ]);
+
+        return response()->json(['message' => 'sảm phẩm đã mở bán.'], 200);
+    }
+
+
+    // danh sách sản phẩmb đang bán có các size sắp hết hàng
+    public function listProductsWithFewSizes(Request $request)
+    {
+        $maxStock = $request->input('max_stock', 10);
+        $products = Product::with('variations.variationValues')
+            ->whereHas('variations.variationValues', function ($query) use ($maxStock) {
+                $query->where('stock', '<=', $maxStock);
+            })
+            ->whereHas(
+                'cost',
+                function ($query) {
+                    $query->where('sale_status', TableProductCost::SALE_STATUS_ACTIVE);
+                }
+            )
+
+            ->paginate(10);
+
+        return response()->json([
+            'data' => ProductResource::collection($products),
+            'pagination' => [
+                'current_page' => $products->currentPage(),
+                'last_page' => $products->lastPage(),
+                'per_page' => $products->perPage(),
+                'total' => $products->total(),
+            ]
+        ], 200);
+    }
+
+    // cập nhật lại sô lượng mới
+    public function updateStockProduct($id, Request $request)
+    {
+        $productVariationValue = ProductVariationValue::findOrFail($id);
+
+        $productVariationValue->stock += $request->input('stock');
+        $productVariationValue->save();
+
+        $productVariation = $productVariationValue->productVariation;
+        $productVariation->stock += $request->input('stock');
+        $productVariation->save();
+
+        $product = $productVariation->product;
+        $product->stock += $request->input('stock');
+        $product->save();
+
+        return response()->json([
+            'message' => 'Đã cập nhật số lượng thành công cho size ' . $productVariationValue->attributeValue->value . ' với số lượng là ' . $request->input('stock')
+        ]);
+    }
+
+    // chuyển đổi vào danh muc giảm giá
+    public function saleCategory($id, Request $request)
+    {
+
+        $product = Product::findOrFail($id);
+
+        $product->update([
+            'category_id' => $request->category_id
+        ]);
+        return response()->json([
+            'message' => 'đã chuyển đổi danh mục'
+        ]);
+    }
+
+    // danh sách sản phẩm hết hàng
+    public function productIsOutOfStock()
+    {
+        $product = Product::with(['variations.variationValues'])
+            ->where('stock', 0)
+            ->WhereHas('variations.variationValues', function ($query) {
+                $query->where('stock', 0);
+            })
+            ->get();
+
+        return response()->json([
+            'data' => ProductResource::collection($product)
+        ]);
+    }
+
+
+    
+
+// bộ lọc tồn kho
+    
+    public function listProductsByDateAndSupplier(Request $request)
+    {
+        $startDate = $request->input('start_date'); 
+        $endDate = $request->input('end_date'); 
+        $supplier = $request->input('supplier');
+        $categoryId = $request->input('category_id'); 
+        
+        $products = Product::with(
+            [
+                'variations.attributeValue',
+                'variations.group',
+                'variations.variationValues',
+                'variations.variationImages',
+                'cost'
+            ]
+        )
+        ->whereHas('cost', function ($query) use ($startDate, $endDate, $supplier, $categoryId) {
+            if ($startDate && $endDate) {
+                $query->where(function ($q) use ($startDate, $endDate) {
+                    $q->whereBetween('sale_start_date', [$startDate, $endDate])
+                      ->orWhereBetween('sale_end_date', [$startDate, $endDate]);
+                });
+            } elseif ($startDate) {
+                $query->where('sale_start_date', '>=', $startDate);
+            } elseif ($endDate) {
+          
+                $query->where('sale_end_date', '<=', $endDate);
+            }
+    
+            if ($supplier) {
+                $query->where('supplier', 'LIKE', '%' . $supplier . '%');
+            }
+    
+            if ($categoryId) {
+                $category = Category::find($categoryId);
+    
+                if ($category) {
+                    // Lấy tất cả danh mục con của danh mục hiện tại (bao gồm danh mục con của các danh mục con)
+                    $childCategories = $category->childrenRecursive()->pluck('id')->toArray(); // Lấy tất cả id danh mục con
+                    $childCategories[] = $category->id; // Thêm danh mục cha vào danh sách
+    
+                    $query->whereIn('category_id', $childCategories);
+                }
+            }
+        })
+        ->paginate(10); 
+    
+        return response()->json([
+            'data' => ProductResource::collection($products),
+            'pagination' => [
+                'current_page' => $products->currentPage(),
+                'last_page' => $products->lastPage(),
+                'per_page' => $products->perPage(),
+                'total' => $products->total(),
+            ]
+        ], 200);
+    }
+    
+
+    
 }
