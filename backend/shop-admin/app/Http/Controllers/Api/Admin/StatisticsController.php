@@ -32,7 +32,8 @@ class StatisticsController extends Controller
         // ]);
         $products = BillDetail::selectRaw('product_id,SUM(quantity) as total_sold')
             ->whereHas('bill', function ($query) use ($startDate, $endDate) {
-                $query->whereBetween('created_at', [$startDate, $endDate]);
+                $query->whereBetween('created_at', [$startDate, $endDate])
+                ->whereIn('status_bill', ['delivered']);
             })
             ->groupBy('product_id')
             ->orderByDesc('total_sold')

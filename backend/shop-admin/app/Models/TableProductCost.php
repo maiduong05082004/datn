@@ -8,19 +8,45 @@ use Illuminate\Database\Eloquent\Model;
 class TableProductCost extends Model
 {
     use HasFactory;
+
     protected $table = 'table_product_costs';
 
-    // Cột có thể gán giá trị (mass assignable)
     protected $fillable = [
         'product_id',
         'cost_price',
         'created_at',
         'updated_at',
         'supplier',
-        'import_date'
+        'import_date',
+        'sale_status',
+        'sale_start_date',
+        'sale_end_date',
     ];
 
-    // Định nghĩa mối quan hệ với bảng products (mỗi bản ghi product_costs sẽ thuộc về 1 product)
+    const SALE_STATUS_ACTIVE = 'active';
+    const SALE_STATUS_INACTIVE = 'inactive';
+
+    public function isActive()
+    {
+        return $this->sale_status === self::SALE_STATUS_ACTIVE;
+    }
+
+    public function isInactive()
+    {
+        return $this->sale_status === self::SALE_STATUS_INACTIVE;
+    }
+    // Trả về sale_status dưới dạng văn bản dễ hiểu hơn nếu cần
+    public function getSaleStatusLabelAttribute()
+    {
+        $statuses = [
+            self::SALE_STATUS_ACTIVE => 'Đang Bán',
+            self::SALE_STATUS_INACTIVE => 'Ngưng Bán',
+        ];
+
+        return $statuses[$this->sale_status] ?? 'Không xác định';
+    }
+
+    // Quan hệ với bảng Product
     public function product()
     {
         return $this->belongsTo(Product::class);

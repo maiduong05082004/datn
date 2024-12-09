@@ -206,6 +206,17 @@ Route::prefix('admins')
 
             Route::prefix('inventory')->as('inventory.')->group(function () {
                 Route::post('/', [InventoryController::class, 'getObsoleteProducts'])->name('obsolete');
+                Route::post('getinstock_by_size', [InventoryController::class, 'getInStockBySize'])->name('getInStockBySize');
+                Route::get('listproductastive', [InventoryController::class, 'listProductActive'])->name('listProductActive');
+                Route::get('listproductinactive', [InventoryController::class, 'listProductInactive'])->name('listProductInactive');
+                Route::put('updateproductactivete/{id}', [InventoryController::class, 'updateProductActivete'])->name('updateProductActivete');
+                Route::put('updateproductinactive/{id}', [InventoryController::class, 'updateProductInactive'])->name('updateProductInactive');
+                Route::post('listproducts_withfewsizes', [InventoryController::class, 'listProductsWithFewSizes'])->name('listProductsWithFewSizes');
+                Route::put('updatestockproduct/{id}', [InventoryController::class, 'updateStockProduct'])->name('updateStockProduct');
+                Route::put('salecategory/{id}', [InventoryController::class, 'saleCategory'])->name('saleCategory');
+                Route::get('product_isoutof_stock', [InventoryController::class, 'productIsOutOfStock'])->name('productIsOutOfStock');
+                Route::post('listProductDate', [InventoryController::class, 'listProductsByDateAndSupplier'])->name('listProductsByDateAndSupplier');
+
             });
 
 

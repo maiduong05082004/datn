@@ -10,6 +10,8 @@ use App\Models\AttributeValue;
 use App\Models\Product;
 use App\Models\Category;
 use App\Models\Banner;
+use App\Models\TableProductCost;
+use Carbon\Carbon;
 use DB;
 use Illuminate\Http\Request;
 
@@ -41,6 +43,9 @@ class HomeController extends Controller
             $childCategoryIds = $this->getCategoryAndChildrenIds($parentCategory);
 
             $newProducts = Product::whereIn('category_id', $childCategoryIds)
+            ->whereHas('cost', function ($query) {
+                $query->where('sale_status', TableProductCost::SALE_STATUS_ACTIVE);
+            })
                 ->orderBy('id', 'desc') // Lấy theo ID giảm dần
                 ->take(4)
                 ->get();
@@ -74,22 +79,25 @@ class HomeController extends Controller
     {
 
 
-            $productCollections = Product::where('is_collection', 1)
-                ->orderBy('id', 'desc') // Lấy theo ID giảm dần
-                ->take(12)
-                ->get();
+        $productCollections = Product::where('is_collection', 1)
+            ->orderBy('id', 'desc') // Lấy theo ID giảm dần
+            ->whereHas('cost', function ($query) {
+                $query->where('sale_status', TableProductCost::SALE_STATUS_ACTIVE);
+            })
+            ->take(12)
+            ->get();
 
-            $banner = Banner::where('type', Banner::TYPE_COLLECTION)
-                ->where('status', 1)
-                ->orderBy('id', 'desc')
-                ->first();
+        $banner = Banner::where('type', Banner::TYPE_COLLECTION)
+            ->where('status', 1)
+            ->orderBy('id', 'desc')
+            ->first();
 
-            $imagePath = $banner ? $banner->image_path : null;
+        $imagePath = $banner ? $banner->image_path : null;
 
-            $productCollection =  [
-                'image_path' => $imagePath,
-                'data' => ProductResource::collection($productCollections)
-            ];
+        $productCollection =  [
+            'image_path' => $imagePath,
+            'data' => ProductResource::collection($productCollections)
+        ];
 
         // Trả về kết quả
         return response()->json($productCollection);
@@ -98,6 +106,11 @@ class HomeController extends Controller
 
     public function productNewHot()
     {
+        // Lấy thời gian bắt đầu và kết thúc tháng trước
+        $currentDate = Carbon::now();
+        $startDate = $currentDate->copy()->subMonth(1)->startOfMonth();
+        $endDate = $currentDate->copy()->endOfMonth();
+
         $categories = Category::whereNull('parent_id')
             ->with('childrenRecursive')
             ->get();
@@ -105,6 +118,10 @@ class HomeController extends Controller
             ->join('bill_details', 'products.id', '=', 'bill_details.product_id')
             ->join('bills', 'bill_details.bill_id', '=', 'bills.id')
             ->whereIn('bills.status_bill', ['delivered'])
+            ->whereBetween('bills.created_at', [$startDate, $endDate])
+            ->whereHas('cost', function ($query) {
+                $query->where('sale_status', TableProductCost::SALE_STATUS_ACTIVE);
+            })
             ->groupBy('products.id')
             ->orderByRaw('total_quantity DESC')
             ->get();
@@ -183,7 +200,7 @@ class HomeController extends Controller
         $priceRange = $request->input('price_range', '');
         $colors = $request->input('colors', []);
         $attributes = Attribute::with('attributeValues')->get();
-        
+
         $productsQuery = Product::query();
 
         // Lọc theo từ khóa
@@ -239,10 +256,10 @@ class HomeController extends Controller
 
         // Lấy danh sách các sản phẩm đã lọc
         $products = $productsQuery->paginate(20);
-        if($keyword ==''){
-            $product='';
+        if ($keyword == '') {
+            $product = '';
             return response()->json([
-                'products'=> [],
+                'products' => [],
             ], 200);
         }
         // Lấy danh sách màu sắc có sẵn
