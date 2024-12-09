@@ -33,7 +33,6 @@ const UpdateProduct: React.FC = () => {
   const [selectedVariantGroup, setSelectedVariantGroup] = useState<number | null>(null);
   const [attributes, setAttributes] = useState<any[]>([]);
   const [variants, setVariants] = useState<Variant[]>([]);
-  const [stock, setStock] = useState<number | null>(null);
   const [showVariantForm, setShowVariantForm] = useState<boolean>(true);
   const { id } = useParams();
   const navigate = useNavigate();
@@ -41,8 +40,6 @@ const UpdateProduct: React.FC = () => {
   const [productData, setProductData] = useState<any>(null);
   const [selectedGroup, setSelectedGroup] = useState<any>(null);
   const [deletingImage, setDeletingImage] = useState<{ [key: string]: boolean }>({});
-
-  // State để lưu trữ các tệp ảnh mới
   const [newColorImages, setNewColorImages] = useState<{ [key: number]: File[] }>({});
   const [newAlbumImages, setNewAlbumImages] = useState<{ [key: number]: File[] }>({});
   const [newVariationAlbumImages, setNewVariationAlbumImages] = useState<File[]>([]);
@@ -67,7 +64,7 @@ const UpdateProduct: React.FC = () => {
   const { data: categories, isLoading: isLoadingCategories } = useQuery({
     queryKey: ['categories'],
     queryFn: async () => {
-      const response = await AxiosInstance.get('http://localhost:8000/api/admins/categories');
+      const response = await AxiosInstance.get('http://localhost:8000/api/admins/categories');      
       return response?.data;
     },
   });
@@ -90,17 +87,17 @@ const UpdateProduct: React.FC = () => {
 
   const deleteImageMutation = useMutation({
     mutationFn: async ({ imageUrl }: { imageUrl: string; type: 'product' | 'variation' }) => {
-      const base64FileUrl = btoa(imageUrl); // Encode toàn bộ URL
+      const base64FileUrl = btoa(imageUrl);
       const response = await AxiosInstance.delete(`http://127.0.0.1:8000/api/admins/images/variation/${base64FileUrl}`, {
         headers: { 'Content-Type': 'application/json' },
       });
       return response.data;
     },
     onSuccess: () => {
-      toast.success('Xóa ảnh thành công!');
+      toast.success('Xóa Ảnh Thành Công');
     },
-    onError: (error: any) => {
-      toast.error(`Failed to delete image: ${error.message}`);
+    onError: () => {
+      toast.error('Xóa Ảnh Thất Bại!');
     },
   });
 
@@ -108,7 +105,6 @@ const UpdateProduct: React.FC = () => {
     Modal.confirm({
       title: 'Bạn có chắc chắn muốn xóa ảnh này?',
       onOk: () => {
-        // Set loading chỉ cho ảnh cụ thể
         setDeletingImage((prev) => ({ ...prev, [imageUrl]: true }));
         deleteImageMutation.mutate(
           { imageUrl, type },
@@ -131,9 +127,9 @@ const UpdateProduct: React.FC = () => {
 
               setDeletingImage((prev) => ({ ...prev, [imageUrl]: false }));
             },
-            onError: (error: any) => {
+            onError: () => {
               setDeletingImage((prev) => ({ ...prev, [imageUrl]: false }));
-              toast.error(`Không thể xóa ảnh: ${error.message}`);
+              toast.error(`Không Thể Xóa Anh`);
             },
           }
         );
@@ -146,13 +142,15 @@ const UpdateProduct: React.FC = () => {
       form.setFieldsValue({
         ...UpdateVariant,
         import_date: UpdateVariant.product_cost?.import_date ? moment(UpdateVariant.product_cost.import_date, 'YYYY-MM-DD', true) : null,
-        category_id: UpdateVariant.category_name,
+        category_id: UpdateVariant.category_id ,
         variant_group: UpdateVariant.group?.id,
         product_cost: UpdateVariant.product_cost?.cost_price || '',
         supplier: UpdateVariant.product_cost?.supplier || '',
+        
       });
+      
       setContent(UpdateVariant.content || '');
-      setProductData(UpdateVariant);
+      setProductData(UpdateVariant); 
 
       const group = variantgroup.find((g: any) => g.group_id === UpdateVariant.group?.id);
       setSelectedGroup(group);
@@ -216,7 +214,7 @@ const UpdateProduct: React.FC = () => {
       }));
       setVariants(formattedVariants);
     }
-  }, [UpdateVariant, form, variantgroup]);
+  }, [UpdateVariant, form, variantgroup , categories]);
 
   const { mutateAsync: updateProductMutation } = useMutation({
     mutationFn: async (formData: FormData) => {
@@ -228,22 +226,23 @@ const UpdateProduct: React.FC = () => {
       return response.data;
     },
     onSuccess: () => {
-      toast.success('Cập nhật sản phẩm thành công!');
+      toast.success('Cập Nhật Sản phẩm Thành Công');
       setLoading(false);
 
     },
-    onError: (error: any) => {
-      toast.error(`Cập nhật sản phẩm thất bại: ${error.message}`);
+    onError: () => {
+      toast.error(`Cập Nhật Sản Phẩm Thất Bại!`);
+      setLoading(false);
     },
   });
-  const handleDeleteVariant = (colorId: number) => {
-    setRemovedVariants((prev) => [...prev, colorId]);
-    setVariants((prevVariants) => {
-      const updatedVariants = prevVariants.filter((variant) => variant.colorId !== colorId);
-      console.log("Updated Variants after Deletion:", updatedVariants);
-      return updatedVariants;
-    });
-  };
+  // const handleDeleteVariant = (colorId: number) => {
+  //   setRemovedVariants((prev) => [...prev, colorId]);
+  //   setVariants((prevVariants) => {
+  //     const updatedVariants = prevVariants.filter((variant) => variant.colorId !== colorId);
+  //     console.log("Updated Variants after Deletion:", updatedVariants);
+  //     return updatedVariants;
+  //   });
+  // };
   const handleAttributeValueChange = (attributeId: number, selectedValues: any[]) => {
     const updatedAttributes = attributes.map((attr) => {
       if (attr.id === attributeId) {
@@ -468,7 +467,7 @@ const UpdateProduct: React.FC = () => {
       }
     });
     const selectedCategoryId = Array.isArray(values.category_id)
-      ? values.category_id[values.category_id.length - 1] // Lấy phần tử cuối cùng
+      ? values.category_id[values.category_id.length - 1] 
       : values.category_id;
     const formData = new FormData();
     formData.append('name', values.name);
@@ -492,9 +491,9 @@ const UpdateProduct: React.FC = () => {
     try {
       await updateProductMutation(formData);
     } catch (error: any) {
-      toast.error(`Cập nhật sản phẩm thất bại: ${error.message}`);
     }
   };
+  
   const handleGroupChange = (groupId: number) => {
     const group = variantgroup?.find((g: any) => g.group_id === groupId);
     setSelectedGroup(group);

@@ -89,8 +89,7 @@ const ListBill: React.FC = () => {
       toast.success('Đơn hàng đã được hủy thành công.');
       refetch();
     } catch (error: any) {
-      const errorMessage = error.response?.data?.message || 'Không thể hủy đơn hàng.';
-      toast.error(errorMessage);
+      toast.error('Không thể hủy đơn hàng.');
     }
   };
 
@@ -100,12 +99,11 @@ const ListBill: React.FC = () => {
       toast.success('Trạng thái đơn hàng đã được cập nhật thành công thành "Đang Vận Chuyển".');
       refetch();
     } catch (error: any) {
-      const errorMessage = error.response?.data?.message || 'Không thể bàn giao đơn hàng cho đơn vị vận chuyển.';
-      toast.error(errorMessage);
+      toast.error('Không thể bàn giao đơn hàng cho đơn vị vận chuyển.');
     }
   };
 
-  const { data, isLoading, refetch } = useQuery({
+  const { isLoading, refetch } = useQuery({
     queryKey: ['products', filterStatus],
     queryFn: async () => {
       const response = await axiosInstance.get(getApiUrl(filterStatus));
@@ -146,7 +144,6 @@ const ListBill: React.FC = () => {
     const counts = billData.reduce(
       (acc, bill) => {
         acc.all += 1;
-        // Ép kiểu status_bill để đảm bảo chỉ nhận giá trị hợp lệ
         if (
           bill.status_bill === 'pending' ||
           bill.status_bill === 'processing' ||
@@ -164,7 +161,6 @@ const ListBill: React.FC = () => {
   };
 
 
-  // Tính toán số lượng mỗi khi `billData` thay đổi
   useEffect(() => {
     const counts = calculateBillCounts();
     setBillCounts(counts);
@@ -280,7 +276,7 @@ const ListBill: React.FC = () => {
       key: 'status_bill',
       render: (text: string) => {
         let vietnameseStatus = '';
-        let statusClass = 'text-gray-500'; // Màu mặc định là xám cho "Mới"
+        let statusClass = 'text-gray-500'; 
 
         switch (text) {
           case 'pending':
@@ -288,19 +284,19 @@ const ListBill: React.FC = () => {
             break;
           case 'processed':
             vietnameseStatus = 'Chờ lấy hàng';
-            statusClass = 'text-blue-500'; // Màu xanh dương cho "Chờ lấy hàng"
+            statusClass = 'text-blue-500'; 
             break;
           case 'shipped':
             vietnameseStatus = 'Đang giao hàng';
-            statusClass = 'text-green-500'; // Màu xanh lá cho "Đang giao hàng"
+            statusClass = 'text-green-500'; 
             break;
           case 'delivered':
             vietnameseStatus = 'Đã giao hàng';
-            statusClass = 'text-teal-500'; // Màu teal cho "Đã giao hàng"
+            statusClass = 'text-teal-500'; 
             break;
           case 'canceled':
             vietnameseStatus = 'Đã hủy';
-            statusClass = 'text-red-500'; // Màu đỏ cho "Đã hủy"
+            statusClass = 'text-red-500';
             break;
           case 'new':
             vietnameseStatus = 'Mới';
@@ -468,20 +464,6 @@ const ListBill: React.FC = () => {
                               ? `Đã Giao Hàng`
                               : `Đã Hủy`}
                   </h2>
-
-                  {/* <h2 className="text-[16px]">
-                    {status === 'all'
-                      ? `Tất Cả (${billCounts.all})`
-                      : status === 'pending'
-                        ? `Đang chờ xử lý (${billCounts.pending})`
-                        : status === 'processing'
-                          ? `Đã xử lý (${billCounts.processing})`
-                          : status === 'shipping'
-                            ? `Đang giao hàng (${billCounts.shipping})`
-                            : status === 'delivered'
-                              ? `Đã giao hàng (${billCounts.delivered})`
-                              : `Đã Hủy (${billCounts.canceled})`}
-                  </h2> */}
                 </button>
               ))}
             </div>

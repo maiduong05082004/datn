@@ -21,12 +21,10 @@ interface User {
 
 const UserList: React.FC = () => {
   // const queryClient = useQueryClient();
-  // const [messageApi, contextHolder] = message.useMessage();
   const navigate = useNavigate();
 
   const [searchQuery, setSearchQuery] = useState('');
   const [sortKey, setSortKey] = useState('');
-
   const sortOptions = ['name', 'email'];
   const sortOptionsName = ['tên', 'email'];
 

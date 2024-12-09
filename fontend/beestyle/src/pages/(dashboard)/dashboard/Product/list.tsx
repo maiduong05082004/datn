@@ -5,6 +5,7 @@ import { format } from 'date-fns';
 import { DeleteOutlined, EditOutlined, EyeOutlined, PlusOutlined } from '@ant-design/icons';
 import AxiosInstance from '@/configs/axios';
 import { useNavigate, useParams } from 'react-router-dom';
+import { toast, ToastContainer } from 'react-toastify';
 
 interface Product {
   id: number;
@@ -39,7 +40,6 @@ interface VariationValue {
 }
 
 const ListProducts = () => {
-  const [messageApi, contextHolder] = message.useMessage();
   const queryClient = useQueryClient();
   const navigate = useNavigate();
   const [isModalVisible, setIsModalVisible] = useState(false);
@@ -59,28 +59,45 @@ const ListProducts = () => {
       await AxiosInstance.delete(`http://localhost:8000/api/admins/products/${id}`);
     },
     onSuccess: () => {
-      messageApi.success('Xóa thành công');
+      toast.success('Xóa Sản Phẩm Thành Công');
       queryClient.invalidateQueries({ queryKey: ['products'] });
     },
     onError: () => {
-      messageApi.error('Xóa sản phẩm thất bại');
+      toast.error('Xóa Sản Phẩm Thất Bại!');
+
     },
   });
 
   const columns: Array<any> = [
     {
-      title: 'STT',
-      dataIndex: 'index',
-      key: 'index',
+      title: 'Xem Trước',
+      key: 'action',
       align: 'center',
-      width:"50px",
-      render: (_: any, __: Product, index: number) => <span>{index + 1}</span>,
+      width: "50px",
+      render: (product: Product) => (
+        <div className="flex space-x-2">
+          <Button
+            type="link"
+            icon={<PlusOutlined />}
+
+            onClick={() => navigate(`/admin/dashboard/products/show/${product.id}`)}
+          />
+        </div>
+      ),
     },
+    // {
+    //   title: 'STT',
+    //   dataIndex: 'index',
+    //   key: 'index',
+    //   align: 'center',
+    //   width: "50px",
+    //   render: (_: any, __: Product, index: number) => <span>{index + 1}</span>,
+    // },
     {
       title: 'Tên sản phẩm',
       dataIndex: 'name',
       key: 'name',
-      width:"250px",
+      width: "250px",
       align: 'center',
       filters: productsData?.data?.map((product: Product) => ({
         text: product.name,
@@ -112,7 +129,7 @@ const ListProducts = () => {
         <span>{product_cost?.supplier || 'Không có'}</span>
       ),
     },
-    
+
     {
       title: 'Ngày nhập',
       dataIndex: 'product_cost',
@@ -136,7 +153,7 @@ const ListProducts = () => {
       title: 'Mô tả',
       dataIndex: 'description',
       align: 'center',
-      width:"100px",
+      width: "100px",
       key: 'description',
       render: (text: string) => (
         <div className="max-w-xs truncate">
@@ -168,7 +185,7 @@ const ListProducts = () => {
       dataIndex: 'category_name',
       align: 'center',
       key: 'category_name',
-      width:"100px",
+      width: "100px",
       filters: productsData?.data?.map((product: Product) => ({
         text: product.category_name,
         value: product.category_name,
@@ -180,7 +197,7 @@ const ListProducts = () => {
       title: 'Bình Luận',
       align: 'center',
       key: 'comments',
-      width:"50px",
+      width: "50px",
       render: (product: Product) => (
         <div className="m-auto">
           <Button
@@ -199,7 +216,7 @@ const ListProducts = () => {
       title: 'Hành Động',
       key: 'action',
       align: 'center',
-      width:"50px",
+      width: "50px",
       render: (product: Product) => (
         <div className="flex space-x-2">
           <Button
@@ -234,7 +251,7 @@ const ListProducts = () => {
 
   return (
     <>
-      {contextHolder}
+      <ToastContainer />
       <div className="w-full mx-auto px-6 py-8">
         <div className="flex justify-between items-center mb-6">
           <Button

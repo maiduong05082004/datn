@@ -1,13 +1,12 @@
 import { useMutation, useQuery } from '@tanstack/react-query';
-import { Form, Input, Button, message, Divider, Select, Typography } from 'antd';
+import { Form, Input, Button, Select } from 'antd';
 import axiosInstance from '@/configs/axios';
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { toast, ToastContainer } from 'react-toastify';
 
-const { Title } = Typography;
 
 const UpdateAttributeGroup = () => {
-  const [messageApi, contextHolder] = message.useMessage();
   const [form] = Form.useForm();
   const [selectedAttributes, setSelectedAttributes] = useState<number[]>([]);
   const { id } = useParams();
@@ -22,7 +21,6 @@ const UpdateAttributeGroup = () => {
     },
   });
 
-  // Fetch specific attribute group by ID
   const { data: attributeGroup } = useQuery({
     queryKey: ['attributeGroup', id],
     queryFn: async () => {
@@ -46,13 +44,12 @@ const UpdateAttributeGroup = () => {
       return await axiosInstance.put(`http://127.0.0.1:8000/api/admins/attribute_groups/${id}`, updatedGroup);
     },
     onSuccess: () => {
-      messageApi.success('Cập nhật nhóm thuộc tính thành công!');
+      toast.success('Cập Nhật Nhóm Thuộc Tính Thành Công')
       form.resetFields();
       setSelectedAttributes([]);
     },
-    onError: (error: any) => {
-      const errorMessage = error.response?.data?.message || `Lỗi: ${error.message}`;
-      messageApi.error(errorMessage);
+    onError: () => {
+      toast.error('Cập Nhật Nhóm Thuộc Tính Thất Bại!')
     },
   });
 
@@ -66,7 +63,7 @@ const UpdateAttributeGroup = () => {
 
   return (
     <>
-      {contextHolder}
+      <ToastContainer />
       <div className="min-h-screen p-5">
         <div className="w-full max-w-8x">
           <Form form={form} layout="vertical" onFinish={handleFinish}>

@@ -4,12 +4,12 @@ import { UploadOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import axiosInstance from '@/configs/axios';
+import { toast, ToastContainer } from 'react-toastify';
 
 const { Option } = Select;
 
 const AddBanners: React.FC = () => {
   const [form] = Form.useForm();
-  const [messageApi, contextHolder] = message.useMessage();
   const navigate = useNavigate();
   const [file, setFile] = useState<File | null>(null);
   const [bannerType, setBannerType] = useState<string>('');
@@ -48,23 +48,22 @@ const AddBanners: React.FC = () => {
       });
     },
     onSuccess: () => {
-      messageApi.success('Thêm banner thành công!');
+      toast.success('Thêm Banner Thành Công')
       form.resetFields();
       setFile(null);
       setBannerType('');
       setLoading(false);
 
     },
-    onError: (error: any) => {
-      const errorMessage = error.response?.data?.message || `Lỗi: ${error.message}`;
-      messageApi.error(errorMessage);
+    onError: () => {
+      toast.error('Thêm Banner Thất Bại!')
     },
   });
 
   const onFinish = (values: any) => {
     setLoading(true);
     const selectedCategoryId = Array.isArray(values.category_id)
-      ? values.category_id[values.category_id.length - 1] // Lấy phần tử cuối cùng
+      ? values.category_id[values.category_id.length - 1] 
       : values.category_id;
     const formData = new FormData();
 
@@ -106,7 +105,7 @@ const AddBanners: React.FC = () => {
 
   return (
     <>
-      {contextHolder}
+      <ToastContainer />
       <div className="min-h-screen p-5">
         <h2 className="text-2xl font-bold mb-6 text-center">Thêm Banner Mới</h2>
         <Form
@@ -128,7 +127,6 @@ const AddBanners: React.FC = () => {
               <Option value="collection">Bộ Sưu Tập</Option>
             </Select>
           </Form.Item>
-
           {bannerType && (
             <>
               <Form.Item name="title" label="Tiêu đề Banner" className='mb-[10px]'>

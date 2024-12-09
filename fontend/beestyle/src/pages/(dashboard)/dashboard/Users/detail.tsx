@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { Spin, Button, Input, Form, message } from 'antd';
 import axiosInstance from '@/configs/axios';
+import { ToastContainer } from 'react-toastify';
 
 type Props = {};
 
@@ -23,7 +24,6 @@ interface UserDetail {
 const DetailUser: React.FC<Props> = () => {
   const [form] = Form.useForm();
   const { id } = useParams();
-  const [messageApi, contextHolder] = message.useMessage();
   const navigate = useNavigate();
 
   // Fetch user detail using React Query
@@ -45,7 +45,7 @@ const DetailUser: React.FC<Props> = () => {
 
   return (
     <>
-      {contextHolder}
+      <ToastContainer />
       <div className="min-h-screen p-5">
         <div className="w-full max-w-8xl">
           <Form
