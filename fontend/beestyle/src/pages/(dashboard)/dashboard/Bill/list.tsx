@@ -8,6 +8,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import { useNavigate } from 'react-router-dom';
 import useMessage from 'antd/es/message/useMessage';
 import { CheckCircle } from 'lucide-react';
+import { ColumnsType } from 'antd/es/table';
 
 const { RangePicker } = DatePicker;
 const { Option } = Select;
@@ -44,15 +45,15 @@ const ListBill: React.FC = () => {
   const getApiUrl = (status: string): string => {
     switch (status) {
       case 'pending':
-        return 'http://127.0.0.1:8000/api/admins/orders/pending?page=1&per_page=5';
+        return 'http://127.0.0.1:8000/api/admins/orders/pending?page=1&per_page=10';
       case 'processing':
-        return 'http://127.0.0.1:8000/api/admins/orders/processed?page=1&per_page=2';
+        return 'http://127.0.0.1:8000/api/admins/orders/processed?page=1&per_page=10';
       case 'shipping':
-        return 'http://127.0.0.1:8000/api/admins/orders/shipped?page=1&per_page=3';
+        return 'http://127.0.0.1:8000/api/admins/orders/shipped?page=1&per_page=10';
       case 'delivered':
-        return 'http://127.0.0.1:8000/api/admins/orders/delivered?page=1&per_page=4';
+        return 'http://127.0.0.1:8000/api/admins/orders/delivered?page=1&per_page=10';
       case 'canceled':
-        return 'http://127.0.0.1:8000/api/admins/orders/canceled?page=1&per_page=4';
+        return 'http://127.0.0.1:8000/api/admins/orders/canceled?page=1&per_page=10';
       default:
         return 'http://127.0.0.1:8000/api/admins/orders?page=1&per_page=10';
     }
@@ -219,27 +220,31 @@ const ListBill: React.FC = () => {
     refetch();
   };
 
-  const columns = [
+  const columns: ColumnsType<any> = [
     {
       title: 'STT',
       key: 'index',
+      align: 'center',
       render: (_: any, __: any, index: number) => <span className="text-gray-700 font-medium">{index + 1}</span>,
     },
     {
       title: 'Mã Đơn Hàng',
       dataIndex: 'code_orders',
       key: 'code_orders',
+      align: 'center',
       render: (text: string) => <span className="text-blue-600 font-semibold">{text}</span>,
     },
     {
       title: 'Số Điện Thoại',
       dataIndex: 'phone',
+      align: 'center',
       key: 'phone',
       render: (text: string) => <span className="text-gray-700 font-medium">{text}</span>,
     },
     {
       title: 'Hình Thức Thanh Toán',
       dataIndex: 'payment_type_description',
+      align: 'center',
       key: 'payment_type_description',
       render: (text: string) => <span className="text-gray-600">{text}</span>,
     },
@@ -247,19 +252,22 @@ const ListBill: React.FC = () => {
     {
       title: 'Số Lượng',
       dataIndex: 'quantity',
+      align: 'center',
       key: 'quantity',
       sorter: (a: any, b: any) => parseFloat(a.quantity) - parseFloat(b.quantity),
       render: (text: number) => <span className="text-gray-700 font-medium">{text}</span>,
     },
     {
-      title: 'Tổng Thanh Toán',
+      title: 'Tổng Thanh Toán (VND)',
       dataIndex: 'total',
+      align: 'center',
       key: 'total',
       sorter: (a: any, b: any) => parseFloat(a.total) - parseFloat(b.total),
-      render: (text: string) => <span className="font-bold">{parseFloat(text).toLocaleString()} đ</span>,
+      render: (text: string) => <span className="font-bold">{parseFloat(text).toLocaleString()}</span>,
     },
     {
       title: 'Ngày Đặt Hàng',
+      align: 'center',
       key: 'order_date',
       render: (record: BillRecord) => (
         <div className="text-gray-700">{`${record.order_date} ${record.order_time}`}</div>
@@ -268,33 +276,52 @@ const ListBill: React.FC = () => {
     {
       title: 'Trạng Thái',
       dataIndex: 'status_bill',
+      align: 'center',
       key: 'status_bill',
       render: (text: string) => {
         let vietnameseStatus = '';
+        let statusClass = 'text-gray-500'; // Màu mặc định là xám cho "Mới"
+
         switch (text) {
           case 'pending':
             vietnameseStatus = 'Đang chờ xử lý';
             break;
           case 'processed':
-            vietnameseStatus = 'Đã xử lý';
+            vietnameseStatus = 'Chờ lấy hàng';
+            statusClass = 'text-blue-500'; // Màu xanh dương cho "Chờ lấy hàng"
             break;
           case 'shipped':
             vietnameseStatus = 'Đang giao hàng';
+            statusClass = 'text-green-500'; // Màu xanh lá cho "Đang giao hàng"
             break;
           case 'delivered':
             vietnameseStatus = 'Đã giao hàng';
+            statusClass = 'text-teal-500'; // Màu teal cho "Đã giao hàng"
             break;
           case 'canceled':
             vietnameseStatus = 'Đã hủy';
+            statusClass = 'text-red-500'; // Màu đỏ cho "Đã hủy"
+            break;
+          case 'new':
+            vietnameseStatus = 'Mới';
+            statusClass = 'text-white';
             break;
           default:
             vietnameseStatus = 'Không xác định';
+            statusClass = 'text-gray-400';
         }
-        return <div className="p-2 rounded-md text-green-500 font-semibold">{vietnameseStatus}</div>;
+
+        return (
+          <div className={`p-2 rounded-md font-semibold ${statusClass}`}>
+            {vietnameseStatus}
+          </div>
+        );
       },
-    },
+    }
+    ,
     {
       title: 'Chức năng',
+      align: 'center',
       key: 'action',
       render: (record: BillRecord) => (
         <div className="relative w-[180px]">
@@ -316,7 +343,7 @@ const ListBill: React.FC = () => {
                 toast.error('Không thể cập nhật trạng thái đơn hàng.');
               }
             }}
-            className="block w-full h-[40px] px-4 pr-8 bg-white border border-gray-300 rounded-md text-gray-700 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 appearance-none shadow-md"
+            className="block w-full h-[40px] px-4 pr-8 bg-white border border-gray-300 rounded-md text-gray-700 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 appearance-none"
           >
             {record.status_bill === 'pending' && (
               <>
@@ -328,15 +355,15 @@ const ListBill: React.FC = () => {
             )}
             {record.status_bill === 'processed' && (
               <>
-                <option value="processed">Đã xử lý Đơn Hàng</option>
-                <option value="shipping">Bàn Giao Đơn Vị Vận Chuyển</option>
+                <option value="processed">Đã Xác Nhận Đơn Hàng</option>
+                <option value="shipping">Giao Hàng</option>
                 <option value="canceled">Hủy Đơn Hàng</option>
                 {/* <option value="remove">Xóa Đơn Hàng</option> */}
               </>
             )}
             {record.status_bill === 'shipped' && (
               <>
-                <option value="shipped">Bàn Giao Đơn Vị Vận Chuyển</option>
+                <option value="shipped">Giao Hàng</option>
                 <option value="delivered">Đã Giao Hàng</option>
                 <option value="canceled">Hủy Đơn Hàng</option>
               </>
@@ -347,7 +374,6 @@ const ListBill: React.FC = () => {
             {record.status_bill === 'canceled' && (
               <>
                 <option value="canceled">Hủy Đơn Hàng</option>
-                {/* <option value="remove">Xóa Đơn Hàng</option> */}
               </>
             )}
           </select>
@@ -358,64 +384,58 @@ const ListBill: React.FC = () => {
     ,
     {
       title: 'Xem Chi Tiết',
+      align: 'center',
       key: 'action',
       render: (record: BillRecord) => (
-        <div className=" w-[140px]">
-          {['pending', 'shipping', 'confirmed'].includes(record.status_bill) && (
+        <div className='w-full text-center flex justify-center gap-2'>
+          {/* Trạng thái "pending" và "shipping" */}
+          {['pending', 'shipping'].includes(record.status_bill) && (
             <Button
               type="default"
               icon={<EyeOutlined />}
               onClick={() => navigate(`/admin/dashboard/bill/detail/${record.id}`)}
-              className="bg-blue-500 text-white hover:bg-blue-600 focus:bg-blue-700 rounded-md shadow-md"
-            >
-              Xem Chi Tiết
-            </Button>
+            />
           )}
 
+          {/* Trạng thái "shipped" */}
           {['shipped'].includes(record.status_bill) && (
             <Button
               icon={<EyeOutlined />}
               type="default"
               onClick={() => navigate(`/admin/dashboard/bill/shiping/${record.id}`)}
-              className="bg-yellow-500 text-white hover:bg-yellow-600 focus:bg-yellow-700 rounded-md shadow-md"
-            >
-              Vận Chuyển
-            </Button>
+            />
           )}
+
+          {/* Trạng thái "processed" */}
           {['processed'].includes(record.status_bill) && (
             <Button
               icon={<EyeOutlined />}
               type="default"
               onClick={() => navigate(`/admin/dashboard/bill/detailConfirm/${record.id}`)}
-              className="bg-yellow-500 text-white hover:bg-yellow-600 focus:bg-yellow-700 rounded-md shadow-md"
-            >
-              Đơn Xác Nhận
-            </Button>
+            />
           )}
+
+          {/* Trạng thái "delivered" */}
           {['delivered'].includes(record.status_bill) && (
             <Button
               icon={<EyeOutlined />}
               type="default"
-              onClick={() => navigate(`/admin/dashboard/bill/detailship/${record.id}`)}
-              className="bg-yellow-500 text-white hover:bg-yellow-600 focus:bg-yellow-700 rounded-md shadow-md"
-            >
-              Đơn Hàng
-            </Button>
+              onClick={() => navigate(`/admin/dashboard/bill/detailSuccessful/${record.id}`)}
+            />
           )}
+
+          {/* Trạng thái "canceled" */}
           {['canceled'].includes(record.status_bill) && (
             <Button
               icon={<EyeOutlined />}
               type="default"
               onClick={() => navigate(`/admin/dashboard/bill/cancel/${record.id}`)}
-              className="bg-red-500 text-white hover:bg-red-600 focus:bg-red-700 rounded-md shadow-md"
-            >
-              Đơn Hủy
-            </Button>
+            />
           )}
-
         </div>
       ),
-    },
+    }
+
   ];
 
   if (isLoading) return <Spin tip="Loading..." className="flex justify-center items-center h-screen" />;
@@ -445,7 +465,7 @@ const ListBill: React.FC = () => {
                           : status === 'shipping'
                             ? `Đang giao hàng`
                             : status === 'delivered'
-                              ? `Chưa thanh toán`
+                              ? `Đã Giao Hàng`
                               : `Đã Hủy`}
                   </h2>
 
@@ -474,14 +494,14 @@ const ListBill: React.FC = () => {
                 onChange={(e) => setSearchCode(e.target.value)}
                 className="w-[1000px] h-[40px]"
               />
-              <Button type="primary" icon={<SearchOutlined />} onClick={searchBill} className="h-[40px] bg-blue-500 text-white hover:bg-blue-600 focus:bg-blue-700 rounded-md">
+              <Button type="default" icon={<SearchOutlined />} onClick={searchBill} className="h-[40px] bg-blue-500 text-white hover:bg-blue-600 focus:bg-blue-700">
                 Tìm Kiếm
               </Button>
               <Button
                 type="default"
                 icon={<FilterOutlined />}
                 onClick={() => setIsFilterVisible(true)}
-                className="h-[40px] bg-blue-500 text-white hover:bg-blue-600 focus:bg-blue-700 rounded-md shadow-md"
+                className="h-[40px] bg-blue-500 text-white hover:bg-blue-600 focus:bg-blue-700"
               >
                 Lọc
               </Button>

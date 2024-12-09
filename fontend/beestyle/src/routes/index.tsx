@@ -22,7 +22,8 @@ import UpdateAttribute from "@/pages/(dashboard)/dashboard/Attribute/update";
 import AddtributeGroup from "@/pages/(dashboard)/dashboard/Attribute_Group/add";
 import ListAttributeGroup from "@/pages/(dashboard)/dashboard/Attribute_Group/list";
 import UpdateAttributeGroup from "@/pages/(dashboard)/dashboard/Attribute_Group/update";
-import Detailship from "@/pages/(dashboard)/dashboard/Bill/detailship";
+import DeatilConfirm from "@/pages/(dashboard)/dashboard/Bill/detailConfirm";
+import Detailship from "@/pages/(dashboard)/dashboard/Bill/detailSuccessful";
 import AddCategories from "@/pages/(dashboard)/dashboard/Category/add";
 import ListCategories from "@/pages/(dashboard)/dashboard/Category/list";
 import UpdateCategories from "@/pages/(dashboard)/dashboard/Category/update";
@@ -54,13 +55,14 @@ import InventoryManagement from "@/pages/(dashboard)/dashboard/Inventory/list";
 import ForgotPasswordPage from "@/pages/(website)/ForgotPassword/page";
 import ResetPasswordPage from "@/pages/(website)/ResetPassword/page";
 import ListBannersMain from "@/pages/(dashboard)/dashboard/Banner/list";
-import ListBannersCustom from "@/pages/(dashboard)/dashboard/Banner/list_banner_category";
-import ListBannersCategory from "@/pages/(dashboard)/dashboard/Banner/list_banner_custom";
+import ListBannersCustom from "@/pages/(dashboard)/dashboard/Banner/list_banner_custom";
+import ListBannersCategory from "@/pages/(dashboard)/dashboard/Banner/listbanner_category";
 import CancelBill from "@/pages/(dashboard)/dashboard/Bill/cancel";
 import ShipNoGHN from "@/pages/(dashboard)/dashboard/Bill/ShipNoGHN";
 import DetailProduct from "@/pages/(dashboard)/dashboard/Product/detail";
-import ListAllChart from "@/pages/(dashboard)/Statistics/page";
 import ListUserChat from "@/pages/(dashboard)/dashboard/ChatRealTime/ListUserChat";
+// import DetailPro from "@/pages/(dashboard)/dashboard/Products/detailpro";
+import ListAllChart from "@/pages/(dashboard)/dashboard/Statistic/page";
 
 const Router = () => {
 
@@ -102,7 +104,7 @@ const Router = () => {
                     {/* bills */}
                     <Route path="bill/list" element={<ListBill />} />
                     <Route path="bill/detail/:id" element={<DetailBill />} />
-                    <Route path="bill/detailship/:id" element={<Detailship />} />
+                    <Route path="bill/detailSuccessful/:id" element={<Detailship />} />
                     {/* <Route path="bill/detailConfirm/:id" element={<DeatilConfirm />} /> */}
                     {/* <Route path="bill/detailConfirm/:id" element={<DeatilConfirm />} /> */}
                     <Route path="bill/cancel/:id" element={<CancelBill />} />

@@ -17,6 +17,7 @@ const AddAttributeValues: React.FC = () => {
     const queryClient = useQueryClient();
     const navigate = useNavigate();
     const [fileList, setFileList] = useState<any[]>([]);
+    const [loading, setLoading] = useState<boolean>(false);
 
     const { data: attributeList, isLoading, error } = useQuery({
         queryKey: ['attributes'],
@@ -39,6 +40,8 @@ const AddAttributeValues: React.FC = () => {
             setFileList([]);
             queryClient.invalidateQueries({ queryKey: ['attributes'] });
             form.resetFields();
+            setLoading(false);
+
         },
         onError: (error: any) => {
             messageApi.error(`Lỗi: ${error.response?.data?.message || error.message}`);
@@ -51,24 +54,25 @@ const AddAttributeValues: React.FC = () => {
         setFileList(newFileList);
 
     };
-    
+
 
     const onFinish = (values: any) => {
+        setLoading(true);
         const formData = new FormData();
-        
+
         formData.append('attribute_id', values.attribute);
-        
+
         values.values.forEach((value: any, index: number) => {
             formData.append(`values[${index}][value]`, value.value);
             if (fileList[index]) {
                 formData.append(`values[${index}][image_file]`, fileList[index]);
             }
         });
-    
+
         mutate(formData);
     };
-    
-    
+
+
 
     if (isLoading) return <Spin tip="Loading..." className="flex justify-center items-center h-screen" />;
     if (error) return <div className="text-center text-red-500">Không thể tải dữ liệu</div>;
@@ -93,7 +97,6 @@ const AddAttributeValues: React.FC = () => {
                                 placeholder="Chọn một thuộc tính"
                                 size="large"
                                 allowClear
-                                className="rounded-md"
                             >
                                 {attributeList?.map((attribute: Attribute) => (
                                     <Select.Option key={attribute.id} value={attribute.id}>
@@ -117,7 +120,7 @@ const AddAttributeValues: React.FC = () => {
                                                     <Input
                                                         placeholder="Nhập giá trị"
                                                         size="large"
-                                                        className="rounded-md"
+                                                        className="h-10"
                                                     />
                                                 </Form.Item>
                                                 <Form.Item name={[field.name, 'image_path']} label="Ảnh Màu Sắc">
@@ -159,7 +162,7 @@ const AddAttributeValues: React.FC = () => {
 
                         <Form.Item>
                             <div className="flex justify-end space-x-4">
-                                <Button type="primary" htmlType="submit">
+                                <Button type="primary" htmlType="submit" loading={loading}>
                                     Submit
                                 </Button>
                                 <Button onClick={() => navigate('/admin/dashboard/attribute/list')}>

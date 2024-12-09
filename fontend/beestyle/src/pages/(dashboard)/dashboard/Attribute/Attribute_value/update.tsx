@@ -12,6 +12,7 @@ const UpdateAttributeValues: React.FC = () => {
     const navigate = useNavigate();
     const { id } = useParams();
     const [fileList, setFileList] = useState<any[]>([]);
+    const [loading, setLoading] = useState<boolean>(false);
 
     const { data: attributeUpdate, isLoading, isError } = useQuery({
         queryKey: ['attributeUpdate', id],
@@ -54,8 +55,8 @@ const UpdateAttributeValues: React.FC = () => {
         onSuccess: () => {
             messageApi.success('Cập nhật giá trị thuộc tính thành công');
             queryClient.invalidateQueries({ queryKey: ['attributeUpdate'] });
-            form.resetFields();
-            setFileList([]); // Reset file list after successful upload
+            setFileList([]);
+            setLoading(false);
         },
         onError: (error: any) => {
             messageApi.error(`Lỗi: ${error.response?.data?.message || error.message}`);
@@ -68,7 +69,7 @@ const UpdateAttributeValues: React.FC = () => {
         },
         onSuccess: () => {
             messageApi.success('Xóa ảnh thành công!');
-            setFileList([]); 
+            setFileList([]);
         },
         onError: (error: any) => {
             const errorMessage = error.response?.data?.message || `Lỗi: ${error.message}`;
@@ -81,16 +82,16 @@ const UpdateAttributeValues: React.FC = () => {
     };
 
     const onFinish = (values: any) => {
+        setLoading(true);
         const formData = new FormData();
         formData.append('value', values.value);
         if (fileList.length > 0) {
             formData.append('image_file', fileList[0].originFileObj);
         }
-    
         mutate(formData);
     };
-    
-    
+
+
 
     if (isLoading) return <Spin tip="Loading..." className="flex justify-center items-center h-screen" />;
 
@@ -114,7 +115,7 @@ const UpdateAttributeValues: React.FC = () => {
                             <Input
                                 placeholder="Nhập giá trị"
                                 size="large"
-                                className="rounded-md"
+                                className="h-10"
                             />
                         </Form.Item>
 
@@ -122,9 +123,9 @@ const UpdateAttributeValues: React.FC = () => {
                             <Upload
                                 listType="picture"
                                 onChange={handleFileChange}
-                                beforeUpload={() => false} // Prevent automatic upload
+                                beforeUpload={() => false}
                                 fileList={fileList}
-                                maxCount={1} // Only allow one image
+                                maxCount={1}
                             >
                                 <Button icon={<UploadOutlined />}>Tải lên ảnh</Button>
                             </Upload>
@@ -142,7 +143,7 @@ const UpdateAttributeValues: React.FC = () => {
 
                         <Form.Item>
                             <div className="flex justify-end space-x-4">
-                                <Button type="primary" htmlType="submit">
+                                <Button type="primary" htmlType="submit" loading={loading}>
                                     Submit
                                 </Button>
                                 <Button onClick={() => navigate('/admin/dashboard/attribute/list')}>

@@ -4,6 +4,7 @@ import axiosInstance from '@/configs/axios';
 import { Button, message, Modal, Popconfirm, Spin, Table } from 'antd';
 import { Link, useNavigate } from 'react-router-dom';
 import { PlusCircleFilled, DeleteOutlined, EyeOutlined, EditOutlined } from '@ant-design/icons';
+import { ColumnsType } from 'antd/es/table';
 
 type AttributeValue = {
     value_id: number;
@@ -90,12 +91,13 @@ const ListAttribute: React.FC = () => {
         setSelectedAttribute(null);
     };
 
-    const columns = [
+    const columns: ColumnsType<any> = [
         {
             title: 'STT',
             dataIndex: 'index',
             key: 'index',
-            width: 80,
+            width: "50px",
+            align: 'center',
             render: (_: any, __: any, index: number) => <span>{index + 1}</span>,
         },
         {
@@ -104,11 +106,12 @@ const ListAttribute: React.FC = () => {
             key: 'name',
         },
         {
-            title: 'Action',
+            title: 'Hành Động',
             key: 'action',
-            width: 200,
+            align: 'center',
+            width: "50px",
             render: (attribute: Attribute) => (
-                <div className="flex space-x-2">
+                <div className="flex justify-center gap-2">
                     <Button
                         icon={<EyeOutlined />}
                         onClick={() => handleViewDetails(attribute)}
@@ -140,11 +143,13 @@ const ListAttribute: React.FC = () => {
         image_path: value.image_path,
         value_id: value.value_id,
     }));
-    const columns2 = [
+    const columns2: ColumnsType<any> = [
         {
             title: 'STT',
             dataIndex: 'key',
             key: 'key',
+            width: "50px",
+            align: 'center'
         },
         {
             title: 'Giá Trị',
@@ -174,6 +179,8 @@ const ListAttribute: React.FC = () => {
         {
             title: 'Action',
             key: 'action',
+            align: 'center',
+            width: "50px",
             render: (text: any, record: any) => (
                 <div className="flex justify-center gap-4">
                     <Button
@@ -226,13 +233,13 @@ const ListAttribute: React.FC = () => {
                         type="default"
                         icon={<PlusCircleFilled />}
                     >
-                        <Link to={`/admin/dashboard/attribute/add`}>Thêm Attribute</Link>
+                        <Link to={`/admin/dashboard/attribute/add`}>Thêm Thuộc Tính</Link>
                     </Button>
                     <Button
                         type="default"
                         icon={<PlusCircleFilled />}
                     >
-                        <Link to={`/admin/dashboard/attribute_value/add`}>Thêm Giá Trị Attribute</Link>
+                        <Link to={`/admin/dashboard/attribute_value/add`}>Thêm Giá Trị Thuộc Tính</Link>
                     </Button>
                 </div>
 

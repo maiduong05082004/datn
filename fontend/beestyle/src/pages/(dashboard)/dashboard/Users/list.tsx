@@ -5,6 +5,7 @@ import { Table, Spin, message, Button, Space } from 'antd';
 import { EditOutlined, PlusOutlined, EyeOutlined } from '@ant-design/icons';
 import axiosInstance from '@/configs/axios';
 import SearchComponent from '@/components/ui/search';
+import { ColumnsType } from 'antd/es/table';
 
 interface User {
   id: number;
@@ -19,8 +20,8 @@ interface User {
 }
 
 const UserList: React.FC = () => {
-  const queryClient = useQueryClient();
-  const [messageApi, contextHolder] = message.useMessage();
+  // const queryClient = useQueryClient();
+  // const [messageApi, contextHolder] = message.useMessage();
   const navigate = useNavigate();
 
   const [searchQuery, setSearchQuery] = useState('');
@@ -72,59 +73,68 @@ const UserList: React.FC = () => {
     index: index + 1,
   }));
 
-  const columns = [
+  const columns: ColumnsType<User> = [
     {
       title: 'STT',
       dataIndex: 'index',
       key: 'index',
-      width: 50,
+      align: 'center',
     },
     {
       title: 'Tên người dùng',
       dataIndex: 'name',
       key: 'name',
+      align: 'center',
     },
     {
       title: 'Ngày sinh',
       dataIndex: 'date_of_birth',
       key: 'date_of_birth',
+      align: 'center',
     },
     {
       title: 'Email',
       dataIndex: 'email',
       key: 'email',
+      align: 'center',
     },
     {
       title: 'Địa chỉ',
       dataIndex: 'address',
       key: 'address',
+      align: 'center',
     },
     {
       title: 'Số điện thoại',
       dataIndex: 'phone',
       key: 'phone',
+      align: 'center',
     },
     {
       title: 'Trạng thái hoạt động',
       dataIndex: 'is_active',
       key: 'is_active',
+      align: 'center',
       render: (isActive: boolean) => (isActive ? 'Hoạt động' : 'Không hoạt động'),
     },
     {
       title: 'Ngày tạo',
       dataIndex: 'created_at',
       key: 'created_at',
+      align: 'center',
       render: (date: string) => new Date(date).toLocaleDateString(),
     },
     {
       title: 'Ngày cập nhật',
       dataIndex: 'updated_at',
       key: 'updated_at',
+      align: 'center',
       render: (date: string) => new Date(date).toLocaleDateString(),
     },
     {
       title: 'Hành động',
       key: 'action',
+      align: 'center',
       render: (_: any, record: User) => (
         <Space size="middle">
           <Button
@@ -146,7 +156,6 @@ const UserList: React.FC = () => {
 
   return (
     <>
-      {contextHolder}
       <div className="w-full mx-auto px-6 py-8">
         <SearchComponent 
           items={filteredUsers} 
@@ -155,7 +164,7 @@ const UserList: React.FC = () => {
           sortOptions={sortOptions}
           sortOptionsName={sortOptionsName}
         />
-        <div className="flex justify-between items-center mb-6">
+        {/* <div className="flex justify-between items-center mb-6">
           <Button
             type="default"
             icon={<PlusOutlined />}
@@ -163,7 +172,7 @@ const UserList: React.FC = () => {
           >
             Thêm mới
           </Button>
-        </div>
+        </div> */}
         <Table
           columns={columns}
           dataSource={dataSource}
@@ -173,7 +182,9 @@ const UserList: React.FC = () => {
             pageSize: 7,
             showTotal: (total) => `Tổng ${total} người dùng`,
           }}
+          style={{ textAlign: 'center' }}  // Căn giữa toàn bộ nội dung bảng
         />
+
       </div>
     </>
   );

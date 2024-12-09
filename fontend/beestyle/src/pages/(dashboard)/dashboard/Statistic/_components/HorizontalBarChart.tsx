@@ -1,13 +1,22 @@
 import React from 'react';
 import { Bar } from 'react-chartjs-2';
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from 'chart.js';
+import AxiosInstance from '@/configs/axios';
+import { useQuery } from '@tanstack/react-query';
+import { Spin } from 'antd';
 
-// Đăng ký các thành phần của Chart.js
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
 type Props = {}
 
 const HorizontalBarChart = (props: Props) => {
+//   const { data: TopSelling, isLoading } = useQuery({
+//     queryKey: ['topselling'],
+//     queryFn: async () => {
+//         const response = await AxiosInstance('http://127.0.0.1:8000/api/admins/statistics/top-selling-products');
+//         return response.data;
+//     },
+// });
   const data = {
     labels: ['Sản phẩm A', 'Sản phẩm B', 'Sản phẩm C', 'Sản phẩm D', 'Sản phẩm E','Sản phẩm A', 'Sản phẩm B', 'Sản phẩm C', 'Sản phẩm D', 'Sản phẩm E', 'Sản phẩm D', 'Sản phẩm E'],
     datasets: [
@@ -62,7 +71,7 @@ const HorizontalBarChart = (props: Props) => {
       },
     },
   };
-
+  // if (isLoading) return <Spin tip="Loading..." className="flex justify-center items-center h-screen" />;
   return (
     <div style={{ width: '100%', height: '400px' }}>
       <Bar data={data} options={options as any} />

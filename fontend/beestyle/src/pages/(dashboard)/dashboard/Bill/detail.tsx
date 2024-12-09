@@ -153,9 +153,9 @@ const DetailBill: React.FC = () => {
   ];
   const DetailRow = ({ label, value, icon }: { label: any, icon: any, value: any }) => (
     <div className="flex items-center space-x-3">
-      <span className="text-xl">{icon}</span>
+      <span className="text-[18px]">{icon}</span>
       <div>
-        <p className="text-sm text-gray-500">{label}</p>
+        <p className="text-[16px] text-gray-500">{label}</p>
         <p className={`font-medium ${value === 'Đang Xử Lý Đơn Hàng' ? 'text-green-500' : 'text-gray-800'}`}>{value}</p>
       </div>
     </div>
@@ -170,18 +170,18 @@ const DetailBill: React.FC = () => {
 
   return (
     <div className=" mx-auto p-5">
-      <div className="bg-white shadow-md rounded-lg p-6 mb-6 border-l-4 border-blue-500">
-        <h2 className="text-3xl font-bold text-gray-800">
+      <div className="bg-white shadow-md rounded-lg p-6 mb-4 border-l-4 border-blue-500">
+        <h2 className="text-[18px] font-bold text-gray-800">
           Đơn Hàng:
           <span className="text-blue-500 ml-2">{detailBill?.code_orders}</span>
         </h2>
-        <p className="text-gray-500">Chi tiết đơn hàng của bạn</p>
+        <p className="text-gray-500 text-[16px]">Chi tiết đơn hàng của bạn</p>
       </div>
 
-      <div className="grid md:grid-cols-2 gap-6 mb-6">
+      <div className="grid md:grid-cols-2 gap-4 mb-4">
         {/* Customer Details */}
         <div className="bg-white rounded-lg shadow-md p-6 border">
-          <h3 className="text-xl font-semibold text-gray-700 border-b pb-2 mb-4">Thông Tin Khách Hàng</h3>
+          <h3 className="text-[18px] font-semibold text-gray-700 border-b pb-2 mb-4">Thông Tin Khách Hàng</h3>
           <div className="space-y-3">
             <DetailRow
               label="Người Nhận"
@@ -208,7 +208,7 @@ const DetailBill: React.FC = () => {
 
         {/* Order Details */}
         <div className="bg-white rounded-lg shadow-md p-6 border">
-          <h3 className="text-xl font-semibold text-gray-700 border-b pb-2 mb-4">Chi Tiết Đơn Hàng</h3>
+          <h3 className="text-[18px] font-semibold text-gray-700 border-b pb-2 mb-4">Chi Tiết Đơn Hàng</h3>
           <div className="space-y-3">
             <DetailRow
               label="Hình Thức Thanh Toán"
@@ -233,7 +233,7 @@ const DetailBill: React.FC = () => {
           </div>
         </div>
       </div>
-      <div className="bg-white rounded-lg shadow-md overflow-hidden mb-5">
+      <div className="bg-white rounded-lg shadow-md overflow-hidden mb-4">
         <Table
           dataSource={dataSource}
           columns={columns}
@@ -244,13 +244,13 @@ const DetailBill: React.FC = () => {
       </div>
 
       {detailBill?.promotions?.length > 0 && (
-        <div className="bg-white rounded-lg shadow-md p-6 mb-6 border">
-          <h3 className="text-xl font-semibold text-gray-700 border-b pb-2 mb-4">Khuyến Mãi Đã Áp Dụng</h3>
+        <div className="bg-white rounded-lg shadow-md p-4 mb-4 border">
+          <h3 className="text-[18px] font-semibold text-gray-700 border-b pb-2 mb-4">Khuyến Mãi Đã Áp Dụng</h3>
           <ul className="space-y-2">
             {detailBill.promotions.map((promotion: any, index: number) => (
               <li key={index} className="flex items-center space-x-3 text-gray-700">
                 <span className="text-green-500">🎁</span>
-                <span>
+                <span className='text-[16px]'>
                   <strong>{promotion.code}:</strong> {promotion.description} - Giảm {promotion.discount_amount}%
                 </span>
               </li>
@@ -259,9 +259,9 @@ const DetailBill: React.FC = () => {
         </div>
       )}
 
-      <div className="bg-white rounded-lg shadow-md p-6 mt-6 border">
-        <h3 className="text-xl font-semibold text-gray-700 border-b pb-2 mb-4">Chi Tiết Thanh Toán</h3>
-        <div className="grid md:grid-cols-2 gap-4">
+      <div className="bg-white rounded-lg shadow-md p-4 border">
+        <h3 className="text-[18px] font-semibold text-gray-700 border-b pb-2 mb-4">Chi Tiết Thanh Toán</h3>
+        <div className="grid md:grid-cols-2 gap-4 text-[16px]">
           <FinancialRow
             label="Tổng Phụ"
             value={parseFloat(detailBill?.subtotal).toLocaleString()}
@@ -276,7 +276,7 @@ const DetailBill: React.FC = () => {
           />
           <div className="md:col-span-2 mt-4 border-t pt-4">
             <div className="flex justify-between items-center">
-              <span className="text-xl font-bold text-gray-800">Tổng Cộng</span>
+              <span className="text-[18px] font-bold text-gray-800">Tổng Cộng</span>
               <span className="text-2xl font-bold text-red-500">
                 {parseFloat(detailBill?.total).toLocaleString()} đ
               </span>

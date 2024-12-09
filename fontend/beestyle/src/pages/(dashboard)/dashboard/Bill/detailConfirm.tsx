@@ -118,6 +118,7 @@ const DetailConfirm = ({ isCheckAddresses, idAddresses, isUpdateAddresses, setCh
     },
     onSuccess: () => {
       toast.success('Trạng thái đơn hàng đã được cập nhật thành công.');
+      navigate('/admin/dashboard/bill/list')
     },
     onError: (error: any) => {
       toast.error(error.response?.data?.message || 'Không thể cập nhật trạng thái đơn hàng.');
@@ -242,7 +243,6 @@ const DetailConfirm = ({ isCheckAddresses, idAddresses, isUpdateAddresses, setCh
   }, [districtId, setValue]);
 
 
-
   if (isLoading)
     return <Spin tip="Loading..." className="flex justify-center items-center h-screen" />;
 
@@ -255,7 +255,7 @@ const DetailConfirm = ({ isCheckAddresses, idAddresses, isUpdateAddresses, setCh
           <div className="bg-white shadow-md flex items-center justify-between px- py-2">
             <div className="flex items-center px-5">
               <MenuOutlined className="text-xl mr-4 cursor-pointer" />
-              <h2 className="text-xl font-bold text-gray-800">Đơn Hàng</h2>
+              <h2 className="text-[18px] font-bold text-gray-800">Đơn Hàng</h2>
             </div>
 
             <div className="flex-grow px-4">
@@ -268,7 +268,7 @@ const DetailConfirm = ({ isCheckAddresses, idAddresses, isUpdateAddresses, setCh
 
           <div className="bg-white shadow-lg mb-4">
             <div className="w-full p-5">
-              <h3 className="text-lg font-bold mb-6 text-gray-900 border-b pb-4">Thông Tin Sản Phẩm</h3>
+              <h3 className="text-[18px] font-bold mb-6 text-gray-900 border-b pb-4">Thông Tin Sản Phẩm</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                 {detailConfirm?.bill_detail?.map((item: any) => (
                   <div
@@ -295,7 +295,7 @@ const DetailConfirm = ({ isCheckAddresses, idAddresses, isUpdateAddresses, setCh
             <div className="flex items-center justify-between mb-4 p-4 border-b bg-slate-100">
               <div className="flex items-center gap-2">
                 <EnvironmentOutlined style={{ fontSize: '1.5rem', color: '#333' }} />
-                <h3 className="text-lg font-bold">Nhận hàng</h3>
+                <h3 className="text-[18px] font-bold">Nhận hàng</h3>
               </div>
               <Select
                 className='h-[38px]'
@@ -403,7 +403,7 @@ const DetailConfirm = ({ isCheckAddresses, idAddresses, isUpdateAddresses, setCh
             <Button
               type="default"
               className="rounded-md px-4 w-[150px] transition duration-300 ease-in-out transform hover:scale-105"
-              onClick={() => navigate('/admin/dashboard/bill/app')}
+              onClick={() => navigate('/admin/dashboard/bill/list')}
             >
               Quay Lại
             </Button>

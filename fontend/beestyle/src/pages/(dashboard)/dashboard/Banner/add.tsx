@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Button, Form, Input, Radio, Select, Upload, message } from 'antd';
+import { Button, Cascader, Form, Input, Radio, Select, Upload, message } from 'antd';
 import { UploadOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import { useMutation, useQuery } from '@tanstack/react-query';
@@ -12,16 +12,33 @@ const AddBanners: React.FC = () => {
   const [messageApi, contextHolder] = message.useMessage();
   const navigate = useNavigate();
   const [file, setFile] = useState<File | null>(null);
-  const [bannerType, setBannerType] = useState<string>(''); // Lưu trạng thái của `type`
+  const [bannerType, setBannerType] = useState<string>('');
+  const [loading, setLoading] = useState<boolean>(false);
 
   // Fetch categories
-  const { data: categoryData, isLoading: categoryLoading } = useQuery({
+  const { data: categories, isLoading: isLoadingCategories } = useQuery({
     queryKey: ['categories'],
     queryFn: async () => {
       const response = await axiosInstance.get('http://127.0.0.1:8000/api/admins/categories');
       return response.data;
     },
   });
+  const categoryOptions = categories?.map((category: any) => ({
+    value: category.id,
+    label: category.name,
+    children: category.children_recursive && category.children_recursive.length > 0
+      ? category.children_recursive.map((child: any) => ({
+        value: child.id,
+        label: child.name,
+        children: child.children_recursive && child.children_recursive.length > 0
+          ? child.children_recursive.map((subChild: any) => ({
+            value: subChild.id,
+            label: subChild.name,
+          }))
+          : [],
+      }))
+      : [],
+  }));
 
   // Mutation để thêm banner
   const { mutate } = useMutation({
@@ -35,6 +52,8 @@ const AddBanners: React.FC = () => {
       form.resetFields();
       setFile(null);
       setBannerType('');
+      setLoading(false);
+
     },
     onError: (error: any) => {
       const errorMessage = error.response?.data?.message || `Lỗi: ${error.message}`;
@@ -43,14 +62,16 @@ const AddBanners: React.FC = () => {
   });
 
   const onFinish = (values: any) => {
+    setLoading(true);
+    const selectedCategoryId = Array.isArray(values.category_id)
+      ? values.category_id[values.category_id.length - 1] // Lấy phần tử cuối cùng
+      : values.category_id;
     const formData = new FormData();
-    
+
     if (values.type) formData.append('type', values.type);
     if (values.title) formData.append('title', values.title);
-    if (values.category_id) formData.append('category_id', values.category_id.toString());
+    if (selectedCategoryId) formData.append('category_id', selectedCategoryId.toString());
     if (values.status) formData.append('status', values.status.toString());
-    if (values.link) formData.append('link', values.link);
-
     if (file) {
       formData.append('image_path', file);
     }
@@ -69,15 +90,17 @@ const AddBanners: React.FC = () => {
   const handleTypeChange = (value: string) => {
     setBannerType(value);
     if (value === 'main') {
-      form.setFieldsValue({ category_id: undefined, link: undefined });
+      form.setFieldsValue({ category_id: undefined });
     } else if (value === 'category') {
-      form.setFieldsValue({ link: undefined });
+      form.setFieldsValue({});
     } else if (value === 'custom') {
+      form.setFieldsValue({ category_id: undefined });
+    } else if (value === 'collection') {
       form.setFieldsValue({ category_id: undefined });
     }
   };
 
-  if (categoryLoading) {
+  if (isLoadingCategories) {
     return <div>Đang tải danh mục...</div>;
   }
 
@@ -92,47 +115,38 @@ const AddBanners: React.FC = () => {
           onFinish={onFinish}
           initialValues={{
             title: '',
-            category_id: undefined,
-            link: '',
+            category_id: "",
             type: '',
-            status: 1,
+            status: 0,
           }}
         >
-          {/* Chỉ hiển thị loại banner ban đầu */}
-          <Form.Item name="type" label="Loại Banner">
-            <Select placeholder="Chọn loại banner" onChange={handleTypeChange} allowClear>
+          <Form.Item name="type" label="Loại Banner" className='mb-[10px]'>
+            <Select placeholder="Chọn loại banner" onChange={handleTypeChange} allowClear className='h-10'>
               <Option value="main">Banner Chính</Option>
               <Option value="category">Banner Danh Mục</Option>
               <Option value="custom">Banner Tự Do</Option>
+              <Option value="collection">Bộ Sưu Tập</Option>
             </Select>
           </Form.Item>
 
-          {/* Hiển thị các trường khác khi `type` được chọn */}
           {bannerType && (
             <>
-              <Form.Item name="title" label="Tiêu đề Banner">
-                <Input placeholder="Nhập tiêu đề banner" />
+              <Form.Item name="title" label="Tiêu đề Banner" className='mb-[10px]'>
+                <Input placeholder="Nhập tiêu đề banner" className='h-10' />
               </Form.Item>
 
               {bannerType === 'category' && (
-                <Form.Item name="category_id" label="Danh mục">
-                  <Select placeholder="Chọn danh mục">
-                    {categoryData?.map((category: any) => (
-                      <Option key={category.id} value={category.id}>
-                        {category.name}
-                      </Option>
-                    ))}
-                  </Select>
+                <Form.Item
+                  label="Danh mục"
+                  name="category_id"
+                  className='mb-[10px]'
+                  rules={[{ required: true, message: "Danh mục sản phẩm bắt buộc!" }]}
+                >
+                  <Cascader options={categoryOptions} className='h-10' />
                 </Form.Item>
               )}
 
-              {/* {bannerType !== 'main' && (
-                <Form.Item name="link" label="Đường link (Tùy chọn)">
-                  <Input placeholder="Nhập đường link" />
-                </Form.Item>
-              )} */}
-
-              <Form.Item name="status" label="Trạng thái">
+              <Form.Item name="status" label="Trạng thái" className='mb-[10px]'>
                 <Radio.Group>
                   <Radio value={0}>Không hoạt động</Radio>
                   <Radio value={1}>Hoạt động</Radio>
@@ -149,8 +163,8 @@ const AddBanners: React.FC = () => {
 
           <Form.Item>
             <div className="flex justify-end space-x-4">
-              <Button type="default" htmlType="submit">
-                Thêm mới
+              <Button type="primary" htmlType="submit" loading={loading}>
+                Submit
               </Button>
               <Button onClick={() => navigate('/admin/dashboard/banner/list')}>Quay lại</Button>
             </div>

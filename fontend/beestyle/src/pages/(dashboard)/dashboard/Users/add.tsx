@@ -72,7 +72,7 @@ const AddUser: React.FC = () => {
                 { pattern: /^[a-zA-Z\s-]+$/, message: 'Tên chỉ chứa chữ cái, khoảng trắng và dấu gạch nối' },
               ]}
             >
-              <Input placeholder="Nhập tên người dùng" size="large" prefix={<UserOutlined />}/>
+              <Input placeholder="Nhập tên người dùng" size="large" prefix={<UserOutlined />} />
             </Form.Item>
 
             <Form.Item
