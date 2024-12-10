@@ -1,24 +1,26 @@
-import { message } from 'antd'
-import React from 'react'
-import { Navigate } from 'react-router-dom'
+import { message } from 'antd';
+import React from 'react';
+import { Navigate } from 'react-router-dom';
 
 type Props = {
     children: React.ReactNode;
-    userRole: string | null;
-}
+};
 
-const PrivateRouter = ({ children, userRole }: Props) => {
-    const token = localStorage.getItem('token');
-    const user = JSON.parse(localStorage.getItem('user') || '{}');
-    console.log(token, user);
+const PrivateRouter = ({ children }: Props) => {
+    const token = localStorage.getItem('tokenadmin');
+    const userRole = localStorage.getItem('role');  // Lấy role từ localStorage
+
+    console.log(token, userRole);  // Kiểm tra xem token và role có chính xác không
 
     let check: boolean = true;
-    if (!token || user?.role !== 'admin') {
+
+    // Kiểm tra nếu không có token hoặc role không phải là "admin"
+    if (!token || userRole !== 'admin') {
         check = false;
-        message.error("Bạn không có quyền truy cập");
+        message.error("Bạn không có quyền truy cập.");
     }
-    console.log(check);
 
     return check ? children : <Navigate to={'/admin'} />;
-}
+};
+
 export default PrivateRouter;
