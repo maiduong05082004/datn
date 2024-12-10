@@ -64,6 +64,7 @@ import ListUserChat from "@/pages/(dashboard)/dashboard/ChatRealTime/ListUserCha
 import DetailPro from "@/pages/(dashboard)/dashboard/Product/detailpro";
 import ListAllChart from "@/pages/(dashboard)/dashboard/Statistics/page";
 import DetailProduct from "@/pages/(dashboard)/dashboard/Product/detail";
+import PrivateRouter from "./PrivateRoute";
 
 const Router = () => {
 
@@ -106,7 +107,6 @@ const Router = () => {
                     <Route path="bill/list" element={<ListBill />} />
                     <Route path="bill/detail/:id" element={<DetailBill />} />
                     <Route path="bill/detailSuccessful/:id" element={<Detailship />} />
-                    {/* <Route path="bill/detailConfirm/:id" element={<DeatilConfirm />} /> */}
                     {/* <Route path="bill/detailConfirm/:id" element={<DeatilConfirm />} /> */}
                     <Route path="bill/cancel/:id" element={<CancelBill />} />
                     {/* <Route path="bill/detailConfirm/:id" element={<DeatilConfirm />} /> */}
