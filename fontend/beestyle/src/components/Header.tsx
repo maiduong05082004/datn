@@ -50,7 +50,7 @@ const Header = ({ isSearch, setIsSearch }: Props) => {
     return (
         <>
             <div className="bg-black h-[42px] text-center flex">
-                <span className='text-white justify-center flex m-auto text-[11px] font-[600] lg:text-[14px]'>Ưu đãi 5% cho dơnd hàng đầu tiên* | Nhập mã: MLBWELCOM</span>
+                <span className='text-white justify-center flex m-auto text-[11px] font-[600] lg:text-[14px]'>Ưu đãi 5% cho dơn hàng đầu tiên* | Nhập mã: MLBWELCOM</span>
             </div>
             <header className='py-[8px] h-[57px] sticky top-0 bg-white lg:h-[64px] mt-[0.1px] border-b-[1px] border-b-[##e8e8e8] lg:border-none z-20'>
                 <div className="flex text-center justify-center h-[100%] px-[15px] pc:px-[48px]">
@@ -127,7 +127,9 @@ const Header = ({ isSearch, setIsSearch }: Props) => {
                                             </div>
                                         )}
 
+                                        <div>
 
+                                        </div>
                                     </li>
                                 ))}
                             </ul>
