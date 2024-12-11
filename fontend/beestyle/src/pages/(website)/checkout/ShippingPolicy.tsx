@@ -2,7 +2,7 @@ import React from "react";
 
 const ShippingPolicyPage = () => {
     return (
-        <div className="container mx-auto p-6 max-w-screen-lg">
+        <div className="bg-gray-50">
             {/* Banner full ngang */}
             <div className="relative w-full h-[300px] mb-12">
                 <img
@@ -24,56 +24,56 @@ const ShippingPolicyPage = () => {
             </div>
 
             {/* Content Section */}
-            <div className="space-y-8">
+            <div className="container mx-auto px-6 py-12 max-w-7xl">
                 <div>
                     <h2 className="text-2xl font-semibold text-gray-800">I. GIAO HÀNG TIÊU CHUẨN</h2>
-                    <p className="text-lg text-gray-600">
+                    <p className="text-lg text-gray-600 mb-4">
                     BeeStyle Việt Nam phục vụ giao hàng cho Khách hàng trên toàn quốc, ngoại trừ một số khu vực sau: Xã Hoàng Sa (Huyện Hoàng Sa, Đà Nẵng), Xã Trường Sa, Xã Song Tử Tây, Xã Sinh Tồn (Huyện Trường Sa, Khánh Hòa).
                     </p>
-                    <p className="text-lg text-gray-600">
+                    <p className="text-lg text-gray-600 mb-4">
                         Thời gian phục vụ giao hàng: BeeStyle Việt Nam phục vụ giao hàng trong giờ hành chính thứ 2 đến thứ 7 (trừ Chủ nhật và ngày Lễ, Tết). Trong trường hợp, quý khách đặt hàng sau 18h, thời gian giao hàng sẽ cộng dồn thêm 1 ngày.
                     </p>
-                    <ul className="list-disc pl-8 text-lg text-gray-600">
-                        <li>Nội thành HCM và HN: dự kiến giao từ 2-3 ngày (kể từ lúc Nhân Viên Xác Nhận Đơn Hàng Thành Công).</li>
-                        <li>Ngoại tỉnh: dự kiến giao hàng từ 3-5 ngày (kể từ lúc Nhân Viên Xác Nhận Đơn Hàng Thành Công).</li>
+                    <ul className="list-disc pl-8 text-lg text-gray-600 mb-4">
+                        <li className="mb-4">Nội thành HCM và HN: dự kiến giao từ 2-3 ngày (kể từ lúc Nhân Viên Xác Nhận Đơn Hàng Thành Công).</li>
+                        <li className="mb-4">Ngoại tỉnh: dự kiến giao hàng từ 3-5 ngày (kể từ lúc Nhân Viên Xác Nhận Đơn Hàng Thành Công).</li>
                         
                     </ul>
-                    <p className="text-lg text-gray-600">
+                    <p className="text-lg text-gray-600 mb-4">
                         Đơn hàng sẽ được giao đến địa chỉ của khách hàng, ngoại trừ các trường hợp như: khu vực văn phòng hạn chế ra vào, khu vực chung cư/cao tầng (chỉ phục vụ giao tại chân tòa nhà) hoặc bên trong các khu vực hạn chế đi lại (khu vực quân sự, biên giới,…).
                     </p>
-                    <p className="text-lg italic text-gray-600">
+                    <p className="text-lg italic text-gray-600 mb-4">
                         Lưu ý: Những đơn hàng dưới 1.000.000đ sẽ tính thêm phí giao hàng. Phí giao hàng có thể thay đổi tùy vào trọng lượng kiện hàng sau khi đóng gói.
                     </p>
                     <h3 className="text-xl font-semibold text-gray-800 mt-4">Chính sách đồng kiểm:</h3>
-                    <p className="text-lg text-gray-600">
+                    <p className="text-lg text-gray-600 mb-4">
                         Nhằm đáp ứng nhu cầu và bảo vệ tối đa quyền lợi khách hàng khi sử dụng dịch vụ, BeeStyle Việt Nam có chính sách đồng kiểm khi giao hàng, quý khách được quyền yêu cầu đồng kiểm khi nhận hàng và ký xác nhận vào biên bản đồng kiểm (nếu có) theo hướng dẫn sau:
                     </p>
-                    <ul className="list-disc pl-8 text-lg text-gray-600">
-                        <li>Kiểm tra tình trạng hộp/gói hàng: hàng được đóng gói cẩn thận, bọc nguyên kiện với băng dính; không có dấu hiệu móp, méo hay rách thủng.</li>
-                        <li>Kiểm tra sản phẩm: còn nguyên tem mác, đảm bảo khớp về số lượng, màu sắc, tình trạng, chủng loại, kích cỡ đúng với đơn hàng của quý khách. Việc kiểm tra ngoại quan, không bao gồm việc sử dụng thử sản phẩm.</li>
-                        <li>Sau khi kiểm tra, nếu không hài lòng với tình trạng sản phẩm được giao, quý khách có thể từ chối nhận hàng.</li>
+                    <ul className="list-disc pl-8 text-lg text-gray-600 mb-4">
+                        <li className="mb-4">Kiểm tra tình trạng hộp/gói hàng: hàng được đóng gói cẩn thận, bọc nguyên kiện với băng dính; không có dấu hiệu móp, méo hay rách thủng.</li>
+                        <li  className="mb-4">Kiểm tra sản phẩm: còn nguyên tem mác, đảm bảo khớp về số lượng, màu sắc, tình trạng, chủng loại, kích cỡ đúng với đơn hàng của quý khách. Việc kiểm tra ngoại quan, không bao gồm việc sử dụng thử sản phẩm.</li>
+                        <li  className="mb-4">Sau khi kiểm tra, nếu không hài lòng với tình trạng sản phẩm được giao, quý khách có thể từ chối nhận hàng.</li>
                         
                     </ul>
                     <p className="font-bold underline">Đối với sản phẩm trang phục và phụ kiện thời trang:</p>
                     <p className="list-disc pl-8 text-lg text-gray-600">Đối với các trường hợp bất khả kháng không thể đồng kiểm khi nhận hàng: Quý Khách vui lòng thực hiện quay video clip khi mở kiện hàng, việc lưu trữ hình ảnh/video sẽ góp phần giải quyết tốt hơn các vấn đề phát sinh về sau.</p>
-                    <p className="text-lg italic text-gray-600 mt-4">
+                    <p className="text-lg italic text-gray-600 mt-4 mb-4">
                         Lưu ý: Sản phẩm online sẽ được đóng gói niêm phong bằng thùng carton thường sẽ không kèm túi giấy.
                     </p>
                 </div>
 
                 <div>
                     <h2 className="text-2xl font-semibold text-gray-800">II. GIAO HÀNG NHANH 4H - HỎA TỐC</h2>
-                    <p className="text-lg text-gray-600">
+                    <p className="text-lg text-gray-600 mb-4">
                         Khu vực áp dụng giao hàng nhanh: Chỉ áp dụng tại nội thành Hồ Chí Minh và Hà Nội.
                     </p>
-                    <p className="text-lg text-gray-600">
+                    <p className="text-lg text-gray-600 mb-4">
                         Thời gian giao hàng:
                     </p>
-                    <ul className="list-disc pl-8 text-lg text-gray-600">
-                        <li>Đơn hàng đặt trước 17h: sẽ được giao trong vòng từ 2h-4h.</li>
-                        <li>Đơn hàng đặt sau 17h: sẽ được giao trước 12h hôm sau.</li>
+                    <ul className="list-disc pl-8 text-lg text-gray-600 mb-4">
+                        <li className="mb-4">Đơn hàng đặt trước 17h: sẽ được giao trong vòng từ 2h-4h.</li>
+                        <li className="mb-4">Đơn hàng đặt sau 17h: sẽ được giao trước 12h hôm sau.</li>
                     </ul>
-                    <p className="text-lg italic text-gray-600">
+                    <p className="text-lg italic text-gray-600 mb-4">
                         Lưu ý: Trường hợp khách hàng cần gấp trong ngày, hãy liên hệ CSKH qua hotline 094.705.9709 hoặc email cskh.mlbkorea@gmail.com để được hỗ trợ giao trước 20h.
                     </p>
                     <p className="text-lg text-gray-600 mt-4">
@@ -82,7 +82,7 @@ const ShippingPolicyPage = () => {
                     <p className="text-lg text-gray-600 mt-4">
                         Quý Khách vui lòng thực hiện quay video clip khi mở kiện hàng, việc lưu trữ hình ảnh/video sẽ góp phần giải quyết tốt hơn các vấn đề phát sinh về sau.
                     </p>
-                    <p className="text-lg text-gray-600 mt-4">
+                    <p className="text-lg text-gray-600 mt-4 mb-4">
                         Thời gian tiếp nhận khiếu nại đối với đơn hàng vận chuyển HỎA TỐC là 24h tính từ thời điểm hoàn tất giao hàng hoặc từ chối nhận hàng nếu phát hiện nhân viên giao sản phẩm không đủ điều kiện (hư hỏng, đánh tráo, hay bao bì không còn nguyên vẹn..).
                     </p>
                 </div>
