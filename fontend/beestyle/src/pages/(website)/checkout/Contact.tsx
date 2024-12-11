@@ -13,14 +13,17 @@ const ContactPage = () => {
           />
           <div className="absolute inset-0 flex flex-col items-center justify-center bg-black bg-opacity-40 text-center">
             <h1 className="text-white text-3xl font-bold mb-4">Thông tin liên hệ</h1>
+            
             <a href="/" className="text-white text-xl mb-0">
               Quay về
             </a>
           </div>
         </div>
+
         <div className="container mx-auto px-6 py-12 max-w-7xl">
           <div>
             <h1 className="text-4xl font-bold text-gray-800">Thông Tin Liên Hệ</h1>
+
             <p className="text-lg text-gray-600 mt-4">
               Vui lòng tham khảo thông tin dưới đây để liên hệ với chúng tôi.
             </p>
@@ -29,7 +32,9 @@ const ContactPage = () => {
           <div className="bg-white p-8 rounded-lg shadow-md space-y-6">
             {/* Địa chỉ */}
             <div className="flex items-center">
+
               <i className="fas fa-map-marker-alt text-blue-600 text-2xl mr-4"></i>
+
               <p className="text-lg text-gray-800">
                 Địa chỉ: Trụ sở chính Tòa nhà FPT Polytechnic, Phố Trịnh Văn Bô, Nam Từ Liêm, Hà Nội
               </p>
@@ -37,7 +42,9 @@ const ContactPage = () => {
 
             {/* Số điện thoại */}
             <div className="flex items-center">
+
               <i className="fas fa-phone-alt text-blue-600 text-2xl mr-4"></i>
+
               <p className="text-lg text-gray-800">
                 Điện thoại: <a href="tel:0947059709" className="text-blue-600">0846739434</a>
               </p>
@@ -45,7 +52,9 @@ const ContactPage = () => {
 
             {/* Zalo */}
             <div className="flex items-center">
+
               <i className="fas fa-comment-alt text-blue-600 text-2xl mr-4"></i>
+
               <p className="text-lg text-gray-800">
                 Zalo: <a href="https://zalo.me/0947059709" className="text-blue-600">0846739434</a>
               </p>
@@ -53,7 +62,9 @@ const ContactPage = () => {
 
             {/* Giờ làm việc */}
             <div className="flex items-center">
+
               <i className="fas fa-clock text-blue-600 text-2xl mr-4"></i>
+
               <p className="text-lg text-gray-800">
                 Giờ làm việc: Thứ 2 - Thứ 7, từ 9:00 AM - 6:00 PM
               </p>
