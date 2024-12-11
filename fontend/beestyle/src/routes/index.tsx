@@ -65,6 +65,12 @@ import PrivateRouter from "./PrivateRoute";
 import ListBannerCollection from "@/pages/(dashboard)/dashboard/Banner/list_collection";
 import ListAllChart from "@/pages/(dashboard)/dashboard/Statistics/page";
 import { ToastContainer } from "react-toastify";
+import PaymentPolicyPage from "@/pages/(website)/checkout/PaymentPolicy";
+import ReturnPolicyPage from "@/pages/(website)/checkout/ReturnPolicy";
+import ShippingPolicyPage from "@/pages/(website)/checkout/ShippingPolicy";
+import PrivacyPolicyPage from "@/pages/(website)/checkout/PrivacyPolicy";
+import ContactPage from "@/pages/(website)/checkout/Contact";
+
 
 const Router = () => {
 
@@ -79,6 +85,13 @@ const Router = () => {
                     <Route path="categories/:id" element={<ListPage />} />
                     <Route path="products/:id" element={<DetailPage />} />
                     <Route path="checkouts" element={<CheckOutPage />} />
+                    <Route path="/payment-policy" element={<PaymentPolicyPage />} />
+                    <Route path="/return-policy" element={<ReturnPolicyPage />} />
+                    <Route path="/shipping-policy" element={<ShippingPolicyPage />} />
+                    <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
+                    <Route path="/contact" element={<ContactPage />} />
+                    <Route path="forgot-password" element={<ForgotPasswordPage />} />
+                    <Route path="reset-password/:token" element={<ResetPasswordPage />} />
                     <Route path="search" element={<SearchPage isKeySearch={isKeySearch} />} />
                     <Route path="carts" element={<CartPage />} />
                     <Route path="account" element={<AccountPage />}>
@@ -95,6 +108,7 @@ const Router = () => {
                 <Route path="reset-password/:token" element={<ResetPasswordPage />} />
                 <Route path="signin" element={<PageSignin />} />
                 <Route path="signup" element={<PageSignup />} />
+            
 
                 {/* Admin Routes */}
                 <Route path="admin" element={<Signin />} />
