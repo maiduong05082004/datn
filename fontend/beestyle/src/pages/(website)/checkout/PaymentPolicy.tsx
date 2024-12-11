@@ -30,6 +30,7 @@ const PaymentPolicyPage = () => {
             <div className="container mx-auto px-6 py-12 max-w-7xl">
                 <div>
                     <h2 className="text-2xl font-semibold text-gray-800">I. THANH TOÁN ONLINE QUA ỨNG DỤNG QR CODE</h2>
+                    
                     <p className="text-lg text-gray-600 mb-4">
                         Ứng dụng thanh toán di động giúp đáp ứng nhu cầu thanh toán của quý khách hàng mà không cần tiền mặt hay qua ngân hàng.
                     </p>
@@ -43,6 +44,7 @@ const PaymentPolicyPage = () => {
 
                 <div>
                     <h2 className="text-2xl font-semibold text-gray-800">II. THANH TOÁN QUA VÍ ĐIỆN TỬ</h2>
+
                     <p className="text-lg text-gray-600 mb-4">
                         Ứng dụng thanh toán di động giúp đáp ứng nhu cầu thanh toán của quý khách hàng mà không cần tiền mặt hay qua ngân hàng. Quý khách hàng chỉ cần nạp tiền vào Ví và thanh toán. Toàn bộ hệ thống bảo mật theo Tiêu Chuẩn Quốc Tế PCI-DSS. Xác nhận mã OTP và thiết lập mật khẩu thanh toán 6 số bảo vệ.
                     </p>
@@ -50,6 +52,7 @@ const PaymentPolicyPage = () => {
 
                 <div>
                     <h2 className="text-2xl font-semibold text-gray-800">III. THANH TOÁN BẰNG PAYPAL</h2>
+
                     <p className="text-lg text-gray-600 mb-4">
                         Được kết nối TLS và HTTPS, chức năng key pinning trên điện thoại cũng như việc tuân thủ tiêu chuẩn PCI có thể giúp việc thanh toán an toàn hơn.
                     </p>
@@ -57,6 +60,7 @@ const PaymentPolicyPage = () => {
 
                 <div>
                     <h2 className="text-2xl font-semibold text-gray-800">IV. THANH TOÁN KHI NHẬN HÀNG (COD)</h2>
+
                     <p className="text-lg text-gray-600">
                         COD – Cash on delivery, nghĩa là thanh toán khi nhận hàng. Khi chọn phương thức thanh toán này, khách hàng sẽ trả tiền mặt cho nhân viên giao hàng ngay khi nhận được đơn hàng và đồng kiểm sản phẩm.BeeStyle Việt Nam chấp nhận hình thức thanh toán khi nhận hàng đối với các đơn hàng có giá trị dưới 5 triệu VND và áp dụng cho tất cả các tỉnh thành BeeStyle Việt Nam có thể giao hàng trong lãnh thổ Việt Nam.
                     </p>

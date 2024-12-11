@@ -12,6 +12,7 @@ const PrivacyPolicyPage = () => {
                 />
                 <div className="absolute inset-0 flex flex-col items-center justify-center bg-black bg-opacity-40 text-center">
           <h1 className="text-white text-3xl font-bold mb-4">Chính sách bảo mật</h1>
+          
           <a href="/" className="text-white text-xl mb-0">
             Quay về
           </a>
@@ -19,15 +20,19 @@ const PrivacyPolicyPage = () => {
             </div>
 
       {/* Content Section */}
+
       <div className="container mx-auto px-6 py-12 max-w-7xl">
         <div>
           <h2 className="text-2xl font-semibold text-gray-800">Cám ơn quý khách đã quan tâm và truy cập vào website</h2>
+
           <p className="text-lg text-gray-600 mb-4">
             Chúng tôi tôn trọng và cam kết sẽ bảo mật những thông tin mang tính riêng tư của Quý khách.
           </p>
+
           <p className="text-lg text-gray-600 mb-4">
             Chính sách bảo mật sẽ giải thích cách chúng tôi tiếp nhận, sử dụng và (trong trường hợp nào đó) tiết lộ thông tin cá nhân của Quý khách.
           </p>
+
           <p className="text-lg text-gray-600 mb-4">
             Bảo vệ dữ liệu cá nhân và gây dựng được niềm tin cho quý khách là vấn đề rất quan trọng với chúng tôi. Vì vậy, chúng tôi sẽ dùng tên và các thông tin khác liên quan đến quý khách tuân thủ theo nội dung của Chính sách bảo mật.
           </p>
@@ -56,6 +61,7 @@ const PrivacyPolicyPage = () => {
 
         <div>
           <h2 className="text-2xl font-semibold text-gray-800">3. Quyền lợi khách hàng</h2>
+
           <ul className="list-disc pl-6 text-lg text-gray-600">
             <li>Quý khách có quyền yêu cầu truy cập vào dữ liệu cá nhân của mình, có quyền yêu cầu chúng tôi sửa lại những sai sót trong dữ liệu của bạn mà không mất phí. Bất cứ lúc nào bạn cũng có quyền yêu cầu chúng tôi ngưng sử dụng dữ liệu cá nhân của bạn cho mục đích tiếp thị.</li>
           </ul>

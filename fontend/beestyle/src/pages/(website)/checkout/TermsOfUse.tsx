@@ -12,6 +12,7 @@ function TermsOfUse() {
                 />
                 <div className="absolute inset-0 flex flex-col items-center justify-center bg-black bg-opacity-40 text-center">
                     <h1 className="text-white text-3xl font-bold mb-4">Điều khoản sử dụng</h1>
+
                     <a href="/" className="text-white text-xl mb-0">
                         Quay về
                     </a>
@@ -20,12 +21,16 @@ function TermsOfUse() {
 
             {/* Content Section */}
             <div className="container mx-auto px-6 py-12 max-w-7xl">
+
                 <h2 className="text-2xl font-semibold text-gray-800 mb-6">Điều Khoản Sử Dụng</h2>
 
                 <div className="space-y-8 text-lg leading-relaxed text-gray-600">
                     <div>
                         <p>
-                            Việc truy cập vào Trang web và / hoặc Dịch vụ này phải tuân theo các điều khoản và điều kiện này cũng như Chính sách bảo vệ Quyền riêng tư, Cookie và Dữ liệu của chúng tôi. Bằng cách truy cập Trang web này, đặt mua sản phẩm và sử dụng Dịch vụ, bạn đồng ý bị ràng buộc về mặt pháp lý bởi các Điều khoản này.
+                            Việc truy cập vào Trang web và / hoặc Dịch vụ này phải tuân theo
+                            các điều khoản và điều kiện này cũng như Chính sách bảo vệ Quyền riêng tư,
+                            Cookie và Dữ liệu của chúng tôi. Bằng cách truy cập Trang web này, đặt mua sản phẩm và sử dụng Dịch vụ,
+                            bạn đồng ý bị ràng buộc về mặt pháp lý bởi các Điều khoản này.
                         </p>
                     </div>
 
@@ -46,6 +51,7 @@ function TermsOfUse() {
 
                     <div>
                         <h3 className="text-xl font-bold text-gray-800">Định Nghĩa</h3>
+
                         <p className="list-disc pl-6 text-gray-800">
                             <p className="mb-4"><strong>Thỏa thuận:</strong> Thỏa thuận được hình thành bởi Điều khoản web.</p>
                             <p className="mb-4"><strong>Nội dung MLB:</strong> Tất cả nội dung của MLB được cung cấp trên hoặc thông qua Trang web này.</p>
@@ -68,7 +74,9 @@ function TermsOfUse() {
 
                     <div>
                         <h3 className="text-xl font-bold text-gray-800"> Mật Khẩu & Tài Khoản</h3>
+
                         <p className="list-disc pl-6 leading-relaxed ">
+
                             <p className="mb-4">Chúng tôi có thể yêu cầu khách hàng đăng ký một tài khoản trực tuyến ("Tài khoản") để cho phép khách hàng truy cập và sử dụng các phần nhất định của Trang web này hoặc truy cập các Dịch vụ nhất định. <br />
 
                                 Khách hàng đồng ý rằng Tài khoản của mình chỉ dành cho mục đích sử dụng cá nhân. Khách hàng đồng ý không:</p>
@@ -92,13 +100,17 @@ function TermsOfUse() {
 
                     <div>
                         <h3 className="text-xl font-bold text-gray-800 mb-4"> Sử Dụng Thông Tin Tài Khoản</h3>
+
                         <p>
-                            Bằng cách cung cấp thông tin được yêu cầu cho tài khoản của khách hàng, khách hàng đồng ý với việc sử dụng và tiết lộ tất cả thông tin đó cho các mục đích được nêu trong Chính sách Bảo mật của chúng tôi.
+                            Bằng cách cung cấp thông tin được yêu cầu cho tài khoản của khách hàng,
+                            khách hàng đồng ý với việc sử dụng và tiết lộ tất cả thông tin đó cho các mục đích được nêu
+                            trong Chính sách Bảo mật của chúng tôi.
                         </p>
                     </div>
 
                     <div>
                         <h3 className="text-xl font-bold text-gray-800"> Tạm Ngưng & Chấm Dứt Tài Khoản</h3>
+
                         <p className="list-disc pl-6">
                             <p className="mb-4">Khách hàng đồng ý rằng chúng tôi có quyền theo quyết định riêng và tuyệt đối của mình và không cần thông báo đối với:</p>
                             <p className="pl-6 leading-relaxed mb-4">Hạn chế, đình chỉ hoặc chấm dứt quyền truy cập của Khách hàng vào tất cả hoặc bất kỳ phần nào của Trang web hoặc Dịch vụ; và / hoặc chấm dứt, hủy kích hoạt hoặc tạm ngưng Tài khoản của Khách hàng, xóa Tài khoản của Khách hàng và tất cả các thông tin và tệp liên quan trong Tài khoản của Khách hàng mà không chỉ định bất kỳ lý do nào; và</p>
@@ -110,6 +122,7 @@ function TermsOfUse() {
 
                     <div>
                         <h3 className="text-xl font-bold text-gray-800">Hành Vi Trực Tuyến</h3>
+
                         <p className="list-disc pl-6">
                             <p className="mb-4">Khách hàng đồng ý: </p>
                             <p className="pl-6 leading-relaxed mb-4">Tuân thủ các Điều khoản web này, và các thông báo hoặc hướng dẫn khác có thể được chúng tôi đăng trên Trang web theo thời gian (sẽ được kết hợp bằng cách tham chiếu vào các Điều khoản web này);</p>
@@ -121,6 +134,7 @@ function TermsOfUse() {
 
                     <div>
                         <h3 className="text-xl font-bold text-gray-800">Nội Dung Người Dùng Hoặc Giấy Phép</h3>
+
                         <p className="list-disc pl-6">
                             <p className="mb-4">Khách hàng đồng ý tôn trọng và hành động hợp lý khi tham gia vào bất kỳ tính năng cộng đồng nào trên Dịch vụ cho phép Khách hàng tải lên hoặc gửi Nội dung Người dùng. Khách hàng đồng ý không sử dụng Trang web theo bất kỳ cách nào bất hợp pháp hoặc làm suy yếu hoạt động của Trang web hoặc tính khả dụng hoặc việc sử dụng của người khác.</p>
                             <p className=" mb-4">Khách hàng không thể gửi, tải lên hoặc xuất bản trên Trang web hoặc tới cho chúng tôi:</p>
@@ -142,6 +156,7 @@ function TermsOfUse() {
 
                     <div>
                         <h3 className="text-xl font-bold text-gray-800"> Giao Hàng và Hủy Đơn Đặt Hàng</h3>
+
                         <p className="list-disc pl-6">
                             <p className=" mb-4">Người Mua sẽ chỉ định trong Đơn Đặt Hàng tùy chọn giao hàng ưu tiên của Người Mua hoặc nếu có, tùy chọn thu tiền và nơi tùy chọn giao hàng được chọn, địa chỉ giao Sản Phẩm.</p>
                             <p className=" mb-4"> Luôn tuân theo sự chấp nhận Đơn Đặt Hàng của MLB.</p>
@@ -152,6 +167,7 @@ function TermsOfUse() {
                                     <li>Chi Phí Giao Hàng và Gửi Hàng; </li>
                                     <li>Chi phí giao hàng, tái giao hàng, vận chuyển, trả lại, chuyển tiếp, tái vận chuyển và chi phí hành chính, thuế, phí lưu kho và tiêu hủy và chi phí đối với bất kỳ (các) Sản Phẩm nào bị Người Mua từ chối nếu sự từ chối không được thực hiện theo quyền rõ ràng của Người Mua theo các Điều Kiện này hoặc khi bất kỳ giao hàng nào cho Người mua không thành công vì bất kỳ lý do gì.</li>
                                 </ul>
+
                                 <p className=" italic list-disc pl-8 text-lg text-gray-600 mb-6">Vui lòng đọc Điều Khoản Giao Hàng mới nhất của chúng tôi về việc giao hàng trong nước và quốc tế, áp dụng cho Hợp Đồng.</p>
                             </p>
 
@@ -165,6 +181,7 @@ function TermsOfUse() {
 
                                     Email: cskh.mlbkorea@gmail.com</strong>
                             </p>
+
                             <p className="mb-4">Theo từng lần, chúng tôi bảo lưu quyền, mà không chịu trách nhiệm pháp lý hoặc thông báo trước, thu hồi hoặc ngừng cung cấp bất kỳ hoặc tất cả Sản Phẩm từ Cửa Hàng Trực Tuyến, hoặc để:</p>
                             <p>
                                 <ul className="list-disc pl-8 text-lg text-gray-600 mb-6">
@@ -176,6 +193,7 @@ function TermsOfUse() {
                                     <li className="mb-4">Người Mua sẽ thanh toán mọi khoản phí hủy bỏ do chúng tôi áp đặt</li>
                                 </ul>
                             </p>
+
                             <p>Nếu một Đơn Đặt Hàng đã được xử lý, sẽ không được phép hủy hoặc hoàn tiền.</p>
 
                         </p>
