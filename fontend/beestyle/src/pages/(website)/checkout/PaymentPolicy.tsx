@@ -2,7 +2,7 @@ import React from "react";
 
 const PaymentPolicyPage = () => {
     return (
-        <div className="container mx-auto p-6 max-w-screen-lg">
+        <div className="bg-gray-50">
             {/* Banner full ngang */}
             <div className="relative w-full h-[300px] mb-12">
         <img
@@ -27,30 +27,30 @@ const PaymentPolicyPage = () => {
 
 
             {/* Content Section */}
-            <div className="space-y-8">
+            <div className="container mx-auto px-6 py-12 max-w-7xl">
                 <div>
                     <h2 className="text-2xl font-semibold text-gray-800">I. THANH TOÁN ONLINE QUA ỨNG DỤNG QR CODE</h2>
-                    <p className="text-lg text-gray-600">
+                    <p className="text-lg text-gray-600 mb-4">
                         Ứng dụng thanh toán di động giúp đáp ứng nhu cầu thanh toán của quý khách hàng mà không cần tiền mặt hay qua ngân hàng.
                     </p>
-                    <p className="text-lg text-gray-600">
+                    <p className="text-lg text-gray-600 mb-4">
                         Toàn bộ hệ thống bảo mật theo Tiêu Chuẩn Quốc Tế PCI-DSS. Xác nhận mã OTP và thiết lập mật khẩu thanh toán 6 số bảo vệ.
                     </p>
-                    <p className="text-lg text-gray-600">
+                    <p className="text-lg text-gray-600 mb-4">
                         Liên kết được nhiều ngân hàng khác nhau trên 1 tài khoản cổng thanh toán. Không cần điền lại thông tin ngân hàng cho những lần thanh toán sau.
                     </p>
                 </div>
 
                 <div>
                     <h2 className="text-2xl font-semibold text-gray-800">II. THANH TOÁN QUA VÍ ĐIỆN TỬ</h2>
-                    <p className="text-lg text-gray-600">
+                    <p className="text-lg text-gray-600 mb-4">
                         Ứng dụng thanh toán di động giúp đáp ứng nhu cầu thanh toán của quý khách hàng mà không cần tiền mặt hay qua ngân hàng. Quý khách hàng chỉ cần nạp tiền vào Ví và thanh toán. Toàn bộ hệ thống bảo mật theo Tiêu Chuẩn Quốc Tế PCI-DSS. Xác nhận mã OTP và thiết lập mật khẩu thanh toán 6 số bảo vệ.
                     </p>
                 </div>
 
                 <div>
                     <h2 className="text-2xl font-semibold text-gray-800">III. THANH TOÁN BẰNG PAYPAL</h2>
-                    <p className="text-lg text-gray-600">
+                    <p className="text-lg text-gray-600 mb-4">
                         Được kết nối TLS và HTTPS, chức năng key pinning trên điện thoại cũng như việc tuân thủ tiêu chuẩn PCI có thể giúp việc thanh toán an toàn hơn.
                     </p>
                 </div>

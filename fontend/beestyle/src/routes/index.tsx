@@ -70,6 +70,7 @@ import ReturnPolicyPage from "@/pages/(website)/checkout/ReturnPolicy";
 import ShippingPolicyPage from "@/pages/(website)/checkout/ShippingPolicy";
 import PrivacyPolicyPage from "@/pages/(website)/checkout/PrivacyPolicy";
 import ContactPage from "@/pages/(website)/checkout/Contact";
+import TermsOfUse from "@/pages/(website)/checkout/TermsOfUse";
 
 
 const Router = () => {
@@ -90,6 +91,7 @@ const Router = () => {
                     <Route path="/shipping-policy" element={<ShippingPolicyPage />} />
                     <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
                     <Route path="/contact" element={<ContactPage />} />
+                    <Route path="/terms-of-use" element={<TermsOfUse />} />
                     <Route path="forgot-password" element={<ForgotPasswordPage />} />
                     <Route path="reset-password/:token" element={<ResetPasswordPage />} />
                     <Route path="search" element={<SearchPage isKeySearch={isKeySearch} />} />
