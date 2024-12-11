@@ -4,7 +4,7 @@ const ContactPage = () => {
   return (
     <div className="bg-gray-50">
       <div className="text-center mb-12">
-        {/* Banner full ngang */}
+        
         <div className="relative w-full h-[300px] mb-12">
           <img
             src="https://bizweb.dktcdn.net/thumb/large/100/446/974/products/giay-mlb-chinh-hang-bigball-chunky-logo-ny-mau-kem-3ashbcv4n-50crs-2.jpg?v=1723951477623"

@@ -3,19 +3,19 @@ import React from "react";
 const ReturnPolicyPage = () => {
     return (
         <div className="bg-gray-50">
-            {/* Banner full ngang */}
+            
             <div className="relative w-full h-[300px] mb-12">
                 <img
                     src="https://bizweb.dktcdn.net/thumb/large/100/446/974/products/giay-mlb-chinh-hang-bigball-chunky-logo-ny-mau-kem-3ashbcv4n-50crs-2.jpg?v=1723951477623" // Thay đổi hình ảnh banner ở đây
                     alt="Banner"
                     className="w-full h-full object-cover rounded-lg"
                 />
-                {/* Chữ và link trên banner */}
+               
                 <div className="absolute inset-0 flex flex-col items-center justify-center bg-black bg-opacity-40 text-center">
                     <h1 className="text-white text-3xl font-bold mb-4">Chính Sách Đổi Trả</h1>
-                    {/* Link quay về */}
+                   
                     <a
-                        href="/" // Thay đổi link về trang chủ hoặc trang khác nếu cần
+                        href="/" 
                         className="text-white text-xl mb-0"
                     >
                         Quay về
