@@ -7,10 +7,9 @@ const instance = axios.create({
 instance.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('user');
-    const cleanToken = token ? token.replace(/"/g, "") : null;
 
-    if (cleanToken) {
-      config.headers.Authorization = `Bearer ${cleanToken}`;
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
     }
     return config;
   },

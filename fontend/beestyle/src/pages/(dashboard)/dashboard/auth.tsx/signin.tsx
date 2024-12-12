@@ -27,8 +27,8 @@ const Signin = () => {
         },
         onSuccess: (data) => {
             toast.success("Đăng Nhập Thành Công");
-            localStorage.setItem("tokenadmin", data.token)
-            localStorage.setItem("user", JSON.stringify(data.user));
+            // localStorage.setItem("tokenadmin", data.token)
+            localStorage.setItem("user", data.token);
             form.resetFields();
             navigate("/admin/dashboard");
         },

@@ -65,7 +65,7 @@ const AddProduct: React.FC = () => {
   const { data: variantgroup, isLoading: isLoadingVariantGroup } = useQuery({
     queryKey: ['variantgroup'],
     queryFn: async () => {
-      const response = await AxiosInstance.get('http://localhost:8000/api/admins/attribute_groups');
+      const response = await AxiosInstance.get(`api/admins/attribute_groups`);
       return response?.data?.variation;
     },
   });
@@ -73,7 +73,7 @@ const AddProduct: React.FC = () => {
   const { data: categories, isLoading: isLoadingCategories } = useQuery({
     queryKey: ['categories'],
     queryFn: async () => {
-      const response = await AxiosInstance.get('http://localhost:8000/api/admins/categories');
+      const response = await AxiosInstance.get(`api/admins/categories`);
       return response?.data;
     },
   });
@@ -98,7 +98,7 @@ const AddProduct: React.FC = () => {
 
   const { mutate } = useMutation({
     mutationFn: async (data: FormData) => {
-      const response = await AxiosInstance.post('http://localhost:8000/api/admins/products', data);
+      const response = await AxiosInstance.post(`api/admins/products`, data);
       return response.data;
     },
     onSuccess: () => {
@@ -115,6 +115,8 @@ const AddProduct: React.FC = () => {
     },
     onError: () => {
       toast.error('Thêm sản phẩm thất bại!');
+      setLoading(false);
+
     },
   });
 
