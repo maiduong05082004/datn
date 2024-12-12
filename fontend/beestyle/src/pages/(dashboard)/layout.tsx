@@ -47,7 +47,8 @@ const items1: MenuProps['items'] = [
       { key: 'sub2-1', label: <NavLink to="/admin/dashboard/banner/list/custom">Banners Tự Do</NavLink> },
       { key: 'sub2-2', label: <NavLink to="/admin/dashboard/banner/list/main">Banners Chính</NavLink> },
       { key: 'sub2-4', label: <NavLink to="/admin/dashboard/banner/list/category">Banners Danh Mục</NavLink> },
-      { key: 'sub2-5', label: <NavLink to="/admin/dashboard/banner/add">Thêm Banners</NavLink> },
+      { key: 'sub2-5', label: <NavLink to="/admin/dashboard/banner/list/collection">Banners Bộ Sưu Tập</NavLink> },
+      { key: 'sub2-6', label: <NavLink to="/admin/dashboard/banner/add">Thêm Banners</NavLink> },
     ],
   },
   {
@@ -93,11 +94,7 @@ const items1: MenuProps['items'] = [
   {
     key: 'sub6',
     icon: React.createElement(ProductOutlined),
-    label: 'Đơn Hàng',
-    children: [
-      // { key: 'sub6-1', label: <NavLink to="/admin/bill/list">Danh sách đơn hàng</NavLink> },
-      { key: 'sub6-1', label: <NavLink to="/admin/dashboard/bill/list">Danh sách đơn hàng</NavLink> },
-    ],
+    label: <NavLink to="/admin/dashboard/bill/list">Danh Sách Đơn Hàng</NavLink>,
   },
   {
     key: 'sub8',
@@ -119,12 +116,9 @@ const items1: MenuProps['items'] = [
   {
     key: 'inventory',
     icon: React.createElement(DatabaseOutlined),
-    label: 'Quản lý tồn kho',
-    children: [
-      { key: 'inventory-1', label: <NavLink to="/admin/dashboard/inventory/list">Danh sách tồn kho</NavLink> },
-    ],
-  },
-
+    label: <NavLink to="/admin/dashboard/inventory/list">Quản lý tồn kho</NavLink>,
+  }
+  ,
   {
     key: 'sub12',
     icon: React.createElement(TagOutlined),

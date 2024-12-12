@@ -27,8 +27,8 @@ interface Attribute {
 interface AttributeValue {
   id: number;
   value: string;
+  image_path?: string | null; 
 }
-
 interface Variant {
   attributeName: string;
   attributeValue: string;
@@ -198,8 +198,8 @@ const AddProduct: React.FC = () => {
     setLoading(true);
     const formData = new FormData();
     const formattedInputDay = moment(values.import_date).format("YYYY-MM-DD");
-    const selectedCategoryId = Array.isArray(values.category_id) 
-      ? values.category_id[values.category_id.length - 1] 
+    const selectedCategoryId = Array.isArray(values.category_id)
+      ? values.category_id[values.category_id.length - 1]
       : values.category_id;
 
     formData.append('name', values.name);
@@ -369,9 +369,9 @@ const AddProduct: React.FC = () => {
               </Form.Item>
 
               {attributes.map((attribute, index) => (
-                <Form.Item key={attribute.id} label={`Thuộc Tính (${attribute.name})`} className='mb-[15px]'>
+                <Form.Item key={attribute.id} label={`Thuộc Tính (${attribute.name})`} className="mb-[15px]">
                   <Select
-                    className='h-[40px]'
+                    className="h-[40px]"
                     mode="tags"
                     style={{ width: '100%' }}
                     placeholder={`Nhập giá trị cho ${attribute.name}`}
@@ -382,12 +382,22 @@ const AddProduct: React.FC = () => {
                   >
                     {attribute.attribute_values.map((val) => (
                       <Option key={val.id} value={val.id}>
-                        {val.value}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                          {val.image_path ? (
+                            <img
+                              src={val.image_path}
+                              alt={val.value}
+                              style={{ width: 20, height: 20, borderRadius: '50%' }}
+                            />
+                          ) : null}
+                          <span>{val.value}</span>
+                        </div>
                       </Option>
                     ))}
                   </Select>
                 </Form.Item>
               ))}
+
 
               <Button type="default" className='mb-4' onClick={generateVariants} icon={<PlusOutlined />}>
                 Tạo Biến Thể
@@ -455,7 +465,7 @@ const AddProduct: React.FC = () => {
                           )}
                         </Upload>
                         <Button
-                        className='mt-2'
+                          className='mt-2'
                           type="primary"
                           danger
                           onClick={() => handleResetImage(index, 'albumImages')}

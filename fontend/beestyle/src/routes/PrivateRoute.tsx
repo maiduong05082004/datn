@@ -8,13 +8,9 @@ type Props = {
 
 const PrivateRouter = ({ children }: Props) => {
     const token = localStorage.getItem('tokenadmin');
-    const userRole = localStorage.getItem('role');  // Lấy role từ localStorage
-
-    console.log(token, userRole);  // Kiểm tra xem token và role có chính xác không
-
+    const userRole = localStorage.getItem('user');
     let check: boolean = true;
 
-    // Kiểm tra nếu không có token hoặc role không phải là "admin"
     if (!token || userRole !== 'admin') {
         check = false;
         message.error("Bạn không có quyền truy cập.");

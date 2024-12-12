@@ -1,0 +1,436 @@
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { Spin, Table, Tabs, Tooltip, Button, Modal, InputNumber } from 'antd';
+import React, { useState } from 'react';
+import { format } from 'date-fns';
+import AxiosInstance from '@/configs/axios';
+import { toast } from 'react-toastify';
+import { useParams } from 'react-router-dom';
+
+type Product = {
+    id: string;
+    name: string;
+    price: string;
+    stock: number;
+    category_name: string;
+    description: string;
+    product_cost: {
+        cost_price: string;
+        supplier: string;
+        import_date: string;
+        sale_status: string; // Thêm dòng này
+    };
+};
+
+
+type Variation = {
+    id: string;
+    stock: number;
+    attribute_value_image_variant: {
+        value: string; // Màu sắc hoặc thuộc tính khác
+        image_path: string; // Hình ảnh của biến thể
+    };
+    variation_values: Array<{
+        value: string;
+        stock: number;
+        price: string;
+        discount: number;
+    }>;
+};
+
+type Props = {};
+
+const InventoryManagement = (props: Props) => {
+    const queryCient = useQueryClient();
+    const [isModalVisible, setIsModalVisible] = useState(false);
+    const [currentProduct, setCurrentProduct] = useState<Product | null>(null);
+    const [newStock, setNewStock] = useState<number | null>(null);
+    const [selectedVariant, setSelectedVariant] = useState<Variation | null>(null);
+    const handleVariantClick = (variant: Variation) => {
+        setSelectedVariant(variant);
+    };
+    const handleUpdateStock = () => {
+        if (newStock === null || newStock < 0) {
+            toast.error("Vui lòng nhập một số lượng hợp lệ.");
+            return;
+        }
+        if (currentProduct) {
+            updateStock({ id: currentProduct.id, stock: newStock });
+            setIsModalVisible(false); // Đóng modal
+        }
+    };
+    const { data: activeData, isLoading: loadingActive } = useQuery({
+        queryKey: ['activeProducts'],
+        queryFn: async () => {
+            const response = await AxiosInstance.get('http://127.0.0.1:8000/api/admins/inventory/listproductastive');
+            return response.data.data;
+        },
+    });
+
+    const { data: inactiveData, isLoading: loadingInactive } = useQuery({
+        queryKey: ['inactiveProducts'],
+        queryFn: async () => {
+            const response = await AxiosInstance.get('http://127.0.0.1:8000/api/admins/inventory/listproductinactive');
+            return response.data.data;
+        },
+    });
+
+    const { data: outOfStockData, isLoading: loadingOutOfStock } = useQuery({
+        queryKey: ['outOfStockProducts'],
+        queryFn: async () => {
+            const response = await AxiosInstance.get('http://127.0.0.1:8000/api/admins/inventory/product_isoutof_stock');
+            return response.data.data;
+        },
+    });
+
+    const { data: lowStockData, isLoading: loadingLowStock } = useQuery({
+        queryKey: ['lowStockProducts'],
+        queryFn: async () => {
+            const response = await AxiosInstance.post(
+                'http://127.0.0.1:8000/api/admins/inventory/listproducts_withfewsizes'
+            );
+            return response.data.data;
+        },
+    });
+
+    const { mutate: updateProductStatus } = useMutation<
+        unknown,
+        Error,
+        string
+    >({
+        mutationFn: async (id: string) => {
+            const response = await AxiosInstance.put(
+                `http://127.0.0.1:8000/api/admins/inventory/updateproductinactive/${id}`
+            );
+            return response.data;
+        },
+        onSuccess: () => {
+            toast.success('Trạng thái sản phẩm đã được chuyển sang Ngừng bán.');
+            queryCient.invalidateQueries({ queryKey: ['activeProducts'] });
+            queryCient.invalidateQueries({ queryKey: ['inactiveProducts'] });
+        },
+        onError: (error) => {
+            console.error('Lỗi:', error);
+            toast.error('Đã xảy ra lỗi khi cập nhật trạng thái sản phẩm.');
+        },
+    });
+
+    const { mutate: updateProductStatus2 } = useMutation<
+        unknown,
+        Error,
+        string
+    >({
+        mutationFn: async (id: string) => {
+            const response = await AxiosInstance.put(
+                `http://127.0.0.1:8000/api/admins/inventory/updateproductactivete/${id}`
+            );
+            return response.data;
+        },
+        onSuccess: (action) => {
+            toast.success(
+                `Trạng thái sản phẩm đã được chuyển sang ${action === 'activate' ? 'Đang bán' : 'Ngừng bán'
+                }.`
+            );
+            queryCient.invalidateQueries({ queryKey: ['activeProducts'] });
+            queryCient.invalidateQueries({ queryKey: ['inactiveProducts'] });
+        },
+        onError: (error) => {
+            console.error('Lỗi:', error);
+            toast.error('Đã xảy ra lỗi khi cập nhật trạng thái sản phẩm.');
+        },
+    });
+
+    const { mutate: updateStock } = useMutation<
+        unknown,
+        Error,
+        { id: string; stock: number }
+    >({
+        mutationFn: async ({ id, stock }) => {
+            const response = await AxiosInstance.put(
+                `http://127.0.0.1:8000/api/admins/inventory/updatestockproduct/${id}`,
+                { stock }
+            );
+            return response.data;
+        },
+        onSuccess: () => {
+            toast.success("Số lượng sản phẩm đã được cập nhật thành công!");
+            queryCient.invalidateQueries({ queryKey: ['lowStockProducts'] }); // Làm mới dữ liệu "Sắp hết hàng"
+        },
+        onError: (error) => {
+            console.error("Lỗi:", error);
+            toast.error(
+                "Đã xảy ra lỗi khi cập nhật số lượng sản phẩm. Hãy kiểm tra lại ID hoặc liên hệ với quản trị viên."
+            );
+        },
+    });
+
+    const { mutate: updateCategoryToSale } = useMutation<
+        unknown,
+        Error,
+        { id: string; category_id: number }
+    >({
+        mutationFn: async ({ id, category_id }) => {
+            const response = await AxiosInstance.put(
+                `http://127.0.0.1:8000/api/admins/inventory/salecategory/${id}`,
+                { category_id }
+            );
+            return response.data;
+        },
+        onSuccess: () => {
+            toast.success("Sản phẩm đã được chuyển vào danh mục giảm giá!");
+            queryCient.invalidateQueries();
+        },
+        onError: (error) => {
+            console.error("Lỗi:", error);
+            toast.error("Đã xảy ra lỗi khi chuyển sản phẩm vào danh mục giảm giá.");
+        },
+    });
+
+
+
+    if (loadingActive || loadingInactive || loadingOutOfStock || loadingLowStock)
+        return <Spin tip="Loading..." className="flex justify-center items-center h-screen" />;
+
+    // Table columns
+    const columns: Array<any> = [
+        {
+            title: 'STT',
+            dataIndex: 'index',
+            key: 'index',
+            align: 'center',
+            render: (_: any, __: Product, index: number) => <span>{index + 1}</span>,
+        },
+        {
+            title: 'Tên sản phẩm',
+            dataIndex: 'name',
+            key: 'name',
+            align: 'center',
+        },
+        {
+            title: 'Số lượng',
+            dataIndex: 'stock',
+            key: 'stock',
+            align: 'center',
+        },
+        {
+            title: 'Trạng thái',
+            dataIndex: ['product_cost', 'sale_status'], // Sử dụng nested key để truy cập sale_status
+            key: 'sale_status',
+            align: 'center',
+            width: "100px",
+            render: (sale_status: string) => {
+                let statusLabel = '';
+                let statusClass = '';
+
+                switch (sale_status) {
+                    case 'active':
+                        statusLabel = 'Đang bán';
+                        statusClass = ' text-green-500';
+                        break;
+                    case 'inactive':
+                        statusLabel = 'Ngừng Bán';
+                        statusClass = 'text-yellow-500';
+                        break;
+                    default:
+                        statusLabel = 'Không xác định';
+                        statusClass = 'bg-red-100 text-red-800';
+                }
+
+                return (
+                    <span className={`px-2 py-1 rounded-full text-sm font-semibold ${statusClass}`}>
+                        {statusLabel}
+                    </span>
+                );
+            },
+        }
+        ,
+        {
+            title: 'Giá nhập',
+            dataIndex: 'product_cost',
+            key: 'cost_price',
+            align: 'center',
+            render: (product_cost: { cost_price: string }) =>
+                product_cost?.cost_price ? `${parseFloat(product_cost.cost_price).toLocaleString()} VND` : 'Không có',
+        },
+        {
+            title: 'Nhà cung cấp',
+            dataIndex: 'product_cost',
+            key: 'supplier',
+            align: 'center',
+            render: (product_cost: { supplier: string }) => product_cost?.supplier || 'Không có',
+        },
+        {
+            title: 'Biến thể',
+            dataIndex: 'variations',
+            key: 'variations',
+            align: 'center',
+            render: (variations: Variation[]) => (
+                <div className=''>
+                    {variations?.map((variation) => (
+                        <Tooltip title={`Màu sắc: ${variation.attribute_value_image_variant.value}`} key={variation.id}>
+                            <Button
+                                type="link"
+                                onClick={() => handleVariantClick(variation)}
+                                style={{ padding: 0, margin: '5px' }}
+                            >
+                                <img
+                                    src={variation.attribute_value_image_variant.image_path}
+                                    alt={variation.attribute_value_image_variant.value}
+                                    style={{ width: 30, height: 30, borderRadius: '50%' }}
+                                />
+                            </Button>
+                        </Tooltip>
+                    ))}
+                </div>
+            ),
+        },
+        ,
+        {
+            title: 'Giá bán',
+            dataIndex: 'price',
+            key: 'price',
+            align: 'center',
+            render: (price: string) => `${parseFloat(price).toLocaleString()} VND`,
+        },
+        {
+            title: 'Danh mục',
+            dataIndex: 'category_name',
+            key: 'category_name',
+            align: 'center',
+        },
+        {
+            title: 'Hành động',
+            key: 'action',
+            align: 'center',
+            render: (text: any, record: Product) => (
+                <div style={{ display: 'flex', justifyContent: 'center', gap: '10px' }}>
+                    {/* Nếu trạng thái là inactive */}
+                    {record.product_cost?.sale_status === 'inactive' && (
+                        <Button
+                            type="primary"
+                            onClick={() => {
+                                updateProductStatus2(record.id);
+                            }}
+                        >
+                            Đăng Bán
+                        </Button>
+                    )}
+                    {/* Nếu trạng thái là active */}
+                    {record.product_cost?.sale_status === 'active' && (
+                        <Button
+                            type="primary"
+                            danger
+                            onClick={() => {
+                                updateProductStatus(record.id);
+                            }}
+                        >
+                            Ngừng bán
+                        </Button>
+                    )}
+                </div>
+            ),
+        }
+
+    ];
+
+    // Map data from API
+    const activeProducts = activeData?.map((product: Product, index: number) => ({
+        key: product.id,
+        index,
+        ...product,
+    }));
+
+    const inactiveProducts = inactiveData?.map((product: Product, index: number) => ({
+        key: product.id,
+        index,
+        ...product,
+    }));
+
+    const outOfStockProducts = outOfStockData?.map((product: Product, index: number) => ({
+        key: product.id,
+        index,
+        ...product,
+    }));
+
+    const lowStockProducts = lowStockData?.map((product: Product, index: number) => ({
+        key: product.id,
+        index,
+        ...product,
+    }));
+
+    // Tabs configuration
+    const items = [
+        {
+            key: '1',
+            label: 'Đang bán',
+            children: <Table dataSource={activeProducts} columns={columns} bordered />,
+        },
+        {
+            key: '2',
+            label: 'Ngừng bán (Hàng Tồn)',
+            children: <Table dataSource={inactiveProducts} columns={columns} bordered />,
+        },
+        {
+            key: '3',
+            label: 'Hết hàng',
+            children: <Table dataSource={outOfStockProducts} columns={columns} bordered />,
+        },
+        {
+            key: '4',
+            label: 'Sắp hết hàng',
+            children: <Table dataSource={lowStockProducts} columns={columns} bordered />,
+        },
+    ];
+
+    return (
+        <div className="p-5">
+            <Tabs defaultActiveKey="1" items={items} />
+            <Modal
+                title={`Cập nhật số lượng cho sản phẩm ${currentProduct ? `"${currentProduct.name}"` : ""
+                    }`}
+                visible={isModalVisible}
+                onCancel={() => setIsModalVisible(false)}
+                onOk={handleUpdateStock}
+            >
+                <InputNumber
+                    min={0}
+                    value={newStock}
+                    onChange={(value) => setNewStock(value)}
+                    style={{ width: "100%" }}
+                />
+            </Modal>
+            <Modal
+                title={`Chi tiết biến thể: ${selectedVariant ? selectedVariant.attribute_value_image_variant.value : ''}`}
+                visible={!!selectedVariant}
+                onCancel={() => setSelectedVariant(null)}
+                footer={null}
+                centered
+                width={600}
+            >
+                {selectedVariant ? (
+                    <div className="p-5 space-y-5 text-sm text-gray-800">
+                        <div className="text-lg font-semibold text-gray-700">
+                            <strong>Màu sắc:</strong> {selectedVariant.attribute_value_image_variant.value}
+                        </div>
+                        <div className="space-y-4">
+                            {selectedVariant.variation_values.map((variationValue, index) => (
+                                <div key={index} className="space-y-2">
+                                    <div><strong>Size:</strong> {variationValue.value}</div>
+                                    {/* <div><strong>Giá:</strong> {`${parseFloat(variationValue.price).toLocaleString()} VND`}</div> */}
+                                    <div><strong>Số lượng:</strong> {variationValue.stock}</div>
+                                    <hr className="border-gray-300" />
+                                </div>
+                            ))}
+                        </div>
+
+                    </div>
+                ) : (
+                    <p>Chưa chọn biến thể</p>
+                )}
+            </Modal>
+
+
+        </div>
+    );
+};
+
+export default InventoryManagement;

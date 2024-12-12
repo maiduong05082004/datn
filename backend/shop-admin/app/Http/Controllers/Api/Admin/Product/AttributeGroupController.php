@@ -57,7 +57,8 @@ class AttributeGroupController extends Controller
                         'attribute_values' => $item->attribute->values->map(function ($value) {
                             return [
                                 'id' => $value->id,
-                                'value' => $value->value
+                                'value' => $value->value,
+                                'image_path' => $value->image_path
                             ];
                         })->values() // Chuyển về danh sách các đối tượng có id và value
                     ];
@@ -125,11 +126,12 @@ class AttributeGroupController extends Controller
                     'attribute_values' => $item->attribute->values->map(function ($value) {
                         return [
                             'id' => $value->id,
-                            'value' => $value->value
+                            'value' => $value->value,
+                            'image_path' => $value->image_path??null
                         ];
                     })->values() // Lấy danh sách đối tượng id và value
                 ];
-            })->values() // Sử dụng .values() để lấy danh sách attributes
+            })->values() 
         ];
 
         return response()->json(['variation' => [$result]], 201); // Bọc trong 'variation'

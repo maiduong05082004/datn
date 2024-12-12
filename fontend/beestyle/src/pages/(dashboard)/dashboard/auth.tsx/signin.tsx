@@ -1,8 +1,10 @@
 import instance from "@/configs/axios";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button, Form, Input, message, Spin } from "antd";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
+import AxiosInstance from '@/configs/axios';
+import axios from "axios";
 
 type FildType = {
     email?: string;
@@ -12,11 +14,12 @@ type FildType = {
 const Signin = () => {
     const [form] = Form.useForm();
     const navigate = useNavigate();
+    const queryCient = useQueryClient();
 
     const { mutate } = useMutation({
         mutationFn: async (auth: FildType) => {
             try {
-                const response = await instance.post(
+                const response = await axios.post(
                     `http://localhost:8000/api/admins/signin`,
                     auth
                 );
@@ -25,11 +28,19 @@ const Signin = () => {
                 throw error;
             }
         },
-        onSuccess: (data) => {
-            toast.success("Đăng nhập thành công!");
-            localStorage.setItem("user", data.token);
-            form.resetFields();
-            navigate("/admin/dashboard");
+        onSuccess: async (data) => {
+            toast.success("Đăng Nhập Thành Công");
+            localStorage.setItem("token_admin", data.token);
+            
+                const userResponse = await AxiosInstance.get(
+                    `http://127.0.0.1:8000/api/client/auth/profile`,
+                );
+                
+                const userData = userResponse.data;
+                localStorage.setItem("user", JSON.stringify(userData));
+                localStorage.setItem("role", userData.role); 
+                form.resetFields();
+                navigate("/admin/dashboard");
         },
         onError: () => {
             toast.error("Đăng Nhập Thất Bại!");
