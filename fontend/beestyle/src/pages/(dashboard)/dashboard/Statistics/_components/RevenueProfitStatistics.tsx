@@ -10,13 +10,13 @@ ChartJS.register(CategoryScale, LinearScale, LineElement, PointElement, Title, T
 
 const RevenueProfitStatistics = () => {
 
-    const [ year, setYear ] = useState<any>(0)
+    const [year, setYear] = useState<any>(0)
 
     const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
         setYear(e.target.value);
-      };
+    };
 
-    const { data: years  } = useQuery({
+    const { data: years } = useQuery({
         queryKey: ['years'],
         queryFn: async () => {
             return instance.post(`api/admins/statistics/revenue-and-profit`, {
@@ -26,12 +26,15 @@ const RevenueProfitStatistics = () => {
         },
     })
 
+    console.log(years);
+
+
     useEffect(() => {
         if (years?.data?.length) {
             setYear(years.data[years?.data?.length - 1]?.period); // Set initial year
         }
     }, [years]);
-    
+
 
 
     const { data: revenue_profit_statistics } = useQuery({
@@ -108,7 +111,7 @@ const RevenueProfitStatistics = () => {
             title: {
                 color: 'white',
                 display: true,
-                text:  [
+                text: [
                     `Doanh thu và Lợi nhuận (năm ${year === 0 ? '' : year})`,
                     `Doanh Thu: ${new Intl.NumberFormat('vi-VN').format(totalRevenue || 0)} VND | Lợi Nhuận: ${new Intl.NumberFormat('vi-VN').format(totalProfite || 0)} VND`,
                 ],
@@ -167,6 +170,7 @@ const RevenueProfitStatistics = () => {
     return (
         <>
             <select onChange={handleChange} value={year} id="yearSelect">
+                <option value="0">Không có dữ liệu</option>
                 {years?.data.map((item: any, index: any) => (
                     <option key={index + 1} value={item.period}>{item.period}</option>
                 ))}

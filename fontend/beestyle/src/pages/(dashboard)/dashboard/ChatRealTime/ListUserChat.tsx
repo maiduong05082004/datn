@@ -1,13 +1,12 @@
-import React, { useEffect, useState, useRef } from "react";
-import axios from "axios";
-import echo, { joinChannel } from "@/echo"; // Pusher Echo đã cấu hình trong echo.js
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import axiosInstance from "@/configs/axios";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import React, { useEffect, useRef, useState } from "react";
 
 const ListUserChat: React.FC = () => {
   const [userId, setUserId] = useState<any>(null);
   const queryClient = useQueryClient()
   const [message, setMessage] = useState<string>("")
+  const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
   const { data: userMessage } = useQuery({
     queryKey: ['userMessage'],
@@ -25,7 +24,9 @@ const ListUserChat: React.FC = () => {
     enabled: !!userId,
   })
 
-
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
   useEffect(() => {
     scrollToBottom();
   }, [support?.data]);
@@ -40,6 +41,7 @@ const ListUserChat: React.FC = () => {
         queryKey: ['support', userId],
       }),
     setMessage("")
+    scrollToBottom();
     }
   })
 
@@ -47,26 +49,6 @@ const ListUserChat: React.FC = () => {
     const data = { receiver_id: userId.id, content: message }
     mutate(data)
   }
-
-  const messagesEndRef = useRef<HTMLDivElement | null>(null);
-
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  };
-  useEffect(() => {
-    scrollToBottom();
-  }, [support]);
-
-
-  useEffect(() => {
-    if (support) {
-      queryClient.invalidateQueries({
-        queryKey: ['support', userId],
-      })
-    }
-  }, [support?.data, queryClient]);
-  
-
 
   return (
     <div className="flex h-[calc(100vh-50px)] bg-gray-100 relative">
