@@ -26,9 +26,8 @@ const Signin = () => {
             }
         },
         onSuccess: (data) => {
-            toast.success("Đăng Nhập Thành Công");
-            localStorage.setItem("tokenadmin", data.token)
-            localStorage.setItem("user", JSON.stringify(data.user));
+            toast.success("Đăng nhập thành công!");
+            localStorage.setItem("user", data.token);
             form.resetFields();
             navigate("/admin/dashboard");
         },

@@ -30,8 +30,8 @@ const InventoryChart = () => {
         labels: ['Còn hàng', 'Hết hàng', 'Đang chờ nhập kho'],
         datasets: [
             {
-                data: [inStock, outOfStock, awaitingStock], 
-                backgroundColor: ['#36A2EB', '#FF6384', '#FFCE56'], 
+                data: [1, 2, 3], // Số lượng sản phẩm theo các trạng thái
+                backgroundColor: ['#36A2EB', '#FF6384', '#FFCE56'], // Màu sắc cho các phần
             },
         ],
     };

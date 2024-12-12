@@ -62,7 +62,7 @@ import ShipNoGHN from "@/pages/(dashboard)/dashboard/Bill/ShipNoGHN";
 // import DetailProduct from "@/pages/(dashboard)/dashboard/Product/detail";
 import ListUserChat from "@/pages/(dashboard)/dashboard/ChatRealTime/ListUserChat";
 import DetailPro from "@/pages/(dashboard)/dashboard/Product/detailpro";
-import ListAllChart from "@/pages/(dashboard)/dashboard/Statistic/page";
+import ListAllChart from "@/pages/(dashboard)/dashboard/Statistics/page";
 import DetailProduct from "@/pages/(dashboard)/dashboard/Product/detail";
 import PrivateRouter from "./PrivateRoute";
 
@@ -89,8 +89,8 @@ const Router = () => {
                         <Route path="addresses" element={<AddressesPage />} />
                         <Route path="orders/:oderId" element={<OrderDetail />} />
                     </Route>
-                    <Route path="*" element={<ErrorPage />} />
                 </Route>
+                <Route path="*" element={<ErrorPage />} />
                 <Route path="forgot-password" element={<ForgotPasswordPage />} />
                 <Route path="reset-password/:token" element={<ResetPasswordPage />} />
                 <Route path="signin" element={<PageSignin />} />
@@ -108,7 +108,6 @@ const Router = () => {
                     <Route path="bill/detail/:id" element={<DetailBill />} />
                     <Route path="bill/detailSuccessful/:id" element={<Detailship />} />
                     {/* <Route path="bill/detailConfirm/:id" element={<DeatilConfirm />} /> */}
-                    <Route path="bill/detailConfirm/:id" element={<DeatilConfirm />} />
                     <Route path="bill/cancel/:id" element={<CancelBill />} />
                     {/* <Route path="bill/detailConfirm/:id" element={<DeatilConfirm />} /> */}
                     <Route path="bill/cancel" element={<CancelBill />} />
@@ -116,10 +115,7 @@ const Router = () => {
                     <Route path="bill/shiping/:id" element={<ShipNoGHN />} />
                     {/* <Route path="bill/address" element={<AddAddresses />} /> */}
                     {/* comments */}
-<<<<<<< HEAD
-=======
                     {/* <Route path="comment/list" element={<ListComments />} /> */}
->>>>>>> 72595ba (Fix statistics)
                     {/* banners */}
                     <Route path="banner/add" element={<AddBanners />} />
                     <Route path="banner/list/main" element={<ListBannersMain />} />

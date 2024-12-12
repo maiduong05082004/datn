@@ -1,4 +1,5 @@
 import { useOrderViewMutations } from '@/components/hooks/useOrderViewMutations'
+import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 
 type Props = {
@@ -10,7 +11,11 @@ interface TReport {
     reason: string
 }
 
-const Reason = ({bill_id, isReason, setReason} : any) => {
+const Reason = ({ bill_id, isReason, setReason }: any) => {
+    // Load dau trang
+    useEffect(() => {
+        window.scrollTo(0, 0);
+    }, []);
 
     const { register, handleSubmit, formState: { errors }, reset } = useForm<TReport>({
         defaultValues: {
@@ -27,16 +32,13 @@ const Reason = ({bill_id, isReason, setReason} : any) => {
 
     const { cancelOrder, handleContext } = useOrderViewMutations()
 
-
-
     const onSubmit = (data: any) => {
         if (data && bill_id) {
-            cancelOrder.mutate({bill_id, ...data});
+            cancelOrder.mutate({ bill_id, ...data });
             setReason(false)
             reset()
         }
     }
-
 
     return (
         <>
@@ -58,7 +60,7 @@ const Reason = ({bill_id, isReason, setReason} : any) => {
                             </div>
                         ))}
                         <div className="flex mt-5 justify-end">
-                            <div onClick={() =>  setReason(false)} className="cursor-pointer mr-5 text-black bg-slate-50 p-[10px_50px] rounded font-medium">
+                            <div onClick={() => setReason(false)} className="cursor-pointer mr-5 text-black bg-slate-50 p-[10px_50px] rounded font-medium">
                                 Hủy
                             </div>
                             <button type="submit" className="text-white bg-black p-[10px_50px] rounded font-medium">

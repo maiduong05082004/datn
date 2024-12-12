@@ -24,7 +24,7 @@ const Header = ({ isSearch, setIsSearch }: Props) => {
 
     const token = localStorage.getItem("token")
 
-    const { data: user } = useQuery({
+    const { data: user, isLoading: isLoadingUser} = useQuery({
         queryKey: ['user', token],
         queryFn: () => {
             return axios.get(`http://127.0.0.1:8000/api/client/auth/profile`, {
@@ -45,12 +45,12 @@ const Header = ({ isSearch, setIsSearch }: Props) => {
         enabled: !!token,
     })
 
-    if (isLoadingCarts) { <LoadingPage /> }
+    if (isLoadingCarts && isLoadingUser) { <LoadingPage /> }
 
     return (
         <>
             <div className="bg-black h-[42px] text-center flex">
-                <span className='text-white justify-center flex m-auto text-[11px] font-[600] lg:text-[14px]'>Ưu đãi 5% cho dơnd hàng đầu tiên* | Nhập mã: BEESTYLEWELCOM</span>
+                <span className='text-white justify-center flex m-auto text-[11px] font-[600] lg:text-[14px]'>Ưu đãi 5% cho đơn hàng đầu tiên* | Nhập mã: BEESTYLEWELCOM</span>
             </div>
             <header className='py-[8px] h-[57px] sticky top-0 bg-white lg:h-[64px] mt-[0.1px] border-b-[1px] border-b-[##e8e8e8] lg:border-none z-20'>
                 <div className="flex text-center justify-center h-[100%] px-[15px] pc:px-[48px]">
@@ -227,7 +227,7 @@ const Header = ({ isSearch, setIsSearch }: Props) => {
                         </div>
                     </div>
 
-
+                    {!isLoadingCarts &&
                     <div className="ml-auto grid grid-cols-3 grid-rows-1 lg:grid-cols-4">
                         <div onClick={() => setIsSearch(!isSearch)} className="flex items-center">
                             <div className='w-[40px] h-[40px] flex justify-center items-center text-center'>
@@ -253,7 +253,7 @@ const Header = ({ isSearch, setIsSearch }: Props) => {
                                 <img className=" ls-is-cached lazyloaded" src="https://file.hstatic.net/200000642007/file/icon-account_5d386c88832c4872b857c0da62a81bbc.svg" data-src="https://file.hstatic.net/200000642007/file/icon-account_5d386c88832c4872b857c0da62a81bbc.svg" alt="Icon account" width={24} height={24} />
                             </div>
                         </Link>
-                    </div>
+                    </div>}
                 </div>
                 {user ? (<Support />) : ""}
                 <EventsAudio />

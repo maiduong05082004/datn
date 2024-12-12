@@ -1,8 +1,69 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import Loader from '../loading/loadSupport'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import axios from 'axios'
+import Pusher from 'pusher-js'
+import { joinChannel } from '@/echo'
 
 const Support = () => {
     const [isSupport, setSupport] = useState<boolean>(false)
+    const queryClient = useQueryClient()
+    const messagesEndRef = useRef<HTMLDivElement | null>(null);
+
+
+    const { data: support } = useQuery({
+        queryKey: ['support'],
+        queryFn: async () => {
+            return axios.get(`http://127.0.0.1:8000/api/client/messages`, {
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem("token")}`,
+                },
+            })
+        },
+    })
+
+    useEffect(() => {
+        if (support) {
+          queryClient.invalidateQueries({
+            queryKey: ['support'],
+          })
+        }
+      }, [support?.data, queryClient]);
+    
+
+    const { mutate } = useMutation({
+        mutationFn: async (message: any) => {
+            return axios.post(`http://127.0.0.1:8000/api/client/messages/send`, {
+                content: message,
+            }, {
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem("token")}`,
+                },
+            })
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({
+                queryKey: ['support'],
+            }),
+                setMessage("")
+        }
+    })
+
+    const scrollToBottom = () => {
+        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    };
+    useEffect(() => {
+        if (support?.data.support.length) {
+            scrollToBottom();
+        }
+    }, [support?.data.support.length, isSupport]);
+
+    const [message, setMessage] = useState<string>("")
+
+    const handleSend = async () => {
+        if (!message.trim()) return;
+        mutate(message)
+    }
 
     return (
         <div className="">
@@ -33,18 +94,25 @@ const Support = () => {
                             </svg>
                         </div>
                     </div>
-                    <div className="flex flex-col justify-start items-start p-[10px]">
-                        <div className="bg-slate-200 rounded-[15px] p-[5px_10px] max-w-[250px]">
-                            Tôi có thể giúp gì cho bạn?
-                        </div>
-                    </div>
-                    <div className="flex flex-col justify-start items-end p-[10px]">
-                        <div className="bg-blue-500 text-white rounded-[15px] p-[5px_10px] max-w-[250px]">
-                            Tôi muốn hút thuốc...
-                        </div>
-                    </div>
-                    <div className="flex flex-col justify-start items-start p-[10px]">
-                        <div className="bg-slate-200 rounded-[15px] p-[10px_10px] max-w-[250px] "><Loader /></div>
+
+                    <div className="overflow-y-auto whitespace-nowrapw h-[296px]">
+                        {/* <div className="flex flex-col justify-start items-start p-[10px]">
+                            <div className="bg-slate-200 rounded-[15px] p-[5px_10px] max-w-[250px]">
+                                Tôi có thể giúp gì cho bạn?
+                            </div>
+                        </div> */}
+                        {support?.data.support.slice().reverse().map((item: any, index: any) => (
+                            <div className={`${item.sender_id === support?.data.user_id ? "justify-end" : "justify-start"} flex p-[10px]`}>
+                                <div className={`${item.sender_id === support?.data.user_id ? "bg-blue-500 text-white" : "bg-slate-200"}  rounded-[5px] p-[5px_10px] max-w-[250px]`}>
+                                    {item.content}
+                                </div>
+                            </div>
+                        ))}
+                        {/* <div className="flex flex-col justify-start items-start p-[10px]">
+                            <div className="bg-slate-200 rounded-[15px] p-[10px_10px] max-w-[250px] "><Loader /></div>
+                        </div> */}
+                        <div ref={messagesEndRef}></div>
+
                     </div>
                     <div className="absolute w-full h-[50px] bottom-0 bg-slate-200 flex items-center px-[10px] border-t-[#e0e0e0] border-t-[2px] justify-between">
                         <div className="flex mr-[10px] w-[70px] justify-between">
@@ -58,8 +126,8 @@ const Support = () => {
                                 <path strokeLinecap="round" strokeLinejoin="round" d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5Zm10.5-11.25h.008v.008h-.008V8.25Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
                             </svg>
                         </div>
-                        <input className="rounded-[15px] min-h-[35px] px-[10px] w-[240px] outline-none" type="text" placeholder="Aa" />
-                        <div className="ml-[10px] cursor-pointer">
+                        <input onChange={(e: any) => setMessage(e.target.value)} onKeyPress={(e) => e.key === 'Enter' && handleSend()} value={message} className="rounded-[15px] min-h-[35px] px-[10px] w-[240px] outline-none" type="text" placeholder="Aa" />
+                        <div onClick={() => handleSend()} className="ml-[10px] cursor-pointer">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M6 12 3.269 3.125A59.769 59.769 0 0 1 21.485 12 59.768 59.768 0 0 1 3.27 20.875L5.999 12Zm0 0h7.5" />
                             </svg>

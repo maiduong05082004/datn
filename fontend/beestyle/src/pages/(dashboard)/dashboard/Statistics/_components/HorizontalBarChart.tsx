@@ -17,8 +17,6 @@ const HorizontalBarChart = () => {
     },
   })
   
-  
-
   const data = {
     labels: top_12_products_sell_well?.data.map((item: any) => item.product.slug),
     datasets: [
