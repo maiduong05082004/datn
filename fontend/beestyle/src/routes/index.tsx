@@ -65,6 +65,7 @@ import DetailPro from "@/pages/(dashboard)/dashboard/Product/detailpro";
 import ListAllChart from "@/pages/(dashboard)/dashboard/Statistic/page";
 import DetailProduct from "@/pages/(dashboard)/dashboard/Product/detail";
 import PrivateRouter from "./PrivateRoute";
+import ListBannerCollection from "@/pages/(dashboard)/dashboard/Banner/list_collection";
 
 const Router = () => {
 
@@ -121,6 +122,7 @@ const Router = () => {
                     <Route path="banner/list/main" element={<ListBannersMain />} />
                     <Route path="banner/list/custom" element={<ListBannersCustom />} />
                     <Route path="banner/list/category" element={<ListBannersCategory />} />
+                    <Route path="banner/list/collection" element={<ListBannerCollection />} />
                     <Route path="banner/update/:id" element={<UpdateBanners />} />
                     <Route path="banner/detail/:id" element={<DetailBanner />} />
                     {/* users */}

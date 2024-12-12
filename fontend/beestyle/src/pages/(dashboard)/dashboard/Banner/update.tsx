@@ -66,6 +66,7 @@ const UpdateBanners: React.FC = () => {
     },
     onError: () => {
       toast.error('Cập Nhật Banner Thất Bại!')
+      setLoading(false);
     },
   });
 
@@ -89,7 +90,7 @@ const UpdateBanners: React.FC = () => {
       : values.category_id;
     const formData = new FormData();
     formData.append('title', values.title || '');
-    formData.append('type', values.type || '');
+    if (values.type) formData.append('type', values.type);
     formData.append('status', values.status.toString());
     if (selectedCategoryId) formData.append('category_id', selectedCategoryId.toString());
     if (fileList.length > 0 && fileList[0].originFileObj) {

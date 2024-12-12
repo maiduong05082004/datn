@@ -44,6 +44,11 @@ class Banner extends Model
         return $this->type === self::TYPE_CUSTOM;
     }
 
+    public function isCollection()
+    {
+        return $this->type === self::TYPE_COLLECTION;
+    }
+
     // Quan hệ với bảng Category
     public function category()
     {

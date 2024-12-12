@@ -57,6 +57,7 @@ const AddBanners: React.FC = () => {
     },
     onError: () => {
       toast.error('Thêm Banner Thất Bại!')
+      setLoading(false)
     },
   });
 

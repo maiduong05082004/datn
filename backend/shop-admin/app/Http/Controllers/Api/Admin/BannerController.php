@@ -70,7 +70,7 @@ class BannerController extends Controller
             'title' => 'string|max:255',
             'image_path' => 'file|mimes:jpeg,png,jpg,gif,jfif|max:5120',
             'link' => 'string|max:255',
-            'type' => 'required|in:' . implode(',', [Banner::TYPE_MAIN, Banner::TYPE_CATEGORY, Banner::TYPE_CUSTOM]),
+            'type' => 'required|in:' . implode(',', [Banner::TYPE_MAIN, Banner::TYPE_CATEGORY, Banner::TYPE_CUSTOM, Banner::TYPE_COLLECTION]),
             'status' => 'integer|in:0,1',
         ]);
 
@@ -115,7 +115,7 @@ class BannerController extends Controller
             'title' => 'string|max:255',
             'image_path' => 'file|mimes:jpeg,png,jpg,gif,jfif|max:5120', // Để ` cho ảnh
             'link' => 'string|max:255',
-            'type' => 'required|in:' . implode(',', [Banner::TYPE_MAIN, Banner::TYPE_CATEGORY, Banner::TYPE_CUSTOM]),
+            'type' => 'required|in:' . implode(',', [Banner::TYPE_MAIN, Banner::TYPE_CATEGORY, Banner::TYPE_CUSTOM, Banner::TYPE_COLLECTION]),
             'status' => 'required|integer|in:0,1', // Chỉ cho phép giá trị là số 0 hoặc 1
         ]);
 
