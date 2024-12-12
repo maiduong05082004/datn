@@ -6,6 +6,7 @@ import { DeleteOutlined, EditOutlined, EyeOutlined, PlusOutlined } from '@ant-de
 import AxiosInstance from '@/configs/axios';
 import { useNavigate, useParams } from 'react-router-dom';
 import { toast, ToastContainer } from 'react-toastify';
+import instance from '@/configs/axios';
 
 interface Product {
   id: number;
@@ -49,14 +50,14 @@ const ListProducts = () => {
   const { data: productsData, isLoading } = useQuery({
     queryKey: ['products'],
     queryFn: async () => {
-      const response = await AxiosInstance.get('http://localhost:8000/api/admins/products');
+      const response = await instance.get(`api/admins/products`);
       return response.data;
     }
   });
 
   const mutation = useMutation({
     mutationFn: async (id: number) => {
-      await AxiosInstance.delete(`http://localhost:8000/api/admins/products/${id}`);
+      await instance.delete(`api/admins/products/${id}`);
     },
     onSuccess: () => {
       toast.success('Xóa Sản Phẩm Thành Công');
