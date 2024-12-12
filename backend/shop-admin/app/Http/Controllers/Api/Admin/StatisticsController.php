@@ -47,7 +47,6 @@ class StatisticsController extends Controller
     public function getRevenueAndProfit(Request $request)
     {
         $isSummary = $request->get('summary', false);
-        // $date = $request->get('date');
         $year = $request->get('year');
         $month = $request->get('month');
         $groupByType = $request->get('group_by', 'month');
@@ -215,26 +214,26 @@ class StatisticsController extends Controller
         return response()->json($newUsers);
     }
 
-    public function getCustomerBehavior(Request $request)
-    {
-        $date = $request->get('date');
+    // public function getCustomerBehavior(Request $request)
+    // {
+    //     $date = $request->get('date');
 
-        $stats = [
-            'total_product_views' => Product::when($date, function ($query, $date) {
-                $query->whereBetween('created_at', [$date['start'], $date['end']]);
-            })->count(),
+    //     $stats = [
+    //         'total_product_views' => Product::when($date, function ($query, $date) {
+    //             $query->whereBetween('created_at', [$date['start'], $date['end']]);
+    //         })->count(),
 
-            'total_cart_adds' => CartItem::when($date, function ($query, $date) {
-                $query->whereBetween('created_at', [$date['start'], $date['end']]);
-            })->count(),
+    //         'total_cart_adds' => CartItem::when($date, function ($query, $date) {
+    //             $query->whereBetween('created_at', [$date['start'], $date['end']]);
+    //         })->count(),
 
-            'total_wishlist_adds' => WishlistItem::when($date, function ($query, $date) {
-                $query->whereBetween('created_at', [$date['start'], $date['end']]);
-            })->count(),
-        ];
+    //         'total_wishlist_adds' => WishlistItem::when($date, function ($query, $date) {
+    //             $query->whereBetween('created_at', [$date['start'], $date['end']]);
+    //         })->count(),
+    //     ];
 
-        return response()->json($stats);
-    }
+    //     return response()->json($stats);
+    // }
 
     // Đơn hàng thành công
     public function getDeliveredOrderProducts(Request $request)
@@ -303,13 +302,6 @@ class StatisticsController extends Controller
         $today = now()->toDateString();
         $statistics = [
             'date' => $today,
-            // 'total_revenue' => Bill::whereDate('created_at', $today)->sum('total'),
-            // 'total_profit' => Bill::whereDate('created_at', $today)->sum(DB::raw('total - 500000')),
-            // 'total_orders' => Bill::whereDate('created_at', $today)->count(),
-            // 'total_users' => User::whereDate('created_at', $today)->count(),
-            // 'total_product_views' => Product::whereDate('created_at', $today)->count(),
-            // 'total_cart_adds' => CartItem::whereDate('created_at', $today)->count(),
-            // 'total_wishlist_adds' => WishlistItem::whereDate('created_at', $today)->count(),
             'total_revenue' => Bill::whereDate('created_at', '>=', $startDate)
                 ->whereDate('created_at', '<=', $today)
                 ->sum('total'),
@@ -335,19 +327,6 @@ class StatisticsController extends Controller
                 ->whereDate('created_at', '<=', $today)
                 ->count(),
         ];
-        // $topProduct = BillDetail::selectRaw('product_id, SUM(quantity) as total_sold')
-        //     ->whereHas('bill', function ($query) use ($today) {
-        //         $query->whereDate('created_at', $today);
-        //     })
-        //     ->groupBy('product_id')
-        //     ->orderByDesc('total_sold')
-        //     ->first();
-        // if ($topProduct) {
-        //     $statistics['top_selling_product_id'] = $topProduct->product_id;
-        //     $statistics['top_selling_quantity'] = $topProduct->total_sold;
-        // }
-        // Statistic::updateOrCreate(['date' => $today], $statistics);
-        // return response()->json($statistics);
         $topProduct = BillDetail::selectRaw('product_id, SUM(quantity) as total_sold')
             ->whereHas('bill', function ($query) use ($startDate, $today) {
                 $query->whereDate('created_at', '>=', $startDate)

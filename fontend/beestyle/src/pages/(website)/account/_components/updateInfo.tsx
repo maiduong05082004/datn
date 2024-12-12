@@ -34,13 +34,13 @@ const authSchema = Joi.object({
         'any.required': 'Ngày sinh là bắt buộc'
     }),
     phone: Joi.string()
-    .pattern(/^[0-9]{10,11}$/)
-    .required()
-    .messages({
-        'string.pattern.base': 'Số điện thoại không hợp lệ (10-11 chữ số)',
-        'string.empty': 'Số điện thoại không được để trống',
-        'any.required': 'Số điện thoại là bắt buộc',
-    })
+        .pattern(/^[0-9]{10,11}$/)
+        .required()
+        .messages({
+            'string.pattern.base': 'Số điện thoại không hợp lệ (10-11 chữ số)',
+            'string.empty': 'Số điện thoại không được để trống',
+            'any.required': 'Số điện thoại là bắt buộc',
+        })
 }).options({ stripUnknown: true });
 
 const UpdateInfo = ({ user, isInfo, setInfo }: any) => {
@@ -50,6 +50,11 @@ const UpdateInfo = ({ user, isInfo, setInfo }: any) => {
     })
     const [messageApi, handleContext] = message.useMessage()
     const queryClient = useQueryClient()
+
+    // Load dau trang
+    useEffect(() => {
+        window.scrollTo(0, 0);
+    }, []);
 
     useEffect(() => {
         if (user) {

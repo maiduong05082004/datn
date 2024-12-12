@@ -89,8 +89,8 @@ const Router = () => {
                         <Route path="addresses" element={<AddressesPage />} />
                         <Route path="orders/:oderId" element={<OrderDetail />} />
                     </Route>
-                    <Route path="*" element={<ErrorPage />} />
                 </Route>
+                <Route path="*" element={<ErrorPage />} />
                 <Route path="forgot-password" element={<ForgotPasswordPage />} />
                 <Route path="reset-password/:token" element={<ResetPasswordPage />} />
                 <Route path="signin" element={<PageSignin />} />
@@ -108,7 +108,6 @@ const Router = () => {
                     <Route path="bill/detail/:id" element={<DetailBill />} />
                     <Route path="bill/detailSuccessful/:id" element={<Detailship />} />
                     {/* <Route path="bill/detailConfirm/:id" element={<DeatilConfirm />} /> */}
-                    <Route path="bill/detailConfirm/:id" element={<DeatilConfirm />} />
                     <Route path="bill/cancel/:id" element={<CancelBill />} />
                     {/* <Route path="bill/detailConfirm/:id" element={<DeatilConfirm />} /> */}
                     <Route path="bill/cancel" element={<CancelBill />} />
