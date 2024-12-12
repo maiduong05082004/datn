@@ -113,6 +113,7 @@ Route::prefix('client')->as('client.')->group(function () {
         Route::post('/report', [CommentController::class, 'reportComment'])->name('comment.report'); // Báo cáo bình luận
         // Route::delete('/destroy', [CommentController::class, 'destroy'])->name('comment->destroy'); // Xóa bình luận bên giao diện
         Route::get('/rating', [CommentController::class, 'getProductRating'])->name('comment.rating'); // Trung bình số sao đánh giá
+        Route::post('/like', [CommentController::class, 'toggleLike'])->name('comment.like');
 
         //     Route::post('approve', [CommentController::class, 'approve'])->name('comment.approve'); // Duyệt bình luận
         //     Route::post('/reply', [CommentController::class, 'reply'])->name('comment.reply'); // Admin trả lời bình luận của user
@@ -229,12 +230,15 @@ Route::prefix('admins')
                 Route::delete('/{id}/image', [BannerController::class, 'deleteImage'])->name('banners.deleteImage');
             });
             Route::prefix('statistics')->as('statistics')->group(function () {
-                Route::post('top-selling-products', [StatisticsController::class, 'getTopSellingProducts'])->name('statistics.top-selling-products');
-                Route::get('revenue-and-profit', [StatisticsController::class, 'getRevenueAndProfit'])->name('statistics.revenue-and-profit');
-                Route::get('delivered_product', [StatisticsController::class, 'getDeliveredOrderProducts'])->name('statistics.delivered_product');
-                Route::get('canceled_product', [StatisticsController::class, 'getCancelledOrderProducts'])->name('statistics.canceled_product');
+                Route::get('top-selling-products', [StatisticsController::class, 'getTopSellingProducts'])->name('statistics.top-selling-products');
+                // Route::get('top-selling-products', [StatisticsController::class, 'getTopSellingProducts'])->name('statistics.top-selling-products');
+                Route::get('get_top_rated', [StatisticsController::class, 'getTopRatedProducts'])->name('statistics.get_top_rated');
+                Route::post('revenue-and-profit', [StatisticsController::class, 'getRevenueAndProfit'])->name('statistics.revenue-and-profit');
+                // Route::get('delivered_product', [StatisticsController::class, 'getDeliveredOrderProducts'])->name('statistics.delivered_product');
+                // Route::get('canceled_product', [StatisticsController::class, 'getCancelledOrderProducts'])->name('statistics.canceled_product');
+                Route::post('order_statistics', [StatisticsController::class, 'getOrderStatistics'])->name('statistics.order_statistics');
                 Route::get('revenue-and-profit_with_categories', [StatisticsController::class, 'getRevenueAndProfitByCategory'])->name('statistics.revenue-and-profit_with_categories');
-                Route::get('new-users', [StatisticsController::class, 'getNewUsers'])->name('statistics.new-users');
+                Route::post('new-users', [StatisticsController::class, 'getNewUsers'])->name('statistics.new-users');
                 Route::get('customer-behavior', [StatisticsController::class, 'getCustomerBehavior'])->name('statistics.customer-behavior');
                 Route::get('get_product_stock', [StatisticsController::class, 'getProductStock'])->name('statistics.get_product_stock'); // tồn kho của từng sản phẩm còn bao nhiêu
                 Route::post('update-daily', [StatisticsController::class, 'updateDailyStatistics'])->name('statistics.update-daily');
