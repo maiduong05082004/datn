@@ -6,7 +6,7 @@ window.Pusher = Pusher;
 
 const echo = new Echo({
   broadcaster: 'pusher',
-  key: 'c944babeaf4cf6134005',  // App Key từ Pusher
+  key: 'cbdecfb64b2a63d95a08',  // App Key từ Pusher
   cluster: 'ap1',  // Cluster của Pusher
   wsHost: 'pusher.com',
   wsPort: 80,  // Port WebSocket không SSL (sẽ không sử dụng)

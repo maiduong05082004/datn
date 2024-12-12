@@ -15,6 +15,11 @@ const AddressesPage = () => {
     const [messageApi, handleContext] = message.useMessage()
     const queryClient = useQueryClient()
 
+    // Load dau trang
+    useEffect(() => {
+        window.scrollTo(0, 0);
+    }, []);
+
     const { data: addresses, isLoading: isLoadingAddress } = useQuery({
         queryKey: ['addresses'],
         queryFn: async () => {
@@ -62,7 +67,7 @@ const AddressesPage = () => {
     }
 
     // Lấy tỉnh/thành phố
-    const { data: provinceData} = useQuery({
+    const { data: provinceData } = useQuery({
         queryKey: ['province'],
         queryFn: async () => {
             return await axios.get(`https://dev-online-gateway.ghn.vn/shiip/public-api/master-data/province`, {
@@ -74,7 +79,7 @@ const AddressesPage = () => {
     });
 
     // Lấy quận/huyện
-    const { data: districtData} = useQuery({
+    const { data: districtData } = useQuery({
         queryKey: ['district'],
         queryFn: async () => {
             return await axios.get(`https://dev-online-gateway.ghn.vn/shiip/public-api/master-data/district`, {

@@ -1,5 +1,5 @@
 import { message } from 'antd'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import AddProductCart from '../../_components/AddProductCart'
 
@@ -9,9 +9,13 @@ const RecentlyPage = () => {
     const [isEditShowView, setEditShowView] = useState<boolean>(false)
     const [selectedProducts, setSelectProducts] = useState<any>(JSON.parse(localStorage.getItem("showView") || '[]'))
     const [messageApi, handleContext] = message.useMessage()
-
     const [cartItem, setCartItem] = useState<any>()
     const [activeCart, setActiveCart] = useState<boolean>(false)
+
+        // Load dau trang
+        useEffect(() => {
+            window.scrollTo(0, 0);
+        }, []);
 
     const handleSelectProduct = (productId: any) => {
         if (selectedProductsId.includes(productId)) {

@@ -9,15 +9,12 @@ const ProductHot = () => {
   const [cartItem, setCartItem] = useState<any>()
   const [activeCart, setActiveCart] = useState<boolean>(false)
 
-  const { data: hotpr } = useQuery({
+  const { data: hotpr, isLoading: isLoadingHotPr} = useQuery({
     queryKey: ["hotpr"],
     queryFn: async () => {
       return await axios.get(`http://127.0.0.1:8000/api/client/home/productnewhot`)
     }
   })
-
-  console.log(hotpr)
-  
 
   useEffect(() => {
     if (hotpr?.data?.data) {
@@ -29,6 +26,7 @@ const ProductHot = () => {
   }, [hotpr?.data?.data]);
 
   return (
+    !isLoadingHotPr &&
     <section>
       <div className="pt-[40px]">
         <div className="px-[15px] pc:px-[48px]">
@@ -73,8 +71,8 @@ const ProductHot = () => {
                           </div>
                         </Link>
                         <div className="flex gap-1 justify-start mt-[18px]">
-                          {product.variations.map((value: any) => (
-                            <React.Fragment >
+                          {product.variations.map((value: any, index: any) => (
+                            <React.Fragment key={index + 1}>
                               <input
                                 className='hidden'
                                 id={``}
