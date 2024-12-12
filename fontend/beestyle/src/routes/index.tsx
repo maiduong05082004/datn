@@ -59,8 +59,8 @@ import ListBannersCategory from "@/pages/(dashboard)/dashboard/Banner/list_banne
 import CancelBill from "@/pages/(dashboard)/dashboard/Bill/cancel";
 import ShipNoGHN from "@/pages/(dashboard)/dashboard/Bill/ShipNoGHN";
 import DetailProduct from "@/pages/(dashboard)/dashboard/Product/detail";
-import ListAllChart from "@/pages/(dashboard)/Statistics/page";
 import ListUserChat from "@/pages/(dashboard)/dashboard/ChatRealTime/ListUserChat";
+import ListAllChart from "@/pages/(dashboard)/dashboard/Statistics/page";
 
 const Router = () => {
 
@@ -85,8 +85,8 @@ const Router = () => {
                         <Route path="addresses" element={<AddressesPage />} />
                         <Route path="orders/:oderId" element={<OrderDetail />} />
                     </Route>
-                    <Route path="*" element={<ErrorPage />} />
                 </Route>
+                <Route path="*" element={<ErrorPage />} />
                 <Route path="forgot-password" element={<ForgotPasswordPage />} />
                 <Route path="reset-password/:token" element={<ResetPasswordPage />} />
                 <Route path="signin" element={<PageSignin />} />

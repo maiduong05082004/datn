@@ -10,27 +10,27 @@ ChartJS.register(ArcElement, Tooltip, Legend);
 
 const InventoryChart = () => {
     // Fetch dữ liệu từ API
-    const { data: Inventory, isLoading } = useQuery({
-        queryKey: ['inventory'],
-        queryFn: async () => {
-            const response = await AxiosInstance('http://127.0.0.1:8000/api/admins/statistics/get_product_stock');
-            return response.data;
-        },
-    });
+    // const { data: Inventory, isLoading } = useQuery({
+    //     queryKey: ['inventory'],
+    //     queryFn: async () => {
+    //         const response = await AxiosInstance('http://127.0.0.1:8000/api/admins/statistics/get_product_stock');
+    //         return response.data;
+    //     },
+    // });
 
     // Kiểm tra trạng thái tải dữ liệu
-    if (isLoading) return <Spin tip="Loading..." className="flex justify-center items-center h-screen" />;
+    // if (isLoading) return <Spin tip="Loading..." className="flex justify-center items-center h-screen" />;
 
-    const inStock = Inventory.filter((item :any) => item.stock > 0).length; 
-    const outOfStock = Inventory.filter((item : any) => item.stock === 0).length;  
-    const awaitingStock = Inventory.filter((item : any) => item.stock < 0).length;  
+    // const inStock = Inventory.filter((item :any) => item.stock > 0).length; 
+    // const outOfStock = Inventory.filter((item : any) => item.stock === 0).length;  
+    // const awaitingStock = Inventory.filter((item : any) => item.stock < 0).length;  
  
     // Dữ liệu cho biểu đồ
     const data = {
         labels: ['Còn hàng', 'Hết hàng', 'Đang chờ nhập kho'],
         datasets: [
             {
-                data: [inStock, outOfStock, awaitingStock], // Số lượng sản phẩm theo các trạng thái
+                data: [1, 2, 3], // Số lượng sản phẩm theo các trạng thái
                 backgroundColor: ['#36A2EB', '#FF6384', '#FFCE56'], // Màu sắc cho các phần
                 hoverBackgroundColor: ['#36A2EB', '#FF6384', '#FFCE56'],
             },
@@ -61,7 +61,7 @@ const InventoryChart = () => {
             tooltip: {
                 callbacks: {
                     label: function (tooltipItem: any) {
-                        return `${tooltipItem.label}: ${tooltipItem.raw} sản phẩm`;
+                        return `${2}: ${1} sản phẩm`;
                     },
                 },
             },

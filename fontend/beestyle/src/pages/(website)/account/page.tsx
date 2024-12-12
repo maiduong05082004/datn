@@ -4,12 +4,12 @@ import { useEffect } from 'react';
 import { Link, Outlet, useNavigate } from 'react-router-dom';
 
 const AccountPage = () => {
-    
+
     const navigater = useNavigate()
     const token = localStorage.getItem("token")
 
     useEffect(() => {
-        if(!token) {
+        if (!token) {
             navigater(`/signin`)
         }
     }, [token])

@@ -34,8 +34,14 @@ class MessageController extends Controller
             ->withTrashed()  
             ->orderBy('created_at', 'desc')
             ->get();
+
+            $userMess = [
+                'user_id' => $request->user()->id,
+                'support' => $messages
+
+            ];
     
-        return response()->json($messages);
+        return response()->json($userMess);
     }
     
 

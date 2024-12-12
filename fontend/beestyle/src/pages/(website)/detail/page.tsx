@@ -13,7 +13,6 @@ const DetailPage = () => {
     const [variations, setVariations] = useState<any>("")
     const [variationValues, setVariatonValues] = useState<any>("")
     const [checkStock, setCheckStock] = useState<any>([])
-    console.log(checkStock);
     
     const [quantity, setQuantity] = useState<number>(1)
 

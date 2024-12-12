@@ -2,12 +2,17 @@ import { useQuery } from '@tanstack/react-query'
 import axios from 'axios'
 import { Link } from 'react-router-dom'
 import UpdateInfo from './updateInfo'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 const InfoPage = () => {
 
   const [isInfo, setInfo] = useState<boolean>(false)
   const token = localStorage.getItem("token")
+
+  // Load dau trang
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
   const { data: user } = useQuery({
     queryKey: ['user', token],
@@ -20,7 +25,7 @@ const InfoPage = () => {
   })
 
   console.log(user);
-  
+
 
   return (
     <div className="">
@@ -60,7 +65,7 @@ const InfoPage = () => {
         </div>
         <div onClick={() => setInfo(true)} className="flex items-center justify-center h-[45px] bg-black text-white rounded-[2px] font-[600] text-[16px] mt-[20px] lg:w-[200px] cursor-pointer">Cập nhật thông tin</div>
       </div>
-      <UpdateInfo user={user} isInfo={isInfo} setInfo={setInfo}/>
+      <UpdateInfo user={user} isInfo={isInfo} setInfo={setInfo} />
     </div>
   )
 }

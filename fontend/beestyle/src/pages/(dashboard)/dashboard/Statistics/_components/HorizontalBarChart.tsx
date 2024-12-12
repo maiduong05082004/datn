@@ -1,19 +1,31 @@
-import React from 'react';
+import instance from '@/configs/axios';
+import { useQuery } from '@tanstack/react-query';
+import axios from 'axios';
+import { BarElement, CategoryScale, Chart as ChartJS, Legend, LinearScale, Title, Tooltip } from 'chart.js';
 import { Bar } from 'react-chartjs-2';
-import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from 'chart.js';
-
 // Đăng ký các thành phần của Chart.js
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
-type Props = {}
 
-const HorizontalBarChart = (props: Props) => {
+const HorizontalBarChart = () => {
+
+  const { data: top_12_products_sell_well } = useQuery({
+    queryKey: ['top_12_products_sell_well'],
+    queryFn: async () => {
+      return instance.post(`admins/statistics/top-selling-products`, {} ,{
+      })
+    },
+  })
+  
+  
+  console.log(top_12_products_sell_well)
+
   const data = {
-    labels: ['Sản phẩm A', 'Sản phẩm B', 'Sản phẩm C', 'Sản phẩm D', 'Sản phẩm E','Sản phẩm A', 'Sản phẩm B', 'Sản phẩm C', 'Sản phẩm D', 'Sản phẩm E', 'Sản phẩm D', 'Sản phẩm E'],
+    labels: top_12_products_sell_well?.data.map((item: any) => item.product.slug),
     datasets: [
       {
         label: 'Số lượng bán ra',
-        data: [120, 150, 180, 100, 90], // Dữ liệu cột ngang
+        data: top_12_products_sell_well?.data.map((item: any) => item.total_sold),
         backgroundColor: 'rgba(75, 192, 192, 0.6)', // Màu cột
         borderColor: 'rgba(75, 192, 192, 1)', // Màu viền
         borderWidth: 1, // Độ dày viền
@@ -34,7 +46,7 @@ const HorizontalBarChart = (props: Props) => {
       },
       title: {
         display: true,
-        text: 'Top 12 sản phẩm bán chạy',
+        text: 'Top 12 sản phẩm bán chạy (1 tháng gần nhất)',
         color: 'white', // Màu chữ của title
         font: {
           family: 'Arial',
@@ -64,9 +76,7 @@ const HorizontalBarChart = (props: Props) => {
   };
 
   return (
-    <div style={{ width: '100%', height: '400px' }}>
       <Bar data={data} options={options as any} />
-    </div>
   );
 };
 

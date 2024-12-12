@@ -219,13 +219,13 @@ Route::prefix('admins')
             });
             Route::prefix('statistics')->as('statistics')->group(function () {
                 Route::post('top-selling-products', [StatisticsController::class, 'getTopSellingProducts'])->name('statistics.top-selling-products');
-                Route::get('revenue-and-profit', [StatisticsController::class, 'getRevenueAndProfit'])->name('statistics.revenue-and-profit');
-                Route::get('delivered_product', [StatisticsController::class, 'getDeliveredOrderProducts'])->name('statistics.delivered_product');
-                Route::get('canceled_product', [StatisticsController::class, 'getCancelledOrderProducts'])->name('statistics.canceled_product');
-                Route::get('revenue-and-profit_with_categories', [StatisticsController::class, 'getRevenueAndProfitByCategory'])->name('statistics.revenue-and-profit_with_categories');
-                Route::get('new-users', [StatisticsController::class, 'getNewUsers'])->name('statistics.new-users');
-                Route::get('customer-behavior', [StatisticsController::class, 'getCustomerBehavior'])->name('statistics.customer-behavior');
-                Route::get('get_product_stock', [StatisticsController::class, 'getProductStock'])->name('statistics.get_product_stock'); // tồn kho của từng sản phẩm còn bao nhiêu
+                Route::post('revenue-and-profit', [StatisticsController::class, 'getRevenueAndProfit'])->name('statistics.revenue-and-profit');
+                Route::post('delivered_product', [StatisticsController::class, 'getDeliveredOrderProducts'])->name('statistics.delivered_product');
+                Route::post('canceled_product', [StatisticsController::class, 'getCancelledOrderProducts'])->name('statistics.canceled_product');
+                Route::post('revenue-and-profit_with_categories', [StatisticsController::class, 'getRevenueAndProfitByCategory'])->name('statistics.revenue-and-profit_with_categories');
+                Route::post('new-users', [StatisticsController::class, 'getNewUsers'])->name('statistics.new-users');
+                // Route::get('customer-behavior', [StatisticsController::class, 'getCustomerBehavior'])->name('statistics.customer-behavior');
+                Route::post('get_product_stock', [StatisticsController::class, 'getProductStock'])->name('statistics.get_product_stock'); // tồn kho của từng sản phẩm còn bao nhiêu
                 Route::post('update-daily', [StatisticsController::class, 'updateDailyStatistics'])->name('statistics.update-daily');
             });
 

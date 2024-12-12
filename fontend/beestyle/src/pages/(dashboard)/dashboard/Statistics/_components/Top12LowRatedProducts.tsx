@@ -9,7 +9,7 @@ type Props = {}
 
 const Top12LowRatedProducts = (props: Props) => {
   const data = {
-    labels: ['Sản phẩm A', 'Sản phẩm B', 'Sản phẩm C', 'Sản phẩm D', 'Sản phẩm E','Sản phẩm A', 'Sản phẩm B', 'Sản phẩm C', 'Sản phẩm D', 'Sản phẩm E'],
+    labels: ['Sản phẩm A', 'Sản phẩm B', 'Sản phẩm C', 'Sản phẩm D', 'Sản phẩm E', 'Sản phẩm A', 'Sản phẩm B', 'Sản phẩm C', 'Sản phẩm D', 'Sản phẩm E'],
     datasets: [
       {
         label: 'Trung bình sao',
@@ -64,9 +64,7 @@ const Top12LowRatedProducts = (props: Props) => {
   };
 
   return (
-    <div style={{ width: '100%', height: '400px' }}>
-      <Bar data={data} options={options as any} />
-    </div>
+    <Bar data={data} options={options as any} />
   );
 };
 
