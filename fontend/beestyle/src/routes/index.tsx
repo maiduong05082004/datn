@@ -116,6 +116,10 @@ const Router = () => {
                     <Route path="bill/shiping/:id" element={<ShipNoGHN />} />
                     {/* <Route path="bill/address" element={<AddAddresses />} /> */}
                     {/* comments */}
+<<<<<<< HEAD
+=======
+                    {/* <Route path="comment/list" element={<ListComments />} /> */}
+>>>>>>> 72595ba (Fix statistics)
                     {/* banners */}
                     <Route path="banner/add" element={<AddBanners />} />
                     <Route path="banner/list/main" element={<ListBannersMain />} />

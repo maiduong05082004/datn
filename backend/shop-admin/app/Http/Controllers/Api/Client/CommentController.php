@@ -10,6 +10,7 @@ use App\Models\Product;
 use App\Models\ReportComment;
 use App\Models\User;
 use Auth;
+use DB;
 use Illuminate\Http\Request;
 
 class CommentController extends Controller
@@ -291,7 +292,6 @@ class CommentController extends Controller
     {
         $productId = $request->input('product_id');
         $ratingData = $this->getProductRating($request);
-
         $comments = Comment::with([
             'user',
             'parentComment',
@@ -323,10 +323,9 @@ class CommentController extends Controller
             ];
             $replyComments = Comment::with('user')
                 ->where('parent_id', $comment->id)
-                ->where('is_visible', 1) // Chỉ lấy các bình luận trả lời đã được phê duyệt
+                ->where('is_visible', 1)
                 ->get();
             foreach ($replyComments as $reply) {
-                // Lấy tên người dùng hoặc 'Anonymous' nếu là bình luận ẩn danh
                 $replyUserName = $reply->is_anonymous && Auth::user()->role !== 'admin' ? 'Anonymous' : $reply->user->name;
 
                 $commentData['reply_comment'][] = [
@@ -549,5 +548,38 @@ class CommentController extends Controller
         $comment->delete();
 
         return response()->json(['message' => 'Comment deleted successfully.']);
+    }
+
+    public function toggleLike(Request $request)
+    {
+        $commentId = $request->input('comment_id'); // Lấy comment_id từ request
+
+        if (!$commentId) {
+            return response()->json(['message' => 'Comment ID is required'], 400);
+        }
+
+        // Tìm comment trong cơ sở dữ liệu
+        $comment = Comment::find($commentId);
+
+        if (!$comment) {
+            return response()->json(['message' => 'Comment not found'], 404);
+        }
+
+        $isLiked = $request->input('like', true); // Xác định trạng thái like từ request
+
+        if ($isLiked) {
+            // Nếu đã like, giảm like_count
+            $comment->like += 1;
+        } else {
+            // Nếu chưa like, tăng like
+            $comment->like = max(0, $comment->like - 1);
+        }
+
+        $comment->save(); // Lưu thay đổi vào cơ sở dữ liệu
+
+        return response()->json([
+            'message' => $isLiked ? 'Liked successfully' : 'Like removed',
+            'like' => $comment->like,
+        ]);
     }
 }

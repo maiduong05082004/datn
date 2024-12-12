@@ -8,6 +8,7 @@ use App\Models\Bill;
 use App\Models\BillDetail;
 use App\Models\CartItem;
 use App\Models\Category;
+use App\Models\Comment;
 use App\Models\Product;
 use App\Models\Statistic;
 use App\Models\User;
@@ -33,7 +34,7 @@ class StatisticsController extends Controller
         $products = BillDetail::selectRaw('product_id,SUM(quantity) as total_sold')
             ->whereHas('bill', function ($query) use ($startDate, $endDate) {
                 $query->whereBetween('created_at', [$startDate, $endDate])
-                ->whereIn('status_bill', ['delivered']);
+                    ->whereIn('status_bill', ['delivered']);
             })
             ->groupBy('product_id')
             ->orderByDesc('total_sold')
@@ -42,6 +43,37 @@ class StatisticsController extends Controller
             ->get();
         return response()->json($products);
     }
+
+    // Top sản phẩm đánh giá cao và thấp
+    public function getTopRatedProducts(Request $request)
+    {
+        $currentDate = Carbon::now();
+
+        $startDate = $currentDate->copy()->subMonth(1)->startOfMonth();
+        $endDate = $currentDate->copy()->endOfMonth();
+
+        $topRatedProducts = Comment::selectRaw('product_id, AVG(stars) as average_stars, COUNT(id) as total_reviews')
+            ->whereBetween('created_at', [$startDate, $endDate])
+            ->groupBy('product_id')
+            ->orderByDesc('average_stars')
+            ->take(12)
+            ->with('product')
+            ->get();
+
+        $lowRatedProducts = Comment::selectRaw('product_id, AVG(stars) as average_stars, COUNT(id) as total_reviews')
+            ->whereBetween('created_at', [$startDate, $endDate])
+            ->groupBy('product_id')
+            ->orderBy('average_stars', 'asc')
+            ->take(12)
+            ->with('product')
+            ->get();
+
+        return response()->json([
+            'top' => $topRatedProducts,
+            'low' => $lowRatedProducts,
+        ]);
+    }
+
 
     // Thống kê doanh thu, lợi nhuận
     public function getRevenueAndProfit(Request $request)
@@ -202,18 +234,102 @@ class StatisticsController extends Controller
 
 
     // Thống kê người dùng mới
+    // public function getNewUsers(Request $request)
+    // {
+    //     $date = $request->get('date');
+    //     $newUsers = User::selectRaw('DATE(created_at) as date, COUNT(id) as total_users')
+    //         ->when($date, function ($query, $date) {
+    //             $query->whereBetween('created_at', [$date['start'], $date['end']]);
+    //         })
+    //         ->groupBy('date')
+    //         ->get();
+
+    //     return response()->json($newUsers);
+    // }
+
     public function getNewUsers(Request $request)
     {
         $date = $request->get('date');
-        $newUsers = User::selectRaw('DATE(created_at) as date, COUNT(id) as total_users')
+        $year = $request->get('year');
+        $month = $request->get('month');
+        $group_by = $request->get('group_by', 'month');
+        $summary = $request->get('summary', false);
+
+        // $newUsers = User::selectRaw('YEAR(created_at) as year, MONTH(created_at) as month, COUNT(id) as total_users')
+        //     ->when($date, function ($query, $date) {
+        //         $query->whereBetween('created_at', [$date['start'], $date['end']]);
+        //     })
+        //     ->when($year, function ($query) use ($year) {
+        //         $query->whereYear('created_at', $year);
+        //     })
+        //     ->when($month, function ($query) use ($month) {
+        //         $query->whereMonth('created_at', $month);
+        //     })
+        //     ->groupBy('year', 'month')
+        //     ->orderBy('year', 'asc')
+        //     ->orderBy('month', 'asc')
+        //     ->get();
+
+        // return response()->json($newUsers);
+        $newUsers = User::selectRaw(
+            match ($group_by) {
+                'day' => 'DATE(created_at) as period, COUNT(id) as total_users',
+                'month' => 'YEAR(created_at) as year, MONTH(created_at) as month, COUNT(id) as total_users',
+                'year' => 'YEAR(created_at) as year, COUNT(id) as total_users',
+                default => 'YEAR(created_at) as year, MONTH(created_at) as month, COUNT(id) as total_users',
+            }
+        )
             ->when($date, function ($query, $date) {
                 $query->whereBetween('created_at', [$date['start'], $date['end']]);
             })
-            ->groupBy('date')
+            ->when($year, function ($query) use ($year) {
+                $query->whereYear('created_at', $year);
+            })
+            ->when($month, function ($query) use ($month) {
+                $query->whereMonth('created_at', $month);
+            })
+            ->groupByRaw(
+                match ($group_by) {
+                    'day' => 'DATE(created_at)',
+                    'month' => 'YEAR(created_at), MONTH(created_at)',
+                    'year' => 'YEAR(created_at)',
+                    default => 'YEAR(created_at), MONTH(created_at)',
+                }
+            )
+            ->orderByRaw(
+                match ($group_by) {
+                    'day' => 'DATE(created_at) ASC',
+                    'month' => 'YEAR(created_at) ASC, MONTH(created_at) ASC',
+                    'year' => 'YEAR(created_at) ASC',
+                    default => 'YEAR(created_at) ASC, MONTH(created_at) ASC',
+                }
+            )
             ->get();
 
+        // Nếu cần tính tổng
+        if ($summary) {
+            $summaryData = User::selectRaw('COUNT(id) as total_users')
+                ->when($date, function ($query, $date) {
+                    $query->whereBetween('created_at', [$date['start'], $date['end']]);
+                })
+                ->when($year, function ($query) use ($year) {
+                    $query->whereYear('created_at', $year);
+                })
+                ->when($month, function ($query) use ($month) {
+                    $query->whereMonth('created_at', $month);
+                })
+                ->first();
+
+            return response()->json([
+                'data' => $newUsers,
+                'summary' => [
+                    'total_users' => $summaryData->total_users ?? 0,
+                ],
+            ]);
+        }
         return response()->json($newUsers);
     }
+
 
     public function getCustomerBehavior(Request $request)
     {
@@ -236,65 +352,111 @@ class StatisticsController extends Controller
         return response()->json($stats);
     }
 
-    // Đơn hàng thành công
-    public function getDeliveredOrderProducts(Request $request)
+    public function getOrderStatistics(Request $request)
     {
-        $date = $request->get('date');
+        $dateRange = $request->get('date');
+        $year = $request->get('year');
+        $month = $request->get('month');
 
-        $completedOrderProducts = BillDetail::join('bills', 'bill_details.bill_id', '=', 'bills.id')
-            ->join('products', 'bill_details.product_id', '=', 'products.id')
+        $query = \DB::table('bills')
             ->select(
-                'bill_details.product_id',
-                'products.name as product_name',
-                'products.price',
-                'products.category_id',
-                \DB::raw('SUM(bill_details.quantity) as total_sold'),
-                \DB::raw('SUM(bill_details.quantity * bill_details.don_gia) as total_revenue')
+                \DB::raw('YEAR(created_at) as year'),
+                \DB::raw('MONTH(created_at) as month'),
+                \DB::raw('SUM(CASE WHEN status_bill = "' . Bill::STATUS_DELIVERED . '" THEN 1 ELSE 0 END) as total_delivered'),
+                \DB::raw('SUM(CASE WHEN status_bill = "' . Bill::STATUS_CANCELED . '" THEN 1 ELSE 0 END) as total_canceled')
             )
-            ->where('bills.status_bill', Bill::STATUS_DELIVERED)
-            ->when(
-                $date,
-                function ($query) use ($date) {
-                    $query->whereBetween('bills.created_at', [$date['start'], $date['end']]);
-                }
-            )
-            ->groupBy('bill_details.product_id', 'products.name', 'products.price', 'products.category_id')
-            ->orderByDesc('total_sold')
+            ->when($dateRange, function ($query) use ($dateRange) {
+                $query->whereBetween('created_at', [$dateRange['start'], $dateRange['end']]);
+            })
+            ->when($year, function ($query) use ($year) {
+                $query->whereYear('created_at', $year);
+            })
+            ->when($month, function ($query) use ($month) {
+                $query->whereMonth('created_at', $month);
+            })
+            ->groupBy('year', 'month')
+            ->orderBy('year', 'asc')
+            ->orderBy('month', 'asc')
             ->get();
+        $sumYearly = null;
+        if ($year && !$month) {
+            $sumYearly = $query->groupBy('year')->map(function ($yearGroup) {
+                return [
+                    'delivered' => $yearGroup->sum('total_delivered'),
+                    'canceled' => $yearGroup->sum('total_canceled'),
+                ];
+            });
+        }
+        return response()->json([
+            'data' => $query,
+            'sum_yearly' => $sumYearly
+        ]);
 
-        return response()->json($completedOrderProducts);
+        return response()->json($query);
     }
+
+
+
+
+    // Đơn hàng thành công
+    // public function getDeliveredOrderProducts(Request $request)
+    // {
+    //     $date = $request->get('date');
+
+    //     $completedOrderProducts = BillDetail::join('bills', 'bill_details.bill_id', '=', 'bills.id')
+    //         ->join('products', 'bill_details.product_id', '=', 'products.id')
+    //         ->select(
+    //             'bill_details.product_id',
+    //             'products.name as product_name',
+    //             'products.price',
+    //             'products.category_id',
+    //             \DB::raw('SUM(bill_details.quantity) as total_sold'),
+    //             \DB::raw('SUM(bill_details.quantity * bill_details.don_gia) as total_revenue')
+    //         )
+    //         ->where('bills.status_bill', Bill::STATUS_DELIVERED)
+    //         ->when(
+    //             $date,
+    //             function ($query) use ($date) {
+    //                 $query->whereBetween('bills.created_at', [$date['start'], $date['end']]);
+    //             }
+    //         )
+    //         ->groupBy('bill_details.product_id', 'products.name', 'products.price', 'products.category_id')
+    //         ->orderByDesc('total_sold')
+    //         ->get();
+
+    //     return response()->json($completedOrderProducts);
+    // }
 
 
 
     // đơn hàng bị hủy
-    public function getCancelledOrderProducts(Request $request)
-    {
-        $date = $request->get('date');
+    // public function getCancelledOrderProducts(Request $request)
+    // {
+    //     $date = $request->get('date');
 
-        $cancelledOrderProducts = BillDetail::join('bills', 'bill_details.bill_id', '=', 'bills.id')
-            ->join('products', 'bill_details.product_id', '=', 'products.id')
-            ->select(
-                'bill_details.product_id',
-                'products.name as product_name',
-                'products.price',
-                'products.category_id',
-                \DB::raw('SUM(bill_details.quantity) as total_sold'),
-                \DB::raw('SUM(bill_details.quantity * bill_details.don_gia) as total_revenue')
-            )
-            ->where('bills.status_bill', Bill::STATUS_CANCELED)
-            ->when(
-                $date,
-                function ($query) use ($date) {
-                    $query->whereBetween('bills.created_at', [$date['start'], $date['end']]);
-                }
-            )
-            ->groupBy('bill_details.product_id', 'products.name', 'products.price', 'products.category_id')
-            ->orderByDesc('total_sold')
-            ->get();
+    //     $cancelledOrderProducts = BillDetail::join('bills', 'bill_details.bill_id', '=', 'bills.id')
+    //         ->join('products', 'bill_details.product_id', '=', 'products.id')
+    //         ->select(
+    //             'bill_details.product_id',
+    //             'products.name as product_name',
+    //             'products.price',
+    //             'products.category_id',
+    //             \DB::raw('SUM(bill_details.quantity) as total_sold'),
+    //             \DB::raw('SUM(bill_details.quantity * bill_details.don_gia) as total_revenue')
+    //         )
+    //         ->where('bills.status_bill', Bill::STATUS_CANCELED)
+    //         ->when(
+    //             $date,
+    //             function ($query) use ($date) {
+    //                 $query->whereBetween('bills.created_at', [$date['start'], $date['end']]);
+    //             }
+    //         )
+    //         ->groupBy('bill_details.product_id', 'products.name', 'products.price', 'products.category_id')
+    //         ->orderByDesc('total_sold')
+    //         ->get();
 
-        return response()->json($cancelledOrderProducts);
-    }
+    //     return response()->json($cancelledOrderProducts);
+    // }
 
 
     public function updateDailyStatistics(Request $request)

@@ -182,11 +182,13 @@ class AuthController extends Controller
     {
         $user = $request->user(); // Lấy thông tin người dùng đang đăng nhập
 
-        // if ($request->user()->id !== (int) $request->route('id')) {
-        //     return response()->json([
-        //         'message' => 'You are not authorized to update this user\'s information.',
-        //     ], 403);
-        // }
+        if (
+            $user->role !== 'admin' && $user->id !== (int) $request->route('id')
+        ) {
+            return response()->json([
+                'message' => 'Bạn không được cập nhật thông tin user',
+            ], 403);
+        }
 
         // Xác thực dữ liệu đầu vào
         $validatedData = $request->validate([

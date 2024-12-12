@@ -181,6 +181,15 @@ const ListProducts = () => {
       ),
     },
     {
+<<<<<<< HEAD:fontend/beestyle/src/pages/(dashboard)/dashboard/Product/list.tsx
+=======
+      title: 'Ngày nhập',
+      dataIndex: 'input_day',
+      key: 'input_day',
+      // render: (date: string) => <span>{format(new Date(date), 'dd/MM/yyyy')}</span>,
+    },
+    {
+>>>>>>> 72595ba (Fix statistics):fontend/beestyle/src/pages/(dashboard)/dashboard/products/list.tsx
       title: 'Danh mục',
       dataIndex: 'category_name',
       align: 'center',
