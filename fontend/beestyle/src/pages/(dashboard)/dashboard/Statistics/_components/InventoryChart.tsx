@@ -3,7 +3,7 @@ import { Doughnut } from 'react-chartjs-2';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
 import { useQuery } from '@tanstack/react-query';
 import { Spin } from 'antd';
-import AxiosInstance from '@/configs/axios';
+import instance from '@/configs/axios';
 
 // Đăng ký các thành phần của Chart.js
 ChartJS.register(ArcElement, Tooltip, Legend);
@@ -13,7 +13,7 @@ const InventoryChart = () => {
     // const { data: Inventory, isLoading } = useQuery({
     //     queryKey: ['inventory'],
     //     queryFn: async () => {
-    //         const response = await AxiosInstance('http://127.0.0.1:8000/api/admins/statistics/get_product_stock');
+    //         const response = await instance('http://127.0.0.1:8000/api/admins/statistics/get_product_stock');
     //         return response.data;
     //     },
     // });

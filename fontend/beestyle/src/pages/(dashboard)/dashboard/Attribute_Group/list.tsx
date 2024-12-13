@@ -1,7 +1,7 @@
 import { DeleteOutlined, EditOutlined, PlusOutlined } from '@ant-design/icons';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Button, message, Popconfirm, Table } from 'antd';
-import axiosInstance from '@/configs/axios';
+import instance from '@/configs/axios';
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ColumnsType } from 'antd/es/table';
@@ -15,14 +15,14 @@ const ListAttributeGroup = (props: Props) => {
     const { data: attributeGroups, isLoading } = useQuery({
         queryKey: ['attribute_group'],
         queryFn: async () => {
-            const response = await axiosInstance.get('http://127.0.0.1:8000/api/admins/attribute_groups');
+            const response = await instance.get('api/admins/attribute_groups');
             return response?.data?.variation;
         },
     });
 
     const mutation = useMutation({
         mutationFn: async (id: any) => {
-            return await axiosInstance.delete(`http://127.0.0.1:8000/api/admins/attribute_groups/${id}`);
+            return await instance.delete(`api/admins/attribute_groups/${id}`);
         },
         onSuccess: () => {
             toast.success('Xóa Nhóm Thuộc Tính Thành Công');

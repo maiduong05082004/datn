@@ -1,10 +1,9 @@
 import React, { useState } from 'react';
-import { Table, message, Button, Image, Tag, Modal, Popconfirm, Spin, Tooltip } from 'antd';
+import { Table, Button,Modal, Popconfirm, Spin, Tooltip } from 'antd';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { format } from 'date-fns';
 import { DeleteOutlined, EditOutlined, EyeOutlined, PlusOutlined } from '@ant-design/icons';
-import AxiosInstance from '@/configs/axios';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { toast, ToastContainer } from 'react-toastify';
 import instance from '@/configs/axios';
 

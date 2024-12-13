@@ -1,5 +1,5 @@
 import React from 'react';
-import AxiosInstance from '@/configs/axios';
+import instance from '@/configs/axios';
 import { useNavigate } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Table, Spin, message, Button, Popconfirm, Space, Image } from 'antd';
@@ -22,14 +22,14 @@ const ListCategories: React.FC = () => {
   const { data: categories = [], isLoading } = useQuery<Category[]>({
     queryKey: ['categories'],
     queryFn: async () => {
-      const response = await AxiosInstance.get('http://127.0.0.1:8000/api/admins/categories');
+      const response = await instance.get('api/admins/categories');
       return response.data;
     },
   });
 
   const { mutate: deleteCategory } = useMutation({
     mutationFn: async (id: number) => {
-      await AxiosInstance.delete(`http://127.0.0.1:8000/api/admins/categories/${id}`);
+      await instance.delete(`api/admins/categories/${id}`);
     },
     onSuccess: () => {
       toast.success('Xóa Danh Mục Thành Công')

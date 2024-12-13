@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
-import axiosInstance from '@/configs/axios';
+import instance from '@/configs/axios';
 import { Button, Form, Input, Select, message, Spin, Checkbox } from 'antd';
 import { useNavigate } from 'react-router-dom';
 import { toast, ToastContainer } from 'react-toastify';
@@ -22,14 +22,14 @@ const AddCategories: React.FC = () => {
   const { data: categories, isLoading } = useQuery<Category[]>({
     queryKey: ['categories'],
     queryFn: async () => {
-      const response = await axiosInstance.get('http://127.0.0.1:8000/api/admins/categories');
+      const response = await instance.get('api/admins/categories');
       return response.data;
     },
   });
 
   const { mutate } = useMutation({
     mutationFn: async (categoryData: FormData) => {
-      return await axiosInstance.post('http://127.0.0.1:8000/api/admins/categories', categoryData, {
+      return await instance.post('api/admins/categories', categoryData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
     },

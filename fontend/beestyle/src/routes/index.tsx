@@ -7,9 +7,7 @@ import MyProfile from "@/pages/(dashboard)/dashboard/profile";
 import AddPromotion from "@/pages/(dashboard)/dashboard/promotions/add";
 import ListPromotions from "@/pages/(dashboard)/dashboard/promotions/list";
 import UpdatePromotion from "@/pages/(dashboard)/dashboard/promotions/update";
-import AddUser from "@/pages/(dashboard)/dashboard/Users/add";
 import ListUser from "@/pages/(dashboard)/dashboard/Users/list";
-import UpdateUser from "@/pages/(dashboard)/dashboard/Users/update";
 import LayoutAdmin from "@/pages/(dashboard)/layout";
 import HomePage from "@/pages/(website)/home/page";
 import LayoutWebsite from "@/pages/(website)/layout";
@@ -31,7 +29,6 @@ import AddProduct from "@/pages/(dashboard)/dashboard/Product/add";
 import Comments from "@/pages/(dashboard)/dashboard/Product/comments";
 import ListProducts from "@/pages/(dashboard)/dashboard/Product/list";
 import UpdateProduct from "@/pages/(dashboard)/dashboard/Product/update";
-import DetailUser from "@/pages/(dashboard)/dashboard/Users/detail";
 import ErrorPage from "@/pages/(website)/404/page";
 import Search from "@/pages/(website)/_components/Search";
 import AddressesPage from "@/pages/(website)/account/_components/addresses";
@@ -107,7 +104,7 @@ const Router = () => {
                     <Route path="bill/list" element={<ListBill />} />
                     <Route path="bill/detail/:id" element={<DetailBill />} />
                     <Route path="bill/detailSuccessful/:id" element={<Detailship />} />
-                    {/* <Route path="bill/detailConfirm/:id" element={<DeatilConfirm />} /> */}
+                    <Route path="bill/detailConfirm/:id" element={<DeatilConfirm />} />
                     <Route path="bill/cancel/:id" element={<CancelBill />} />
                     {/* <Route path="bill/detailConfirm/:id" element={<DeatilConfirm />} /> */}
                     <Route path="bill/cancel" element={<CancelBill />} />
@@ -124,10 +121,7 @@ const Router = () => {
                     <Route path="banner/update/:id" element={<UpdateBanners />} />
                     <Route path="banner/detail/:id" element={<DetailBanner />} />
                     {/* users */}
-                    <Route path="user/add" element={<AddUser />} />
                     <Route path="user/list" element={<ListUser />} />
-                    <Route path="user/detail/:id" element={<DetailUser />} />
-                    <Route path="user/update/:id" element={<UpdateUser />} />
                     {/* products */}
                     <Route path="products/list" element={<ListProducts />} />
                     <Route path="comments/list/:id" element={<Comments />} />

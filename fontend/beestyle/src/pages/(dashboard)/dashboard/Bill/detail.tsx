@@ -3,9 +3,7 @@ import { useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { Table, Spin, Carousel } from 'antd';
 import axios from 'axios';
-import Joi from 'joi';
 import { useForm } from 'react-hook-form';
-import { joiResolver } from '@hookform/resolvers/joi';
 
 interface TCheckout {
   full_name: string;
@@ -37,7 +35,7 @@ const DetailBill: React.FC = () => {
   const { data: detailBill, isLoading } = useQuery({
     queryKey: ['detailbill', id],
     queryFn: async () => {
-      const response = await axios.get(`http://127.0.0.1:8000/api/admins/orders/show_detailorder/${id}`, {
+      const response = await axios.get(`api/admins/orders/show_detailorder/${id}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },

@@ -2,7 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Spin, Table, Tabs, Tooltip, Button, Modal, InputNumber, Cascader, Form, Input } from 'antd';
 import React, { useState } from 'react';
 import { format } from 'date-fns';
-import AxiosInstance from '@/configs/axios';
+import instance from '@/configs/axios';
 import { toast, ToastContainer } from 'react-toastify';
 import { DatePicker, Select } from 'antd';
 import { FilterOutlined } from '@ant-design/icons';
@@ -52,9 +52,8 @@ const InventoryManagement = (props: Props) => {
     const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
     const [selectedSupplier, setSelectedSupplier] = useState<string | null>(null);
     const [selectedDates, setSelectedDates] = useState<[string, string] | null>(null);
-    const [filterData, setFilterData] = useState([]);
-    const [isFiltered, setIsFiltered] = useState(false); // Trạng thái kiểm tra có lọc hay không
-    const [filteredData, setFilteredData] = useState<Product[]>([]); // Dữ liệu đã lọc
+    const [isFiltered, setIsFiltered] = useState(false);
+    const [filteredData, setFilteredData] = useState<Product[]>([]);
 
 
     const handleOpenFilterModal = () => {
@@ -64,12 +63,18 @@ const InventoryManagement = (props: Props) => {
     const handleCloseFilterModal = () => {
         setIsFilterModalVisible(false);
     };
+    const handleTabChange = (activeKey: string) => {
+        setIsFiltered(false);
+        setFilteredData([]);
+        resetFilters();
+    };
+
 
     const handleApplyFilter = async () => {
         try {
-            const params: any = {};
+            const params: Record<string, any> = {};
 
-            if (selectedDates) {
+            if (selectedDates && selectedDates.length === 2) {
                 params.start_date = selectedDates[0];
                 params.end_date = selectedDates[1];
             }
@@ -82,31 +87,45 @@ const InventoryManagement = (props: Props) => {
                 params.category_id = selectedCategoryId;
             }
 
-            // Lấy dữ liệu từ API
-            const response = await AxiosInstance.post(
-                'http://127.0.0.1:8000/api/admins/inventory/listProductDate',
+            const response = await instance.post(
+                'api/admins/inventory/listProductDate',
                 params
             );
 
-            const normalizedData = response.data.data.map((item: any, index: number) => ({
-                key: item.id,
-                index,
-                ...item,
-            }));
+            if (response?.data?.data?.length > 0) {
+                const normalizedData = response.data.data.map((item: any, index: number) => ({
+                    key: item.id || index,
+                    index,
+                    ...item,
+                }));
 
-            setFilteredData(normalizedData);
-            setIsFiltered(true);
-            toast.success('Lọc dữ liệu thành công!');
+                setFilteredData(normalizedData);
+                setIsFiltered(true);
+                toast.success('Lọc dữ liệu thành công!');
+            } else {
+                setFilteredData([]);
+                setIsFiltered(false);
+                toast.info('Không tìm thấy dữ liệu phù hợp!');
+            }
+
+            resetFilters(); // Reset bộ lọc
+            setIsFilterModalVisible(false); // Đóng modal lọc
         } catch (error) {
             toast.error('Có lỗi xảy ra khi lọc!');
         }
     };
 
 
+    const resetFilters = () => {
+        setSelectedDates(null);
+        setSelectedSupplier(null);
+        setSelectedCategoryId(null);
+    };
+
     const { data: productData } = useQuery({
         queryKey: ['products'],
         queryFn: async () => {
-            const response = await AxiosInstance.get('http://127.0.0.1:8000/api/admins/products');
+            const response = await instance.get('api/admins/products');
             return response.data.data;
         },
     })
@@ -114,7 +133,7 @@ const InventoryManagement = (props: Props) => {
     const { data: activeData, isLoading: loadingActive } = useQuery({
         queryKey: ['activeProducts'],
         queryFn: async () => {
-            const response = await AxiosInstance.get('http://127.0.0.1:8000/api/admins/inventory/listproductastive');
+            const response = await instance.get('api/admins/inventory/listproductastive');
             return response.data.data;
         },
     });
@@ -122,7 +141,7 @@ const InventoryManagement = (props: Props) => {
     const { data: inactiveData, isLoading: loadingInactive } = useQuery({
         queryKey: ['inactiveProducts'],
         queryFn: async () => {
-            const response = await AxiosInstance.get('http://127.0.0.1:8000/api/admins/inventory/listproductinactive');
+            const response = await instance.get('api/admins/inventory/listproductinactive');
             return response.data.data;
         },
     });
@@ -130,7 +149,7 @@ const InventoryManagement = (props: Props) => {
     const { data: outOfStockData, isLoading: loadingOutOfStock } = useQuery({
         queryKey: ['outOfStockProducts'],
         queryFn: async () => {
-            const response = await AxiosInstance.get('http://127.0.0.1:8000/api/admins/inventory/product_isoutof_stock');
+            const response = await instance.get('api/admins/inventory/product_isoutof_stock');
             return response.data.data;
         },
     });
@@ -138,8 +157,8 @@ const InventoryManagement = (props: Props) => {
     const { data: lowStockData, isLoading: loadingLowStock } = useQuery({
         queryKey: ['lowStockProducts'],
         queryFn: async () => {
-            const response = await AxiosInstance.post(
-                'http://127.0.0.1:8000/api/admins/inventory/listproducts_withfewsizes'
+            const response = await instance.post(
+                'api/admins/inventory/listproducts_withfewsizes'
             );
             return response.data.data;
         },
@@ -151,8 +170,8 @@ const InventoryManagement = (props: Props) => {
         string
     >({
         mutationFn: async (id: string) => {
-            const response = await AxiosInstance.put(
-                `http://127.0.0.1:8000/api/admins/inventory/updateproductinactive/${id}`
+            const response = await instance.put(
+                `api/admins/inventory/updateproductinactive/${id}`
             );
             return response.data;
         },
@@ -173,8 +192,8 @@ const InventoryManagement = (props: Props) => {
         string
     >({
         mutationFn: async (id: string) => {
-            const response = await AxiosInstance.put(
-                `http://127.0.0.1:8000/api/admins/inventory/updateproductactivete/${id}`
+            const response = await instance.put(
+                `api/admins/inventory/updateproductactivete/${id}`
             );
             return response.data;
         },
@@ -225,8 +244,8 @@ const InventoryManagement = (props: Props) => {
         { id: string; stock: number }
     >({
         mutationFn: async ({ id, stock }) => {
-            const response = await AxiosInstance.put(
-                `http://127.0.0.1:8000/api/admins/inventory/updatestockproduct/${id}`,
+            const response = await instance.put(
+                `api/admins/inventory/updatestockproduct/${id}`,
                 { stock }
             );
             return response.data;
@@ -252,8 +271,8 @@ const InventoryManagement = (props: Props) => {
         { id: string; category_id: number }
     >({
         mutationFn: async ({ id, category_id }) => {
-            const response = await AxiosInstance.put(
-                `http://127.0.0.1:8000/api/admins/inventory/salecategory/${id}`,
+            const response = await instance.put(
+                `api/admins/inventory/salecategory/${id}`,
                 { category_id }
             );
             return response.data;
@@ -284,7 +303,7 @@ const InventoryManagement = (props: Props) => {
     const { data: categories, isLoading: isLoadingCategories } = useQuery({
         queryKey: ['categories'],
         queryFn: async () => {
-            const response = await AxiosInstance.get('http://localhost:8000/api/admins/categories');
+            const response = await instance.get('http://localhost:8000/api/admins/categories');
             return response?.data;
         },
     });
@@ -303,6 +322,7 @@ const InventoryManagement = (props: Props) => {
             dataIndex: 'index',
             key: 'index',
             align: 'center',
+            width: "50px",
             render: (_: any, __: Product, index: number) => <span>{index + 1}</span>,
         },
         {
@@ -382,6 +402,7 @@ const InventoryManagement = (props: Props) => {
             title: 'Số Lượng Hiện Tại',
             dataIndex: 'variations',
             key: 'variations',
+            width: "100px",
             align: 'center',
             render: (variations: Variation[]) => (
                 <div className=''>
@@ -490,26 +511,60 @@ const InventoryManagement = (props: Props) => {
             label: 'Tất Cả',
             children: (
                 <Table
-                    dataSource={isFiltered ? filteredData : productDatas} 
+                    dataSource={isFiltered ? filteredData : productDatas}
                     columns={columns}
                     bordered
+                    pagination={{
+                        pageSize: 10,
+                        showTotal: (total) => `Tổng ${total} sản phẩm`,
+                    }}
                 />
             ),
         },
         {
             key: '2',
             label: 'Đang bán',
-            children: <Table dataSource={activeProducts} columns={columns} bordered />,
+            children: (
+                <Table
+                    dataSource={isFiltered ? filteredData : activeProducts}
+                    columns={columns}
+                    bordered
+                    pagination={{
+                        pageSize: 10,
+                        showTotal: (total) => `Tổng ${total} sản phẩm`,
+                    }}
+                />
+            ),
         },
         {
             key: '3',
             label: 'Đang Bán (Sắp hết hàng) ',
-            children: <Table dataSource={lowStockProducts} columns={columns} bordered />,
+            children: (
+                <Table
+                    dataSource={isFiltered ? filteredData : lowStockProducts}
+                    columns={columns}
+                    bordered
+                    pagination={{
+                        pageSize: 10,
+                        showTotal: (total) => `Tổng ${total} sản phẩm`,
+                    }}
+                />
+            ),
         },
         {
             key: '4',
             label: 'Ngừng bán (Hàng Tồn)',
-            children: <Table dataSource={inactiveProducts} columns={columns} bordered />,
+            children: (
+                <Table
+                    dataSource={isFiltered ? filteredData : inactiveProducts}
+                    columns={columns}
+                    bordered
+                    pagination={{
+                        pageSize: 10,
+                        showTotal: (total) => `Tổng ${total} sản phẩm`,
+                    }}
+                />
+            ),
         },
 
         {
@@ -524,15 +579,16 @@ const InventoryManagement = (props: Props) => {
 
         <div className="p-5">
             <ToastContainer />
-                <Tabs
-                    defaultActiveKey="1"
-                    items={items}
-                    tabBarExtraContent={
-                        <Button icon={<FilterOutlined />} type="default" onClick={handleOpenFilterModal}>
-                            Lọc
-                        </Button>
-                    }
-                />
+            <Tabs
+                defaultActiveKey="1"
+                onChange={handleTabChange}
+                items={items}
+                tabBarExtraContent={
+                    <Button icon={<FilterOutlined />} type="default" onClick={handleOpenFilterModal}>
+                        Lọc
+                    </Button>
+                }
+            />
 
             <Modal
                 title={`Chi tiết biến thể: ${selectedVariant ? selectedVariant.attribute_value_image_variant.value : ''}`}

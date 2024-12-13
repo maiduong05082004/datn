@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import axiosInstance from '@/configs/axios';
+import instance from '@/configs/axios';
 import React, { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { Spin } from 'antd';
@@ -50,7 +50,7 @@ const Shipping = (props: Props) => {
     const { data: orderDetail, isLoading } = useQuery({
         queryKey: ['shipping', id],
         queryFn: async () => {
-            const response = await axiosInstance.post(`http://127.0.0.1:8000/api/admins/orders/ghn-detail/${id}`,{
+            const response = await instance.post(`api/admins/orders/ghn-detail/${id}`,{
                 headers: {
                     Authorization: `Bearer ${token}`,
                   },

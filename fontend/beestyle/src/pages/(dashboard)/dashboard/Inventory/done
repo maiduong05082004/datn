@@ -52,8 +52,8 @@ const InventoryManagement = (props: Props) => {
     const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
     const [selectedSupplier, setSelectedSupplier] = useState<string | null>(null);
     const [selectedDates, setSelectedDates] = useState<[string, string] | null>(null);
-    const [isFiltered, setIsFiltered] = useState(false); // Trạng thái kiểm tra có lọc hay không
-    const [filteredData, setFilteredData] = useState<Product[]>([]); // Dữ liệu đã lọc
+    const [isFiltered, setIsFiltered] = useState(false);
+    const [filteredData, setFilteredData] = useState<Product[]>([]);
 
 
     const handleOpenFilterModal = () => {
@@ -63,37 +63,42 @@ const InventoryManagement = (props: Props) => {
     const handleCloseFilterModal = () => {
         setIsFilterModalVisible(false);
     };
+    const handleTabChange = (activeKey: string) => {
+        setIsFiltered(false);
+        setFilteredData([]);
+        resetFilters();
+    };
+
 
     const handleApplyFilter = async () => {
         try {
-            // Chuẩn bị tham số lọc
             const params: Record<string, any> = {};
-    
+
             if (selectedDates && selectedDates.length === 2) {
                 params.start_date = selectedDates[0];
                 params.end_date = selectedDates[1];
             }
-    
+
             if (selectedSupplier) {
                 params.supplier = selectedSupplier;
             }
-    
+
             if (selectedCategoryId) {
                 params.category_id = selectedCategoryId;
             }
-    
+
             const response = await instance.post(
                 'api/admins/inventory/listProductDate',
                 params
             );
-    
+
             if (response?.data?.data?.length > 0) {
                 const normalizedData = response.data.data.map((item: any, index: number) => ({
                     key: item.id || index,
                     index,
                     ...item,
                 }));
-    
+
                 setFilteredData(normalizedData);
                 setIsFiltered(true);
                 toast.success('Lọc dữ liệu thành công!');
@@ -102,20 +107,20 @@ const InventoryManagement = (props: Props) => {
                 setIsFiltered(false);
                 toast.info('Không tìm thấy dữ liệu phù hợp!');
             }
-    
-            resetFilters();
+
+            resetFilters(); // Reset bộ lọc
+            setIsFilterModalVisible(false); // Đóng modal lọc
         } catch (error) {
             toast.error('Có lỗi xảy ra khi lọc!');
         }
     };
-    
+
+
     const resetFilters = () => {
         setSelectedDates(null);
         setSelectedSupplier(null);
         setSelectedCategoryId(null);
     };
-    
-
 
     const { data: productData } = useQuery({
         queryKey: ['products'],
@@ -317,6 +322,7 @@ const InventoryManagement = (props: Props) => {
             dataIndex: 'index',
             key: 'index',
             align: 'center',
+            width: "50px",
             render: (_: any, __: Product, index: number) => <span>{index + 1}</span>,
         },
         {
@@ -396,6 +402,7 @@ const InventoryManagement = (props: Props) => {
             title: 'Số Lượng Hiện Tại',
             dataIndex: 'variations',
             key: 'variations',
+            width: "100px",
             align: 'center',
             render: (variations: Variation[]) => (
                 <div className=''>
@@ -504,7 +511,7 @@ const InventoryManagement = (props: Props) => {
             label: 'Tất Cả',
             children: (
                 <Table
-                    dataSource={isFiltered ? filteredData : productDatas} 
+                    dataSource={isFiltered ? filteredData : productDatas}
                     columns={columns}
                     bordered
                     pagination={{
@@ -519,7 +526,7 @@ const InventoryManagement = (props: Props) => {
             label: 'Đang bán',
             children: (
                 <Table
-                    dataSource={isFiltered ? filteredData : activeProducts} 
+                    dataSource={isFiltered ? filteredData : activeProducts}
                     columns={columns}
                     bordered
                     pagination={{
@@ -534,7 +541,7 @@ const InventoryManagement = (props: Props) => {
             label: 'Đang Bán (Sắp hết hàng) ',
             children: (
                 <Table
-                    dataSource={isFiltered ? filteredData : lowStockProducts} 
+                    dataSource={isFiltered ? filteredData : lowStockProducts}
                     columns={columns}
                     bordered
                     pagination={{
@@ -549,7 +556,7 @@ const InventoryManagement = (props: Props) => {
             label: 'Ngừng bán (Hàng Tồn)',
             children: (
                 <Table
-                    dataSource={isFiltered ? filteredData : inactiveProducts} 
+                    dataSource={isFiltered ? filteredData : inactiveProducts}
                     columns={columns}
                     bordered
                     pagination={{
@@ -572,15 +579,16 @@ const InventoryManagement = (props: Props) => {
 
         <div className="p-5">
             <ToastContainer />
-                <Tabs
-                    defaultActiveKey="1"
-                    items={items}
-                    tabBarExtraContent={
-                        <Button icon={<FilterOutlined />} type="default" onClick={handleOpenFilterModal}>
-                            Lọc
-                        </Button>
-                    }
-                />
+            <Tabs
+                defaultActiveKey="1"
+                onChange={handleTabChange}
+                items={items}
+                tabBarExtraContent={
+                    <Button icon={<FilterOutlined />} type="default" onClick={handleOpenFilterModal}>
+                        Lọc
+                    </Button>
+                }
+            />
 
             <Modal
                 title={`Chi tiết biến thể: ${selectedVariant ? selectedVariant.attribute_value_image_variant.value : ''}`}

@@ -1,7 +1,7 @@
 import { ShoppingCartOutlined, EyeOutlined, FilterOutlined, SearchOutlined } from '@ant-design/icons';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { Button, Spin, Table, DatePicker, Input, Select, Drawer, Tabs } from 'antd';
-import axiosInstance from '@/configs/axios';
+import instance from '@/configs/axios';
 import React, { useEffect, useState } from 'react';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -45,17 +45,17 @@ const ListBill: React.FC = () => {
   const getApiUrl = (status: string): string => {
     switch (status) {
       case 'pending':
-        return 'http://127.0.0.1:8000/api/admins/orders/pending?page=1&per_page=10';
+        return 'api/admins/orders/pending?page=1&per_page=10';
       case 'processing':
-        return 'http://127.0.0.1:8000/api/admins/orders/processed?page=1&per_page=10';
+        return 'api/admins/orders/processed?page=1&per_page=10';
       case 'shipping':
-        return 'http://127.0.0.1:8000/api/admins/orders/shipped?page=1&per_page=10';
+        return 'api/admins/orders/shipped?page=1&per_page=10';
       case 'delivered':
-        return 'http://127.0.0.1:8000/api/admins/orders/delivered?page=1&per_page=10';
+        return 'api/admins/orders/delivered?page=1&per_page=10';
       case 'canceled':
-        return 'http://127.0.0.1:8000/api/admins/orders/canceled?page=1&per_page=10';
+        return 'api/admins/orders/canceled?page=1&per_page=10';
       default:
-        return 'http://127.0.0.1:8000/api/admins/orders?page=1&per_page=10';
+        return 'api/admins/orders?page=1&per_page=10';
     }
   };
 
@@ -63,29 +63,29 @@ const ListBill: React.FC = () => {
     let baseUrl;
     switch (status) {
       case 'pending':
-        baseUrl = `http://127.0.0.1:8000/api/admins/orders/search-pending?order_code=${code}`;
+        baseUrl = `api/admins/orders/search-pending?order_code=${code}`;
         break;
       case 'processing':
-        baseUrl = `http://127.0.0.1:8000/api/admins/orders/search-processed?order_code=${code}`;
+        baseUrl = `api/admins/orders/search-processed?order_code=${code}`;
         break;
       case 'shipping':
-        baseUrl = `http://127.0.0.1:8000/api/admins/orders/search-shipped?order_code=${code}`;
+        baseUrl = `api/admins/orders/search-shipped?order_code=${code}`;
         break;
       case 'delivered':
-        baseUrl = `http://127.0.0.1:8000/api/admins/orders/search-delivered?order_code=${code}`;
+        baseUrl = `api/admins/orders/search-delivered?order_code=${code}`;
         break;
       case 'canceled':
-        baseUrl = `http://127.0.0.1:8000/api/admins/orders/search-canceled?order_code=${code}`;
+        baseUrl = `api/admins/orders/search-canceled?order_code=${code}`;
         break;
       default:
-        baseUrl = `http://127.0.0.1:8000/api/admins/orders/search_order?order_code=${code}`;
+        baseUrl = `api/admins/orders/search_order?order_code=${code}`;
     }
     return baseUrl;
   };
 
   const handleDeleteShipping = async (billId: number) => {
     try {
-      await axiosInstance.post(`http://127.0.0.1:8000/api/admins/orders/update_order/${billId}`, { status: 'canceled' });
+      await instance.post(`api/admins/orders/update_order/${billId}`, { status: 'canceled' });
       toast.success('Đơn hàng đã được hủy thành công.');
       refetch();
     } catch (error: any) {
@@ -95,7 +95,7 @@ const ListBill: React.FC = () => {
 
   const handleAssignShipping = async (billId: number) => {
     try {
-      await axiosInstance.post(`http://127.0.0.1:8000/api/admins/orders/update_order/${billId}`, { status: 'shipped' });
+      await instance.post(`api/admins/orders/update_order/${billId}`, { status: 'shipped' });
       toast.success('Trạng thái đơn hàng đã được cập nhật thành công thành "Đang Vận Chuyển".');
       refetch();
     } catch (error: any) {
@@ -106,17 +106,16 @@ const ListBill: React.FC = () => {
   const { isLoading, refetch } = useQuery({
     queryKey: ['products', filterStatus],
     queryFn: async () => {
-      const response = await axiosInstance.get(getApiUrl(filterStatus));
+      const response = await instance.get(getApiUrl(filterStatus));
       setBillData(response.data.bills);
       return response.data;
     },
   });
 
   const filterBill = (status: string) => {
-    let baseUrl = `http://127.0.0.1:8000/api/admins/orders/${status !== 'all' ? status : ''}?`;
+    let baseUrl = `api/admins/orders/${status !== 'all' ? status : ''}?`;
     if (startDate && endDate) {
-      baseUrl += `start_date=${startDate.split(' ')[0]}&start_time=${startDate.split(' ')[1]}&`;
-      baseUrl += `end_date=${endDate.split(' ')[0]}&end_time=${endDate.split(' ')[1]}&`;
+      baseUrl += `start_date=${startDate}&end_date=${endDate}&`;
     }
     if (phone) {
       baseUrl += `phone=${phone}&`;
@@ -133,7 +132,7 @@ const ListBill: React.FC = () => {
 
   const fetchFilteredBills = async () => {
     try {
-      const response = await axiosInstance.get(filterBill(filterStatus));
+      const response = await instance.get(filterBill(filterStatus));
       setBillData(response.data.bills);
     } catch (error) {
       toast.error('Không thể lấy dữ liệu hóa đơn!');
@@ -187,7 +186,7 @@ const ListBill: React.FC = () => {
   const searchBill = async () => {
     if (searchCode) {
       try {
-        const response = await axiosInstance.post(getApiUrlSearch(filterStatus, searchCode));
+        const response = await instance.post(getApiUrlSearch(filterStatus, searchCode));
 
         if (response.data.bill) {
           const updatedBillData = billData
@@ -285,12 +284,12 @@ const ListBill: React.FC = () => {
             vietnameseStatus = 'Đang chờ xử lý';
             break;
           case 'processed':
-            vietnameseStatus = 'Chờ lấy hàng';
-            statusClass = 'text-blue-500';
+            vietnameseStatus = 'Đã Xử Lý';
+            statusClass = 'text-green-500';
             break;
           case 'shipped':
             vietnameseStatus = 'Đang giao hàng';
-            statusClass = 'text-green-500';
+            statusClass = 'text-yellow-500';
             break;
           case 'delivered':
             vietnameseStatus = 'Đã giao hàng';
@@ -333,7 +332,7 @@ const ListBill: React.FC = () => {
                 } else if (newStatus === 'canceled') {
                   await handleDeleteShipping(record.id);
                 } else {
-                  await axiosInstance.post(`http://127.0.0.1:8000/api/admins/orders/update_order/${record.id}`, { status: newStatus });
+                  await instance.post(`api/admins/orders/update_order/${record.id}`, { status: newStatus });
                   toast.success('Trạng thái đơn hàng đã được cập nhật thành công.');
                   refetch();
                 }
@@ -436,12 +435,12 @@ const ListBill: React.FC = () => {
     { key: 'delivered', label: `Đã Giao Hàng` },
     { key: 'canceled', label: `Đã Hủy` },
   ];
-  
+
   const getTabLabelWithCount = (statusKey: string, count: number) => {
     const status = statusList.find((item) => item.key === statusKey);
     return `${status?.label} (${count})`;
   };
-  
+
 
   const handleTabChange = (key: any) => {
     setFilterStatus(key);
@@ -454,7 +453,7 @@ const ListBill: React.FC = () => {
       <div className='p-5'>
         <div className="w-[100%]">
           <Tabs
-            activeKey={filterStatus} 
+            activeKey={filterStatus}
             onChange={handleTabChange}
           >
             {statusList.map((status) => (
@@ -493,20 +492,18 @@ const ListBill: React.FC = () => {
           >
             <div className="p-4 space-y-4">
               <RangePicker
-                showTime
                 className="w-full rounded-lg border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
                 onChange={(dates) => {
                   if (dates) {
-                    setStartDate(dates[0]?.format('YYYY-MM-DD HH:mm:ss') || null);
-                    setEndDate(dates[1]?.format('YYYY-MM-DD HH:mm:ss') || null);
+                    setStartDate(dates[0]?.format('YYYY-MM-DD') || null); 
+                    setEndDate(dates[1]?.format('YYYY-MM-DD') || null);   
                   } else {
                     setStartDate(null);
                     setEndDate(null);
                   }
                 }}
+                format="YYYY-MM-DD" 
               />
-
-
               <Input
                 className="w-full rounded-lg border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
                 placeholder="Số điện thoại"
@@ -522,12 +519,6 @@ const ListBill: React.FC = () => {
                 <Option value="online">Online</Option>
                 <Option value="cod">COD</Option>
               </Select>
-              <Input
-                className="w-full rounded-lg border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-                placeholder="Mã khuyến mãi"
-                value={promoCode}
-                onChange={(e) => setPromoCode(e.target.value)}
-              />
               <Button
                 onClick={handleFilterApply}
                 className="w-full bg-blue-500 text-white font-semibold py-2 rounded-lg shadow-md hover:bg-blue-600 focus:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:outline-none transition duration-150 ease-in-out"

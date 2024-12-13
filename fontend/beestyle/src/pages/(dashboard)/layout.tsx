@@ -35,7 +35,7 @@ const items1: MenuProps['items'] = [
     label: "Tài Khoản",
     children: [
       { key: 'sub1-1', label: <NavLink to="/admin/dashboard/user/list">Danh sách tài Khoản</NavLink> },
-      // { key: 'sub1-2', label: <NavLink to="/admin/dashboard/user/add">Thêm Tài Khoản</NavLink> },
+      // { key: 'sub1-2', label: <NavLink to="/admin/dashboard/user/add">Thêm Tài Khoản</NavLink> },  
     ],
   },
   {
@@ -44,7 +44,7 @@ const items1: MenuProps['items'] = [
     label: "Banners",
     children: [
 
-      { key: 'sub2-1', label: <NavLink to="/admin/dashboard/banner/list/custom">Banners Tự Do</NavLink> },
+      { key: 'sub2-1', label: <NavLink to="/admin/dashboard/banner/list/collection">Banners Bộ Sưu Tập</NavLink> },
       { key: 'sub2-2', label: <NavLink to="/admin/dashboard/banner/list/main">Banners Chính</NavLink> },
       { key: 'sub2-4', label: <NavLink to="/admin/dashboard/banner/list/category">Banners Danh Mục</NavLink> },
       { key: 'sub2-6', label: <NavLink to="/admin/dashboard/banner/add">Thêm Banners</NavLink> },
@@ -150,6 +150,7 @@ const App: React.FC = () => {
   const [collapsed, setCollapsed] = React.useState(false);
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
+  const [openKeys, setOpenKeys] = useState<string[]>([]);
   const toggleDropdown = () => {
     setIsOpen(!isOpen);
   };
@@ -157,15 +158,23 @@ const App: React.FC = () => {
     setIsDarkMode((prevMode) => !prevMode);
   };
 
+  const onOpenChange = (keys: string[]) => {
+    const latestOpenKey = keys.find((key) => openKeys.indexOf(key) === -1); 
+    if (items1.map((item :any) => item.key).includes(latestOpenKey!)) {
+      setOpenKeys(latestOpenKey ? [latestOpenKey] : []);
+    } else {
+      setOpenKeys(keys); 
+    }
+  };
+
 
   return (
     <Layout style={{ minHeight: '100vh' }}>
-      {/* Sidebar Navigation */}
       <Sider
         collapsible
         collapsed={collapsed}
         onCollapse={setCollapsed}
-        theme="dark" // Sidebar always stays in dark theme
+        theme="dark" 
         style={{
           background: '#001529',
         }}
@@ -177,13 +186,22 @@ const App: React.FC = () => {
           </div>
         </div>
 
-        <Menu theme="dark" mode="inline" defaultSelectedKeys={['dashboard']} className='font-bold text-[14px]' items={items1} style={{ marginTop: '16px' }} />
+        <Menu
+          theme="dark"
+          mode="inline"
+          openKeys={openKeys}
+          onOpenChange={onOpenChange}
+          defaultSelectedKeys={["dashboard"]}
+          items={items1}
+          className='font-bold text-[14px]'
+          style={{ marginTop: "16px" }}
+        />
       </Sider>
 
       <Layout>
         {/* Top Header */}
         <Header
-          className='h-[50px]'
+          className='h-[50px'
           style={{
             background: isDarkMode ? '#001529' : '#fff',
             padding: '0 16px',

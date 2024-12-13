@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Table, Spin, message, Button, Space } from 'antd';
 import { EditOutlined, PlusOutlined, EyeOutlined } from '@ant-design/icons';
-import axiosInstance from '@/configs/axios';
+import instance from '@/configs/axios';
 import SearchComponent from '@/components/ui/search';
 import { ColumnsType } from 'antd/es/table';
 
@@ -43,7 +43,7 @@ const UserList: React.FC = () => {
   const { data: userManager = [], isLoading } = useQuery<User[]>({
     queryKey: ['userManager'],
     queryFn: async () => {
-      const response = await axiosInstance.get('http://127.0.0.1:8000/api/admins/users');
+      const response = await instance.get('api/admins/users');
       return response.data;
     },
   });
@@ -59,9 +59,9 @@ const UserList: React.FC = () => {
 
   const sortedUsers = [...filteredUsers].sort((a, b) => {
     if (sortKey === 'name') {
-      return a.name.localeCompare(b.name); // Sắp xếp theo tên A-Z
+      return a.name.localeCompare(b.name); 
     } else if (sortKey === 'email') {
-      return a.email.localeCompare(b.email); // Sắp xếp theo email A-Z
+      return a.email.localeCompare(b.email); 
     }
     return 0;
   });
@@ -128,27 +128,6 @@ const UserList: React.FC = () => {
       key: 'updated_at',
       align: 'center',
       render: (date: string) => new Date(date).toLocaleDateString(),
-    },
-    {
-      title: 'Hành động',
-      key: 'action',
-      align: 'center',
-      render: (_: any, record: User) => (
-        <Space size="middle">
-          <Button
-            type="default"
-            icon={<EyeOutlined />}
-            onClick={() => navigate(`/admin/dashboard/user/detail/${record.id}`)}
-          >
-          </Button>
-          <Button
-            type="default"
-            icon={<EditOutlined />}
-            onClick={() => navigate(`/admin/dashboard/user/update/${record.id}`)}
-          >
-          </Button>
-        </Space>
-      ),
     },
   ];
 

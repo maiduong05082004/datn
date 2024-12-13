@@ -1,6 +1,6 @@
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { Form, Input, Button, Select } from 'antd';
-import axiosInstance from '@/configs/axios';
+import instance from '@/configs/axios';
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast, ToastContainer } from 'react-toastify';
@@ -15,14 +15,14 @@ const AddAttributeGroup = (props: Props) => {
   const { data: attributes } = useQuery({
     queryKey: ['attributes'],
     queryFn: async () => {
-      const response = await axiosInstance.get('http://127.0.0.1:8000/api/admins/attributes');
+      const response = await instance.get('api/admins/attributes');
       return response?.data?.data;
     },
   });
 
   const mutation = useMutation({
     mutationFn: async (attributeGroup: any) => {
-      return await axiosInstance.post('http://127.0.0.1:8000/api/admins/attribute_groups', attributeGroup);
+      return await instance.post('api/admins/attribute_groups', attributeGroup);
     },
     onSuccess: () => {
       toast.success('Thêm Nhóm Thuộc Tính Thành Công')

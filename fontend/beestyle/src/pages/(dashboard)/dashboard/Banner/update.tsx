@@ -3,7 +3,7 @@ import { Button, Cascader, Form, Input, Radio, Select, Upload, message } from 'a
 import { UploadOutlined } from '@ant-design/icons';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useMutation, useQuery } from '@tanstack/react-query';
-import axiosInstance from '@/configs/axios';
+import instance from '@/configs/axios';
 import { toast, ToastContainer } from 'react-toastify';
 
 const { Option } = Select;
@@ -20,7 +20,7 @@ const UpdateBanners: React.FC = () => {
   const { data: categories, isLoading: isLoadingCategories, isError: categoryError } = useQuery({
     queryKey: ['categories'],
     queryFn: async () => {
-      const response = await axiosInstance.get('/api/admins/categories');
+      const response = await instance.get('/api/admins/categories');
       return response.data;
     },
   });
@@ -29,7 +29,7 @@ const UpdateBanners: React.FC = () => {
   const { data: bannerData, isLoading: bannerLoading, isError: bannerError } = useQuery({
     queryKey: ['banner', id],
     queryFn: async () => {
-      const response = await axiosInstance.get(`/api/admins/banners/${id}`);
+      const response = await instance.get(`/api/admins/banners/${id}`);
       return response.data;
     },
     enabled: !!id,
@@ -38,7 +38,7 @@ const UpdateBanners: React.FC = () => {
   // Mutation để cập nhật banner
   const { mutate: updateBanner } = useMutation({
     mutationFn: async (formData: FormData) => {
-      return await axiosInstance.post(`/api/admins/banners/${id}`, formData, {
+      return await instance.post(`/api/admins/banners/${id}`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
         params: { _method: 'PUT' },
       });
@@ -56,7 +56,7 @@ const UpdateBanners: React.FC = () => {
 
   const { mutate: deleteImage } = useMutation({
     mutationFn: async () => {
-      return await axiosInstance.delete(`/api/admins/banners/${id}/image`);
+      return await instance.delete(`/api/admins/banners/${id}/image`);
     },
     onSuccess: () => {
       toast.success('Xóa Ảnh Thành Công')

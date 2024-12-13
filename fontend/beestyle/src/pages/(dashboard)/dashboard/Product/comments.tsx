@@ -1,6 +1,6 @@
 import { useMutation, useQuery } from '@tanstack/react-query';
 import React, { useState } from 'react';
-import axiosInstance from '@/configs/axios';
+import instance from '@/configs/axios';
 import { Spin, Button, message, Input, Table, Tag, Modal } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import { useParams } from 'react-router-dom';
@@ -55,7 +55,7 @@ const Comments = (props: Props) => {
   const { data: CommentsData, isLoading, refetch } = useQuery({
     queryKey: ['comments', id],
     queryFn: async () => {
-      const response = await axiosInstance.post('http://localhost:8000/api/admins/comment/list', {
+      const response = await instance.post('api/admins/comment/list', {
         product_id: id,
       });
       return response.data.comment_list;
@@ -65,14 +65,14 @@ const Comments = (props: Props) => {
   const { data: ProductData } = useQuery({
     queryKey: ['detailProduct', id],
     queryFn: async () => {
-      const response = await axiosInstance.get(`http://localhost:8000/api/admins/products/${id}`);
+      const response = await instance.get(`api/admins/products/${id}`);
       return response?.data?.data || {};
     },
   });
 
   const { mutate: hideComment } = useMutation({
     mutationFn: async (id: number) => {
-      const response = await axiosInstance.post('http://localhost:8000/api/admins/comment/hide', {
+      const response = await instance.post('api/admins/comment/hide', {
         id: id,
       });
       return response.data;
@@ -88,7 +88,7 @@ const Comments = (props: Props) => {
   // Khóa comment
   const { mutate: manageUser } = useMutation({
     mutationFn: async (user_id: number) => {
-      const response = await axiosInstance.post('http://localhost:8000/api/admins/comment/manageUser', {
+      const response = await instance.post('api/admins/comment/manageUser', {
         user_id: user_id,
       });
       return response.data;
@@ -109,7 +109,7 @@ const Comments = (props: Props) => {
 
   const { mutate: fetchReports } = useMutation({
     mutationFn: async (comment_id: number) => {
-      const response = await axiosInstance.post('http://localhost:8000/api/admins/comment/list-report', {
+      const response = await instance.post('api/admins/comment/list-report', {
         comment_id,
       });
       return response.data.reports;
@@ -130,7 +130,7 @@ const Comments = (props: Props) => {
 
   // const { mutate: reportComment } = useMutation({
   //   mutationFn: async ({ id, reason }: { id: number; reason: string }) => {
-  //     const response = await axiosInstance.post('http://localhost:8000/api/admins/comment/report', {
+  //     const response = await instance.post('api/admins/comment/report', {
   //       id,
   //       reason,
   //     });
@@ -167,7 +167,7 @@ const Comments = (props: Props) => {
 
   const { mutate } = useMutation({
     mutationFn: async ({ parentId, content }: { parentId: number; content: string }) => {
-      const response = await axiosInstance.post('http://localhost:8000/api/admins/comment/reply', {
+      const response = await instance.post('api/admins/comment/reply', {
         parent_id: parentId,
         content: content,
       });

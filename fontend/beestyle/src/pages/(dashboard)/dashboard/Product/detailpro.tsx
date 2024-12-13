@@ -4,7 +4,7 @@ import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
 import { Spin, Form, Input, InputNumber, Select, DatePicker } from 'antd';
 import { useParams } from 'react-router-dom';
 import moment from 'moment';
-import AxiosInstance from '@/configs/axios';
+import instance from '@/configs/axios';
 import { useQuery } from '@tanstack/react-query';
 
 const { Option } = Select;
@@ -19,7 +19,7 @@ const DetailPro: React.FC = () => {
   const { data: UpdateVariant, isLoading: isLoadingProduct } = useQuery({
     queryKey: ['updatevariant', id],
     queryFn: async () => {
-      const response = await AxiosInstance.get(`http://localhost:8000/api/admins/products/${id}`);
+      const response = await instance.get(`api/admins/products/${id}`);
       return response?.data?.data;
     },
   });
@@ -27,7 +27,7 @@ const DetailPro: React.FC = () => {
   const { data: variantgroup, isLoading: isLoadingVariantGroup } = useQuery({
     queryKey: ['variantgroup'],
     queryFn: async () => {
-      const response = await AxiosInstance.get('http://localhost:8000/api/admins/attribute_groups');
+      const response = await instance.get('api/admins/attribute_groups');
       return response?.data?.variation;
     },
   });
@@ -35,7 +35,7 @@ const DetailPro: React.FC = () => {
   const { data: categories, isLoading: isLoadingCategories } = useQuery({
     queryKey: ['categories'],
     queryFn: async () => {
-      const response = await AxiosInstance.get('http://localhost:8000/api/admins/categories');
+      const response = await instance.get('api/admins/categories');
       return response?.data;
     },
   });

@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import React from 'react';
 import { useParams } from 'react-router-dom';
-import axiosInstance from '@/configs/axios';
+import instance from '@/configs/axios';
 import { Spin } from 'antd';
 
 type Props = {}
@@ -11,14 +11,14 @@ const DetailBanner = (props: Props) => {
     const { data: detailBanner, isLoading } = useQuery({
         queryKey: ['detailBanner', id],
         queryFn: async () => {
-            const response = await axiosInstance.get(`http://127.0.0.1:8000/api/admins/banners/${id}`);
+            const response = await instance.get(`api/admins/banners/${id}`);
             return response.data;
         }
     });
     const { data: categoryData } = useQuery({
         queryKey: ['categories'],
         queryFn: async () => {
-            const response = await axiosInstance.get('http://127.0.0.1:8000/api/admins/categories');
+            const response = await instance.get('api/admins/categories');
             return response.data;
         },
     });

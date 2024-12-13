@@ -4,18 +4,12 @@ import { useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
 import { Button, Input, Spin, Select, message, Table, Carousel, Modal } from 'antd';
 import { useForm } from 'react-hook-form';
-import axiosInstance from '@/configs/axios';
+import instance from '@/configs/axios';
 import { toast, ToastContainer } from 'react-toastify';
-import {
-  EnvironmentOutlined,
-  MenuOutlined,
-  MessageOutlined,
-} from '@ant-design/icons';
 // import ChatRealTime from '../ChatRealTime/chatrealtime';
 import { joiResolver } from '@hookform/resolvers/joi';
 import Joi from 'joi';
 
-const { Option } = Select;
 type Props = {
   isCheckAddresses: boolean
   idAddresses: any
@@ -274,7 +268,7 @@ const DetailConfirm = ({ isCheckAddresses, idAddresses, isUpdateAddresses, setCh
 
   const updateStatusMutation = useMutation({
     mutationFn: async (status: string) => {
-      return await axiosInstance.post(`/api/admins/orders/update_order/${id}`, { status });
+      return await instance.post(`/api/admins/orders/update_order/${id}`, { status });
     },
     onSuccess: () => {
       toast.success('Trạng thái đơn hàng đã được cập nhật thành công.');

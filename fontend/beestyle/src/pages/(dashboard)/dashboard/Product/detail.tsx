@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { Image, Typography, Button, Badge, Divider, message } from 'antd';
-import AxiosInstance from '@/configs/axios';
+import instance from '@/configs/axios';
 import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
 
@@ -16,7 +16,7 @@ const DetailProduct = () => {
   const { data, isLoading, isError } = useQuery({
     queryKey: ['detailProduct', id],
     queryFn: async () => {
-      const response = await AxiosInstance.get(`http://localhost:8000/api/admins/products/${id}`);
+      const response = await instance.get(`api/admins/products/${id}`);
       return response?.data?.data || {};
     },
   });

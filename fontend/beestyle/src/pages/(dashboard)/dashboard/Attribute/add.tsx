@@ -1,6 +1,6 @@
 import { useMutation } from '@tanstack/react-query';
 import { Form, Input, Button, message, Card, Select } from 'antd';
-import axiosInstance from '@/configs/axios';
+import instance from '@/configs/axios';
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast, ToastContainer } from 'react-toastify';
@@ -13,7 +13,7 @@ const AddAttribute: React.FC = () => {
 
     const { mutate } = useMutation({
         mutationFn: async (newAttribute: { name: string; attribute_type: number }) => {
-            return await axiosInstance.post('http://127.0.0.1:8000/api/admins/attributes', newAttribute);
+            return await instance.post('api/admins/attributes', newAttribute);
         },
         onSuccess: () => {
             toast.success('Thêm Thuộc Tính Thành Công')

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import axiosInstance from '@/configs/axios';
+import instance from '@/configs/axios';
 import { Button, message, Modal, Popconfirm, Spin, Table } from 'antd';
 import { Link, useNavigate } from 'react-router-dom';
 import { PlusCircleFilled, DeleteOutlined, EyeOutlined, EditOutlined } from '@ant-design/icons';
@@ -35,7 +35,7 @@ const ListAttribute: React.FC = () => {
     const { data: attributes = [], isLoading, error } = useQuery({
         queryKey: ['attributes'],
         queryFn: async () => {
-            const response = await axiosInstance.get('http://127.0.0.1:8000/api/admins/attributes');
+            const response = await instance.get('api/admins/attributes');
             return response.data.data || [];
         },
     });
@@ -43,14 +43,14 @@ const ListAttribute: React.FC = () => {
     const { data: attributeValues = [] } = useQuery({
         queryKey: ['attributesvalue'],
         queryFn: async () => {
-            const response = await axiosInstance.get('http://127.0.0.1:8000/api/admins/attribute_values');
+            const response = await instance.get('api/admins/attribute_values');
             return response.data || [];
         },
     });
 
     const deleteAttributeMutation = useMutation({
         mutationFn: async (id: number) => {
-            await axiosInstance.delete(`http://127.0.0.1:8000/api/admins/attributes/${id}`);
+            await instance.delete(`api/admins/attributes/${id}`);
         },
         onSuccess: () => {
             toast.success('Xóa Thuộc Tính Thành Công')
@@ -67,7 +67,7 @@ const ListAttribute: React.FC = () => {
 
     const deleteAttributeValueMutation = useMutation({
         mutationFn: async (valueId: number) => {
-            await axiosInstance.delete(`http://127.0.0.1:8000/api/admins/attribute_values/${valueId}`);
+            await instance.delete(`api/admins/attribute_values/${valueId}`);
         },
         onSuccess: () => {
             toast.success('Xóa Giá Trị Thuộc Tính Thành Công')

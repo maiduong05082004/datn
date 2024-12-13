@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Table, Button, Space, Popconfirm, Spin, message } from 'antd';
 import { EditOutlined, DeleteOutlined, PlusOutlined, EyeOutlined } from '@ant-design/icons';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import axiosInstance from '@/configs/axios';
+import instance from '@/configs/axios';
 import { ColumnsType } from 'antd/es/table';
 import { toast, ToastContainer } from 'react-toastify';
 
@@ -24,7 +24,7 @@ const ListBannerCollection: React.FC = () => {
     const { data: BannerData, isLoading } = useQuery({
         queryKey: ['banners'],
         queryFn: async () => {
-            const response = await axiosInstance.get('http://127.0.0.1:8000/api/admins/banners');
+            const response = await instance.get('api/admins/banners');
             return response.data;
         },
     });
@@ -32,14 +32,14 @@ const ListBannerCollection: React.FC = () => {
     const { data: categoryData } = useQuery({
         queryKey: ['categories'],
         queryFn: async () => {
-            const response = await axiosInstance.get('http://127.0.0.1:8000/api/admins/categories');
+            const response = await instance.get('api/admins/categories');
             return response.data;
         },
     });
 
     const mutation = useMutation({
         mutationFn: async (id: number) => {
-            return await axiosInstance.delete(`http://127.0.0.1:8000/api/admins/banners/${id}`);
+            return await instance.delete(`api/admins/banners/${id}`);
         },
         onSuccess: () => {
             toast.success('Xóa Banner Thành Công')
