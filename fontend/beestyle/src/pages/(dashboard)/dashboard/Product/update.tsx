@@ -64,7 +64,7 @@ const UpdateProduct: React.FC = () => {
   const { data: categories, isLoading: isLoadingCategories } = useQuery({
     queryKey: ['categories'],
     queryFn: async () => {
-      const response = await AxiosInstance.get('http://localhost:8000/api/admins/categories');      
+      const response = await AxiosInstance.get('http://localhost:8000/api/admins/categories');
       return response?.data;
     },
   });
@@ -142,15 +142,15 @@ const UpdateProduct: React.FC = () => {
       form.setFieldsValue({
         ...UpdateVariant,
         import_date: UpdateVariant.product_cost?.import_date ? moment(UpdateVariant.product_cost.import_date, 'YYYY-MM-DD', true) : null,
-        category_id: UpdateVariant.category_id ,
+        category_id: UpdateVariant.category_id,
         variant_group: UpdateVariant.group?.id,
         product_cost: UpdateVariant.product_cost?.cost_price || '',
         supplier: UpdateVariant.product_cost?.supplier || '',
-        
+
       });
-      
+
       setContent(UpdateVariant.content || '');
-      setProductData(UpdateVariant); 
+      setProductData(UpdateVariant);
 
       const group = variantgroup.find((g: any) => g.group_id === UpdateVariant.group?.id);
       setSelectedGroup(group);
@@ -214,7 +214,7 @@ const UpdateProduct: React.FC = () => {
       }));
       setVariants(formattedVariants);
     }
-  }, [UpdateVariant, form, variantgroup , categories]);
+  }, [UpdateVariant, form, variantgroup, categories]);
 
   const { mutateAsync: updateProductMutation } = useMutation({
     mutationFn: async (formData: FormData) => {
@@ -467,7 +467,7 @@ const UpdateProduct: React.FC = () => {
       }
     });
     const selectedCategoryId = Array.isArray(values.category_id)
-      ? values.category_id[values.category_id.length - 1] 
+      ? values.category_id[values.category_id.length - 1]
       : values.category_id;
     const formData = new FormData();
     formData.append('name', values.name);
@@ -493,7 +493,7 @@ const UpdateProduct: React.FC = () => {
     } catch (error: any) {
     }
   };
-  
+
   const handleGroupChange = (groupId: number) => {
     const group = variantgroup?.find((g: any) => g.group_id === groupId);
     setSelectedGroup(group);
@@ -535,13 +535,18 @@ const UpdateProduct: React.FC = () => {
             </Form.Item>
 
             <Form.Item
-              className='mb-[10px]'
+              className="mb-[10px]"
               label="Giá Nhập"
               name="product_cost"
               rules={[{ required: true, message: 'Giá Nhập sản phẩm bắt buộc' }]}
             >
-              <Input className='h-10' />
+              <InputNumber
+                className="py-1 w-full"
+                formatter={(value) => `${Math.floor(Number(value || 0))}`}
+                parser={(value) => value?.replace(/\$\s?|(,*)/g, '') || ''}
+              />
             </Form.Item>
+
 
             <Form.Item
               className='mb-[10px]'
@@ -658,7 +663,16 @@ const UpdateProduct: React.FC = () => {
                   >
                     {attribute.attribute_values.map((val: any) => (
                       <Option key={val.id} value={val.id}>
-                        {val.value}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                          {val.image_path ? (
+                            <img
+                              src={val.image_path}
+                              alt={val.value}
+                              style={{ width: 20, height: 20, borderRadius: '50%' }}
+                            />
+                          ) : null}
+                          <span>{val.value}</span>
+                        </div>
                       </Option>
                     ))}
                   </Select>

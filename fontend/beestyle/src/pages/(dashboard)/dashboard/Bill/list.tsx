@@ -1,6 +1,6 @@
 import { ShoppingCartOutlined, EyeOutlined, FilterOutlined, SearchOutlined } from '@ant-design/icons';
 import { useMutation, useQuery } from '@tanstack/react-query';
-import { Button, Spin, Table, DatePicker, Input, Select, Drawer } from 'antd';
+import { Button, Spin, Table, DatePicker, Input, Select, Drawer, Tabs } from 'antd';
 import axiosInstance from '@/configs/axios';
 import React, { useEffect, useState } from 'react';
 import { toast, ToastContainer } from 'react-toastify';
@@ -9,6 +9,7 @@ import { useNavigate } from 'react-router-dom';
 import useMessage from 'antd/es/message/useMessage';
 import { CheckCircle } from 'lucide-react';
 import { ColumnsType } from 'antd/es/table';
+import TabPane from 'antd/es/tabs/TabPane';
 
 const { RangePicker } = DatePicker;
 const { Option } = Select;
@@ -37,7 +38,6 @@ const ListBill: React.FC = () => {
   const [promoCode, setPromoCode] = useState<string>('');
   const [billData, setBillData] = useState<BillRecord[]>([]);
   const [isFilterVisible, setIsFilterVisible] = useState<boolean>(false);
-  const [messageApi, contextHolder] = useMessage();
   const navigate = useNavigate();
 
 
@@ -166,6 +166,8 @@ const ListBill: React.FC = () => {
     setBillCounts(counts);
   }, [billData]);
 
+  // 
+
   // Trạng thái lưu số lượng
   const [billCounts, setBillCounts] = useState({
     all: 0,
@@ -276,7 +278,7 @@ const ListBill: React.FC = () => {
       key: 'status_bill',
       render: (text: string) => {
         let vietnameseStatus = '';
-        let statusClass = 'text-gray-500'; 
+        let statusClass = 'text-gray-500';
 
         switch (text) {
           case 'pending':
@@ -284,15 +286,15 @@ const ListBill: React.FC = () => {
             break;
           case 'processed':
             vietnameseStatus = 'Chờ lấy hàng';
-            statusClass = 'text-blue-500'; 
+            statusClass = 'text-blue-500';
             break;
           case 'shipped':
             vietnameseStatus = 'Đang giao hàng';
-            statusClass = 'text-green-500'; 
+            statusClass = 'text-green-500';
             break;
           case 'delivered':
             vietnameseStatus = 'Đã giao hàng';
-            statusClass = 'text-teal-500'; 
+            statusClass = 'text-teal-500';
             break;
           case 'canceled':
             vietnameseStatus = 'Đã hủy';
@@ -346,7 +348,6 @@ const ListBill: React.FC = () => {
                 <option value="pending">Mới</option>
                 <option value="processed">Xác Nhận Đơn Hàng</option>
                 <option value="canceled">Hủy Đơn Hàng</option>
-                {/* <option value="remove">Xóa Đơn Hàng</option> */}
               </>
             )}
             {record.status_bill === 'processed' && (
@@ -354,7 +355,6 @@ const ListBill: React.FC = () => {
                 <option value="processed">Đã Xác Nhận Đơn Hàng</option>
                 <option value="shipping">Giao Hàng</option>
                 <option value="canceled">Hủy Đơn Hàng</option>
-                {/* <option value="remove">Xóa Đơn Hàng</option> */}
               </>
             )}
             {record.status_bill === 'shipped' && (
@@ -384,7 +384,6 @@ const ListBill: React.FC = () => {
       key: 'action',
       render: (record: BillRecord) => (
         <div className='w-full text-center flex justify-center gap-2'>
-          {/* Trạng thái "pending" và "shipping" */}
           {['pending', 'shipping'].includes(record.status_bill) && (
             <Button
               type="default"
@@ -393,7 +392,6 @@ const ListBill: React.FC = () => {
             />
           )}
 
-          {/* Trạng thái "shipped" */}
           {['shipped'].includes(record.status_bill) && (
             <Button
               icon={<EyeOutlined />}
@@ -402,7 +400,6 @@ const ListBill: React.FC = () => {
             />
           )}
 
-          {/* Trạng thái "processed" */}
           {['processed'].includes(record.status_bill) && (
             <Button
               icon={<EyeOutlined />}
@@ -411,7 +408,6 @@ const ListBill: React.FC = () => {
             />
           )}
 
-          {/* Trạng thái "delivered" */}
           {['delivered'].includes(record.status_bill) && (
             <Button
               icon={<EyeOutlined />}
@@ -420,7 +416,6 @@ const ListBill: React.FC = () => {
             />
           )}
 
-          {/* Trạng thái "canceled" */}
           {['canceled'].includes(record.status_bill) && (
             <Button
               icon={<EyeOutlined />}
@@ -433,7 +428,24 @@ const ListBill: React.FC = () => {
     }
 
   ];
+  const statusList = [
+    { key: 'all', label: `Tất Cả` },
+    { key: 'pending', label: `Chưa xử lý giao hàng` },
+    { key: 'processing', label: `Chờ lấy hàng` },
+    { key: 'shipping', label: `Đang giao hàng` },
+    { key: 'delivered', label: `Đã Giao Hàng` },
+    { key: 'canceled', label: `Đã Hủy` },
+  ];
+  
+  const getTabLabelWithCount = (statusKey: string, count: number) => {
+    const status = statusList.find((item) => item.key === statusKey);
+    return `${status?.label} (${count})`;
+  };
+  
 
+  const handleTabChange = (key: any) => {
+    setFilterStatus(key);
+  };
   if (isLoading) return <Spin tip="Loading..." className="flex justify-center items-center h-screen" />;
 
   return (
@@ -441,33 +453,14 @@ const ListBill: React.FC = () => {
       <ToastContainer />
       <div className='p-5'>
         <div className="w-[100%]">
-          <div className="flex justify-between items-center mb-5">
-            <div className="flex gap-6 w-full">
-              {['all', 'pending', 'processing', 'shipping', 'delivered', 'canceled'].map((status, index) => (
-                <button
-                  key={index}
-                  onClick={() => handleFilterStatusChange(status)}
-                  className={` flex justify-center items-center py-2 pt-3 border-b-2 transition duration-300 ease-in-out
-                  ${filterStatus === status ? 'border-blue-500 text-blue-600 font-semibold' : 'border-transparent text-gray-500'}
-                  hover:text-blue-600 hover:border-gray-200`}
-                >
-                  <h2 className="text-[16px]">
-                    {status === 'all'
-                      ? `Tất Cả`
-                      : status === 'pending'
-                        ? `Chưa xử lý giao hàng`
-                        : status === 'processing'
-                          ? `Chờ lấy hàng`
-                          : status === 'shipping'
-                            ? `Đang giao hàng`
-                            : status === 'delivered'
-                              ? `Đã Giao Hàng`
-                              : `Đã Hủy`}
-                  </h2>
-                </button>
-              ))}
-            </div>
-          </div>
+          <Tabs
+            activeKey={filterStatus} 
+            onChange={handleTabChange}
+          >
+            {statusList.map((status) => (
+              <TabPane tab={status.label} key={status.key} />
+            ))}
+          </Tabs>
           <div className="w-[100%] h-auto">
             <div className="flex gap-4 items-center">
               <Input

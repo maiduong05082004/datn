@@ -24,23 +24,7 @@ const UpdateBanners: React.FC = () => {
       return response.data;
     },
   });
-  const categoryOptions = categories?.map((category: any) => ({
-    value: category.id,
-    label: category.name,
-    children: category.children_recursive && category.children_recursive.length > 0
-      ? category.children_recursive.map((child: any) => ({
-        value: child.id,
-        label: child.name,
-        children: child.children_recursive && child.children_recursive.length > 0
-          ? child.children_recursive.map((subChild: any) => ({
-            value: subChild.id,
-            label: subChild.name,
-          }))
-          : [],
-      }))
-      : [],
-  }));
-
+  const parentCategories = categories?.filter((category: any) => category.parent_id === null) || [];
   // Fetch banner details
   const { data: bannerData, isLoading: bannerLoading, isError: bannerError } = useQuery({
     queryKey: ['banner', id],
@@ -85,14 +69,11 @@ const UpdateBanners: React.FC = () => {
 
   const onFinish = (values: any) => {
     setLoading(true);
-    const selectedCategoryId = Array.isArray(values.category_id)
-      ? values.category_id[values.category_id.length - 1]
-      : values.category_id;
     const formData = new FormData();
     formData.append('title', values.title || '');
     if (values.type) formData.append('type', values.type);
     formData.append('status', values.status.toString());
-    if (selectedCategoryId) formData.append('category_id', selectedCategoryId.toString());
+    if (values.category_id) formData.append('category_id', values.category_id.toString());
     if (fileList.length > 0 && fileList[0].originFileObj) {
       formData.append('image_path', fileList[0].originFileObj);
     }
@@ -109,8 +90,6 @@ const UpdateBanners: React.FC = () => {
       form.setFieldsValue({ category_id: undefined });
     } else if (value === 'category') {
       form.setFieldsValue({});
-    } else if (value === 'custom') {
-      form.setFieldsValue({ category_id: undefined });
     } else if (value === 'collection') {
       form.setFieldsValue({ category_id: undefined });
     }
@@ -164,7 +143,6 @@ const UpdateBanners: React.FC = () => {
             <Select className='h-10' placeholder="Chọn loại banner" onChange={handleTypeChange} allowClear>
               <Option value="main">Banner Chính</Option>
               <Option value="category">Banner Danh Mục</Option>
-              <Option value="custom">Banner Tự Do</Option>
               <Option value="collection">Bộ Sưu Tập</Option>
             </Select>
           </Form.Item>
@@ -182,13 +160,18 @@ const UpdateBanners: React.FC = () => {
 
               {bannerType === 'category' && (
                 <Form.Item
-                  className="mb-[10px]"
                   label="Danh mục"
                   name="category_id"
+                  className="mb-[10px]"
                   rules={[{ required: true, message: "Danh mục sản phẩm bắt buộc phải chọn" }]}
                 >
-                  <Cascader options={categoryOptions} className='h-10' />
-
+                  <Select placeholder="Chọn danh mục">
+                    {parentCategories.map((category: any) => (
+                      <Option key={category.id} value={category.id}>
+                        {category.name}
+                      </Option>
+                    ))}
+                  </Select>
                 </Form.Item>
               )}
 

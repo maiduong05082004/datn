@@ -131,7 +131,7 @@ const ListBannerCollection: React.FC = () => {
     return (
         <div className="w-full mx-auto items-center justify-center p-5">
             <ToastContainer />
-            <div className="flex justify-between items-center mb-6">
+            <div className="flex justify-between items-center mb-5">
                 <Button
                     type="default"
                     icon={<PlusOutlined />}

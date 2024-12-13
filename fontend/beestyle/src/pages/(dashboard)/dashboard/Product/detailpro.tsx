@@ -100,28 +100,34 @@ const DetailPro: React.FC = () => {
             </Form.Item>
 
             <Form.Item
-            label="Giá Nhập"
-            name="product_cost"
-            rules={[{ required: true, message: 'Giá Nhập sản phẩm bắt buộc' }]}
-          >
-            <Input disabled />
-          </Form.Item >
+              label="Giá Nhập"
+              name="product_cost"
+              rules={[{ required: true, message: 'Giá Nhập sản phẩm bắt buộc' }]}
+            >
+              <InputNumber
+                disabled
+                style={{ width: '100%' }}
+                formatter={(value) => `${Math.floor(Number(value || 0))}`}
+                parser={(value) => value?.replace(/\$\s?|(,*)/g, '') || ''}
+              />
+            </Form.Item>
 
-          <Form.Item
-            label="Nhà Cung Cấp"
-            name="supplier"
-            rules={[{ required: true, message: 'Nhà Cung Cấp bắt buộc' }]}
-          >
-            <Input disabled />
-          </Form.Item>
 
-          <Form.Item
-            label="Ngày nhập"
-            name="import_date"
-            rules={[{ required: true, message: "Ngày nhập sản phẩm bắt buộc phải điền" }]}
-          >
-            <DatePicker format="YYYY-MM-DD" style={{ width: '100%' }} disabled />
-          </Form.Item>
+            <Form.Item
+              label="Nhà Cung Cấp"
+              name="supplier"
+              rules={[{ required: true, message: 'Nhà Cung Cấp bắt buộc' }]}
+            >
+              <Input disabled />
+            </Form.Item>
+
+            <Form.Item
+              label="Ngày nhập"
+              name="import_date"
+              rules={[{ required: true, message: "Ngày nhập sản phẩm bắt buộc phải điền" }]}
+            >
+              <DatePicker format="YYYY-MM-DD" style={{ width: '100%' }} disabled />
+            </Form.Item>
 
             <Form.Item label="Giá sản phẩm" name="price">
               <InputNumber min={0} style={{ width: '100%' }} className="border border-gray-300 rounded-md" disabled />

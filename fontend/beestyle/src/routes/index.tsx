@@ -55,7 +55,6 @@ import InventoryManagement from "@/pages/(dashboard)/dashboard/Inventory/list";
 import ForgotPasswordPage from "@/pages/(website)/ForgotPassword/page";
 import ResetPasswordPage from "@/pages/(website)/ResetPassword/page";
 import ListBannersMain from "@/pages/(dashboard)/dashboard/Banner/list";
-import ListBannersCustom from "@/pages/(dashboard)/dashboard/Banner/list_banner_custom";
 import ListBannersCategory from "@/pages/(dashboard)/dashboard/Banner/listbanner_category";
 import CancelBill from "@/pages/(dashboard)/dashboard/Bill/cancel";
 import ShipNoGHN from "@/pages/(dashboard)/dashboard/Bill/ShipNoGHN";
@@ -120,7 +119,6 @@ const Router = () => {
                     {/* banners */}
                     <Route path="banner/add" element={<AddBanners />} />
                     <Route path="banner/list/main" element={<ListBannersMain />} />
-                    <Route path="banner/list/custom" element={<ListBannersCustom />} />
                     <Route path="banner/list/category" element={<ListBannersCategory />} />
                     <Route path="banner/list/collection" element={<ListBannerCollection />} />
                     <Route path="banner/update/:id" element={<UpdateBanners />} />
