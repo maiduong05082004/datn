@@ -1,4 +1,4 @@
-import AxiosInstance from '@/configs/axios';
+import instance from '@/configs/axios';
 import { PlusOutlined, UploadOutlined } from '@ant-design/icons';
 import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
 import { CKEditor } from '@ckeditor/ckeditor5-react';
@@ -65,7 +65,7 @@ const AddProduct: React.FC = () => {
   const { data: variantgroup, isLoading: isLoadingVariantGroup } = useQuery({
     queryKey: ['variantgroup'],
     queryFn: async () => {
-      const response = await AxiosInstance.get(`api/admins/attribute_groups`);
+      const response = await instance.get(`api/admins/attribute_groups`);
       return response?.data?.variation;
     },
   });
@@ -73,7 +73,7 @@ const AddProduct: React.FC = () => {
   const { data: categories, isLoading: isLoadingCategories } = useQuery({
     queryKey: ['categories'],
     queryFn: async () => {
-      const response = await AxiosInstance.get(`api/admins/categories`);
+      const response = await instance.get(`api/admins/categories`);
       return response?.data;
     },
   });
@@ -98,7 +98,7 @@ const AddProduct: React.FC = () => {
 
   const { mutate } = useMutation({
     mutationFn: async (data: FormData) => {
-      const response = await AxiosInstance.post(`api/admins/products`, data);
+      const response = await instance.post(`api/admins/products`, data);
       return response.data;
     },
     onSuccess: () => {

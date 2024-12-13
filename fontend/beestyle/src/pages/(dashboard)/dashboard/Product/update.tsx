@@ -8,7 +8,7 @@ import { Form, Input, Button, Checkbox, InputNumber, Upload, DatePicker, Spin, S
 import { DeleteOutlined, PlusOutlined, UploadOutlined } from '@ant-design/icons';
 import { useNavigate, useParams } from 'react-router-dom';
 import moment from 'moment';
-import AxiosInstance from '@/configs/axios';
+import instance from '@/configs/axios';
 
 interface Size {
   sizeId: number;
@@ -48,7 +48,7 @@ const UpdateProduct: React.FC = () => {
   const { data: variantgroup, isLoading: isLoadingVariantGroup } = useQuery({
     queryKey: ['variantgroup'],
     queryFn: async () => {
-      const response = await AxiosInstance.get('http://localhost:8000/api/admins/attribute_groups');
+      const response = await instance.get('api/admins/attribute_groups');
       return response?.data?.variation;
     },
   });
@@ -56,7 +56,7 @@ const UpdateProduct: React.FC = () => {
   const { data: UpdateVariant, isLoading: isLoadingProduct } = useQuery({
     queryKey: ['updatevariant', id],
     queryFn: async () => {
-      const response = await AxiosInstance.get(`http://localhost:8000/api/admins/products/${id}`);
+      const response = await instance.get(`api/admins/products/${id}`);
       return response?.data?.data;
     },
   });
@@ -64,7 +64,7 @@ const UpdateProduct: React.FC = () => {
   const { data: categories, isLoading: isLoadingCategories } = useQuery({
     queryKey: ['categories'],
     queryFn: async () => {
-      const response = await AxiosInstance.get('http://localhost:8000/api/admins/categories');
+      const response = await instance.get('api/admins/categories');
       return response?.data;
     },
   });
@@ -88,7 +88,7 @@ const UpdateProduct: React.FC = () => {
   const deleteImageMutation = useMutation({
     mutationFn: async ({ imageUrl }: { imageUrl: string; type: 'product' | 'variation' }) => {
       const base64FileUrl = btoa(imageUrl);
-      const response = await AxiosInstance.delete(`http://127.0.0.1:8000/api/admins/images/variation/${base64FileUrl}`, {
+      const response = await instance.delete(`http://127.0.0.1:8000/api/admins/images/variation/${base64FileUrl}`, {
         headers: { 'Content-Type': 'application/json' },
       });
       return response.data;
@@ -218,7 +218,7 @@ const UpdateProduct: React.FC = () => {
 
   const { mutateAsync: updateProductMutation } = useMutation({
     mutationFn: async (formData: FormData) => {
-      const response = await AxiosInstance.post(`http://127.0.0.1:8000/api/admins/products/${id}`, formData, {
+      const response = await instance.post(`http://127.0.0.1:8000/api/admins/products/${id}`, formData, {
         params: {
           _method: 'PUT',
         },

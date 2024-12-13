@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axiosInstance from '@/configs/axios';
+import instance from '@/configs/axios';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Form, Input, Button, Upload, message, Spin } from 'antd';
@@ -17,7 +17,7 @@ const UpdateAttributeValues: React.FC = () => {
     const { data: attributeUpdate, isLoading } = useQuery({
         queryKey: ['attributeUpdate', id],
         queryFn: async () => {
-            const response = await axiosInstance.get(`http://127.0.0.1:8000/api/admins/attribute_values/${id}`);
+            const response = await instance.get(`api/admins/attribute_values/${id}`);
             return response.data;
         },
     });
@@ -37,8 +37,8 @@ const UpdateAttributeValues: React.FC = () => {
     const { mutate } = useMutation({
         mutationFn: async (data: FormData) => {
             // Sử dụng PUT request để cập nhật
-            return await axiosInstance.post(
-                `http://127.0.0.1:8000/api/admins/attribute_values/${id}`,
+            return await instance.post(
+                `api/admins/attribute_values/${id}`,
                 data,
                 {
                     headers: { 'Content-Type': 'multipart/form-data' },
@@ -59,7 +59,7 @@ const UpdateAttributeValues: React.FC = () => {
 
     const { mutate: deleteImage } = useMutation({
         mutationFn: async () => {
-            return await axiosInstance.delete(`/api/admins/attribute_values/${id}/image`);
+            return await instance.delete(`/api/admins/attribute_values/${id}/image`);
         },
         onSuccess: () => {
             toast.success('Xóa Ảnh Thành Công')

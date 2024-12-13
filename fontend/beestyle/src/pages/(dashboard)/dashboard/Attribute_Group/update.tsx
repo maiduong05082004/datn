@@ -1,6 +1,6 @@
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { Form, Input, Button, Select } from 'antd';
-import axiosInstance from '@/configs/axios';
+import instance from '@/configs/axios';
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { toast, ToastContainer } from 'react-toastify';
@@ -16,7 +16,7 @@ const UpdateAttributeGroup = () => {
   const { data: attributes } = useQuery({
     queryKey: ['attributes'],
     queryFn: async () => {
-      const response = await axiosInstance.get('http://127.0.0.1:8000/api/admins/attributes');
+      const response = await instance.get('api/admins/attributes');
       return response?.data?.data;
     },
   });
@@ -24,7 +24,7 @@ const UpdateAttributeGroup = () => {
   const { data: attributeGroup } = useQuery({
     queryKey: ['attributeGroup', id],
     queryFn: async () => {
-      const response = await axiosInstance.get(`http://127.0.0.1:8000/api/admins/attribute_groups/${id}`);
+      const response = await instance.get(`api/admins/attribute_groups/${id}`);
       return response?.data;
     },
   });
@@ -41,7 +41,7 @@ const UpdateAttributeGroup = () => {
 
   const mutation = useMutation({
     mutationFn: async (updatedGroup: any) => {
-      return await axiosInstance.put(`http://127.0.0.1:8000/api/admins/attribute_groups/${id}`, updatedGroup);
+      return await instance.put(`http://127.0.0.1:8000/api/admins/attribute_groups/${id}`, updatedGroup);
     },
     onSuccess: () => {
       toast.success('Cập Nhật Nhóm Thuộc Tính Thành Công')

@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Form, Input, Button, message, Card, Select, Spin } from 'antd';
-import axiosInstance from '@/configs/axios';
+import instance from '@/configs/axios';
 import React, { useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { toast, ToastContainer } from 'react-toastify';
@@ -17,7 +17,7 @@ const UpdateAttribute: React.FC = () => {
   const { data: attribute, isLoading } = useQuery({
     queryKey: ['attribute', id],
     queryFn: async () => {
-      const response = await axiosInstance.get(`http://127.0.0.1:8000/api/admins/attributes/${id}`);
+      const response = await instance.get(`api/admins/attributes/${id}`);
       return response.data;
     },
   });
@@ -25,8 +25,8 @@ const UpdateAttribute: React.FC = () => {
 
   const updateAttributeMutation = useMutation({
     mutationFn: async (updatedAttribute: { name: string; attribute_type: number }) => {
-      return await axiosInstance.put(
-        `http://127.0.0.1:8000/api/admins/attributes/${id}`,
+      return await instance.put(
+        `api/admins/attributes/${id}`,
         updatedAttribute
       );
     },

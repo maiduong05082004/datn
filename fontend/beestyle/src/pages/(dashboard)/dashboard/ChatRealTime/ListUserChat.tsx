@@ -1,4 +1,4 @@
-import axiosInstance from "@/configs/axios";
+import instance from "@/configs/axios";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import React, { useEffect, useRef, useState } from "react";
 
@@ -11,7 +11,7 @@ const ListUserChat: React.FC = () => {
   const { data: userMessage } = useQuery({
     queryKey: ['userMessage'],
     queryFn: async () => {
-      return axiosInstance.get(`api/admins/messages/chatted-users`)
+      return instance.get(`api/admins/messages/chatted-users`)
     },
   })
 
@@ -19,7 +19,7 @@ const ListUserChat: React.FC = () => {
     queryKey: ['support', userId],
     queryFn: async () => {
       if (!userId) return;
-      return axiosInstance.get(`api/admins/messages/${userId.id}`)
+      return instance.get(`api/admins/messages/${userId.id}`)
     },
     enabled: !!userId,
   })
@@ -34,7 +34,7 @@ const ListUserChat: React.FC = () => {
 
   const { mutate } = useMutation({
     mutationFn: async (data: any) => {
-      return axiosInstance.post(`api/admins/messages/send`, data)
+      return instance.post(`api/admins/messages/send`, data)
     },
     onSuccess: () => {
       queryClient.invalidateQueries({

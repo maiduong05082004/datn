@@ -3,7 +3,7 @@ import { Button, Cascader, Form, Input, Radio, Select, Upload, message } from 'a
 import { UploadOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import { useMutation, useQuery } from '@tanstack/react-query';
-import axiosInstance from '@/configs/axios';
+import instance from '@/configs/axios';
 import { toast, ToastContainer } from 'react-toastify';
 
 const { Option } = Select;
@@ -19,7 +19,7 @@ const AddBanners: React.FC = () => {
   const { data: categories, isLoading: isLoadingCategories } = useQuery({
     queryKey: ['categories'],
     queryFn: async () => {
-      const response = await axiosInstance.get('http://127.0.0.1:8000/api/admins/categories');
+      const response = await instance.get('api/admins/categories');
       return response.data;
     },
   });
@@ -28,7 +28,7 @@ const AddBanners: React.FC = () => {
   // Mutation để thêm banner
   const { mutate } = useMutation({
     mutationFn: async (formData: FormData) => {
-      return await axiosInstance.post('http://127.0.0.1:8000/api/admins/banners', formData, {
+      return await instance.post('api/admins/banners', formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
     },
