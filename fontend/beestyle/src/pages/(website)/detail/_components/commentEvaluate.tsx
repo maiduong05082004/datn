@@ -4,11 +4,12 @@ import { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import Report from './report';
 import LoadingPage from '../../loading/loadPage';
+import { useReportMutations } from '@/components/hooks/useReportMutations';
 
 const CommentEvaluate = () => {
     const [isReportTab, setReportTab] = useState<boolean>(false)
     const [commentItem, setCommentItem] = useState<any>()
-
+    const { like_plus, handleContext } = useReportMutations()
     const { id } = useParams()
     const product_id = id
 
@@ -18,11 +19,19 @@ const CommentEvaluate = () => {
             return await axios.post(`http://localhost:8000/api/client/comment/list`, { product_id });
         },
     })
+    
+    const handleLikePlus = async (data: any) => {
+        const { comment_id } = data
+        if(comment_id) {
+            like_plus.mutate({comment_id, like: true})
+        }
+    }
 
     if (isLoading) return (<LoadingPage />)
     return (
         !isLoading &&
         <div className="">
+            {handleContext}
             <div className="mt-[48px]">
                 <div className="px-[15px] pc:px-[48px]">
                     <h3 className='text-[18px] mb-[20px] font-[700]'>ĐÁNH GIÁ SẢN PHẨM</h3>
@@ -83,9 +92,11 @@ const CommentEvaluate = () => {
                                         </div> */}
                                         <div className="my-[15px] flex justify-between">
                                             <div className="flex justify-center items-center select-none">
-                                                <svg xmlns="http://www.w3.org/2000/svg" fill="gray" viewBox="0 0 24 24" strokeWidth={1.5} stroke="none" className="size-5 cursor-pointer">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z" />
-                                                </svg>
+                                                <div onClick={() => handleLikePlus(item)}>
+                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="gray" viewBox="0 0 24 24" strokeWidth={1.5} stroke="none" className="size-5 cursor-pointer">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z" />
+                                                    </svg>
+                                                </div>
                                                 <span className='text-[#787878] text-[14px] font-[500] ml-[3px]'>{item.like} {item.like < 1000 ? "" : "k"}</span>
                                             </div>
                                             <div onClick={() => { setReportTab(!isReportTab), setCommentItem(item) }} className="cursor-pointer px-[20px]">

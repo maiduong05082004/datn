@@ -129,7 +129,7 @@ const OrderDetail = () => {
                                         </h3>
                                         <span className='text-[14px] font-[500]'>BeeStyle / {item.attribute_value_size} / {item.sku}</span>
                                         <span className='text-[14px] font-[500]'>Số lượng: {item.quantity}</span>
-                                        <span className='mt-[14px] font-[700]'>{new Intl.NumberFormat('vi-VN').format(item.price) || 0} VND</span>
+                                        <span className='mt-[14px] font-[700]'>{new Intl.NumberFormat('vi-VN').format(item.don_gia) || 0} VND</span>
                                     </div>
                                 </div>
                             </div>

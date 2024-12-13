@@ -1,3 +1,5 @@
+import instance from '@/configs/axios';
+import { useQuery } from '@tanstack/react-query';
 import {
     ArcElement,
     BarElement,
@@ -9,18 +11,31 @@ import {
     Tooltip,
 } from 'chart.js';
 import { Doughnut } from 'react-chartjs-2';
-
 ChartJS.register(ArcElement, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
-type Props = {};
+const OrderPerformance = ({year}: any) => {
 
-const List = (props: Props) => {
+    const { data: order_performance } = useQuery({
+        queryKey: ['order_performance', year],
+        queryFn: async () => {
+            return instance.post(`api/admins/statistics/order_statistics`, {
+                year: year
+            })
+        },
+        enabled:!!year
+    })
+
+    const sum_yearly = () => {
+        const delivered = order_performance?.data.sum_yearly[year].delivered
+        const canceled = order_performance?.data.sum_yearly[year].canceled
+        return [canceled, delivered]
+    }
+
     const doughnutData = {
-        labels: ['Đơn bị hủy', 'Đơn thành công'],
+        labels: [`Đơn bị hủy ${sum_yearly()[0] || 0}`, `Đơn thành công ${sum_yearly()[1] || 0}`],
         datasets: [
             {
-
-                data: [10, 90],
+                data: sum_yearly(),
                 backgroundColor: ['#ff6384', '#4bc0c0'],
             },
         ],
@@ -43,7 +58,7 @@ const List = (props: Props) => {
             },
             title: {
                 display: true,
-                text: 'Đơn hàng',
+                text: `Đơn hàng (năm ${year || 0})`,
                 color: 'white',
                 font: {
                     family: 'Arial',
@@ -65,4 +80,4 @@ const List = (props: Props) => {
     return <Doughnut data={doughnutData} options={options as any} />;
 };
 
-export default List;
+export default OrderPerformance;

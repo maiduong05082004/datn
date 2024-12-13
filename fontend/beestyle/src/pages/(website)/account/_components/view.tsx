@@ -21,7 +21,7 @@ const ViewAccount = () => {
     const [bill_id, setBillId] = useState<any>(null)
     const [isReason, setReason] = useState<boolean>(false)
     const queryClient = useQueryClient();
-    const { evaluateOrder, handleContext } = useOrderViewMutations()
+    const { evaluateOrder, handleContext, successOrder } = useOrderViewMutations()
     const { register, handleSubmit, setValue, reset } = useForm<TDanh>()
     const status = [{ id: 1, name: "Tất cả" }, { id: 2, name: "Đang chờ xử lý" }, { id: 3, name: "Đã xử lý" }, { id: 4, name: "Đang giao hàng" }, { id: 5, name: "Đã giao hàng" }, { id: 6, name: "Đã hủy" }]
 
@@ -53,11 +53,15 @@ const ViewAccount = () => {
         }
     }
 
+    const handleSuccess = (id: any) => {
+        successOrder.mutate(id)
+    }
+
     if (isLoadingOrder) return (<LoadingPage />)
 
     return (
         <>
-            <Reason bill_id={bill_id} isReason={isReason} setReason={setReason}/>
+            <Reason bill_id={bill_id} isReason={isReason} setReason={setReason} />
             {handleContext}
             <div className="flex flex-col">
                 <div className="flex justify-between overflow-x-auto whitespace-nowrap cursor-pointer select-none *:p-[15px]">
@@ -136,9 +140,7 @@ const ViewAccount = () => {
                                                             </div>
                                                         ) : ""}
                                                         {item.status_bill === "shipped" && index == 0 ? (
-                                                            <div className="">
-                                                                <div className=" cursor-pointer rounded-[3px] text-center w-[120px] py-[4px] bg-green-400 mb-[5px] text-white">Đã nhận hàng</div>
-                                                            </div>
+                                                            <div onClick={() => handleSuccess(item.id)} className=" cursor-pointer rounded-[3px] text-center w-[120px] py-[4px] bg-green-400 mb-[5px] text-white">Đã nhận hàng</div>
                                                         ) : ""}
 
                                                         {item.status_bill === "processed" && index == 0 ?
@@ -147,11 +149,11 @@ const ViewAccount = () => {
                                                     </div>
                                                 </div>
                                                 {item.status_bill === "pending" && index == item?.bill_detail.length - 1 ? (
-                                                <div className='flex justify-end gap-4 mt-[20px] border-t-[1px] border-t-[#e8e8e8] pt-[20px]'>
-                                                    <div className="cursor-pointer rounded-[3px] text-center p-[5px_10px] border-[1px] border-black mb-[5px] text-black">Thay đổi đại chỉ</div>
-                                                    <div onClick={() => {setBillId(value.bill_id), setReason(true)}} className=" cursor-pointer rounded-[3px] text-center p-[5px_10px] border-[1px] border-black mb-[5px] text-black">Hủy đơn hàng</div>
-                                                </div>
-                                            ) : ""}
+                                                    <div className='flex justify-end gap-4 mt-[20px] border-t-[1px] border-t-[#e8e8e8] pt-[20px]'>
+                                                        <div className="cursor-pointer rounded-[3px] text-center p-[5px_10px] border-[1px] border-black mb-[5px] text-black">Thay đổi đại chỉ</div>
+                                                        <div onClick={() => { setBillId(value.bill_id), setReason(true) }} className=" cursor-pointer rounded-[3px] text-center p-[5px_10px] border-[1px] border-black mb-[5px] text-black">Hủy đơn hàng</div>
+                                                    </div>
+                                                ) : ""}
                                             </div>
 
                                         ))}
@@ -501,11 +503,7 @@ const ViewAccount = () => {
                                                     )}
 
                                                     {item.status_bill === "shipped" && detailIndex === 0 && (
-                                                        <div>
-                                                            <div className="cursor-pointer rounded-[3px] text-center w-[120px] py-[4px] bg-green-400 mb-[5px] text-white">
-                                                                Đã nhận hàng
-                                                            </div>
-                                                        </div>
+                                                        <div onClick={() => handleSuccess(item.id)} className=" cursor-pointer rounded-[3px] text-center w-[120px] py-[4px] bg-green-400 mb-[5px] text-white">Đã nhận hàng</div>
                                                     )}
                                                 </div>
                                             </div>

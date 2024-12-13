@@ -1,6 +1,4 @@
-import { useMutation } from '@tanstack/react-query'
-import { message } from 'antd'
-import axios from 'axios'
+import { useReportMutations } from '@/components/hooks/useReportMutations'
 import { useForm } from 'react-hook-form'
 
 type Props = {
@@ -14,7 +12,7 @@ interface TReport {
 
 const Report = ({ setReportTab, isReportTab, commentItem }: Props) => {
 
-    const [messageApi, handleContext] = message.useMessage()
+    const { report, handleContext } = useReportMutations()
 
     const { register, handleSubmit, reset } = useForm<TReport>({
         defaultValues: {
@@ -32,39 +30,11 @@ const Report = ({ setReportTab, isReportTab, commentItem }: Props) => {
         "Vi phạm khác"
     ];
 
-    const { mutate } = useMutation({
-        mutationFn: async (reason: any) => {
-            try {
-                await axios.post(`http://127.0.0.1:8000/api/client/comment/report`, reason,{
-                    headers: {
-                        'Authorization': `Bearer ${localStorage.getItem('token')}`,
-                    }
-                })
-            } catch (error) {
-                throw new Error("Báo báo không thành công")
-            }
-        },
-        onSuccess: () => {
-            messageApi.open({
-                type: "success",
-                content: "Báo cáo thành công",
-            }),
-            reset()
-            setReportTab(false)
-        },
-        onError: (error) => {
-            messageApi.open({
-                type: "error",
-                content: error.message,
-            }),
-            reset()
-            setReportTab(false)
-        }
-    })
-
     const onSubmit = (reason: any) => {
         const { comment_id } = commentItem
-        if (comment_id) mutate({...reason, comment_id});
+        if (comment_id) report.mutate({...reason, comment_id});
+        setReportTab(false)
+        reset()
     }
 
     return (

@@ -12,11 +12,13 @@ const HorizontalBarChart = () => {
   const { data: top_12_products_sell_well } = useQuery({
     queryKey: ['top_12_products_sell_well'],
     queryFn: async () => {
-      return instance.post(`admins/statistics/top-selling-products`, {} ,{
-      })
+      return instance.get(`api/admins/statistics/top-selling-products`)
     },
   })
+
+  console.log(top_12_products_sell_well);
   
+
   const data = {
     labels: top_12_products_sell_well?.data.map((item: any) => item.product.slug),
     datasets: [
@@ -43,7 +45,7 @@ const HorizontalBarChart = () => {
       },
       title: {
         display: true,
-        text: 'Top 12 sản phẩm bán chạy (1 tháng gần nhất)',
+        text: 'Top 12 sản phẩm bán chạy (tháng hiện tại)',
         color: 'white', // Màu chữ của title
         font: {
           family: 'Arial',

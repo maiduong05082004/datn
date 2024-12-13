@@ -21,8 +21,6 @@ const SuggestedProducts = () => {
         }
     })
 
-    console.log(rundum)
-
     return (
         <div className="">
             <div className="mt-[48px]">
