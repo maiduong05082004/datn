@@ -180,9 +180,9 @@ const App: React.FC = () => {
         }}
       >
         {/* Sidebar logo */}
-        <div className='flex justify-center items-center' style={{ height: '64px', padding: '16px', background: '#001529', display: 'flex', alignItems: 'center' }}>
-          <div className='pt-5'>
-            <img src="https://res.cloudinary.com/dpaig88n6/image/upload/v1732032276/Remove-bg.ai_1732032149065_f3naqx.png" alt="" />
+        <div className='flex justify-center items-center bg-white h-[90px] rounded-b-[40px] px-[10px]'>
+          <div className=''>
+            <img width={150} src="https://res.cloudinary.com/dpaig88n6/image/upload/v1732032276/Remove-bg.ai_1732032149065_f3naqx.png" alt="" />
           </div>
         </div>
 

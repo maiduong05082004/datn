@@ -315,6 +315,7 @@ class CommentController extends Controller
                 'content' => $comment->content,
                 'commentDate' => $comment->commentDate,
                 'stars' => $comment->stars,
+                'like' => $comment->like,
                 'product_name' => $comment->billDetail->product->name ?? null,
                 'product_variation_value_id' => $variationValue['product_variation_value_id'],
                 'size' => $variationValue['size'],

@@ -58,10 +58,10 @@ import ShipNoGHN from "@/pages/(dashboard)/dashboard/Bill/ShipNoGHN";
 // import DetailProduct from "@/pages/(dashboard)/dashboard/Product/detail";
 import ListUserChat from "@/pages/(dashboard)/dashboard/ChatRealTime/ListUserChat";
 import DetailPro from "@/pages/(dashboard)/dashboard/Product/detailpro";
-import ListAllChart from "@/pages/(dashboard)/dashboard/Statistics/page";
 import DetailProduct from "@/pages/(dashboard)/dashboard/Product/detail";
 import PrivateRouter from "./PrivateRoute";
 import ListBannerCollection from "@/pages/(dashboard)/dashboard/Banner/list_collection";
+import ListAllChart from "@/pages/(dashboard)/dashboard/Statistics/page";
 
 const Router = () => {
 

@@ -8,34 +8,9 @@ import instance from '@/configs/axios';
 // Đăng ký các thành phần của Chart.js
 ChartJS.register(CategoryScale, LinearScale, LineElement, PointElement, Title, Tooltip, Legend);
 
-const RevenueProfitStatistics = () => {
+const RevenueProfitStatistics = ({year}: any) => {
 
-    const [year, setYear] = useState<any>(0)
-
-    const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-        setYear(e.target.value);
-    };
-
-    const { data: years } = useQuery({
-        queryKey: ['years'],
-        queryFn: async () => {
-            return instance.post(`api/admins/statistics/revenue-and-profit`, {
-                summary: true,
-                group_by: "year",
-            })
-        },
-    })
-
-    console.log(years);
-
-
-    useEffect(() => {
-        if (years?.data?.length) {
-            setYear(years.data[years?.data?.length - 1]?.period); // Set initial year
-        }
-    }, [years]);
-
-
+   
 
     const { data: revenue_profit_statistics } = useQuery({
         queryKey: ['revenue-profit-statistics', year],
@@ -169,12 +144,7 @@ const RevenueProfitStatistics = () => {
 
     return (
         <>
-            <select onChange={handleChange} value={year} id="yearSelect">
-                <option value="0">Không có dữ liệu</option>
-                {years?.data.map((item: any, index: any) => (
-                    <option key={index + 1} value={item.period}>{item.period}</option>
-                ))}
-            </select>
+            
             <Line className='w-[100%]' data={chartData} options={options as any} />
         </>
     );

@@ -74,6 +74,7 @@ const ListUserChat: React.FC = () => {
       </div>
 
       {/* Khu vực chat */}
+      {userId ?
       <div className="w-[80%] bg-white h-[100%]">
         <div className="p-4 border-b border-gray-300 flex items-center justify-start h-[60px]">
           {userId ?
@@ -111,7 +112,15 @@ const ListUserChat: React.FC = () => {
           </div>
         </div>
 
+      </div> :
+      <div className="bg-white w-[80%] h-[100%]">
+      <div className="text-[18px] text-center m-auto mt-[25%]">
+        <div className="font-[700] text-[20px]">Chào bạn!</div>
+        <div className="font-[500]">Đây là kênh chat trực tiếp.</div>
+        <div className="font-[500]">Vui lòng chọn đoạn chat để hỗ trợ khách hàng.</div>
       </div>
+      </div>
+       }
     </div>
   );
 };

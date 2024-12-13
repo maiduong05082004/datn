@@ -1,6 +1,8 @@
 import React from 'react';
 import { Bar } from 'react-chartjs-2';
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from 'chart.js';
+import instance from '@/configs/axios';
+import { useQuery } from '@tanstack/react-query';
 
 // Đăng ký các thành phần của Chart.js
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
@@ -8,12 +10,23 @@ ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend)
 type Props = {}
 
 const Top12LowRatedProducts = (props: Props) => {
+
+  const { data: top_12_products_low_rate } = useQuery({
+    queryKey: ['top_12_products_low_rate'],
+    queryFn: async () => {
+      return instance.get(`api/admins/statistics/get_top_rated`)
+    },
+  })
+
+  console.log(top_12_products_low_rate);
+  
+
   const data = {
-    labels: ['Sản phẩm A', 'Sản phẩm B', 'Sản phẩm C', 'Sản phẩm D', 'Sản phẩm E', 'Sản phẩm A', 'Sản phẩm B', 'Sản phẩm C', 'Sản phẩm D', 'Sản phẩm E'],
+    labels: top_12_products_low_rate?.data.low.map((item: any) => item?.product?.slug),
     datasets: [
       {
         label: 'Trung bình sao',
-        data: [3, 2, 2, 1.5, 1], // Dữ liệu cột ngang
+        data: top_12_products_low_rate?.data.low.map((item: any) => item.average_stars),
         backgroundColor: 'rgba(75, 192, 192, 0.6)', // Màu cột
         borderColor: 'rgba(75, 192, 192, 1)', // Màu viền
         borderWidth: 1, // Độ dày viền
@@ -34,7 +47,7 @@ const Top12LowRatedProducts = (props: Props) => {
       },
       title: {
         display: true,
-        text: 'Top 12 sản phẩm có đánh giá thấp',
+        text: 'Top 12 sản phẩm có đánh giá thấp (tháng hiện tại)',
         color: 'white', // Màu chữ của title
         font: {
           family: 'Arial',
