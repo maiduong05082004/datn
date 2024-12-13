@@ -32,6 +32,14 @@ const HomePage = () => {
           </form>
         </div>
       </div> */}
+       <div className="px-[15px] pc:px-[48px]">
+        <div className="py-[40px]">
+          <div className="elfsight-container">
+          <script src="https://static.elfsight.com/platform/platform.js" async></script>
+          <div className="elfsight-app-523443c0-5350-4025-8263-fee3e8e18c35" data-elfsight-app-lazy></div>
+          </div>
+        </div>
+        </div>
     </main>
   )
 }

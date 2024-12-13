@@ -6,6 +6,7 @@ import { DeleteOutlined, EditOutlined, EyeOutlined, PlusOutlined } from '@ant-de
 import { useNavigate } from 'react-router-dom';
 import { toast, ToastContainer } from 'react-toastify';
 import instance from '@/configs/axios';
+import SearchComponent from '@/components/ui/search';
 
 interface Product {
   id: number;
@@ -44,6 +45,8 @@ const ListProducts = () => {
   const navigate = useNavigate();
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [currentDescription, setCurrentDescription] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [sortKey, setSortKey] = useState('');
   // const { id } = useParams();
 
   const { data: productsData, isLoading } = useQuery({
@@ -246,6 +249,42 @@ const ListProducts = () => {
     },
   ];
 
+  const handleSearch = (query: string) => {
+    if (!query.trim()) {
+      setSearchQuery('');
+      return;
+    }
+    setSearchQuery(query);
+  };
+
+  const handleSort = (sortKey: string) => {
+    setSortKey(sortKey);
+  };
+
+  const filteredProducts = productsData?.data?.filter((product: Product) => {
+    if (!searchQuery) return true;
+    
+    const searchLower = searchQuery.toLowerCase();
+    return (
+      product.name.toLowerCase().includes(searchLower) ||
+      product.price.toString().includes(searchLower) ||
+      product.category_name.toLowerCase().includes(searchLower)
+    );
+  });
+
+  const sortedProducts = [...(filteredProducts || [])].sort((a, b) => {
+    switch (sortKey) {
+      case 'name':
+        return a.name.localeCompare(b.name);
+      case 'price':
+        return parseFloat(a.price) - parseFloat(b.price);
+      case 'category_name':
+        return a.category_name.localeCompare(b.category_name);
+      default:
+        return 0;
+    }
+  });
+
   if (isLoading) return <Spin tip="Loading..." className="flex justify-center items-center h-screen" />;
 
   return (
@@ -261,9 +300,18 @@ const ListProducts = () => {
             Thêm mới
           </Button>
         </div>
+
+        <SearchComponent
+          items={filteredProducts || []}
+          onSearch={handleSearch}
+          onSortChange={handleSort}
+          sortOptions={['name', 'price', 'category_name']}
+          sortOptionsName={['Tên sản phẩm', 'Giá sản phẩm', 'Danh mục']}
+        />
+
         <Table
           columns={columns}
-          dataSource={productsData?.data}
+          dataSource={sortedProducts}
           bordered
           rowKey="id"
           pagination={{

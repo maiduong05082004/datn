@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Table, Button, Space, Popconfirm, Spin, message } from 'antd';
 import { EditOutlined, DeleteOutlined, PlusOutlined, EyeOutlined } from '@ant-design/icons';
@@ -6,6 +6,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import instance from '@/configs/axios';
 import { ColumnsType } from 'antd/es/table';
 import { toast, ToastContainer } from 'react-toastify';
+import SearchComponent from '@/components/ui/search';
 
 type Banner = {
     id: number;
@@ -20,6 +21,9 @@ type Banner = {
 const ListBannersMain: React.FC = () => {
     const navigate = useNavigate();
     const queryClient = useQueryClient();
+    const [searchQuery, setSearchQuery] = useState('');
+    const [sortKey, setSortKey] = useState('');
+
     const { data: BannerData, isLoading } = useQuery({
         queryKey: ['banners'],
         queryFn: async () => {
@@ -54,12 +58,36 @@ const ListBannersMain: React.FC = () => {
         return map;
     }, {});
 
-    const dataSource = BannerData?.filter((item: Banner) => item.type === 'main').map((item: Banner, index: number) => ({
+    const handleSearch = (query: string) => {
+        if (!query.trim()) {
+            setSearchQuery('');
+            return;
+        }
+        setSearchQuery(query);
+    };
+
+    const handleSort = (sortKey: string) => {
+        setSortKey(sortKey);
+    };
+
+    const filteredBanners = BannerData?.filter((item: Banner) => 
+        item.type === 'main' && 
+        (!searchQuery || item.title?.toLowerCase().includes(searchQuery.toLowerCase()))
+    );
+
+    const sortedBanners = [...(filteredBanners || [])].sort((a, b) => {
+        if (sortKey === 'title' && a.title && b.title) {
+            return a.title.localeCompare(b.title);
+        }
+        return 0;
+    });
+
+    const dataSource = sortedBanners.map((item: Banner, index: number) => ({
         key: item.id,
         stt: index + 1,
         ...item,
         categoryName: categoryMap?.[item.category_id] || 'Không có',
-        typeLabel: 'Ảnh chính', 
+        typeLabel: 'Ảnh chính',
     }));
 
     const columns: ColumnsType<any> = [
@@ -138,6 +166,15 @@ const ListBannersMain: React.FC = () => {
                     Thêm Banners
                 </Button>
             </div>
+
+            <SearchComponent
+                items={filteredBanners || []}
+                onSearch={handleSearch}
+                onSortChange={handleSort}
+                sortOptions={['title']}
+                sortOptionsName={['Tiêu đề']}
+            />
+
             <Table
                 dataSource={dataSource}
                 columns={columns}

@@ -6,6 +6,7 @@ import { Table, Spin, message, Button, Popconfirm, Space, Image } from 'antd';
 import { DeleteOutlined, EditOutlined, PlusOutlined } from '@ant-design/icons';
 import { ColumnsType } from 'antd/es/table';
 import { toast, ToastContainer } from 'react-toastify';
+import SearchComponent from '@/components/ui/search';
 
 type Category = {
   id: number;
@@ -19,6 +20,9 @@ type Category = {
 const ListCategories: React.FC = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const [searchQuery, setSearchQuery] = useState('');
+  const [sortKey, setSortKey] = useState('');
+
   const { data: categories = [], isLoading } = useQuery<Category[]>({
     queryKey: ['categories'],
     queryFn: async () => {
@@ -69,6 +73,56 @@ const ListCategories: React.FC = () => {
       : `http://127.0.0.1:8000/storage/${image}`;
   };
 
+  const handleSearch = (query: string) => {
+    if (!query.trim()) {
+      setSearchQuery('');
+      return;
+    }
+    setSearchQuery(query);
+  };
+
+  const handleSort = (sortKey: string) => {
+    setSortKey(sortKey);
+  };
+
+  const filterCategoryTree = (categories: Category[], searchTerm: string): Category[] => {
+    return categories.filter(category => {
+      const matchesSearch = category.name.toLowerCase().includes(searchTerm.toLowerCase());
+      const filteredChildren = category.children_recursive 
+        ? filterCategoryTree(category.children_recursive, searchTerm)
+        : [];
+      
+      return matchesSearch || filteredChildren.length > 0;
+    }).map(category => ({
+      ...category,
+      children_recursive: category.children_recursive 
+        ? filterCategoryTree(category.children_recursive, searchTerm)
+        : []
+    }));
+  };
+
+  const sortCategoryTree = (categories: Category[]): Category[] => {
+    return [...categories].sort((a, b) => {
+      if (sortKey === 'name') {
+        return a.name.localeCompare(b.name);
+      }
+      return 0;
+    }).map(category => ({
+      ...category,
+      children_recursive: category.children_recursive 
+        ? sortCategoryTree(category.children_recursive)
+        : []
+    }));
+  };
+
+  const filteredCategories = searchQuery 
+    ? filterCategoryTree(categories, searchQuery)
+    : categories;
+
+  const sortedCategories = sortKey 
+    ? sortCategoryTree(filteredCategories)
+    : filteredCategories;
+
   const columns: ColumnsType<any> = [
     {
       title: 'Tên danh mục',
@@ -85,8 +139,7 @@ const ListCategories: React.FC = () => {
     {
       title: 'Trạng thái',
       dataIndex: 'status',
-      align: 'center',
-      key: 'status',            
+      align: 'center',            
       width: "150px",
       render: (status: boolean) => (status ? 'Hoạt động' : 'Không hoạt động'),
     },
@@ -150,8 +203,17 @@ const ListCategories: React.FC = () => {
             Thêm danh mục
           </Button>
         </div>
+
+        <SearchComponent
+          items={categories}
+          onSearch={handleSearch}
+          onSortChange={handleSort}
+          sortOptions={['name']}
+          sortOptionsName={['Tên danh mục']}
+        />
+
         <Table
-          dataSource={convertToTreeData(categories)}
+          dataSource={convertToTreeData(sortedCategories)}
           columns={columns}
           rowKey={(record) => record.id}
           bordered

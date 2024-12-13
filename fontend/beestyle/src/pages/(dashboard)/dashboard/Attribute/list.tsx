@@ -6,6 +6,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { PlusCircleFilled, DeleteOutlined, EyeOutlined, EditOutlined } from '@ant-design/icons';
 import { ColumnsType } from 'antd/es/table';
 import { toast, ToastContainer } from 'react-toastify';
+import SearchComponent from '@/components/ui/search';
 
 type AttributeValue = {
     value_id: number;
@@ -31,6 +32,8 @@ const ListAttribute: React.FC = () => {
     const navigate = useNavigate();
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedAttribute, setSelectedAttribute] = useState<AttributeWithValues | null>(null);
+    const [searchQuery, setSearchQuery] = useState('');
+    const [sortKey, setSortKey] = useState('');
 
     const { data: attributes = [], isLoading, error } = useQuery({
         queryKey: ['attributes'],
@@ -92,6 +95,32 @@ const ListAttribute: React.FC = () => {
         setIsModalOpen(false);
         setSelectedAttribute(null);
     };
+
+    const handleSearch = (query: string) => {
+        if (!query.trim()) {
+            setSearchQuery('');
+            return;
+        }
+        setSearchQuery(query);
+    };
+
+    const handleSort = (sortKey: string) => {
+        setSortKey(sortKey);
+    };
+
+    const filteredAttributes = attributes.filter((attribute: Attribute) => {
+        if (!searchQuery) return true;
+        
+        const searchLower = searchQuery.toLowerCase();
+        return attribute.name.toLowerCase().includes(searchLower);
+    });
+
+    const sortedAttributes = [...filteredAttributes].sort((a, b) => {
+        if (sortKey === 'name') {
+            return a.name.localeCompare(b.name);
+        }
+        return 0;
+    });
 
     const columns: ColumnsType<any> = [
         {
@@ -245,9 +274,17 @@ const ListAttribute: React.FC = () => {
                     </Button>
                 </div>
 
+                <SearchComponent
+                    items={filteredAttributes}
+                    onSearch={handleSearch}
+                    onSortChange={handleSort}
+                    sortOptions={['name']}
+                    sortOptionsName={['Tên thuộc tính']}
+                />
+
                 <Table
                     columns={columns}
-                    dataSource={attributes}
+                    dataSource={sortedAttributes}
                     rowKey="id"
                     bordered
                     pagination={{

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Table, Button, Space, Popconfirm, message, Tag, Spin } from 'antd';
 import { EditOutlined, DeleteOutlined, PlusOutlined } from '@ant-design/icons';
@@ -7,10 +7,13 @@ import { fetchPromotions, deletePromotion } from '@/services/promotions';
 import { Promotion } from '@/common/types/promotion';
 import { ColumnsType } from 'antd/es/table';
 import { toast } from 'react-toastify';
+import SearchComponent from '@/components/ui/search';
 
 const ListPromotions: React.FC = () => {
     const navigate = useNavigate();
     const queryClient = useQueryClient();
+    const [searchQuery, setSearchQuery] = useState('');
+    const [sortKey, setSortKey] = useState('');
 
     const { data: promotions, isLoading, isError } = useQuery({
         queryKey: ['promotions'],
@@ -114,6 +117,32 @@ const ListPromotions: React.FC = () => {
         },
     ];
 
+    const handleSearch = (query: string) => {
+        if (!query.trim()) {
+            setSearchQuery('');
+            return;
+        }
+        setSearchQuery(query);
+    };
+
+    const handleSort = (sortKey: string) => {
+        setSortKey(sortKey);
+    };
+
+    const filteredPromotions = promotions?.filter((promotion: Promotion) => {
+        if (!searchQuery) return true;
+        
+        const searchLower = searchQuery.toLowerCase();
+        return promotion.code.toLowerCase().includes(searchLower);
+    });
+
+    const sortedPromotions = [...(filteredPromotions || [])].sort((a, b) => {
+        if (sortKey === 'code') {
+            return a.code.localeCompare(b.code);
+        }
+        return 0;
+    });
+
     if (isLoading) {
         return <Spin tip="Đang tải dữ liệu..." className="flex justify-center items-center h-screen" />;
       }
@@ -130,15 +159,21 @@ const ListPromotions: React.FC = () => {
                     Thêm Khuyến Mãi
                 </Button>
             </div>
+
+            <SearchComponent
+                items={promotions || []}
+                onSearch={handleSearch}
+                onSortChange={handleSort}
+                sortOptions={['code']}
+                sortOptionsName={['Mã khuyến mãi']}
+            />
+
             <Table
-                dataSource={promotions}
+                dataSource={sortedPromotions}
                 columns={columns}
                 rowKey="id"
                 bordered
                 pagination={{ pageSize: 10 }}
-                onChange={(pagination, filters, sorter) => {
-                    console.log('Các tham số đã thay đổi:', pagination, filters, sorter);
-                }}
             />
         </div>
     );
