@@ -30,14 +30,16 @@ const Signin = () => {
         onSuccess: async (data) => {
             toast.success("Đăng Nhập Thành Công");
             localStorage.setItem("token_admin", data.token);
-            // const userResponse = await instance.get(
-            //     `api/client/auth/profile`,
-            // );
-
-            // const userData = userResponse.data;
-            // localStorage.setItem("user", JSON.stringify(userData));
-            // form.resetFields();
-            // navigate("/admin/dashboard");
+            
+                const userResponse = await instance.get(
+                    `http://127.0.0.1:8000/api/client/auth/profile`,
+                );
+                
+                const userData = userResponse.data;
+                localStorage.setItem("user", JSON.stringify(userData));
+                localStorage.setItem("role", userData.role); 
+                form.resetFields();
+                navigate("/admin/dashboard");
         },
         onError: () => {
             toast.error("Đăng Nhập Thất Bại!");
