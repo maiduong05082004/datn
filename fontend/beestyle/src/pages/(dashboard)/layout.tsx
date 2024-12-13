@@ -47,7 +47,6 @@ const items1: MenuProps['items'] = [
       { key: 'sub2-1', label: <NavLink to="/admin/dashboard/banner/list/custom">Banners Tự Do</NavLink> },
       { key: 'sub2-2', label: <NavLink to="/admin/dashboard/banner/list/main">Banners Chính</NavLink> },
       { key: 'sub2-4', label: <NavLink to="/admin/dashboard/banner/list/category">Banners Danh Mục</NavLink> },
-      { key: 'sub2-5', label: <NavLink to="/admin/dashboard/banner/list/collection">Banners Bộ Sưu Tập</NavLink> },
       { key: 'sub2-6', label: <NavLink to="/admin/dashboard/banner/add">Thêm Banners</NavLink> },
     ],
   },
@@ -94,7 +93,7 @@ const items1: MenuProps['items'] = [
   {
     key: 'sub6',
     icon: React.createElement(ProductOutlined),
-    label: <NavLink to="/admin/dashboard/bill/list">Danh Sách Đơn Hàng</NavLink>,
+    label: <NavLink to="/admin/dashboard/bill/list">Đơn Hàng</NavLink>,
   },
   {
     key: 'sub8',
@@ -137,8 +136,8 @@ const DashboardPage: React.FC<{ isDarkMode: boolean }> = ({ isDarkMode }) => {
       style={{
         padding: '24px',
         minHeight: '100vh',
-        backgroundColor: isDarkMode ? '#001529' : '#fff', // Dashboard background color
-        color: isDarkMode ? '#fff' : '#000', // Dashboard text color
+        backgroundColor: isDarkMode ? '#001529' : '#fff',
+        color: isDarkMode ? '#fff' : '#000', 
       }}
     >
       <h1>Dashboard Content</h1>

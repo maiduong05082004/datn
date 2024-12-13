@@ -1,10 +1,10 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Spin, Table, Tabs, Tooltip, Button, Modal, InputNumber } from 'antd';
+import { Spin, Table, Tabs, Tooltip, Button, Modal, InputNumber, Cascader, Form } from 'antd';
 import React, { useState } from 'react';
+import { format } from 'date-fns';
 import AxiosInstance from '@/configs/axios';
 import { toast, ToastContainer } from 'react-toastify';
-import { DatePicker } from 'antd'; // Import DatePicker
-import dayjs from 'dayjs';
+import { DatePicker, Select } from 'antd';
 
 type Product = {
     id: string;
@@ -39,12 +39,17 @@ type Variation = {
 };
 
 type Props = {};
+const { RangePicker } = DatePicker;
 
 const InventoryManagement = (props: Props) => {
     const queryCient = useQueryClient();
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [newStocks, setNewStocks] = useState<{ [key: string]: number }>({});
     const [selectedVariant, setSelectedVariant] = useState<Variation | null>(null);
+    const [isCategoryModalVisible, setIsCategoryModalVisible] = useState(false);
+    const [selectedProductId, setSelectedProductId] = useState<string | null>(null);
+    const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
+
 
     const { data: productData } = useQuery({
         queryKey: ['products'],
@@ -189,7 +194,8 @@ const InventoryManagement = (props: Props) => {
     });
 
 
-    const { mutate: updateCategoryToSale } = useMutation<
+    // danh mục 
+    const { mutate: updateCategory } = useMutation<
         unknown,
         Error,
         { id: string; category_id: number }
@@ -202,16 +208,96 @@ const InventoryManagement = (props: Props) => {
             return response.data;
         },
         onSuccess: () => {
-            toast.success("Sản phẩm đã được chuyển vào danh mục giảm giá!");
-            queryCient.invalidateQueries();
+            toast.success("Danh mục sản phẩm đã được cập nhật thành công!");
+            setIsCategoryModalVisible(false);
         },
         onError: (error) => {
-            console.error("Lỗi:", error);
-            toast.error("Đã xảy ra lỗi khi chuyển sản phẩm vào danh mục giảm giá.");
+            console.error("Lỗi cập nhật danh mục:", error);
+            toast.error("Đã xảy ra lỗi khi cập nhật danh mục!");
         },
     });
 
+    const handleCategoryChange = () => {
+        if (!selectedProductId || !selectedCategoryId) {
+            toast.error("Vui lòng chọn sản phẩm và danh mục!");
+            return;
+        }
 
+        updateCategory({
+            id: selectedProductId,
+            category_id: parseInt(selectedCategoryId), // Đảm bảo `category_id` là kiểu số
+        });
+    };
+
+
+    const { data: categories, isLoading: isLoadingCategories } = useQuery({
+        queryKey: ['categories'],
+        queryFn: async () => {
+            const response = await AxiosInstance.get('http://localhost:8000/api/admins/categories');
+            return response?.data;
+        },
+    });
+
+    const categoryOptions = categories?.map((category: any) => ({
+        value: category.id,
+        label: category.name,
+        children: category.children_recursive && category.children_recursive.length > 0
+            ? category.children_recursive.map((child: any) => ({
+                value: child.id,
+                label: child.name,
+                children: child.children_recursive && child.children_recursive.length > 0
+                    ? child.children_recursive.map((subChild: any) => ({
+                        value: subChild.id,
+                        label: subChild.name,
+                    }))
+                    : [],
+            }))
+            : [],
+    }));
+
+    const [filters, setFilters] = useState({
+        startDate: null,
+        endDate: null,
+        supplier: null,
+        category: null,
+    });
+
+    const handleFilterChange = (key: string, value: any) => {
+        setFilters((prev) => ({
+            ...prev,
+            [key]: value,
+        }));
+    };
+
+    const handleApplyFilters = () => {
+        // Gọi API với các filters được áp dụng
+        queryCient.invalidateQueries({ queryKey: ['filteredProducts'], exact: true });
+    };
+
+    const { data: filteredData } = useQuery({
+        queryKey: ['filteredProducts', filters],
+        queryFn: async () => {
+            console.log('Filters:', filters); // Debug
+            const params = {
+                start_date: filters.startDate,
+                end_date: filters.endDate,
+                supplier: filters.supplier,
+            };
+            const response = await AxiosInstance.post('http://127.0.0.1:8000/api/admins/inventory/listProductDate', { params });
+            return response.data.data;
+        },
+        enabled: !!(filters.startDate && filters.endDate),
+    });
+
+
+    const supplierOptions = productData
+        ? Array.from(
+            new Set(productData.map((product: Product) => product.product_cost.supplier))
+        ).map((supplier) => ({
+            value: supplier,
+            label: supplier || 'Không xác định',
+        }))
+        : [];
 
     if (loadingActive || loadingInactive || loadingOutOfStock || loadingLowStock)
         return <Spin tip="Loading..." className="flex justify-center items-center h-screen" />;
@@ -232,6 +318,13 @@ const InventoryManagement = (props: Props) => {
             align: 'center',
         },
         {
+            title: 'Ngày Nhập',
+            dataIndex: 'product_cost',
+            key: 'import_date',
+            align: 'center',
+            render: (product_cost: { import_date: string }) => product_cost?.import_date || 'Không có',
+        },
+        {
             title: 'Tổng Số Lượng',
             dataIndex: 'stock',
             key: 'stock',
@@ -239,7 +332,7 @@ const InventoryManagement = (props: Props) => {
         },
         {
             title: 'Trạng thái',
-            dataIndex: ['product_cost', 'sale_status'], 
+            dataIndex: ['product_cost', 'sale_status'],
             key: 'sale_status',
             align: 'center',
             width: "100px",
@@ -278,6 +371,13 @@ const InventoryManagement = (props: Props) => {
                 product_cost?.cost_price ? `${parseFloat(product_cost.cost_price).toLocaleString()} VND` : 'Không có',
         },
         {
+            title: 'Giá bán',
+            dataIndex: 'price',
+            key: 'price',
+            align: 'center',
+            render: (price: string) => `${parseFloat(price).toLocaleString()} VND`,
+        },
+        {
             title: 'Nhà cung cấp',
             dataIndex: 'product_cost',
             key: 'supplier',
@@ -285,7 +385,7 @@ const InventoryManagement = (props: Props) => {
             render: (product_cost: { supplier: string }) => product_cost?.supplier || 'Không có',
         },
         {
-            title: 'Số Lượng Biến Thể',
+            title: 'Số Lượng Hiện Tại',
             dataIndex: 'variations',
             key: 'variations',
             align: 'center',
@@ -311,13 +411,6 @@ const InventoryManagement = (props: Props) => {
         },
         ,
         {
-            title: 'Giá bán',
-            dataIndex: 'price',
-            key: 'price',
-            align: 'center',
-            render: (price: string) => `${parseFloat(price).toLocaleString()} VND`,
-        },
-        {
             title: 'Danh mục',
             dataIndex: 'category_name',
             key: 'category_name',
@@ -329,7 +422,6 @@ const InventoryManagement = (props: Props) => {
             align: 'center',
             render: (text: any, record: Product) => (
                 <div style={{ display: 'flex', justifyContent: 'center', gap: '10px' }}>
-                    {/* Nếu trạng thái là inactive */}
                     {record.product_cost?.sale_status === 'inactive' && (
                         <Button
                             type="primary"
@@ -351,13 +443,21 @@ const InventoryManagement = (props: Props) => {
                             Ngừng bán
                         </Button>
                     )}
+                    <Button
+                        type="default"
+                        onClick={() => {
+                            setSelectedProductId(record.id);
+                            setIsCategoryModalVisible(true);
+                        }}
+                    >
+                        Thay đổi danh mục
+                    </Button>
                 </div>
             ),
-        }
+        },
 
     ];
 
-    // Map data from API
     const productDatas = productData?.map((product: Product, index: number) => ({
         key: product.id,
         index: index,
@@ -402,14 +502,15 @@ const InventoryManagement = (props: Props) => {
         },
         {
             key: '3',
-            label: 'Ngừng bán (Hàng Tồn)',
-            children: <Table dataSource={inactiveProducts} columns={columns} bordered />,
+            label: 'Đang Bán (Sắp hết hàng) ',
+            children: <Table dataSource={lowStockProducts} columns={columns} bordered />,
         },
         {
             key: '4',
-            label: 'Sắp hết hàng',
-            children: <Table dataSource={lowStockProducts} columns={columns} bordered />,
+            label: 'Ngừng bán (Hàng Tồn)',
+            children: <Table dataSource={inactiveProducts} columns={columns} bordered />,
         },
+
         {
             key: '5',
             label: 'Hết hàng',
@@ -418,9 +519,26 @@ const InventoryManagement = (props: Props) => {
     ];
 
     return (
-        
+
         <div className="p-5">
             <ToastContainer />
+            <div className="mb-5 flex gap-4">
+                <RangePicker
+                    onChange={(dates, dateStrings) => {
+                        console.log('Start Date:', dateStrings[0], 'End Date:', dateStrings[1]); // Debug
+                        handleFilterChange('startDate', dateStrings[0]);
+                        handleFilterChange('endDate', dateStrings[1]);
+                    }}
+                />
+                <Select
+                    placeholder="Chọn nhà cung cấp"
+                    onChange={(value) => handleFilterChange('supplier', value)}
+                    options={supplierOptions}
+                />
+                <Button type="primary" onClick={filteredData}>
+                    Áp dụng
+                </Button>
+            </div>
             <Tabs defaultActiveKey="1" items={items} />
             <Modal
                 title={`Chi tiết biến thể: ${selectedVariant ? selectedVariant.attribute_value_image_variant.value : ''}`}
@@ -441,21 +559,23 @@ const InventoryManagement = (props: Props) => {
                                     <div><strong>Size:</strong> {variationValue.value}</div>
                                     <div><strong>Số lượng hiện tại:</strong> {variationValue.stock}</div>
                                     <div>
-                                        <strong>Cập nhật số lượng:</strong>
-                                        <InputNumber
-                                            min={0}
-                                            onChange={(value) => handleStockChange(variationValue.id, value)}
-                                            style={{ width: '100%' }}
-                                        />
+                                        <strong className='mb-5'>Cập nhật số lượng:</strong>
+                                        <div className='flex justify-center items-center'>
+                                            <InputNumber
+                                                min={0}
+                                                onChange={(value) => handleStockChange(variationValue.id, value)}
+                                                style={{ width: '50%' }}
+                                            />
+                                        <Button
+                                            type="primary"
+                                            style={{ marginTop: '10px' }}
+                                            onClick={() => handleUpdateStock(variationValue.id)}
+                                        >
+                                            Cập nhật
+                                        </Button>
+                                        </div>
+
                                     </div>
-                                    <Button
-                                        type="primary"
-                                        style={{ marginTop: '10px' }}
-                                        onClick={() => handleUpdateStock(variationValue.id)}
-                                    >
-                                        Cập nhật
-                                    </Button>
-                                    <hr className="border-gray-300" />
                                 </div>
                             ))}
                         </div>
@@ -464,6 +584,38 @@ const InventoryManagement = (props: Props) => {
                     <p>Chưa chọn biến thể</p>
                 )}
             </Modal>
+            <Modal
+                title="Cập nhật danh "
+                visible={isCategoryModalVisible}
+                onCancel={() => setIsCategoryModalVisible(false)}
+                footer={[
+                    <Button key="cancel" onClick={() => setIsCategoryModalVisible(false)}>
+                        Hủy
+                    </Button>,
+                    <Button key="submit" type="primary" onClick={handleCategoryChange}>
+                        Cập nhật
+                    </Button>,
+                ]}
+            >
+                {isLoadingCategories ? (
+                    <Spin />
+                ) : (
+                    <Form layout="vertical">
+                        <Form.Item
+                            label="Danh mục"
+                            name="category_id"
+                            rules={[{ required: true, message: 'Danh mục sản phẩm bắt buộc!' }]}
+                        >
+                            <Cascader
+                                options={categoryOptions}
+                                onChange={(value) => setSelectedCategoryId(value[0] as string)} // Lưu danh mục được chọn
+                                placeholder="Chọn danh mục"
+                            />
+                        </Form.Item>
+                    </Form>
+                )}
+            </Modal>
+
         </div>
     );
 };

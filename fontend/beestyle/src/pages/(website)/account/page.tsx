@@ -36,7 +36,6 @@ const AccountPage = () => {
             console.error('Error logging out', error);
         }
     };
-
     useEffect(() => {
         if (token && isLoading) return
         if (!user) navigater(`/signin`)

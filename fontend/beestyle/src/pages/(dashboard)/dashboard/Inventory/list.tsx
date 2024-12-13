@@ -1,10 +1,11 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Spin, Table, Tabs, Tooltip, Button, Modal, InputNumber, Cascader, Form } from 'antd';
+import { Spin, Table, Tabs, Tooltip, Button, Modal, InputNumber, Cascader, Form, Input } from 'antd';
 import React, { useState } from 'react';
 import { format } from 'date-fns';
 import AxiosInstance from '@/configs/axios';
 import { toast, ToastContainer } from 'react-toastify';
 import { DatePicker, Select } from 'antd';
+import { FilterOutlined } from '@ant-design/icons';
 
 type Product = {
     id: string;
@@ -17,7 +18,7 @@ type Product = {
         cost_price: string;
         supplier: string;
         import_date: string;
-        sale_status: string; // Thêm dòng này
+        sale_status: string;
     };
 };
 
@@ -43,12 +44,63 @@ const { RangePicker } = DatePicker;
 
 const InventoryManagement = (props: Props) => {
     const queryCient = useQueryClient();
-    const [isModalVisible, setIsModalVisible] = useState(false);
+    const [isFilterModalVisible, setIsFilterModalVisible] = useState(false);
     const [newStocks, setNewStocks] = useState<{ [key: string]: number }>({});
     const [selectedVariant, setSelectedVariant] = useState<Variation | null>(null);
     const [isCategoryModalVisible, setIsCategoryModalVisible] = useState(false);
     const [selectedProductId, setSelectedProductId] = useState<string | null>(null);
     const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
+    const [selectedSupplier, setSelectedSupplier] = useState<string | null>(null);
+    const [selectedDates, setSelectedDates] = useState<[string, string] | null>(null);
+    const [filterData, setFilterData] = useState([]);
+    const [isFiltered, setIsFiltered] = useState(false); // Trạng thái kiểm tra có lọc hay không
+    const [filteredData, setFilteredData] = useState<Product[]>([]); // Dữ liệu đã lọc
+
+
+    const handleOpenFilterModal = () => {
+        setIsFilterModalVisible(true);
+    };
+
+    const handleCloseFilterModal = () => {
+        setIsFilterModalVisible(false);
+    };
+
+    const handleApplyFilter = async () => {
+        try {
+            const params: any = {};
+
+            if (selectedDates) {
+                params.start_date = selectedDates[0];
+                params.end_date = selectedDates[1];
+            }
+
+            if (selectedSupplier) {
+                params.supplier = selectedSupplier;
+            }
+
+            if (selectedCategoryId) {
+                params.category_id = selectedCategoryId;
+            }
+
+            // Lấy dữ liệu từ API
+            const response = await AxiosInstance.post(
+                'http://127.0.0.1:8000/api/admins/inventory/listProductDate',
+                params
+            );
+
+            const normalizedData = response.data.data.map((item: any, index: number) => ({
+                key: item.id,
+                index,
+                ...item,
+            }));
+
+            setFilteredData(normalizedData);
+            setIsFiltered(true);
+            toast.success('Lọc dữ liệu thành công!');
+        } catch (error) {
+            toast.error('Có lỗi xảy ra khi lọc!');
+        }
+    };
 
 
     const { data: productData } = useQuery({
@@ -142,7 +194,6 @@ const InventoryManagement = (props: Props) => {
 
     const handleVariantClick = (variant: Variation) => {
         setSelectedVariant(variant);
-        // Khởi tạo số lượng mặc định cho các biến thể khi mở modal
         const initialStocks: { [key: string]: number } = {};
         variant.variation_values.forEach((v) => {
             initialStocks[v.id] = v.stock;
@@ -241,68 +292,11 @@ const InventoryManagement = (props: Props) => {
     const categoryOptions = categories?.map((category: any) => ({
         value: category.id,
         label: category.name,
-        children: category.children_recursive && category.children_recursive.length > 0
-            ? category.children_recursive.map((child: any) => ({
-                value: child.id,
-                label: child.name,
-                children: child.children_recursive && child.children_recursive.length > 0
-                    ? child.children_recursive.map((subChild: any) => ({
-                        value: subChild.id,
-                        label: subChild.name,
-                    }))
-                    : [],
-            }))
-            : [],
     }));
-
-    const [filters, setFilters] = useState({
-        startDate: null,
-        endDate: null,
-        supplier: null,
-        category: null,
-    });
-
-    const handleFilterChange = (key: string, value: any) => {
-        setFilters((prev) => ({
-            ...prev,
-            [key]: value,
-        }));
-    };
-
-    const handleApplyFilters = () => {
-        // Gọi API với các filters được áp dụng
-        queryCient.invalidateQueries({ queryKey: ['filteredProducts'], exact: true });
-    };
-
-    const { data: filteredData } = useQuery({
-        queryKey: ['filteredProducts', filters],
-        queryFn: async () => {
-            console.log('Filters:', filters); // Debug
-            const params = {
-                start_date: filters.startDate,
-                end_date: filters.endDate,
-                supplier: filters.supplier,
-            };
-            const response = await AxiosInstance.post('http://127.0.0.1:8000/api/admins/inventory/listProductDate', { params });
-            return response.data.data;
-        },
-        enabled: !!(filters.startDate && filters.endDate),
-    });
-
-
-    const supplierOptions = productData
-        ? Array.from(
-            new Set(productData.map((product: Product) => product.product_cost.supplier))
-        ).map((supplier) => ({
-            value: supplier,
-            label: supplier || 'Không xác định',
-        }))
-        : [];
 
     if (loadingActive || loadingInactive || loadingOutOfStock || loadingLowStock)
         return <Spin tip="Loading..." className="flex justify-center items-center h-screen" />;
 
-    // Table columns
     const columns: Array<any> = [
         {
             title: 'STT',
@@ -458,6 +452,8 @@ const InventoryManagement = (props: Props) => {
 
     ];
 
+
+
     const productDatas = productData?.map((product: Product, index: number) => ({
         key: product.id,
         index: index,
@@ -488,12 +484,17 @@ const InventoryManagement = (props: Props) => {
         ...product,
     }));
 
-    // Tabs configuration
     const items = [
         {
             key: '1',
             label: 'Tất Cả',
-            children: <Table dataSource={productDatas} columns={columns} bordered />,
+            children: (
+                <Table
+                    dataSource={isFiltered ? filteredData : productDatas} 
+                    columns={columns}
+                    bordered
+                />
+            ),
         },
         {
             key: '2',
@@ -516,30 +517,23 @@ const InventoryManagement = (props: Props) => {
             label: 'Hết hàng',
             children: <Table dataSource={outOfStockProducts} columns={columns} bordered />,
         },
+
     ];
 
     return (
 
         <div className="p-5">
             <ToastContainer />
-            <div className="mb-5 flex gap-4">
-                <RangePicker
-                    onChange={(dates, dateStrings) => {
-                        console.log('Start Date:', dateStrings[0], 'End Date:', dateStrings[1]); // Debug
-                        handleFilterChange('startDate', dateStrings[0]);
-                        handleFilterChange('endDate', dateStrings[1]);
-                    }}
+                <Tabs
+                    defaultActiveKey="1"
+                    items={items}
+                    tabBarExtraContent={
+                        <Button icon={<FilterOutlined />} type="default" onClick={handleOpenFilterModal}>
+                            Lọc
+                        </Button>
+                    }
                 />
-                <Select
-                    placeholder="Chọn nhà cung cấp"
-                    onChange={(value) => handleFilterChange('supplier', value)}
-                    options={supplierOptions}
-                />
-                <Button type="primary" onClick={filteredData}>
-                    Áp dụng
-                </Button>
-            </div>
-            <Tabs defaultActiveKey="1" items={items} />
+
             <Modal
                 title={`Chi tiết biến thể: ${selectedVariant ? selectedVariant.attribute_value_image_variant.value : ''}`}
                 visible={!!selectedVariant}
@@ -566,13 +560,13 @@ const InventoryManagement = (props: Props) => {
                                                 onChange={(value) => handleStockChange(variationValue.id, value)}
                                                 style={{ width: '50%' }}
                                             />
-                                        <Button
-                                            type="primary"
-                                            style={{ marginTop: '10px' }}
-                                            onClick={() => handleUpdateStock(variationValue.id)}
-                                        >
-                                            Cập nhật
-                                        </Button>
+                                            <Button
+                                                type="primary"
+                                                style={{ marginTop: '10px' }}
+                                                onClick={() => handleUpdateStock(variationValue.id)}
+                                            >
+                                                Cập nhật
+                                            </Button>
                                         </div>
 
                                     </div>
@@ -585,7 +579,7 @@ const InventoryManagement = (props: Props) => {
                 )}
             </Modal>
             <Modal
-                title="Cập nhật danh "
+                title="Cập Nhật Danh Mục "
                 visible={isCategoryModalVisible}
                 onCancel={() => setIsCategoryModalVisible(false)}
                 footer={[
@@ -614,6 +608,54 @@ const InventoryManagement = (props: Props) => {
                         </Form.Item>
                     </Form>
                 )}
+            </Modal>
+
+            <Modal
+                title="Lọc sản phẩm"
+                visible={isFilterModalVisible}
+                onCancel={handleCloseFilterModal}
+                footer={[
+                    <Button key="cancel" onClick={handleCloseFilterModal}>
+                        Hủy
+                    </Button>,
+                    <Button key="apply" type="primary" onClick={handleApplyFilter}>
+                        Áp dụng
+                    </Button>,
+                ]}
+            >
+                <Form layout="vertical">
+                    <Form.Item label="Ngày nhập">
+                        <RangePicker
+                            onChange={(dates, dateStrings) => setSelectedDates(dateStrings as [string, string])}
+                        />
+                    </Form.Item>
+
+                    <Form.Item label="Danh mục">
+                        <Select
+                            placeholder="Chọn danh mục"
+                            onChange={(value) => setSelectedCategoryId(value)}
+                        >
+                            {categories?.map((category: any) => (
+                                <Select.Option key={category.id} value={category.id}>
+                                    {category.name}
+                                </Select.Option>
+                            ))}
+                        </Select>
+                    </Form.Item>
+
+                    <Form.Item label="Nhà cung cấp">
+                        <Select
+                            placeholder="Chọn nhà cung cấp"
+                            onChange={(value) => setSelectedSupplier(value)}
+                        >
+                            {productData?.map((item: any, index: any) => (
+                                <Select.Option key={index} value={item.product_cost.supplier}>
+                                    {item.product_cost.supplier}
+                                </Select.Option>
+                            ))}
+                        </Select>
+                    </Form.Item>
+                </Form>
             </Modal>
 
         </div>

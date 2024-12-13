@@ -74,14 +74,18 @@ const ListAttributeGroup = (props: Props) => {
                                 {attr.attribute_values.map((value: any, idx: number) => (
                                     <div
                                         key={idx}
-                                        className="bg-white border rounded px-2 py-1 text-sm text-gray-700 
-                                                    hover:bg-blue-50 hover:border-blue-200 
-                                                    transition-colors duration-200 text-center"
+                                        className="flex gap-2 items-center bg-white border rounded px-2 py-1 text-sm text-gray-700 
+                        hover:bg-blue-50 hover:border-blue-200 
+                        transition-colors duration-200 text-center"
                                     >
-                                        {value.value}
+                                        {value.image_path ? (
+                                            <img src={value.image_path} alt={value.value} className="w-8 h-8 rounded-full mb-1" />
+                                        ) : null}
+                                        <span>{value.value}</span>
                                     </div>
                                 ))}
                             </div>
+
                         </div>
                     ))}
                 </div>
