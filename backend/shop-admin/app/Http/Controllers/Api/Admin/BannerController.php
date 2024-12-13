@@ -68,7 +68,7 @@ class BannerController extends Controller
         $validatedData = $request->validate([
             'category_id' => 'exists:categories,id',
             'title' => 'string|max:255',
-            'image_path' => 'file|mimes:jpeg,png,jpg,gif,jfif|max:5120',
+            'image_path' => 'file|mimes:jpeg,png,jpg,gif,jfif,webp|max:5120',
             'link' => 'string|max:255',
             'type' => 'required|in:' . implode(',', [Banner::TYPE_MAIN, Banner::TYPE_CATEGORY, Banner::TYPE_CUSTOM, Banner::TYPE_COLLECTION]),
             'status' => 'integer|in:0,1',

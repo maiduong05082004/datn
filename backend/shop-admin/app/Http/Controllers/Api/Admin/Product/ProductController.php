@@ -35,7 +35,9 @@ class ProductController extends Controller
                 'variations.variationValues',
                 'variations.variationImages'
             ]
-        )->paginate(10);
+        )
+        ->orderBy('id','desc')
+        ->paginate(10);
 
         return ProductResource::collection($products);
     }

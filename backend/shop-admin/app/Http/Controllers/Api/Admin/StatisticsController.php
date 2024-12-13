@@ -11,6 +11,7 @@ use App\Models\Category;
 use App\Models\Comment;
 use App\Models\Product;
 use App\Models\Statistic;
+use App\Models\TableProductCost;
 use App\Models\User;
 use App\Models\WishlistItem;
 use Carbon\Carbon;
@@ -35,6 +36,9 @@ class StatisticsController extends Controller
             ->whereHas('bill', function ($query) use ($startDate, $endDate) {
                 $query->whereBetween('created_at', [$startDate, $endDate])
                     ->whereIn('status_bill', ['delivered']);
+            })
+            ->whereHas('product.cost', function ($query) {
+                $query->where('sale_status', TableProductCost::SALE_STATUS_ACTIVE);
             })
             ->groupBy('product_id')
             ->orderByDesc('total_sold')
