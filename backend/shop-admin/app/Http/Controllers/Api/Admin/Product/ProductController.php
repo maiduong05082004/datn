@@ -36,8 +36,8 @@ class ProductController extends Controller
                 'variations.variationImages'
             ]
         )
-        ->orderBy('id','desc')
-        ->paginate(10);
+            ->orderBy('id', 'desc')
+            ->paginate(10);
 
         return ProductResource::collection($products);
     }
@@ -65,14 +65,7 @@ class ProductController extends Controller
                 'is_new' => $request->is_new ? 1 : 0,
             ]);
 
-            TableProductCost::create([
-                'product_id' => $product->id,
-                'cost_price' => $request->cost_price,
-                'supplier' => $request->supplier,
-                'import_date' => $request->import_date,
-                'sale_status' => TableProductCost::SALE_STATUS_ACTIVE,
-                'sale_start_date' => now(),
-             ]);
+
 
             // Kiểm tra nếu có biến thể
             $hasVariations = $request->has('variations') && !empty($request->variations);
@@ -115,7 +108,7 @@ class ProductController extends Controller
                             $sku = $this->generateVariationSku();
                             $calculatedPrice = $product->price - ($product->price * ($details['discount'] / 100));
 
-                            ProductVariationValue::create([
+                            $productVariationValues = ProductVariationValue::create([
                                 'product_variation_id' => $productVariation->id,
                                 'attribute_value_id' => $sizeId,
                                 'sku' => $sku,
@@ -126,7 +119,20 @@ class ProductController extends Controller
 
                             $totalVariationStock += $details['stock'];
                         }
+
+                        TableProductCost::create([
+                            'product_id' => $product->id,
+                            'product_variation_value_id' => $productVariationValues->id,
+                            'quantity' => $productVariationValues->stock,
+                            'cost_price' => $request->cost_price,
+                            'supplier' => $request->supplier,
+                            'import_date' => $request->import_date,
+                            'sale_status' => TableProductCost::SALE_STATUS_ACTIVE,
+                            'sale_start_date' => now(),
+                        ]);
                     }
+
+
 
                     $productVariation->update(['stock' => $totalVariationStock]);
                     $totalProductStock += $totalVariationStock;
@@ -308,12 +314,7 @@ class ProductController extends Controller
 
             $tableProductCost = $product->cost;
 
-            $tableProductCost->update([
-                'cost_price' => $request->cost_price,
-                'supplier' => $request->supplier,
-                'import_date' => $request->import_date,
-                
-             ]);
+
 
             // Xóa ảnh nếu có yêu cầu
             if ($request->has('delete_images')) {
@@ -342,7 +343,7 @@ class ProductController extends Controller
                     $totalVariationStock = 0;
                     foreach ($sizes as $sizeId => $details) {
                         if (!empty($details['stock']) && isset($details['discount'])) {
-                            ProductVariationValue::updateOrCreate(
+                            $productVariationValue =  ProductVariationValue::updateOrCreate(
                                 ['product_variation_id' => $productVariation->id, 'attribute_value_id' => $sizeId],
                                 [
                                     'sku' => $this->generateVariationSku(),
@@ -355,7 +356,7 @@ class ProductController extends Controller
                             $totalVariationStock += $details['stock'];
                         } else {
                             // Nếu không có stock, đặt mặc định về 0
-                            ProductVariationValue::updateOrCreate(
+                            $productVariationValue =  ProductVariationValue::updateOrCreate(
                                 ['product_variation_id' => $productVariation->id, 'attribute_value_id' => $sizeId],
                                 [
                                     'sku' => $this->generateVariationSku(),
@@ -365,12 +366,29 @@ class ProductController extends Controller
                                 ]
                             );
                         }
+                        TableProductCost::updateOrCreate(
+                            ['product_id' => $product->id, 'product_variation_value_id' => $productVariationValue->id],
+                            [
+                                'quantity' => $productVariationValue->stock,
+                                'cost_price' => $request->cost_price,
+                                'supplier' => $request->supplier,
+                                'import_date' => $request->import_date,
+                                'sale_status' => TableProductCost::SALE_STATUS_ACTIVE,
+                                'sale_start_date' => now(),
+                            ]
+                        );
+
                     }
 
                     $productVariation->update(['stock' => $totalVariationStock]);
                     $totalProductStock += $totalVariationStock;
                 }
 
+                $product->update(['stock' => $totalProductStock]);
+
+           
+
+                // 7. Cập nhật tổng tồn kho của Product
                 $product->update(['stock' => $totalProductStock]);
             }
 
@@ -532,21 +550,33 @@ class ProductController extends Controller
 
 
 
-    private function generateSeoFriendlySlug($productName)
-    {
-        $slug = Str::slug($productName);
-        $randomString = Str::random(8);
-        $slug = "{$slug}-{$randomString}";
+    // private function generateSeoFriendlySlug($productName)
+    // {
+    //     $slug = Str::slug($productName);
+    //     $randomString = Str::random(8);
+    //     $slug = "{$slug}-{$randomString}";
 
-        $originalSlug = $slug;
-        $count = 2;
-        while (Product::where('slug', $slug)->exists()) {
-            $slug = "{$originalSlug}-{$count}";
-            $count++;
-        }
+    //     $originalSlug = $slug;
+    //     $count = 2;
+    //     while (Product::where('slug', $slug)->exists()) {
+    //         $slug = "{$originalSlug}-{$count}";
+    //         $count++;
+    //     }
+
+    //     return $slug;
+    // }
+
+    private function generateSeoFriendlySlug()
+    {
+        do {
+            $slug = 'BLE_' . strtoupper(Str::random(5));
+        } while (Product::where('slug', $slug)->exists());
 
         return $slug;
     }
+
+
+
 
     private function generateVariationSku()
     {
@@ -571,18 +601,18 @@ class ProductController extends Controller
     public function destroy(string $id)
     {
         DB::beginTransaction();
-    
+
         try {
             $product = Product::findOrFail($id);
-    
+
             $carts = CartItem::where('product_id', $id)->get();
-                foreach ($carts as $cart) {
-                $cart->delete(); 
+            foreach ($carts as $cart) {
+                $cart->delete();
             }
             $product->delete();
-    
+
             DB::commit();
-    
+
             return response()->json([
                 'success' => true,
                 'message' => 'Xóa sản phẩm và các cart_id liên quan thành công'
@@ -603,7 +633,7 @@ class ProductController extends Controller
             ], 500);
         }
     }
-    
+
 
 
 

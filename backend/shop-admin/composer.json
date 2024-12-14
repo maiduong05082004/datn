@@ -12,6 +12,7 @@
         "laravel/sanctum": "^3.3",
         "laravel/socialite": "^5.16",
         "laravel/tinker": "^2.8",
+        "maatwebsite/excel": "^1.1",
         "pusher/pusher-php-server": "*",
         "srmklive/paypal": "~3.0",
         "symfony/css-selector": "^6.0"
