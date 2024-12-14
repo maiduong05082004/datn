@@ -21,8 +21,6 @@ const ItemProducts = ({ promotionAdd, promotionShip, promotionProduct, checkouts
     const [isPromotion, setPromotion] = useState<boolean>(false)
     const [checkShip, setCheckShip] = useState<any>({})
 
-
-
     useEffect(() => {
         if (promotionAdd && promotionAdd.length > 0) {
             promotionAdd.map((item: any) => {

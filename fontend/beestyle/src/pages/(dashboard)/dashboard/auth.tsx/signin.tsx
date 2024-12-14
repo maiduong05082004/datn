@@ -30,19 +30,11 @@ const Signin = () => {
         onSuccess: async (data) => {
             toast.success("Đăng Nhập Thành Công");
             localStorage.setItem("token_admin", data.token);
-            
-                const userResponse = await instance.get(
-                    `http://127.0.0.1:8000/api/client/auth/profile`,
-                );
-                
-                const userData = userResponse.data;
-                localStorage.setItem("user", JSON.stringify(userData));
-                localStorage.setItem("role", userData.role); 
-                form.resetFields();
-                navigate("/admin/dashboard");
+            form.resetFields();
+            navigate("/admin/dashboard");
         },
         onError: () => {
-            toast.error("Đăng Nhập Thất Bại!");
+            toast.error("Bạn ko có quyền đăng nhập!!!");
         },
     });
 
@@ -51,76 +43,56 @@ const Signin = () => {
     };
 
     return (
-        <>
-            <ToastContainer />
-
-            <div
-
-                className="flex items-center justify-center min-h-screen"
-                style={{
-                    background: "linear-gradient(to right, #ff7e5f, #feb47b)",
-                }}
-            >
-                <div className="bg-white p-10 rounded-2xl shadow-lg w-96">
-                    <h2 className="text-center text-4xl font-bold text-gray-800 mb-8">
-                        Đăng Nhập
-                    </h2>
-                    <Form
-                        form={form}
-                        name="signin"
-                        onFinish={onFinish}
-                        layout="vertical"
+        <div className="flex items-center justify-center min-h-screen bg-gray-100">
+            <div className="bg-white p-10 rounded-[10px] shadow-lg w-[500px]">
+                <h2 className="text-center text-[20px] font-bold text-gray-800 mb-8">
+                    Đăng Nhập với quyền Admin
+                </h2>
+                <Form
+                    form={form}
+                    name="signin"
+                    onFinish={onFinish}
+                    layout="vertical"
+                >
+                    <Form.Item
+                        label="Email"
+                        name="email"
+                        rules={[
+                            {
+                                required: true,
+                                type: "email",
+                                message: "Vui lòng nhập email hợp lệ!",
+                            },
+                        ]}
                     >
-                        <Form.Item
-                            label="Email"
-                            name="email"
-                            rules={[
-                                {
-                                    required: true,
-                                    type: "email",
-                                    message: "Vui lòng nhập email hợp lệ!",
-                                },
-                            ]}
-                        >
-                            <Input
-                                placeholder="Nhập email của bạn"
-                                className="rounded-md border-gray-300 focus:border-orange-500 focus:ring focus:ring-orange-200"
-                            />
-                        </Form.Item>
+                        <Input
+                            placeholder="Nhập email của bạn"
+                            className="rounded-[5px] p-[10px]  border-gray-300 focus:border-orange-500 focus:ring focus:ring-orange-200"
+                        />
+                    </Form.Item>
 
-                        <Form.Item
-                            label="Mật khẩu"
-                            name="password"
-                            rules={[
-                                { required: true, message: "Vui lòng nhập mật khẩu!" },
-                            ]}
-                        >
-                            <Input.Password
-                                placeholder="Nhập mật khẩu"
-                                className="rounded-md border-gray-300 focus:border-orange-500 focus:ring focus:ring-orange-200"
-                            />
-                        </Form.Item>
+                    <Form.Item
+                        label="Mật khẩu"
+                        name="password"
+                        rules={[
+                            { required: true, message: "Vui lòng nhập mật khẩu!" },
+                        ]}
+                    >
+                        <Input.Password
+                            placeholder="Nhập mật khẩu"
+                            className="rounded-[5px] p-[10px] border-gray-300 focus:border-orange-500 focus:ring focus:ring-orange-200"
+                        />
+                    </Form.Item>
 
-                        <Form.Item>
-                            <Button
-                                type="primary"
-                                htmlType="submit"
-                                className="w-full bg-orange-600 text-white font-semibold py-2 rounded-md hover:bg-orange-700"
-                            >
-                                Đăng Nhập
-                            </Button>
-                        </Form.Item>
-                    </Form>
-
-                    <div className="mt-6 text-center text-sm text-gray-600">
-                        <Link
-                            to="/admin/forgot-password"
-                            className="text-orange-600 hover:text-orange-800"
+                    <Form.Item>
+                        <Button
+                            htmlType="submit"
+                            className="w-full text-white font-semibold p-[20px] rounded-m bg-black"
                         >
-                            Quên mật khẩu?
-                        </Link>
-                    </div>
-                </div>
+                            Đăng Nhập
+                        </Button>
+                    </Form.Item>
+                </Form>
             </div>
         </>
     );

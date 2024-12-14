@@ -1,31 +1,22 @@
 import instance from "@/configs/axios";
-import { message } from "antd";
-import { useState } from "react";
-import { Navigate, useNavigate } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
+import React from "react";
+import { Navigate } from "react-router-dom";
 
 
-const PrivateRouter = async ({ children }: any) => {
-    const [isAuthorized, setIsAuthorized] = useState<boolean>(false);
-    const navigate = useNavigate(); // Dùng để chuyển hướng
+const PrivateRouter = ({ children }: any) => {
+    
+    let isAuthorized = false
     const token = localStorage.getItem("token_admin");
-
-    if (!token) {
-        setIsAuthorized(false);
-        message.error("Bạn không có quyền truy cập. Vui lòng đăng nhập.");
-        return;
-    }
-    const { data } = await instance.get(`api/client/auth/profile`);
-    console.log(data);
-
-    if (data) {
-        const userRole = data?.user.role;
-
-        console.log(userRole);
-
-        if (userRole == "admin") {
-            setIsAuthorized(true);
-            // navigate(`/admin/dashboard`)
-        }
+    console.log(token);
+    const { data } = useQuery({
+        queryKey: ["profile"],
+        queryFn: async () => {
+            return instance.get(`api/client/auth/profile`)
+        },
+    })
+    if(data?.data.user.role === "admin") {
+        isAuthorized = true
     }
 
     return isAuthorized ? children : <Navigate to="/admin" />;

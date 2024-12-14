@@ -150,7 +150,7 @@ const ViewAccount = () => {
                                                 </div>
                                                 {item.status_bill === "pending" && index == item?.bill_detail.length - 1 ? (
                                                     <div className='flex justify-end gap-4 mt-[20px] border-t-[1px] border-t-[#e8e8e8] pt-[20px]'>
-                                                        <div className="cursor-pointer rounded-[3px] text-center p-[5px_10px] border-[1px] border-black mb-[5px] text-black">Thay đổi đại chỉ</div>
+                                                        {/* <div className="cursor-pointer rounded-[3px] text-center p-[5px_10px] border-[1px] border-black mb-[5px] text-black">Thay đổi đại chỉ</div> */}
                                                         <div onClick={() => { setBillId(value.bill_id), setReason(true) }} className=" cursor-pointer rounded-[3px] text-center p-[5px_10px] border-[1px] border-black mb-[5px] text-black">Hủy đơn hàng</div>
                                                     </div>
                                                 ) : ""}
@@ -171,14 +171,6 @@ const ViewAccount = () => {
                             )
                         }
                     </div>
-                    // <div className="pt-[150px] pb-[70px] flex flex-col items-center text-center">
-                    //     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={0.6} stroke="gray" className="size-20">
-                    //         <path opacity="0.4" strokeLinecap="round" strokeLinejoin="round" d="M15.75 10.5V6a3.75 3.75 0 1 0-7.5 0v4.5m11.356-1.993 1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 0 1-1.12-1.243l1.264-12A1.125 1.125 0 0 1 5.513 7.5h12.974c.576 0 1.059.435 1.119 1.007ZM8.625 10.5a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm7.5 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
-                    //     </svg>
-                    //     <span className='text-[#BCBCBC] text-[14px] font-[500]'>
-                    //         Chưa có đơn hàng nào
-                    //     </span>
-                    // </div>
                 }
 
                 {isStep === 2 &&

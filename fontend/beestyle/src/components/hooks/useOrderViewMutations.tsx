@@ -18,7 +18,7 @@ export const useOrderViewMutations = () => {
                         }
                     })
             } catch (error) {
-                throw new Error("Thao tác thất bại!!")
+                throw new Error("Vui lòng liên hệ Admin để hủy đơn hàng.")
             }
         },
         onSuccess: () => {

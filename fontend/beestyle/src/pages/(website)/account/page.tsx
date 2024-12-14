@@ -54,14 +54,14 @@ const AccountPage = () => {
                     <div className="mb-[20px]">
                         <p className='mb-[8px] text-[14px] font-[700] text-[#787878]'>Thông tin mua hàng |</p>
                         <ul>
-                            <li><a className='text-[16px] font-[500]'>Thông tin thành viên</a></li>
+                            {/* <li><a className='text-[16px] font-[500]'>Thông tin thành viên</a></li> */}
                             <li><Link to={`/account`} className='text-[16px] font-[500]'>Thông tin đơn hàng</Link></li>
                         </ul>
                     </div>
                     <div className="mb-[20px]">
                         <p className='mb-[8px] text-[14px] font-[700] text-[#787878]'>Thông tin hoạt động |</p>
                         <ul>
-                            <li><Link className='text-[16px] font-[500]' to={`/account/wishlist`}>Wishlist</Link></li>
+                            <li><Link className='text-[16px] font-[500]' to={`/account/wishlist`}>Yêu thích</Link></li>
                             <li><Link className='text-[16px] font-[500]' to={`/account/recently`}>Xem gần đây</Link></li>
                         </ul>
                     </div>
@@ -70,7 +70,6 @@ const AccountPage = () => {
                         <ul>
                             <li><Link className='text-[16px] font-[500]' to={`/account/addresses`}>Địa chỉ giao hàng</Link></li>
                             <li><Link className='text-[16px] font-[500]' to={`/account/info`}>Thông tin của tôi</Link></li>
-                            <li><a href="" className='text-[16px] font-[500]'>Xóa tài khoản</a></li>
                             <li><div onClick={logout} className='text-[16px] font-[500] cursor-pointer'>Đăng xuất</div></li>
                         </ul>
 

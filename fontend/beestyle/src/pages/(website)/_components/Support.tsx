@@ -76,9 +76,6 @@ const Support = () => {
                     </div>
                     <span className="font-[500] text-white">Chat</span>
                 </div>
-                <div className="absolute bg-black text-white -top-[8px] -right-[6px] border-[1px] border-white rounded-[10px] px-[6px] text-[10px]">
-                    10
-                </div>
             </div>
 
             <div className={`${isSupport ? "" : "hidden"} support fixed w-[400px] h-[400px] bg-white right-[10px] bottom-0 rounded-t-[5px] border-[#e0e0e0] border-[2px] shadow-2xl`}>
@@ -96,11 +93,6 @@ const Support = () => {
                     </div>
 
                     <div className="overflow-y-auto whitespace-nowrapw h-[296px]">
-                        {/* <div className="flex flex-col justify-start items-start p-[10px]">
-                            <div className="bg-slate-200 rounded-[15px] p-[5px_10px] max-w-[250px]">
-                                Tôi có thể giúp gì cho bạn?
-                            </div>
-                        </div> */}
                         {support?.data.support.slice().reverse().map((item: any, index: any) => (
                             <div className={`${item.sender_id === support?.data.user_id ? "justify-end" : "justify-start"} flex p-[10px]`}>
                                 <div className={`${item.sender_id === support?.data.user_id ? "bg-blue-500 text-white" : "bg-slate-200"}  rounded-[5px] p-[5px_10px] max-w-[250px]`}>
@@ -108,11 +100,7 @@ const Support = () => {
                                 </div>
                             </div>
                         ))}
-                        {/* <div className="flex flex-col justify-start items-start p-[10px]">
-                            <div className="bg-slate-200 rounded-[15px] p-[10px_10px] max-w-[250px] "><Loader /></div>
-                        </div> */}
                         <div ref={messagesEndRef}></div>
-
                     </div>
                     <div className="absolute w-full h-[50px] bottom-0 bg-slate-200 flex items-center px-[10px] border-t-[#e0e0e0] border-t-[2px] justify-between">
                         <div className="flex mr-[10px] w-[70px] justify-between">
