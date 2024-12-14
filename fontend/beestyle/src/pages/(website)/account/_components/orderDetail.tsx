@@ -24,6 +24,8 @@ const OrderDetail = () => {
             })
         },
     })
+    console.log(detail);
+    
 
     useEffect(() => {
         if (detail) {
@@ -137,8 +139,8 @@ const OrderDetail = () => {
                     </div>
                 </div>
 
-                <div className="grid lg:grid-cols-12 lg:gap-16">
-                    <div className="lg:col-span-6">
+                <div className="grid lg:grid-cols-12 lg:gap-1">
+                    <div className="lg:col-span-6 lg:mr-[50px]">
                         <div className="border-t-[8px] border-[#F0F0F0] -mx-[15px] p-[15px] border-b-[1px] text-[18px] font-[700] lg:border-t-0 lg:border-b-black lg:border-b-[3px]">Thành tiền</div>
                         <div className="flex justify-between py-[15px]">
                             <div className="*:text-[#787878] *:block *:text-[15px]">
@@ -157,7 +159,7 @@ const OrderDetail = () => {
                             </div>
                         </div>
                     </div>
-                    <div className="lg:col-span-6">
+                    <div className="lg:col-span-6 lg:ml-[50px]">
                         <div className="border-t-[8px] border-[#F0F0F0] -mx-[15px] p-[15px] border-b-[1px] text-[18px] font-[700] lg:border-t-0 lg:border-b-black lg:border-b-[3px]">Địa chỉ nhận hàng</div>
                         <div className="flex justify-between py-[15px]">
                             <div className="*:text-[#787878] *:block *:text-[15px]">
@@ -178,6 +180,12 @@ const OrderDetail = () => {
                                     />
                                 </div>
                             </div>
+                        </div>
+                    </div>
+                    <div className="lg:col-span-12">
+                        <div className="border-t-[8px] border-[#F0F0F0] -mx-[15px] p-[15px] border-b-[1px] text-[18px] font-[700] lg:border-t-0 lg:border-b-black lg:border-b-[3px]">Ghi chú của khách hàng</div>
+                        <div className="font-[600] py-[15px]">
+                            - {detail?.data.note ? detail?.data.note : "Không có ghi chú"}
                         </div>
                     </div>
                 </div>

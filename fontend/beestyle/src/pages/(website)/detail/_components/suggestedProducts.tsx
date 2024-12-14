@@ -37,7 +37,7 @@ const SuggestedProducts = () => {
                                     </div>
                                 </div>
                                 <div className="absolute bg-black h-[30px] w-[30px] top-0 left-0 z-1 flex items-center justify-center">
-                                    <div className="text-white text-[18px] font-[700]">1</div>
+                                    <div className="text-white text-[18px] font-[700]">{index + 1}</div>
                                 </div>
                                 <Link to={`/products/${item.id}`}>
                                     <picture className='group'>

@@ -62,6 +62,7 @@ import DetailProduct from "@/pages/(dashboard)/dashboard/Product/detail";
 import PrivateRouter from "./PrivateRoute";
 import ListBannerCollection from "@/pages/(dashboard)/dashboard/Banner/list_collection";
 import ListAllChart from "@/pages/(dashboard)/dashboard/Statistics/page";
+import { ToastContainer } from "react-toastify";
 
 const Router = () => {
 
@@ -95,8 +96,8 @@ const Router = () => {
 
                 {/* Admin Routes */}
                 <Route path="admin" element={<Signin />} />
-                {/* <Route path="admin/dashboard" element={<PrivateRouter><LayoutAdmin /></PrivateRouter>}> */}
-                <Route path="admin/dashboard" element={<LayoutAdmin />}>
+                <Route path="admin/dashboard" element={<PrivateRouter><LayoutAdmin /></PrivateRouter>}>
+                    {/* <Route path="admin/dashboard" element={<LayoutAdmin />}> */}
                     <Route index element={<DashboardPage />} />
                     <Route path="profile" element={<MyProfile />} />
                     <Route path="chat" element={<ListUserChat />} />
@@ -161,6 +162,7 @@ const Router = () => {
                     {/* <Route path="chat/main" element={<ChatRealTime />} /> */}
                 </Route>
             </Routes>
+            <ToastContainer />
             <Search isSearch={isSearch} setIsSearch={setIsSearch} setKeySearch={setKeySearch} />
         </>
     );

@@ -67,10 +67,6 @@ const RecentlyPage = () => {
                                     </div>
                                 </div>
                             </div>
-                            <div className="absolute flex flex-col items-start m-[6px]">
-                                <div className="bg-[#FF0000] rounded-[3px] text-white text-[12px] font-[500] p-[3px_5px]">10 %</div>
-                                <div className="leading-5 bg-white text-black text-[12px] font-[500] p-[3px_10px] mt-[5px]">Hết hàng</div>
-                            </div>
                             <Link to={`/products/${item.id}`} className="">
                                 <picture>
                                     <div className="pt-[124%] bg-cover bg-center bg-no-repeat cursor-pointer" style={{ backgroundImage: `url(${item.variations[0].variation_album_images[0]})` }} ></div>

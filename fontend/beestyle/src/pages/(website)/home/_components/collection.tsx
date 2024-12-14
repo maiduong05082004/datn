@@ -1,6 +1,11 @@
 import { useQuery } from '@tanstack/react-query'
 import axios from 'axios'
+import React, { useState } from 'react'
+import { Link } from 'react-router-dom'
+import AddProductCart from '../../_components/AddProductCart'
 const Collection = () => {
+    const [cartItem, setCartItem] = useState<any>()
+    const [activeCart, setActiveCart] = useState<boolean>(false)
 
     const { data: collections, isLoading } = useQuery({
         queryKey: ['collections'],
@@ -38,39 +43,51 @@ const Collection = () => {
 
                                     {collections?.data.data.map((item: any) => (
                                         <div className="w-[38.66%] shrink-0 relative">
-                                            <div className="absolute top-[16px] right-[16px]">
+                                            <div onClick={() => { setCartItem(item), setActiveCart(!activeCart) }} className="absolute top-[16px] right-[16px]">
                                                 <div className="bg-black flex justify-center w-[40px] h-[40px] rounded-[100%] items-center opacity-10">
                                                     <div className="w-[24px] h-[24px]">
                                                         <img src="https://file.hstatic.net/200000642007/file/shopping-cart_3475f727ea204ccfa8fa7c70637d1d06.svg" alt="" />
                                                     </div>
                                                 </div>
                                             </div>
-                                            <div className="">
-                                                <picture>
-                                                    <div className="pt-[124%] bg-cover bg-center bg-no-repeat" style={{ backgroundImage: `url(${item?.variations[0]?.variation_album_images[0]})`, }}></div>
+                                            <Link to={`/products/${item.id}`} className="">
+                                                <picture className='group'>
+                                                    <div className="group-hover:hidden pt-[124%] bg-cover bg-center bg-no-repeat cursor-pointer" style={{ backgroundImage: `url(${item?.variations[0].variation_album_images[0]})` }} ></div>
+                                                    <div className="hidden group-hover:block pt-[124%] bg-cover bg-center bg-no-repeat cursor-pointer" style={{ backgroundImage: `url(${item?.variations[0].variation_album_images[1]})` }} ></div>
                                                 </picture>
-                                            </div>
-                                            <div className="w-[100%] text-wrap px-[10px] py-[16px] lg:bg-white">
-                                                <div className="">
+                                            </Link>
+                                            <div className="w-[100%] text-wrap px-[8px] pt-[10px]">
+                                                <Link to={`/products/${item.id}`}>
                                                     <h4 className='description2 mb-[5px] text-[14px] font-[600]'>{item.name}</h4>
                                                     <div className="text-[14px] font-[700]">
-                                                        <span className=''>{new Intl.NumberFormat('vi-VN').format(item.price)}</span><sup className='underline'>đ</sup>
+                                                        <span className=''>{new Intl.NumberFormat('vi-VN').format(item.price)} VND</span>
                                                     </div>
-                                                </div>
+                                                </Link>
                                                 <div className="flex gap-1 justify-start mt-[18px]">
-                                                    <div className="w-[12px] h-[12px] rounded-[100%] border-black border-[6px] bg-black"></div>
-                                                    <div className="w-[12px] h-[12px] rounded-[100%] border-red-500 border-[6px] bg-red-500"></div>
+                                                    {item.variations.map((value: any, index: any) => (
+                                                        <React.Fragment key={index + 1}>
+                                                            <input
+                                                                className='hidden'
+                                                                id={``}
+                                                                name={`options-`}
+                                                                value="1"
+                                                            />
+                                                            <label htmlFor={``} className="w-[12px] h-[12px] cursor-pointer">
+                                                                <img className="w-[12px] h-[12px] rounded-[100%]" src={value.attribute_value_image_variant.image_path} alt="" />
+                                                            </label>
+                                                        </React.Fragment>
+                                                    ))}
                                                 </div>
                                             </div>
                                         </div>
                                     ))}
-
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
+            <AddProductCart cartItem={cartItem} activeCart={activeCart} setActiveCart={setActiveCart} />
         </section>
     )
 }

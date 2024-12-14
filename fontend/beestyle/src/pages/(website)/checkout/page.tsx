@@ -153,7 +153,7 @@ const CheckOutPage = () => {
     }
 
     const { handleContext, orderCod, orderATM } = useOrderMutations()
-
+    
     const onSubmit = (data: any) => {
         const cart_id = checkouts.products.map((item: any) => item.cart_item_id)
         const { note, paymentMethod, address } = data
