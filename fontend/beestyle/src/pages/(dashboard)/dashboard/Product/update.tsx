@@ -25,6 +25,11 @@ interface Variant {
   [key: string]: any;
 }
 
+interface AlbumImage {
+  name: string;
+  url: string;
+}
+
 const { Option } = Select;
 
 const UpdateProduct: React.FC = () => {
@@ -395,7 +400,7 @@ const UpdateProduct: React.FC = () => {
                 const filesToUpload = fileList.filter(file => file.originFileObj);
 
                 // Lọc ra các file đã tồn tại trong albumImages
-                const existingImageNames = new Set(record.albumImages.map(image => image.name));
+                const existingImageNames = new Set(record.albumImages.map((image: AlbumImage) => image.name));
                 const newFilesToUpload = filesToUpload.filter(file => !existingImageNames.has(file.name));
 
                 // Cập nhật newAlbumImages với các file mới

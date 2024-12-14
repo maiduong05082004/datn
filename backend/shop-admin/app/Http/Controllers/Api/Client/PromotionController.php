@@ -8,6 +8,7 @@ use App\Models\Promotion;
 use App\Models\User;
 use App\Models\UserPromotion;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class PromotionController extends Controller
 {
@@ -110,13 +111,23 @@ class PromotionController extends Controller
 
     public function checkPromotion(Request $request)
     {
+        $token = $request->bearerToken();
+
+        if (!$token) {
+            return response()->json(['message' => 'Token không hợp lệ.'], 401);
+        }
+
+        try {
+            $user = Auth::guard('api')->user();
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Không thể xác thực người dùng.'], 401);
+        }
+
         $request->validate([
-            'user_id' => 'required|exists:users,id',
             'codes' => 'required|array',
             'codes.*' => 'string|exists:promotions,code',
         ]);
 
-        $user = User::find($request->user_id);
         $codes = array_unique($request->codes);
         $appliedPromotions = [];
         $errors = [];
@@ -151,7 +162,7 @@ class PromotionController extends Controller
             }
 
             if ($promotion->promotion_type == 'first_order') {
-                $orderCount = $user->orders()->count();
+                $orderCount = $user->bill->count();
                 if ($orderCount > 0) {
                     $errors[] = 'Mã giảm giá đơn hàng đầu tiên chỉ áp dụng cho khách hàng mới.';
                     continue;
