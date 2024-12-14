@@ -394,17 +394,23 @@ const UpdateProduct: React.FC = () => {
               onChange={({ fileList }) => {
                 const filesToUpload = fileList.filter(file => file.originFileObj);
 
+                // Lọc ra các file đã tồn tại trong albumImages
+                const existingImageNames = new Set(record.albumImages.map(image => image.name));
+                const newFilesToUpload = filesToUpload.filter(file => !existingImageNames.has(file.name));
+
+                // Cập nhật newAlbumImages với các file mới
                 setNewAlbumImages(prev => ({
                   ...prev,
                   [record.colorId]: [
                     ...(prev[record.colorId] || []),
-                    ...filesToUpload.map(file => file.originFileObj as File),
+                    ...newFilesToUpload.map(file => file.originFileObj as File),
                   ],
                 }));
 
+                // Cập nhật albumImages với các file mới
                 const updatedAlbumImages = [
                   ...(record.albumImages || []),
-                  ...fileList.map((file) => ({
+                  ...newFilesToUpload.map((file) => ({
                     ...file,
                     url: file.url || (file.originFileObj ? URL.createObjectURL(file.originFileObj) : ''),
                   })),
