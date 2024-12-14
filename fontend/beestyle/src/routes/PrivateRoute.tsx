@@ -1,61 +1,34 @@
-import React, { useEffect, useState } from "react";
-import { Navigate } from "react-router-dom";
-import { message, Spin } from "antd";
 import instance from "@/configs/axios";
+import { message } from "antd";
+import { useState } from "react";
+import { Navigate, useNavigate } from "react-router-dom";
 
-type Props = {
-    children: React.ReactNode;
-};
 
-const PrivateRouter = ({ children }: Props) => {
-    const [isAuthorized, setIsAuthorized] = useState<boolean | null>(null);
+const PrivateRouter = async ({ children }: any) => {
+    const [isAuthorized, setIsAuthorized] = useState<boolean>(false);
+    const navigate = useNavigate(); // Dùng để chuyển hướng
+    const token = localStorage.getItem("token_admin");
 
-    useEffect(() => {
-        const checkAuthorization = async () => {
-            const token = localStorage.getItem("token_admin");
-            if (!token) {
-                setIsAuthorized(false);
-                message.error("Bạn không có quyền truy cập. Vui lòng đăng nhập.");
-                return;
-            }
+    if (!token) {
+        setIsAuthorized(false);
+        message.error("Bạn không có quyền truy cập. Vui lòng đăng nhập.");
+        return;
+    }
+    const { data } = await instance.get(`api/client/auth/profile`);
+    console.log(data);
 
-            try {
-                const response = await instance.get("api/client/auth/profile");
-                console.log("Profile Response:", response.data); // Debug
+    if (data) {
+        const userRole = data?.user.role;
 
-                const userRole = response?.data?.role;
+        console.log(userRole);
 
-                if (userRole === "admin") {
-                    setIsAuthorized(true);
-                } else {
-                    setIsAuthorized(false);
-                    message.error("Bạn không có quyền truy cập. Chỉ admin mới được phép.");
-                }
-            } catch (error: any) {
-                console.error("Error:", error.response || error.message);
-                setIsAuthorized(false);
-                if (error.response?.status === 401) {
-                    message.error("Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.");
-                } else {
-                    message.error("Không thể xác thực người dùng. Vui lòng thử lại sau.");
-                }
-            }
-        };
-
-        checkAuthorization();
-    }, []);
-
-    // Hiển thị spinner khi đang kiểm tra quyền truy cập
-    if (isAuthorized === null) {
-        return (
-            <div className="flex justify-center items-center min-h-screen">
-                <Spin size="large" />
-            </div>
-        );
+        if (userRole == "admin") {
+            setIsAuthorized(true);
+            // navigate(`/admin/dashboard`)
+        }
     }
 
-    // Nếu không được phân quyền, chuyển hướng về trang đăng nhập
     return isAuthorized ? children : <Navigate to="/admin" />;
-};
+}
 
 export default PrivateRouter;

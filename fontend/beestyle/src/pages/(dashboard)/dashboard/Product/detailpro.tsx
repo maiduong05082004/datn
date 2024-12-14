@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { CKEditor } from '@ckeditor/ckeditor5-react';
 import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
-import { Spin, Form, Input, InputNumber, Select, DatePicker } from 'antd';
+import { Spin, Form, Input, InputNumber, Select, DatePicker, Checkbox } from 'antd';
 import { useParams } from 'react-router-dom';
 import moment from 'moment';
 import instance from '@/configs/axios';
@@ -46,6 +46,7 @@ const DetailPro: React.FC = () => {
         ...UpdateVariant,
         import_date: UpdateVariant.product_cost?.import_date ? moment(UpdateVariant.product_cost.import_date, 'YYYY-MM-DD', true) : null,
         category_id: UpdateVariant.category_id,
+        is_collection: UpdateVariant.is_collection,
         variant_group: UpdateVariant.group?.id,
         product_cost: UpdateVariant.product_cost?.cost_price || '',
         supplier: UpdateVariant.product_cost?.supplier || '',
@@ -158,6 +159,11 @@ const DetailPro: React.FC = () => {
                 ))}
               </Select>
             </Form.Item>
+            <div className='flex gap-5 pt-5'>
+            <Form.Item name="is_collection" valuePropName="checked" initialValue={false}>
+              <Checkbox disabled>Bộ sưu tập</Checkbox>
+            </Form.Item>
+          </div>
           </Form>
         </div>
 

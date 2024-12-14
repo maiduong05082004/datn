@@ -4,6 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Table, Spin, Carousel } from 'antd';
 import axios from 'axios';
 import { useForm } from 'react-hook-form';
+import instance from '@/configs/axios';
 
 interface TCheckout {
   full_name: string;
@@ -35,7 +36,7 @@ const DetailBill: React.FC = () => {
   const { data: detailBill, isLoading } = useQuery({
     queryKey: ['detailbill', id],
     queryFn: async () => {
-      const response = await axios.get(`api/admins/orders/show_detailorder/${id}`, {
+      const response = await instance.get(`api/admins/orders/show_detailorder/${id}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -78,7 +79,7 @@ const DetailBill: React.FC = () => {
     return <Spin tip="Loading..." className="flex justify-center items-center h-screen" />;
   }
 
-  const dataSource = detailBill?.bill_detail.map((item: any, index: number) => ({
+  const dataSource = detailBill?.bill_detail?.map((item: any, index: number) => ({
     key: index,
     productName: item.name,
     price: parseFloat(item.price).toLocaleString() + ' đ',

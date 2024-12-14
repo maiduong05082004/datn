@@ -74,7 +74,6 @@ const ListCategories: React.FC = () => {
       title: 'Tên danh mục',
       dataIndex: 'name',
       key: 'name',
-      align: 'center',
     },
     {
       title: 'Danh mục cha',

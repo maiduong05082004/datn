@@ -387,7 +387,7 @@ const UpdateProduct: React.FC = () => {
               </div>
             </div>
           ))}
-          {(!record.albumImages || record.albumImages.length < 20) && (
+          {(!record.albumImages || record.albumImages.length < 10) && (
             <Upload
               listType="picture-card"
               multiple
