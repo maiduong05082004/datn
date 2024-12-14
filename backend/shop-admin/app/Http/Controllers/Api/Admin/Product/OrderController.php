@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\Admin\Product;
 use App\Http\Controllers\Controller;
 use App\Models\Bill;
 use App\Models\Promotion;
+use App\Models\TableProductCost;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -234,7 +235,7 @@ class OrderController extends Controller
                 'status_description' => $bill->status_description,
                 'payment_type' => $bill->payment_type,
                 'payment_type_description' => $bill->payment_type_description,
-                'total' => $bill->total,
+                'total' => (int) ($bill->total + ($bill->shipping_fee ?? 0) - ($bill->discounted_amount ?? 0) - ($bill->discounted_shipping_fee ?? 0)),
                 'quantity' => $quantity,
                 'canceled_reason' => $bill->canceled_reason,
             ];

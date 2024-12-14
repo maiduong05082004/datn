@@ -217,6 +217,9 @@ Route::prefix('admins')
                 Route::put('salecategory/{id}', [InventoryController::class, 'saleCategory'])->name('saleCategory');
                 Route::get('product_isoutof_stock', [InventoryController::class, 'productIsOutOfStock'])->name('productIsOutOfStock');
                 Route::post('listProductDate', [InventoryController::class, 'listProductsByDateAndSupplier'])->name('listProductsByDateAndSupplier');
+                Route::get('list/', [InventoryController::class, 'index'])->name('index');
+                Route::get('listinventory/', [InventoryController::class, 'listInventoryDetails'])->name('listInventoryDetails');
+                Route::get('getprodetails/{id}', [InventoryController::class, 'getProductInventoryDetails'])->name('getProductInventoryDetails');
 
             });
 
