@@ -212,6 +212,7 @@ const AddProduct: React.FC = () => {
     formData.append('group_id', values.variant_group ? values.variant_group.toString() : '');
     formData.append('cost_price', values.product_cost);
     formData.append('supplier', values.supplier);
+    formData.append('is_collection', values.is_collection ? '1' : '0');
 
     albumList.forEach((file: any) => {
       formData.append('album_images[]', file.originFileObj);
@@ -342,14 +343,6 @@ const AddProduct: React.FC = () => {
             <Form.Item name="is_collection" valuePropName="checked" initialValue={false}>
               <Checkbox>Bộ sưu tập</Checkbox>
             </Form.Item>
-
-            {/* <Form.Item name="is_hot" valuePropName="checked" initialValue={false}>
-              <Checkbox>Nổi bật</Checkbox>
-            </Form.Item>
-
-            <Form.Item name="is_new" valuePropName="checked" initialValue={false}>
-              <Checkbox>Sản phẩm mới</Checkbox>
-            </Form.Item> */}
           </div>
 
           {showVariantForm && (

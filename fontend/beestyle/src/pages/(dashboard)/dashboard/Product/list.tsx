@@ -98,7 +98,6 @@ const ListProducts = () => {
       dataIndex: 'name',
       key: 'name',
       width: "250px",
-      align: 'center',
       filters: productsData?.data?.map((product: Product) => ({
         text: product.name,
         value: product.name,
@@ -157,10 +156,10 @@ const ListProducts = () => {
       key: 'description',
       render: (text: string) => (
         <div className="max-w-xs truncate">
-          {text.length > 30 ? (
+          {text.length > 20 ? (
             <Tooltip title={text}>
               <span>
-                {text.slice(0, 30)}...{' '}
+                {text.slice(0, 20)}...{' '}
                 <Button
                   type="default"
                   onClick={() => {
@@ -252,7 +251,7 @@ const ListProducts = () => {
   return (
     <>
       <ToastContainer />
-      <div className="w-full mx-auto px-6 py-8">
+      <div className="w-full mx-auto p-5">
         <div className="flex justify-between items-center mb-6">
           <Button
             icon={<PlusOutlined />}

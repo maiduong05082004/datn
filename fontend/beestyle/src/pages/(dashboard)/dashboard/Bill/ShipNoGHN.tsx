@@ -6,6 +6,7 @@ import axios from 'axios';
 import Joi from 'joi';
 import { useForm } from 'react-hook-form';
 import { joiResolver } from '@hookform/resolvers/joi';
+import instance from '@/configs/axios';
 
 interface TCheckout {
     full_name: string;
@@ -37,7 +38,7 @@ const ShipNoGHN: React.FC = () => {
     const { data: detailBill, isLoading } = useQuery({
         queryKey: ['detailbill', id],
         queryFn: async () => {
-            const response = await axios.get(`api/admins/orders/show_detailorder/${id}`, {
+            const response = await instance.get(`api/admins/orders/show_detailorder/${id}`, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },

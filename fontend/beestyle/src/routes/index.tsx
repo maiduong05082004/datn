@@ -104,7 +104,7 @@ const Router = () => {
                     <Route path="bill/list" element={<ListBill />} />
                     <Route path="bill/detail/:id" element={<DetailBill />} />
                     <Route path="bill/detailSuccessful/:id" element={<Detailship />} />
-                    <Route path="bill/detailConfirm/:id" element={<DeatilConfirm />} />
+                    {/* <Route path="bill/detailConfirm/:id" element={<DeatilConfirm />} /> */}
                     <Route path="bill/cancel/:id" element={<CancelBill />} />
                     {/* <Route path="bill/detailConfirm/:id" element={<DeatilConfirm />} /> */}
                     <Route path="bill/cancel" element={<CancelBill />} />

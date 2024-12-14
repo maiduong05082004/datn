@@ -1,7 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Spin, Table, Tabs, Tooltip, Button, Modal, InputNumber, Cascader, Form, Input } from 'antd';
 import React, { useState } from 'react';
-import { format } from 'date-fns';
 import instance from '@/configs/axios';
 import { toast, ToastContainer } from 'react-toastify';
 import { DatePicker, Select } from 'antd';
@@ -31,7 +30,7 @@ type Variation = {
         image_path: string;
     };
     variation_values: Array<{
-        id: string; // Bổ sung id tại đây
+        id: string;
         value: string;
         stock: number;
         price: string;
@@ -54,6 +53,36 @@ const InventoryManagement = (props: Props) => {
     const [selectedDates, setSelectedDates] = useState<[string, string] | null>(null);
     const [isFiltered, setIsFiltered] = useState(false);
     const [filteredData, setFilteredData] = useState<Product[]>([]);
+    const [isConfirmModalVisible, setIsConfirmModalVisible] = useState(false);
+    const [actionToConfirm, setActionToConfirm] = useState<{
+        action: 'activate' | 'deactivate';
+        productId: string;
+    } | null>(null);
+
+
+    const showConfirmModal = (action: 'activate' | 'deactivate', productId: string) => {
+        setActionToConfirm({ action, productId });
+        setIsConfirmModalVisible(true);
+    };
+
+    const handleConfirmAction = () => {
+        if (actionToConfirm) {
+            const { action, productId } = actionToConfirm;
+            if (action === 'activate') {
+                updateProductStatus2(productId);
+            } else {
+                updateProductStatus(productId);
+            }
+            setIsConfirmModalVisible(false);
+            setActionToConfirm(null);
+        }
+    };
+
+    const handleCancelConfirm = () => {
+        setIsConfirmModalVisible(false);
+        setActionToConfirm(null);
+    };
+
 
 
     const handleOpenFilterModal = () => {
@@ -108,8 +137,8 @@ const InventoryManagement = (props: Props) => {
                 toast.info('Không tìm thấy dữ liệu phù hợp!');
             }
 
-            resetFilters(); // Reset bộ lọc
-            setIsFilterModalVisible(false); // Đóng modal lọc
+            resetFilters();
+            setIsFilterModalVisible(false);
         } catch (error) {
             toast.error('Có lỗi xảy ra khi lọc!');
         }
@@ -122,7 +151,7 @@ const InventoryManagement = (props: Props) => {
         setSelectedCategoryId(null);
     };
 
-    const { data: productData } = useQuery({
+    const { data: productDataNew } = useQuery({
         queryKey: ['products'],
         queryFn: async () => {
             const response = await instance.get('api/admins/products');
@@ -177,8 +206,11 @@ const InventoryManagement = (props: Props) => {
         },
         onSuccess: () => {
             toast.success('Trạng thái sản phẩm đã được chuyển sang Ngừng bán.');
+            queryCient.invalidateQueries({ queryKey: ['products'] });
             queryCient.invalidateQueries({ queryKey: ['activeProducts'] });
             queryCient.invalidateQueries({ queryKey: ['inactiveProducts'] });
+            queryCient.invalidateQueries({ queryKey: ['outOfStockProducts'] });
+            queryCient.refetchQueries({ queryKey: ['products'] });
         },
         onError: (error) => {
             console.error('Lỗi:', error);
@@ -295,7 +327,7 @@ const InventoryManagement = (props: Props) => {
 
         updateCategory({
             id: selectedProductId,
-            category_id: parseInt(selectedCategoryId), // Đảm bảo `category_id` là kiểu số
+            category_id: parseInt(selectedCategoryId),
         });
     };
 
@@ -329,14 +361,7 @@ const InventoryManagement = (props: Props) => {
             title: 'Tên sản phẩm',
             dataIndex: 'name',
             key: 'name',
-            align: 'center',
-        },
-        {
-            title: 'Ngày Nhập',
-            dataIndex: 'product_cost',
-            key: 'import_date',
-            align: 'center',
-            render: (product_cost: { import_date: string }) => product_cost?.import_date || 'Không có',
+            width: "250px",
         },
         {
             title: 'Tổng Số Lượng',
@@ -345,45 +370,14 @@ const InventoryManagement = (props: Props) => {
             align: 'center',
         },
         {
-            title: 'Trạng thái',
-            dataIndex: ['product_cost', 'sale_status'],
-            key: 'sale_status',
-            align: 'center',
-            width: "100px",
-            render: (sale_status: string) => {
-                let statusLabel = '';
-                let statusClass = '';
-
-                switch (sale_status) {
-                    case 'active':
-                        statusLabel = 'Đang bán';
-                        statusClass = ' text-green-500';
-                        break;
-                    case 'inactive':
-                        statusLabel = 'Ngừng Bán';
-                        statusClass = 'text-yellow-500';
-                        break;
-                    default:
-                        statusLabel = 'Không xác định';
-                        statusClass = 'bg-red-100 text-red-800';
-                }
-
-                return (
-                    <span className={`px-2 py-1 rounded-full text-sm font-semibold ${statusClass}`}>
-                        {statusLabel}
-                    </span>
-                );
-            },
-        }
-        ,
-        {
             title: 'Giá nhập',
             dataIndex: 'product_cost',
             key: 'cost_price',
             align: 'center',
             render: (product_cost: { cost_price: string }) =>
                 product_cost?.cost_price ? `${parseFloat(product_cost.cost_price).toLocaleString()} VND` : 'Không có',
-        },
+        }
+        ,
         {
             title: 'Giá bán',
             dataIndex: 'price',
@@ -402,7 +396,7 @@ const InventoryManagement = (props: Props) => {
             title: 'Số Lượng Hiện Tại',
             dataIndex: 'variations',
             key: 'variations',
-            width: "100px",
+            width: "150px",
             align: 'center',
             render: (variations: Variation[]) => (
                 <div className=''>
@@ -432,33 +426,70 @@ const InventoryManagement = (props: Props) => {
             align: 'center',
         },
         {
+            title: 'Ngày Nhập',
+            dataIndex: 'product_cost',
+            key: 'import_date',
+            width: "120px",
+            align: 'center',
+            render: (product_cost: { import_date: string }) => product_cost?.import_date || 'Không có',
+        }
+        ,
+        {
+            title: 'Trạng thái',
+            dataIndex: ['product_cost', 'sale_status'],
+            key: 'sale_status',
+            align: 'center',
+            width: "130px",
+            render: (sale_status: string) => {
+                let statusLabel = '';
+                let statusClass = '';
+
+                switch (sale_status) {
+                    case 'active':
+                        statusLabel = 'Đang bán';
+                        statusClass = ' text-green-500';
+                        break;
+                    case 'inactive':
+                        statusLabel = 'Ngừng Bán';
+                        statusClass = 'text-yellow-500';
+                        break;
+                    default:
+                        statusLabel = 'Không xác định';
+                        statusClass = 'bg-red-100 text-red-800';
+                }
+
+                return (
+                    <span className={`px-2 py-1 rounded-full text-sm font-semibold ${statusClass}`}>
+                        {statusLabel}
+                    </span>
+                );
+            },
+        },
+        {
             title: 'Hành động',
             key: 'action',
             align: 'center',
+            width: "100px",
             render: (text: any, record: Product) => (
                 <div style={{ display: 'flex', justifyContent: 'center', gap: '10px' }}>
                     {record.product_cost?.sale_status === 'inactive' && (
                         <Button
-                            type="primary"
-                            onClick={() => {
-                                updateProductStatus2(record.id);
-                            }}
+                            type="default"
+                            onClick={() => showConfirmModal('activate', record.id)}
                         >
                             Đăng Bán
                         </Button>
                     )}
                     {record.product_cost?.sale_status === 'active' && (
                         <Button
-                            type="primary"
+                            type="default"
                             danger
-                            onClick={() => {
-                                updateProductStatus(record.id);
-                            }}
+                            onClick={() => showConfirmModal('deactivate', record.id)}
                         >
                             Ngừng bán
                         </Button>
                     )}
-                    <Button
+                    {/* <Button
                         type="default"
                         onClick={() => {
                             setSelectedProductId(record.id);
@@ -466,16 +497,14 @@ const InventoryManagement = (props: Props) => {
                         }}
                     >
                         Thay đổi danh mục
-                    </Button>
+                    </Button> */}
                 </div>
             ),
-        },
+        }
+
 
     ];
-
-
-
-    const productDatas = productData?.map((product: Product, index: number) => ({
+    const productDatas = productDataNew?.map((product: any, index: number) => ({
         key: product.id,
         index: index,
         ...product,
@@ -553,7 +582,7 @@ const InventoryManagement = (props: Props) => {
         },
         {
             key: '4',
-            label: 'Ngừng bán (Hàng Tồn)',
+            label: 'Ngừng Bán',
             children: (
                 <Table
                     dataSource={isFiltered ? filteredData : inactiveProducts}
@@ -609,16 +638,16 @@ const InventoryManagement = (props: Props) => {
                                     <div><strong>Size:</strong> {variationValue.value}</div>
                                     <div><strong>Số lượng hiện tại:</strong> {variationValue.stock}</div>
                                     <div>
-                                        <strong className='mb-5'>Cập nhật số lượng:</strong>
-                                        <div className='flex justify-center items-center'>
+                                        <strong>Cập nhật số lượng:</strong>
+                                        <div className="flex items-center space-x-2 pt-5">
                                             <InputNumber
                                                 min={0}
                                                 onChange={(value) => handleStockChange(variationValue.id, value)}
-                                                style={{ width: '50%' }}
+                                                className="w-[300px] border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
                                             />
                                             <Button
                                                 type="primary"
-                                                style={{ marginTop: '10px' }}
+                                                className="bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-lg shadow-md px-4 py-2"
                                                 onClick={() => handleUpdateStock(variationValue.id)}
                                             >
                                                 Cập nhật
@@ -667,6 +696,35 @@ const InventoryManagement = (props: Props) => {
             </Modal>
 
             <Modal
+                title={
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <FilterOutlined style={{ color: '#faad14', fontSize: '24px' }} />
+                        <span>Xác nhận hành động</span>
+                    </div>
+                }
+                visible={isConfirmModalVisible}
+                onOk={handleConfirmAction}
+                onCancel={handleCancelConfirm}
+                okText="Xác nhận"
+                cancelText="Hủy"
+            >
+                {actionToConfirm?.action === 'activate' ? (
+                    <p>
+                        Bạn có chắc chắn muốn chuyển sản phẩm này sang trạng thái
+                        <strong style={{ color: '#f5222d' }}> Ngừng Bán</strong> không?
+                    </p>
+                ) : actionToConfirm?.action === 'deactivate' ? (
+                    <p>
+                        Bạn có chắc chắn muốn chuyển sản phẩm này sang trạng thái
+                        <strong style={{ color: '#52c41a' }}> Đăng Bán</strong> không?
+                    </p>
+                ) : (
+                    <p>Hành động không xác định. Vui lòng kiểm tra lại.</p>
+                )}
+
+            </Modal>
+
+            <Modal
                 title="Lọc sản phẩm"
                 visible={isFilterModalVisible}
                 onCancel={handleCloseFilterModal}
@@ -704,7 +762,7 @@ const InventoryManagement = (props: Props) => {
                             placeholder="Chọn nhà cung cấp"
                             onChange={(value) => setSelectedSupplier(value)}
                         >
-                            {productData?.map((item: any, index: any) => (
+                            {productDataNew?.map((item: any, index: any) => (
                                 <Select.Option key={index} value={item.product_cost.supplier}>
                                     {item.product_cost.supplier}
                                 </Select.Option>

@@ -86,9 +86,7 @@ const DetailProduct = () => {
             {parseFloat(price).toLocaleString()} VND
           </Text>
 
-          <div className="flex gap-4 mb-6">
-            {is_new && <Badge.Ribbon text="Sản phẩm mới" color="green" />}
-            {is_hot && <Badge.Ribbon text="Hot" color="red" />}
+          <div className="">
             {is_collection && <Badge.Ribbon text="Bộ sưu tập" color="blue" />}
           </div>
 

@@ -238,24 +238,17 @@ const ListBill: React.FC = () => {
       key: 'phone',
       render: (text: string) => <span className="text-gray-700 font-medium">{text}</span>,
     },
-    {
-      title: 'Hình Thức Thanh Toán',
-      dataIndex: 'payment_type_description',
-      align: 'center',
-      key: 'payment_type_description',
-      render: (text: string) => <span className="text-gray-600">{text}</span>,
-    },
 
+    // {
+    //   title: 'Số Lượng',
+    //   dataIndex: 'quantity',
+    //   align: 'center',
+    //   key: 'quantity',
+    //   sorter: (a: any, b: any) => parseFloat(a.quantity) - parseFloat(b.quantity),
+    //   render: (text: number) => <span className="text-gray-700 font-medium">{text}</span>,
+    // },
     {
-      title: 'Số Lượng',
-      dataIndex: 'quantity',
-      align: 'center',
-      key: 'quantity',
-      sorter: (a: any, b: any) => parseFloat(a.quantity) - parseFloat(b.quantity),
-      render: (text: number) => <span className="text-gray-700 font-medium">{text}</span>,
-    },
-    {
-      title: 'Tổng Thanh Toán (VND)',
+      title: 'Tổng Tiền (VND)',
       dataIndex: 'total',
       align: 'center',
       key: 'total',
@@ -269,6 +262,13 @@ const ListBill: React.FC = () => {
       render: (record: BillRecord) => (
         <div className="text-gray-700">{`${record.order_date} ${record.order_time}`}</div>
       ),
+    },
+    {
+      title: 'Hình Thức Thanh Toán',
+      dataIndex: 'payment_type_description',
+      align: 'center',
+      key: 'payment_type_description',
+      render: (text: string) => <span className="text-gray-600">{text}</span>,
     },
     {
       title: 'Trạng Thái',

@@ -1,126 +1,128 @@
-import React from "react";
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  Tooltip,
-  ResponsiveContainer,
-  PieChart,
-  Pie,
-  Cell,
-} from "recharts";
+import React, { useState } from 'react';
+import { 
+  LayoutGrid, 
+  Users, 
+  CreditCard, 
+  Bell, 
+  Search, 
+  ChevronDown, 
+  TrendingUp,
+  ShoppingCart,
+  DollarSign,
+  Briefcase,
+  BarChart2
+} from 'lucide-react';
 
-const DashboardPage = () => {
-  const barChartData = [
-    { name: "Jan", value: 30 },
-    { name: "Feb", value: 50 },
-    { name: "Mar", value: 40 },
-    { name: "Apr", value: 70 },
-    { name: "May", value: 60 },
-    { name: "Jun", value: 80 },
-    { name: "Jul", value: 100 },
-    { name: "Aug", value: 90 },
-    { name: "Sep", value: 50 },
+const AdvancedDashboard = () => {
+  const [activeTab, setActiveTab] = useState('dashboard');
+
+  const statsData = [
+    { 
+      icon: TrendingUp, 
+      title: 'Total Revenue', 
+      value: '$124,763', 
+      change: '+12.5%', 
+      color: 'bg-green-100 text-green-600' 
+    },
+    { 
+      icon: Users, 
+      title: 'New Customers', 
+      value: '2,543', 
+      change: '+15.3%', 
+      color: 'bg-blue-100 text-blue-600' 
+    },
+    { 
+      icon: ShoppingCart, 
+      title: 'Total Orders', 
+      value: '1,256', 
+      change: '+8.7%', 
+      color: 'bg-purple-100 text-purple-600' 
+    },
+    { 
+      icon: DollarSign, 
+      title: 'Pending Payouts', 
+      value: '$45,231', 
+      change: '-2.5%', 
+      color: 'bg-orange-100 text-orange-600' 
+    }
   ];
 
-  const pieChartData = [
-    { name: "Desktop", value: 35 },
-    { name: "Tablet", value: 48 },
-    { name: "Mobile", value: 27 },
+  const recentActivities = [
+    {
+      user: 'Alex Johnson',
+      action: 'Completed project milestone',
+      time: '5 mins ago',
+      avatar: 'https://randomuser.me/api/portraits/men/32.jpg'
+    },
+    {
+      user: 'Emma Wilson',
+      action: 'Submitted quarterly report',
+      time: '1 hour ago',
+      avatar: 'https://randomuser.me/api/portraits/women/44.jpg'
+    },
+    {
+      user: 'Michael Chen',
+      action: 'Started new marketing campaign',
+      time: '3 hours ago',
+      avatar: 'https://randomuser.me/api/portraits/men/85.jpg'
+    }
   ];
-
-  const COLORS = ["#0088FE", "#00C49F", "#FFBB28"];
 
   return (
-    <div className="min-h-screen bg-gradient-to-r from-indigo-800 p-8 text-white">
-      {/* Header */}
-      <header className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold ">Dashboard</h1>
-        <div className="flex items-center space-x-4">
-          <div className="text-black text-xl">
-            Welcome back, <b>Jhon Anderson</b>
-          </div>
-        </div>
-      </header>
-
-      {/* Overview Cards */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="bg-indigo-700 p-6 rounded-lg shadow-lg">
-          <h2 className="text-2xl font-semibold">Today's Sales</h2>
-          <p className="text-4xl font-bold mt-4">$65.4K</p>
-          <p className="text-green-400 mt-2">+78.4% Growth</p>
-        </div>
-        <div className="bg-indigo-700 p-6 rounded-lg shadow-lg">
-          <h2 className="text-2xl font-semibold">Active Users</h2>
-          <p className="text-4xl font-bold mt-4">42.5K</p>
-          <p className="text-green-400 mt-2">+12.5% from last month</p>
-        </div>
-        <div className="bg-indigo-700 p-6 rounded-lg shadow-lg">
-          <h2 className="text-2xl font-semibold">Total Users</h2>
-          <p className="text-4xl font-bold mt-4">97.4K</p>
-          <p className="text-green-400 mt-2">+15.5% Growth</p>
-        </div>
-      </div>
-
-      {/* Charts Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
-        {/* Bar Chart */}
-        <div className="bg-indigo-700 p-6 rounded-lg shadow-lg">
-          <h2 className="text-xl font-semibold mb-4">Monthly Revenue</h2>
-          <ResponsiveContainer width="100%" height={200}>
-            <BarChart data={barChartData}>
-              <XAxis dataKey="name" tick={{ fill: "#FFFFFF" }} />
-              <YAxis tick={{ fill: "#FFFFFF" }} />
-              <Tooltip />
-              <Bar dataKey="value" fill="#34D399" />
-            </BarChart>
-          </ResponsiveContainer>
+    <div className="flex bg-gray-100 min-h-screen">
+      {/* Main Content */}
+      <div className="flex-1 p-8">
+        <div className="grid grid-cols-4 gap-6 mb-8">
+          {statsData.map(({ icon: Icon, title, value, change, color }) => (
+            <div 
+              key={title} 
+              className="bg-white rounded-xl shadow-md p-6 transform hover:scale-105 transition"
+            >
+              <div className={`w-12 h-12 rounded-full ${color} mb-4 flex items-center justify-center`}>
+                <Icon className="w-6 h-6" />
+              </div>
+              <h3 className="text-xl font-bold mb-2">{value}</h3>
+              <div className="flex justify-between items-center">
+                <p className="text-gray-500">{title}</p>
+                <span className={`
+                  text-sm font-semibold 
+                  ${change.startsWith('+') ? 'text-green-500' : 'text-red-500'}
+                `}>
+                  {change}
+                </span>
+              </div>
+            </div>
+          ))}
         </div>
 
-        {/* Pie Chart */}
-        <div className="bg-indigo-700 p-6 rounded-lg shadow-lg">
-          <h2 className="text-xl font-semibold mb-4">Device Type</h2>
-          <ResponsiveContainer width="100%" height={200}>
-            <PieChart>
-              <Pie
-                data={pieChartData}
-                dataKey="value"
-                nameKey="name"
-                cx="50%"
-                cy="50%"
-                innerRadius={50}
-                outerRadius={80}
-                fill="#8884d8"
-                paddingAngle={5}
+        {/* Recent Activities */}
+        <div className="bg-white rounded-xl shadow-md p-6">
+          <h2 className="text-xl font-bold mb-6">Recent Activities</h2>
+          <div className="space-y-4">
+            {recentActivities.map(({ user, action, time, avatar }) => (
+              <div 
+                key={user} 
+                className="flex items-center justify-between hover:bg-gray-50 p-3 rounded-lg transition"
               >
-                {pieChartData.map((entry, index) => (
-                  <Cell
-                    key={`cell-${index}`}
-                    fill={COLORS[index % COLORS.length]}
+                <div className="flex items-center">
+                  <img 
+                    src={avatar} 
+                    alt={user} 
+                    className="w-10 h-10 rounded-full mr-4" 
                   />
-                ))}
-              </Pie>
-            </PieChart>
-          </ResponsiveContainer>
-          <ul className="mt-4">
-            {pieChartData.map((entry, index) => (
-              <li
-                key={`legend-${index}`}
-                className="flex items-center text-sm text-gray-200"
-              >
-                <span
-                  className="w-3 h-3 mr-2"
-                  style={{ backgroundColor: COLORS[index % COLORS.length] }}
-                ></span>
-                {entry.name}: {entry.value}%
-              </li>
+                  <div>
+                    <p className="font-semibold">{user}</p>
+                    <p className="text-gray-500 text-sm">{action}</p>
+                  </div>
+                </div>
+                <span className="text-gray-400 text-sm">{time}</span>
+              </div>
             ))}
-          </ul>
+          </div>
         </div>
       </div>
     </div>
   );
 };
 
-export default DashboardPage;
+export default AdvancedDashboard;

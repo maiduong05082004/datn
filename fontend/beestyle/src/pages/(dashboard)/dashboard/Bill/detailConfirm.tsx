@@ -96,7 +96,7 @@ const DetailConfirm = ({ isCheckAddresses, idAddresses, isUpdateAddresses, setCh
   const { data: detailConfirm, isLoading } = useQuery({
     queryKey: ['detailbill', id],
     queryFn: async () => {
-      const response = await axios.get(
+      const response = await instance.get(
         `http://127.0.0.1:8000/api/admins/orders/show_detailorder/${id}`,
         {
           headers: { Authorization: `Bearer ${token}` },

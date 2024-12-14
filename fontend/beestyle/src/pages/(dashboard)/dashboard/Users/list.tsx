@@ -85,12 +85,6 @@ const UserList: React.FC = () => {
       align: 'center',
     },
     {
-      title: 'Ngày sinh',
-      dataIndex: 'date_of_birth',
-      key: 'date_of_birth',
-      align: 'center',
-    },
-    {
       title: 'Email',
       dataIndex: 'email',
       key: 'email',
@@ -107,6 +101,13 @@ const UserList: React.FC = () => {
       dataIndex: 'phone',
       key: 'phone',
       align: 'center',
+    },
+    {
+      title: 'Ngày sinh',
+      dataIndex: 'date_of_birth',
+      key: 'date_of_birth',
+      align: 'center',
+      width: "120px",
     },
     {
       title: 'Trạng thái hoạt động',
