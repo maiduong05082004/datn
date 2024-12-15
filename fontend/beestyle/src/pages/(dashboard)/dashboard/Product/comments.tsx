@@ -43,10 +43,7 @@ const Comments = (props: Props) => {
   const { id } = useParams(); // Lấy ID sản phẩm từ URL
   const [messageAPI, contextHolder] = message.useMessage();
   const [replyContent, setReplyContent] = useState<{ [key: number]: string }>({}); // Quản lý nội dung trả lời
-  // const [isReportModalVisible, setIsReportModalVisible] = useState(false);
-  // const [reportReason, setReportReason] = useState('');
   const [currentCommentId, setCurrentCommentId] = useState<number | null>(null);
-  // const [reportReasons, setReportReasons] = useState<{ [key: number]: string }>({});
   const [isReplyModalVisible, setIsReplyModalVisible] = useState(false);
   const [isReportModalVisible, setIsReportModalVisible] = useState(false);
   const [reportData, setReportData] = useState<Report[]>([]);
@@ -85,27 +82,6 @@ const Comments = (props: Props) => {
       toast.error('Ấn Bình Luận Thất Bại!')
     },
   });
-  // Khóa comment
-  const { mutate: manageUser } = useMutation({
-    mutationFn: async (user_id: number) => {
-      const response = await instance.post('api/admins/comment/manageUser', {
-        user_id: user_id,
-      });
-      return response.data;
-    },
-    onSuccess: (data) => {
-      if (data.message === 'User is in good standing.') {
-        messageAPI.info('Người dùng đang ở trạng thái tốt. Không cần khóa.');
-      } else {
-        messageAPI.success('Người dùng đã bị khóa thành công!');
-      }
-      refetch();
-    },
-    onError: () => {
-      messageAPI.error('Lỗi khi khóa người dùng.');
-    },
-  });
-  // list báo cáo
 
   const { mutate: fetchReports } = useMutation({
     mutationFn: async (comment_id: number) => {
@@ -183,13 +159,12 @@ const Comments = (props: Props) => {
     },
   });
 
-  // Show reply modal
   const showReplyModal = (commentId: number) => {
     setCurrentCommentId(commentId);
     setIsReplyModalVisible(true);
   };
+  
 
-  // Xử lý trả lời bình luận
   const handleReply = () => {
     if (currentCommentId !== null && replyContent[currentCommentId]?.trim()) {
       mutate({ parentId: currentCommentId, content: replyContent[currentCommentId] });
@@ -235,12 +210,9 @@ const Comments = (props: Props) => {
       width: '20%',
       render: (_, record) => (
         <div className="p-4 bg-white rounded-lg shadow-md">
-          {/* Phần nội dung bình luận chính */}
           <p className="text-gray-800 font-semibold">
             <strong>Nội dung:</strong> {record.content}
           </p>
-
-          {/* Phần trả lời nếu có */}
           {record.reply_comment.length > 0 && (
             <div className="pl-4 border-l-2 border-gray-300 mt-4">
               <strong className="block text-gray-600">Trả lời:</strong>
@@ -257,18 +229,20 @@ const Comments = (props: Props) => {
               ))}
             </div>
           )}
-
-          {/* Nút trả lời */}
-          <Button
-            type="default"
-            className="mt-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg px-4 py-2"
-            onClick={() => showReplyModal(record.comment_id)}
-          >
-            Trả lời
-          </Button>
+    
+          {!record.reply_comment.some(reply => reply.user_name === 'admin') && (
+            <Button
+              type="default"
+              className="mt-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg px-4 py-2"
+              onClick={() => showReplyModal(record.comment_id)}
+            >
+              Trả lời
+            </Button>
+          )}
         </div>
       ),
     },
+    
     {
       title: 'Số lần báo cáo',
       dataIndex: 'reported_count',
@@ -345,15 +319,6 @@ const Comments = (props: Props) => {
             icon={<EyeInvisibleOutlined />}
           >
             Ẩn
-          </Button>
-
-          {/* Nút Khóa User */}
-          <Button
-            type="default"
-            onClick={() => manageUser(record.user_id)}
-            icon={<HddOutlined />}
-          >
-            Khóa User
           </Button>
         </div>
       ),

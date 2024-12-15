@@ -396,7 +396,7 @@ const InventoryManagement = (props: Props) => {
             title: 'Số Lượng Hiện Tại',
             dataIndex: 'variations',
             key: 'variations',
-            width: "150px",
+            width: "130px",
             align: 'center',
             render: (variations: Variation[]) => (
                 <div className=''>
@@ -762,9 +762,13 @@ const InventoryManagement = (props: Props) => {
                             placeholder="Chọn nhà cung cấp"
                             onChange={(value) => setSelectedSupplier(value)}
                         >
-                            {productDataNew?.map((item: any, index: any) => (
-                                <Select.Option key={index} value={item.product_cost.supplier}>
-                                    {item.product_cost.supplier}
+                            {[
+                                ...new Set(
+                                    productDataNew?.map((item: any) => item.product_cost.supplier)
+                                ),
+                            ].map((supplier, index) => (
+                                <Select.Option key={index} value={supplier as string}>
+                                    {supplier as string}
                                 </Select.Option>
                             ))}
                         </Select>
