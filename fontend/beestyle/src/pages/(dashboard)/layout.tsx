@@ -115,8 +115,23 @@ const items1: MenuProps['items'] = [
   {
     key: 'inventory',
     icon: React.createElement(DatabaseOutlined),
-    label: <NavLink to="/admin/dashboard/inventory/list">Quản lý Trạng Thái Sản Phẩm</NavLink>,
+    label: (
+      <span>
+        Quản lý Tồn Kho
+      </span>
+    ),
+    children: [
+      {
+        key: 'inventory-list',
+        label: <NavLink to="/admin/dashboard/inventory/list">Danh sách Tồn Kho</NavLink>,
+      },
+      {
+        key: 'inventory-report',
+        label: <NavLink to="/admin/dashboard/inventory/report">Báo cáo Tồn Kho</NavLink>,
+      },
+    ],
   }
+  
   ,
   {
     key: 'sub12',

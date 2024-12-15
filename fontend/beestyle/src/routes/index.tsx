@@ -49,6 +49,8 @@ import { useState } from "react";
 import Signin from "@/pages/(dashboard)/dashboard/auth.tsx/signin";
 import DetailBanner from "@/pages/(dashboard)/dashboard/Banner/detail";
 import InventoryManagement from "@/pages/(dashboard)/dashboard/Inventory/list";
+import ReportInventory from "@/pages/(dashboard)/dashboard/Inventory/report";
+import DetailReport from "@/pages/(dashboard)/dashboard/Inventory/detailReport";
 import ForgotPasswordPage from "@/pages/(website)/ForgotPassword/page";
 import ResetPasswordPage from "@/pages/(website)/ResetPassword/page";
 import ListBannersMain from "@/pages/(dashboard)/dashboard/Banner/list";
@@ -99,13 +101,14 @@ const Router = () => {
                 <Route path="admin/dashboard" element={<PrivateRouter><LayoutAdmin /></PrivateRouter>}>
                     {/* <Route path="admin/dashboard" element={<LayoutAdmin />}> */}
                     <Route index element={<DashboardPage />} />
+
                     <Route path="profile" element={<MyProfile />} />
                     <Route path="chat" element={<ListUserChat />} />
                     {/* bills */}
                     <Route path="bill/list" element={<ListBill />} />
                     <Route path="bill/detail/:id" element={<DetailBill />} />
                     <Route path="bill/detailSuccessful/:id" element={<Detailship />} />
-                    {/* <Route path="bill/detailConfirm/:id" element={<DeatilConfirm />} /> */}
+                    <Route path="bill/detailConfirm/:id" element={<DeatilConfirm />} />
                     <Route path="bill/cancel/:id" element={<CancelBill />} />
                     {/* <Route path="bill/detailConfirm/:id" element={<DeatilConfirm />} /> */}
                     <Route path="bill/cancel" element={<CancelBill />} />
@@ -151,6 +154,8 @@ const Router = () => {
                     <Route path="promotions/update/:id" element={<UpdatePromotion />} />
                     {/* inventory */}
                     <Route path="inventory/list" element={<InventoryManagement />} />
+                    <Route path="inventory/report" element={<ReportInventory />} />
+                    <Route path="inventory/detail/:id" element={<DetailReport />} />
                     {/*{/* statistic */}
                     {/* <Route path="statistic/revenue" element={<ListStatistics />} />
                     <Route path="statistic/selling" element={<ListTopSelling />} />
