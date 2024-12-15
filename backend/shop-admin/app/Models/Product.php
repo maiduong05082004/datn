@@ -69,6 +69,6 @@ class Product extends Model
 
     public function cost()
     {
-        return $this->hasMany(TableProductCost::class);
+        return $this->hasOne(TableProductCost::class);
     }
 }

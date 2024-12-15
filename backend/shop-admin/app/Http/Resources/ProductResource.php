@@ -24,7 +24,7 @@ class ProductResource extends JsonResource
             'category_id' => $this->category_id,
             'category_name' => $this->category?$this->category->name:null,
             'is_collection' => $this->is_collection,
-            'product_cost' => $this->cost->first(),
+            'product_cost' => $this->cost,
             'is_hot' => $this->is_hot,
             'is_new' => $this->is_new,
             'group' => $group ? new GroupResource($group) : null,
