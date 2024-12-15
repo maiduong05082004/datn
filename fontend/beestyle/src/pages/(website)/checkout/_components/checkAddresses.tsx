@@ -26,15 +26,15 @@ const CheckAddresses = ({ selectedAddress, handleSelectProduct, isCheckAddresses
     const token = localStorage.getItem('token')
 
     const { data: addresses } = useQuery({
-        queryKey: ['addresses'],
+        queryKey: ['addresses', token],
         queryFn: async () => {
-            const data = await axios.get(`http://127.0.0.1:8000/api/client/shippingaddress`, {
+            return axios.get(`http://127.0.0.1:8000/api/client/shippingaddress`, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },
             })
-            return data
         },
+        enabled:!!token
     })
 
     useEffect(() => {

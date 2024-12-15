@@ -1,25 +1,29 @@
 import instance from "@/configs/axios";
 import { useQuery } from "@tanstack/react-query";
-import React from "react";
+import { Spin } from "antd";
 import { Navigate } from "react-router-dom";
 
 
 const PrivateRouter = ({ children }: any) => {
-    
-    let isAuthorized = false
-    const token = localStorage.getItem("token_admin");
-    console.log(token);
-    const { data } = useQuery({
+
+    const { data, isLoading, error } = useQuery({
         queryKey: ["profile"],
         queryFn: async () => {
-            return instance.get(`api/client/auth/profile`)
+            return instance.get(`api/client/auth/profile`);
         },
-    })
-    if(data?.data.user.role === "admin") {
-        isAuthorized = true
+    });
+
+    if (isLoading) {
+        return <Spin tip="Loading..." className="flex justify-center items-center h-screen" />;
     }
 
+    if (error) {
+        return <Navigate to="/erorr" />;
+    }
+
+    const isAuthorized = data?.data?.user?.role === "admin";
+
     return isAuthorized ? children : <Navigate to="/admin" />;
-}
+};
 
 export default PrivateRouter;
