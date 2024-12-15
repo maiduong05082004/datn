@@ -11,6 +11,7 @@ use App\Models\Product;
 use App\Models\ProductImage;
 use App\Models\ProductVariation;
 use App\Models\ProductVariationImage;
+use App\Models\ProductVariationQuantity;
 use App\Models\ProductVariationValue;
 use App\Models\TableProductCost;
 use Illuminate\Http\Request;
@@ -65,7 +66,14 @@ class ProductController extends Controller
                 'is_new' => $request->is_new ? 1 : 0,
             ]);
 
-
+            TableProductCost::create([
+                'product_id' => $product->id,
+                'cost_price' => $request->cost_price,
+                'supplier' => $request->supplier,
+                'import_date' => $request->import_date,
+                'sale_status' => TableProductCost::SALE_STATUS_ACTIVE,
+                'sale_start_date' => now(),
+             ]);
 
             // Kiểm tra nếu có biến thể
             $hasVariations = $request->has('variations') && !empty($request->variations);
@@ -108,7 +116,7 @@ class ProductController extends Controller
                             $sku = $this->generateVariationSku();
                             $calculatedPrice = $product->price - ($product->price * ($details['discount'] / 100));
 
-                            $productVariationValues = ProductVariationValue::create([
+                           $productVariationValue =  ProductVariationValue::create([
                                 'product_variation_id' => $productVariation->id,
                                 'attribute_value_id' => $sizeId,
                                 'sku' => $sku,
@@ -118,21 +126,12 @@ class ProductController extends Controller
                             ]);
 
                             $totalVariationStock += $details['stock'];
+                            ProductVariationQuantity::create([
+                                'product_variation_value_id' => $productVariationValue->id,
+                                'quantity' => $productVariationValue->stock,
+                            ]);
                         }
-
-                        TableProductCost::create([
-                            'product_id' => $product->id,
-                            'product_variation_value_id' => $productVariationValues->id,
-                            'quantity' => $productVariationValues->stock,
-                            'cost_price' => $request->cost_price,
-                            'supplier' => $request->supplier,
-                            'import_date' => $request->import_date,
-                            'sale_status' => TableProductCost::SALE_STATUS_ACTIVE,
-                            'sale_start_date' => now(),
-                        ]);
                     }
-
-
 
                     $productVariation->update(['stock' => $totalVariationStock]);
                     $totalProductStock += $totalVariationStock;
@@ -156,6 +155,7 @@ class ProductController extends Controller
             ], 500);
         }
     }
+
 
 
 
@@ -313,8 +313,16 @@ class ProductController extends Controller
             ]);
 
             $tableProductCost = $product->cost;
+            $tableProductCost->update([
+                'product_id' => $product->id,
+                'cost_price' => $request->cost_price,
+                'supplier' => $request->supplier,
+                'import_date' => $request->import_date,
+                'sale_status' => TableProductCost::SALE_STATUS_ACTIVE,
+                'sale_start_date' => now(),
+             ]);
 
-
+ 
 
             // Xóa ảnh nếu có yêu cầu
             if ($request->has('delete_images')) {
@@ -366,17 +374,12 @@ class ProductController extends Controller
                                 ]
                             );
                         }
-                        TableProductCost::updateOrCreate(
-                            ['product_id' => $product->id, 'product_variation_value_id' => $productVariationValue->id],
-                            [
-                                'quantity' => $productVariationValue->stock,
-                                'cost_price' => $request->cost_price,
-                                'supplier' => $request->supplier,
-                                'import_date' => $request->import_date,
-                                'sale_status' => TableProductCost::SALE_STATUS_ACTIVE,
-                                'sale_start_date' => now(),
-                            ]
-                        );
+
+                        ProductVariationQuantity::updateOrCreate([
+                            'product_variation_value_id' => $productVariationValue->id,
+                            'quantity' => $productVariationValue->stock,
+                        ]);
+                
 
                     }
 

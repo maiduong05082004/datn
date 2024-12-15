@@ -9,6 +9,7 @@ use App\Http\Resources\VariationResource;
 use App\Models\Bill;
 use App\Models\Category;
 use App\Models\Product;
+use App\Models\ProductVariationQuantity;
 use App\Models\ProductVariationValue;
 use App\Models\TableProductCost;
 use Carbon\Carbon;
@@ -245,171 +246,64 @@ class InventoryController extends Controller
 
 
 
-    //list sản phẩm đang bán
+
     //list sản phẩm đang bán
     public function listProductActive()
     {
-        $products = Product::with([
-            'variations.attributeValue',
-            'variations.group',
-            'variations.variationValues',
-            'variations.variationImages',
-            'cost'
-        ])
+        $products = Product::with(
+            [
+                'variations.attributeValue',
+                'variations.group',
+                'variations.variationValues',
+                'variations.variationImages',
+                'cost'
+            ]
+        )
             ->whereHas('cost', function ($query) {
                 $query->where('sale_status', TableProductCost::SALE_STATUS_ACTIVE);
             })
             ->paginate(10);
 
-        // Áp dụng map() trên items()
-        $formattedProducts = collect($products->items())->map(function ($product) {
-            // Lấy bản ghi đầu tiên của cost
-            $cost = $product->cost->first();
-
-            return [
-                'id' => $product->id,
-                'name' => $product->name,
-                'slug' => $product->slug,
-                'price' => $product->price,
-                'stock' => $product->stock,
-                'description' => $product->description,
-                'content' => $product->content,
-                'category_id' => $product->category_id,
-                'category_name' => $product->category->name ?? null,
-                'is_collection' => $product->is_collection,
-                'is_hot' => $product->is_hot,
-                'is_new' => $product->is_new,
-                'product_cost' => $cost ? [
-                    'id' => $cost->id,
-                    'product_id' => $cost->product_id,
-                    'cost_price' => $cost->cost_price,
-                    'quantity' => $cost->quantity,
-                    'import_date' => $cost->import_date,
-                    'supplier' => $cost->supplier,
-                    'sale_status' => $cost->sale_status,
-                    'sale_start_date' => $cost->sale_start_date,
-                    'sale_end_date' => $cost->sale_end_date,
-                ] : null,
-                'variations' => $product->variations->map(function ($variation) {
-                    return [
-                        'id' => $variation->id,
-                        'stock' => $variation->stock,
-                        'attribute_value_image_variant' => $variation->attributeValue ? [
-                            'id' => $variation->attributeValue->id,
-                            'value' => $variation->attributeValue->value,
-                            'image_path' => $variation->attributeValue->image_path,
-                        ] : null,
-                        'variation_values' => $variation->variationValues->map(function ($variationValue) {
-                            return [
-                                'id' => $variationValue->id,
-                                'attribute_value_id' => $variationValue->attribute_value_id,
-                                'value' => $variationValue->attributeValue->value ?? null,
-                                'sku' => $variationValue->sku,
-                                'stock' => $variationValue->stock,
-                                'price' => $variationValue->price,
-                                'discount' => $variationValue->discount,
-                            ];
-                        }),
-                        'variation_album_images' => $variation->variationImages->pluck('image_path'),
-                    ];
-                }),
-                'images' => $product->images->pluck('image_path'),
-            ];
-        });
 
         return response()->json([
-            'data' => $formattedProducts,
+            'data' =>  ProductResource::collection($products),
             'pagination' => [
                 'current_page' => $products->currentPage(),
                 'last_page' => $products->lastPage(),
                 'per_page' => $products->perPage(),
                 'total' => $products->total(),
-            ],
+            ]
         ], 200);
     }
-
 
 
     //list sản phẩm Hàng tồn(ngưng bán)
 
     public function listProductInactive()
     {
-        $products = Product::with([
-            'variations.attributeValue',
-            'variations.group',
-            'variations.variationValues',
-            'variations.variationImages',
-            'cost'
-        ])
+        $products = Product::with(
+            [
+                'variations.attributeValue',
+                'variations.group',
+                'variations.variationValues',
+                'variations.variationImages',
+                'cost'
+            ]
+        )
             ->whereHas('cost', function ($query) {
                 $query->where('sale_status', TableProductCost::SALE_STATUS_INACTIVE);
             })
             ->paginate(10);
 
-        // Áp dụng map() trên items()
-        $formattedProducts = collect($products->items())->map(function ($product) {
-            // Lấy bản ghi đầu tiên từ cost
-            $cost = $product->cost->first();
-
-            return [
-                'id' => $product->id,
-                'name' => $product->name,
-                'slug' => $product->slug,
-                'price' => $product->price,
-                'stock' => $product->stock,
-                'description' => $product->description,
-                'content' => $product->content,
-                'category_id' => $product->category_id,
-                'category_name' => $product->category->name ?? null,
-                'is_collection' => $product->is_collection,
-                'is_hot' => $product->is_hot,
-                'is_new' => $product->is_new,
-                'product_cost' => $cost ? [
-                    'id' => $cost->id,
-                    'product_id' => $cost->product_id,
-                    'cost_price' => $cost->cost_price,
-                    'quantity' => $cost->quantity,
-                    'import_date' => $cost->import_date,
-                    'supplier' => $cost->supplier,
-                    'sale_status' => $cost->sale_status,
-                    'sale_start_date' => $cost->sale_start_date,
-                    'sale_end_date' => $cost->sale_end_date,
-                ] : null,
-                'variations' => $product->variations->map(function ($variation) {
-                    return [
-                        'id' => $variation->id,
-                        'stock' => $variation->stock,
-                        'attribute_value_image_variant' => $variation->attributeValue ? [
-                            'id' => $variation->attributeValue->id,
-                            'value' => $variation->attributeValue->value,
-                            'image_path' => $variation->attributeValue->image_path,
-                        ] : null,
-                        'variation_values' => $variation->variationValues->map(function ($variationValue) {
-                            return [
-                                'id' => $variationValue->id,
-                                'attribute_value_id' => $variationValue->attribute_value_id,
-                                'value' => $variationValue->attributeValue->value ?? null,
-                                'sku' => $variationValue->sku,
-                                'stock' => $variationValue->stock,
-                                'price' => $variationValue->price,
-                                'discount' => $variationValue->discount,
-                            ];
-                        }),
-                        'variation_album_images' => $variation->variationImages->pluck('image_path'),
-                    ];
-                }),
-                'images' => $product->images->pluck('image_path'),
-            ];
-        });
 
         return response()->json([
-            'data' => $formattedProducts,
+            'data' =>  ProductResource::collection($products),
             'pagination' => [
                 'current_page' => $products->currentPage(),
                 'last_page' => $products->lastPage(),
                 'per_page' => $products->perPage(),
                 'total' => $products->total(),
-            ],
+            ]
         ], 200);
     }
 
@@ -488,24 +382,10 @@ class InventoryController extends Controller
             $product->increment('stock', $validatedData['stock']);
 
 
-            $lastCost = TableProductCost::where('product_variation_value_id', $productVariationValue->id)
-                ->latest('import_date')
-                ->first();
 
-
-            $costPrice = $lastCost->cost_price ?? 0;
-            $supplier = $lastCost->supplier ?? 'Unknown';
-
-
-            TableProductCost::create([
-                'product_id' => $product->id,
+            ProductVariationQuantity::create([
                 'product_variation_value_id' => $productVariationValue->id,
                 'quantity' => $validatedData['stock'],
-                'cost_price' => $costPrice,
-                'supplier' => $supplier,
-                'import_date' => now(),
-                'sale_status' => TableProductCost::SALE_STATUS_ACTIVE,
-                'sale_start_date' => now(),
             ]);
 
             DB::commit();
@@ -627,68 +507,87 @@ class InventoryController extends Controller
 
     // tồn
 
+
     // public function listInventoryDetails(Request $request)
     // {
-    //     $products = Product::with(['cost', 'billDetails.bill'])->get();
+    //     $slug = $request->input('slug');
+    //     $supplier = $request->input('supplier');
+    
+    //     $query = Product::with(['cost', 'billDetails.bill'])
+    //         ->orderBy('id', 'desc');
+    
+    //     if ($slug) {
+    //         $query->where('slug', $slug);
+    //     }
+    
+    //     if ($supplier) {
+    //         $query->whereHas('cost', function ($q) use ($supplier) {
+    //             $q->where('supplier', $supplier);
+    //         });
+    //     }
+    
+    //     $products = $query->get();
+    
     //     $result = $products->map(function ($product) {
-    //         $importDate = optional($product->cost->first())->import_date;
-    //         $saleStatus = optional($product->cost->first())->sale_status ?? 'unknown';
-    //         $importPrice = optional($product->cost->first())->cost_price ?? 0;
-    //         $supplier = optional($product->cost->first())->supplier ?? 'unknown';
-
-    //         $totalImportedQuantity = $product->cost ? $product->cost->sum('quantity') : 0;
-    //         $totalImportedAmount = $product->cost ? $product->cost->sum(function ($cost) {
-    //             return $cost->quantity * $cost->cost_price;
-    //         }) : 0;
-
+    //         $cost = $product->cost;
+    //         $importPrice = $cost->cost_price ?? 0;
+    //         $supplier = $cost->supplier ?? 'unknown';
+    
+    //         // Lấy tổng số lượng nhập 
+    //         $totalImportedQuantity = ProductVariationQuantity::whereIn(
+    //             'product_variation_value_id',
+    //             $product->variations->pluck('variationValues.*.id')->flatten()
+    //         )->sum('quantity');
+    
+    //         $totalImportedAmount = $totalImportedQuantity * $importPrice;
+    
+    //         // Lọc trạng thái đã giao hàng
     //         $successfulBillDetails = $product->billDetails->filter(function ($detail) {
     //             return optional($detail->bill)->status_bill === Bill::STATUS_DELIVERED;
     //         });
-
-    //         $totalExportedQuantity = $successfulBillDetails->sum('quantity');
+    
+    //         $totalExportedQuantity = $successfulBillDetails->sum('quantity'); // Tổng số lượng xuất
     //         $totalExportedAmount = $successfulBillDetails->sum(function ($detail) {
-    //             return $detail->quantity * $detail->don_gia;
+    //             return $detail->quantity * $detail->don_gia; // Tổng thành tiền xuất
     //         });
-
-    //         $exportPrice = $successfulBillDetails->isNotEmpty()
-    //             ? $successfulBillDetails->first()->don_gia
-    //             : 0;
-
-
-
-    //         // Trả về dữ liệu đã xử lý
+    
+    //         $exportPrice = $product->price;
+    
+    //         // Tính toán tồn kho
+    //         $remainingQuantity = $totalImportedQuantity - $totalExportedQuantity;
+    //         $remainingAmount = $remainingQuantity * $importPrice; // Thành tiền tồn kho
+    
     //         return [
-    //             'id' => $product->id, // Tên sản phẩm
-    //             'product_name' => $product->name, // Tên sản phẩm
-    //             'slug' => $product->slug, // Slug sản phẩm
-    //             'import_date' => $importDate, // Ngày nhập lần đầu
-    //             'status' => $saleStatus, // Trạng thái bán
-    //             'supplier' => $supplier, // Nhà cung cấp
-    //             'cost_price' => $importPrice, // Giá nhập lần đầu
-    //             'total_imported_quantity' => $totalImportedQuantity, // Tổng số lượng nhập
-    //             'total_imported_amount' => $totalImportedAmount, // Tổng thành tiền nhập
-
-    //             'export_price' => $exportPrice, // Giá xuất
-    //             'total_exported_quantity' => $totalExportedQuantity, // Tổng số lượng xuất
-    //             'total_exported_amount' => $totalExportedAmount, // Tổng thành tiền xuất
-
-    //             'remaining_price' => $importPrice, 
-    //             'remaining_quantity' => $totalImportedQuantity-$totalExportedQuantity, // Số lượng tồn
-    //             'remaining_amount' => ($totalImportedQuantity-$totalExportedQuantity)*$importPrice, // Thành tiền tồn
+    //             'id' => $product->id,
+    //             'product_name' => $product->name,
+    //             'slug' => $product->slug,
+    //             'import_price' => round($importPrice, 2),
+    //             'total_imported_quantity' => $totalImportedQuantity,
+    //             'total_imported_amount' => round($totalImportedAmount, 2),
+    //             'export_price' => round($exportPrice, 2),
+    //             'total_exported_quantity' => $totalExportedQuantity,
+    //             'total_exported_amount' => round($totalExportedAmount, 2),
+    //             'remaining_price' => round($importPrice, 2),
+    //             'remaining_quantity' => $remainingQuantity,
+    //             'remaining_amount' => round($remainingAmount, 2),
+    //             'supplier' => $supplier,
     //         ];
     //     });
-
-    //     // Trả về kết quả dưới dạng JSON
+    
+    //     // Trả về kết quả JSON
     //     return response()->json($result);
     // }
+    
 
     public function listInventoryDetails(Request $request)
     {
         $slug = $request->input('slug');
         $supplier = $request->input('supplier');
+        $startDate = $request->input('start_date'); // Ngày bắt đầu
+        $endDate = $request->input('end_date'); // Ngày kết thúc
     
         $query = Product::with(['cost', 'billDetails.bill'])
-        ->orderBy('id','desc');
+            ->orderBy('id', 'desc');
     
         if ($slug) {
             $query->where('slug', $slug);
@@ -702,44 +601,69 @@ class InventoryController extends Controller
     
         $products = $query->get();
     
-        $result = $products->map(function ($product) {
-            $importDate = optional($product->cost->first())->import_date;
-            $importPrice = optional($product->cost->first())->cost_price ?? 0;
-            $supplier = optional($product->cost->first())->supplier ?? 'unknown';
+        $result = $products->map(function ($product) use ($startDate, $endDate) {
+            $cost = $product->cost;
+            $importPrice = $cost->cost_price ?? 0;
+            $supplier = $cost->supplier ?? 'unknown';
     
-            $totalImportedQuantity = $product->cost ? $product->cost->sum('quantity') : 0;
-            $totalImportedAmount = $product->cost ? $product->cost->sum(function ($cost) {
-                return $cost->quantity * $cost->cost_price;
-            }) : 0;
+            // Lọc nhập kho theo ngày tháng
+            $importQuery = ProductVariationQuantity::whereIn(
+                'product_variation_value_id',
+                $product->variations->pluck('variationValues.*.id')->flatten()
+            );
     
-            $successfulBillDetails = $product->billDetails->filter(function ($detail) {
-                return optional($detail->bill)->status_bill === Bill::STATUS_DELIVERED;
+            if ($startDate) {
+                $importQuery->whereDate('created_at', '>=', $startDate);
+            }
+    
+            if ($endDate) {
+                $importQuery->whereDate('created_at', '<=', $endDate);
+            }
+    
+            $totalImportedQuantity = $importQuery->sum('quantity');
+            $totalImportedAmount = $totalImportedQuantity * $importPrice;
+    
+            // Lọc xuất kho theo ngày tháng
+            $exportQuery = $product->billDetails->filter(function ($detail) use ($startDate, $endDate) {
+                $isDelivered = optional($detail->bill)->status_bill === Bill::STATUS_DELIVERED;
+                $isInDateRange = true;
+    
+                if ($startDate) {
+                    $isInDateRange = $isInDateRange && $detail->created_at->gte($startDate);
+                }
+    
+                if ($endDate) {
+                    $isInDateRange = $isInDateRange && $detail->created_at->lte($endDate);
+                }
+    
+                return $isDelivered && $isInDateRange;
             });
     
-            $totalExportedQuantity = $successfulBillDetails->sum('quantity');
-            $totalExportedAmount = $successfulBillDetails->sum(function ($detail) {
-                return $detail->quantity * $detail->don_gia;
+            $totalExportedQuantity = $exportQuery->sum('quantity'); // Tổng số lượng xuất
+            $totalExportedAmount = $exportQuery->sum(function ($detail) {
+                return $detail->quantity * $detail->don_gia; // Tổng thành tiền xuất
             });
     
-            $exportPrice = $successfulBillDetails->isNotEmpty()
-                ? $successfulBillDetails->first()->don_gia
-                : 0;
+            $exportPrice = $product->price;
+    
+            // Tính toán tồn kho
+            $remainingQuantity = $totalImportedQuantity - $totalExportedQuantity;
+            $remainingAmount = $remainingQuantity * $importPrice; // Thành tiền tồn kho
     
             return [
                 'id' => $product->id,
                 'product_name' => $product->name,
                 'slug' => $product->slug,
-                'import_date' => $importDate,
-                'supplier' => $supplier,
-                'cost_price' => $importPrice,
+                'import_price' => round($importPrice, 2),
                 'total_imported_quantity' => $totalImportedQuantity,
-                'total_imported_amount' => $totalImportedAmount,
-                'export_price' => $exportPrice,
+                'total_imported_amount' => round($totalImportedAmount, 2),
+                'export_price' => round($exportPrice, 2),
                 'total_exported_quantity' => $totalExportedQuantity,
-                'total_exported_amount' => $totalExportedAmount,
-                'remaining_price' => $importPrice,
-                'remaining_quantity' => $totalImportedQuantity - $totalExportedQuantity,
-                'remaining_amount' => ($totalImportedQuantity - $totalExportedQuantity) * $importPrice,
+                'total_exported_amount' => round($totalExportedAmount, 2),
+                'remaining_price' => round($importPrice, 2),
+                'remaining_quantity' => $remainingQuantity,
+                'remaining_amount' => round($remainingAmount, 2),
+                'supplier' => $supplier,
             ];
         });
     
@@ -747,70 +671,84 @@ class InventoryController extends Controller
         return response()->json($result);
     }
     
+
+
+
+    // chi tiết kho
+
+
+
+    public function getProductInventoryDetails($id, Request $request)
+    {
+        $startDate = $request->input('start_date'); 
+        $endDate = $request->input('end_date'); 
     
-
-
-// chi tiết kho
-
-public function getProductInventoryDetails($id)
-{
-    $product = Product::with([
-        'cost', 
-        'variations.variationValues.attributeValue',
-    ])->findOrFail($id);
-
-
-    $productDetails = [
-        'product_name' => $product->name,
-        'slug' => $product->slug,
-        'total_stock' => $product->stock,
-        'cost_price' => optional($product->cost->first())->cost_price, 
-        'supplier' => optional($product->cost->first())->supplier, 
-    ];
-
-    // Tổ chức dữ liệu nhập kho
-    $importDetails = $product->cost->groupBy(function ($cost) {
-        return $cost->created_at->format('Y-m-d H:i:s'); 
-    })->map(function ($group, $key) {
-        $first = $group->first();
-        return [
-            'import_date' => $first->created_at->format('Y-m-d'), 
-            'import_time' => $first->created_at->format('H:i:s'), 
-            'detail' => $group->map(function ($cost) {
-                $variationValue = ProductVariationValue::find($cost->product_variation_value_id);
-
-                if ($variationValue) {
-                    return [
-                        'product_variation_value_id' => $cost->product_variation_value_id,
-                        'color' => optional($variationValue->productVariation->attributeValue)->value ?? 'Unknown',
-                        'size' => $variationValue->attributeValue->value ?? 'Unknown',
-                        'quantity' => $cost->quantity,
-                    ];
-                }
-
-                return [
-                    'product_variation_value_id' => $cost->product_variation_value_id,
-                    'color' => 'Unknown',
-                    'size' => 'Unknown',
-                    'quantity' => $cost->quantity,
-                ];
-            })->values(), 
+        $product = Product::with([
+            'variations.variationValues.attributeValue',
+        ])->findOrFail($id);
+    
+        $productDetails = [
+            'product_name' => $product->name,
+            'slug' => $product->slug,
         ];
-    })->values(); 
+    
+        $query = ProductVariationQuantity::whereIn(
+            'product_variation_value_id',
+            $product->variations->pluck('variationValues.*.id')->flatten()
+        );
+    
+        if ($startDate) {
+            $query->whereDate('created_at', '>=', $startDate);
+        }
+    
+        if ($endDate) {
+            $query->whereDate('created_at', '<=', $endDate);
+        }
+    
+        $filteredStock = $query->sum('quantity');
+    
+        $variationQuantities = $query
+            ->orderBy('created_at', 'asc')
+            ->get()
+            ->groupBy(function ($quantity) {
+                return $quantity->created_at->format('Y-m-d H:i:s');
+            });
+    
+        $importDetails = $variationQuantities->map(function ($group) {
+            $first = $group->first();
+            return [
+                'import_date' => $first->created_at->format('Y-m-d'),
+                'import_time' => $first->created_at->format('H:i:s'),
+                'detail' => $group->map(function ($quantity) {
+                    $variationValue = ProductVariationValue::find($quantity->product_variation_value_id);
+    
+                    if ($variationValue) {
+                        return [
+                            'product_variation_value_id' => $quantity->product_variation_value_id,
+                            'color' => optional($variationValue->productVariation->attributeValue)->value ?? 'Unknown',
+                            'size' => optional($variationValue->attributeValue)->value ?? 'Unknown',
+                            'quantity' => $quantity->quantity,
+                        ];
+                    }
+    
+                    return [
+                        'product_variation_value_id' => $quantity->product_variation_value_id,
+                        'color' => 'Unknown',
+                        'size' => 'Unknown',
+                        'quantity' => $quantity->quantity,
+                    ];
+                })->values(),
+            ];
+        })->values();
+    
+        return response()->json([
+            'product_name' => $productDetails['product_name'],
+            'slug' => $productDetails['slug'],
+            'total_stock' => $filteredStock, // Tổng tồn kho sau khi lọc
+            'import_details' => $importDetails,
+        ]);
+    }
+    
+    
 
-
-    return response()->json([
-        'product_name' => $productDetails['product_name'],
-        'slug' => $productDetails['slug'],
-        'total_stock' => $productDetails['total_stock'],
-        'cost_price' => $productDetails['cost_price'],
-        'supplier' => $productDetails['supplier'],
-        'import_details' => $importDetails,
-    ]);
-}
-
-    
-    
-    
-    
 }

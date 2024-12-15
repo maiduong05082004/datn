@@ -13,9 +13,7 @@ class TableProductCost extends Model
 
     protected $fillable = [
         'product_id',
-        'product_variation_value_id', 
         'cost_price',
-        'quantity', 
         'created_at',
         'updated_at',
         'supplier',
@@ -54,8 +52,5 @@ class TableProductCost extends Model
         return $this->belongsTo(Product::class);
     }
 
-    public function productVariationValue()
-    {
-        return $this->belongsTo(ProductVariationValue::class);
-    }
+
 }

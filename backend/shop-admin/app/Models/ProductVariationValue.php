@@ -55,4 +55,9 @@ class ProductVariationValue extends Model
     {
         return $this->hasMany(BillDetail::class, 'product_variation_value_id');
     }
+
+    public function quantity()
+    {
+        return $this->hasOne(ProductVariationQuantity::class, 'product_variation_value_id');
+    }
 }
