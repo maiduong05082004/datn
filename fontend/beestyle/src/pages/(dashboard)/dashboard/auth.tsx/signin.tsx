@@ -31,7 +31,7 @@ const Signin = () => {
             toast.success("Đăng Nhập Thành Công");
             localStorage.setItem("token_admin", data.token);
             form.resetFields();
-            navigate("/admin/dashboard");
+            navigate(`/admin/dashboard`);
         },
         onError: () => {
             toast.error("Bạn ko có quyền đăng nhập!!!");

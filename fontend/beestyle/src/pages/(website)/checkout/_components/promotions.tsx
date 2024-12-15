@@ -21,10 +21,7 @@ const Promotions = ({ isPromotion, setPromotion, setPromotionAdd }: Props) => {
         },
     })
 
-    console.log(promotions);
-
     const [promotion, setPromotionList] = useState<any>(JSON.parse(localStorage.getItem('promotions') || '[]'))
-    // console.log(promotion)
 
     const handleClickPromotion = (item: any) => {
         const existingShipping = promotion.find((promo: any) => promo.promotion_type === "shipping");

@@ -67,7 +67,7 @@ const CheckOutPage = () => {
     // Lấy tất cả địa chỉ của user
     const token = localStorage.getItem('token');
     const { data: addresses, isLoading: isLoadAdress } = useQuery({
-        queryKey: ['addresses'],
+        queryKey: ['addresses', token],
         queryFn: async () => {
             return await axios.get(`http://127.0.0.1:8000/api/client/shippingaddress`, {
                 headers: {
@@ -75,6 +75,7 @@ const CheckOutPage = () => {
                 },
             })
         },
+        enabled:!!token
     })
 
     // Lấy địa chỉ mặc định của user

@@ -157,11 +157,6 @@ const Router = () => {
                     <Route path="inventory/report" element={<ReportInventory />} />
                     <Route path="inventory/detail/:id" element={<DetailReport />} />
                     {/*{/* statistic */}
-                    {/* <Route path="statistic/revenue" element={<ListStatistics />} />
-                    <Route path="statistic/selling" element={<ListTopSelling />} />
-                    <Route path="statistic/user" element={<ListNewPerson />} />
-                    <Route path="statistic/customer" element={<ListCustomer />} />
-                    {/* <Route path="statistic/product" element={<StatisticsProducts />} /> */}
                     <Route path="statistic/list" element={<ListAllChart />} />
                     {/* chatrealtime */}
                     {/* <Route path="chat/main" element={<ChatRealTime />} /> */}
