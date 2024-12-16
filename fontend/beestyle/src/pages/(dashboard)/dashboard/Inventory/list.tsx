@@ -159,7 +159,7 @@ const InventoryManagement = (props: Props) => {
         },
     })
 
-    const { data: activeData, isLoading: loadingActive } = useQuery({
+    const { data: activeData, isLoading: loadingActive} = useQuery({
         queryKey: ['activeProducts'],
         queryFn: async () => {
             const response = await instance.get('api/admins/inventory/listproductastive');
@@ -286,6 +286,8 @@ const InventoryManagement = (props: Props) => {
             toast.success("Số lượng sản phẩm đã được cập nhật thành công!");
             queryCient.invalidateQueries({ queryKey: ['products'] });
             queryCient.invalidateQueries({ queryKey: ['activeProducts'] });
+            queryCient.invalidateQueries({ queryKey: ['inactiveProducts'] });
+            queryCient.invalidateQueries({ queryKey: ['outOfStockProducts'] });
         },
         onError: (error) => {
             console.error("Lỗi:", error);

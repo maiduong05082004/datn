@@ -11,6 +11,7 @@ import SearchComponent from '@/components/ui/search';
 interface Product {
   id: number;
   name: string;
+  slug:string;
   price: string;
   stock: number;
   description: string;
@@ -106,6 +107,12 @@ const ListProducts = () => {
         value: product.name,
       })),
       onFilter: (value: string, record: Product) => record.name.includes(value),
+    },
+    {
+      title: 'Mã Sản Phẩm',
+      dataIndex: 'slug',
+      key: 'slug',
+      align: 'center',
     },
     {
       title: 'Số Lượng',
@@ -268,7 +275,8 @@ const ListProducts = () => {
     return (
       product.name.toLowerCase().includes(searchLower) ||
       product.price.toString().includes(searchLower) ||
-      product.category_name.toLowerCase().includes(searchLower)
+      product.category_name.toLowerCase().includes(searchLower)||
+      product.slug.toLowerCase().includes(searchLower)
     );
   });
 
@@ -280,6 +288,8 @@ const ListProducts = () => {
         return parseFloat(a.price) - parseFloat(b.price);
       case 'category_name':
         return a.category_name.localeCompare(b.category_name);
+      case 'slug':
+        return a.slug.localeCompare(b.slug);
       default:
         return 0;
     }

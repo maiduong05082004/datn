@@ -41,7 +41,6 @@ interface Comment {
 
 const Comments = (props: Props) => {
   const { id } = useParams(); // Lấy ID sản phẩm từ URL
-  const [messageAPI, contextHolder] = message.useMessage();
   const [replyContent, setReplyContent] = useState<{ [key: number]: string }>({}); // Quản lý nội dung trả lời
   const [currentCommentId, setCurrentCommentId] = useState<number | null>(null);
   const [isReplyModalVisible, setIsReplyModalVisible] = useState(false);
@@ -75,13 +74,14 @@ const Comments = (props: Props) => {
       return response.data;
     },
     onSuccess: () => {
-      toast.success('Ấn Bình Luận Thành Công')
-      refetch();
+      toast.success('Ẩn bình luận thành công');
+      refetch();  // Gọi lại dữ liệu để cập nhật trạng thái ẩn từ server
     },
     onError: () => {
-      toast.error('Ấn Bình Luận Thất Bại!')
+      toast.error('Ẩn bình luận thất bại!');
     },
   });
+  
 
   const { mutate: fetchReports } = useMutation({
     mutationFn: async (comment_id: number) => {
@@ -95,7 +95,7 @@ const Comments = (props: Props) => {
       setIsReportModalVisible(true);
     },
     onError: () => {
-      messageAPI.error('Không thể lấy dữ liệu báo cáo.');
+      toast.error('Không thể lấy dữ liệu báo cáo.');
     },
   });
   const showReportModal = (commentId: number) => {
@@ -150,12 +150,12 @@ const Comments = (props: Props) => {
       return response.data;
     },
     onSuccess: () => {
-      messageAPI.success('Trả lời bình luận thành công');
+      toast.success('Trả lời bình luận thành công');
       refetch();
       setIsReplyModalVisible(false);
     },
     onError: () => {
-      messageAPI.error('Admin đã trả lời rồi');
+      toast.error('Admin đã trả lời rồi');
     },
   });
 
@@ -169,7 +169,7 @@ const Comments = (props: Props) => {
     if (currentCommentId !== null && replyContent[currentCommentId]?.trim()) {
       mutate({ parentId: currentCommentId, content: replyContent[currentCommentId] });
     } else {
-      messageAPI.error('Vui lòng nhập nội dung trả lời trước khi gửi.');
+      toast.error('Vui lòng nhập nội dung trả lời trước khi gửi.');
     }
   };
 
@@ -185,17 +185,21 @@ const Comments = (props: Props) => {
       title: 'STT',
       dataIndex: 'stt',
       key: 'stt',
+      width: "50px",
+      align: 'center',
       render: (_: any, __: any, index: number) => index + 1,
     },
     {
       title: 'Người bình luận',
       dataIndex: 'user_name',
       key: 'user_name',
+      align: 'center',
       render: (text) => <strong>{text}</strong>,
     },
     {
       title: 'Thông tin sản phẩm',
       key: 'product_info',
+      
       render: () => (
         <div>
           <p><strong>Tên sản phẩm:</strong> {ProductData?.name || 'N/A'}</p>
@@ -246,9 +250,10 @@ const Comments = (props: Props) => {
     {
       title: 'Số lần báo cáo',
       dataIndex: 'reported_count',
+      align: 'center',
       key: 'reported_count',
       render: (count, record) => (
-        <div className="flex items-center gap-2">
+        <div className="flex items-center justify-center gap-2">
           <Tag
             color={count > 0 ? 'red' : 'green'}
             style={{
@@ -276,6 +281,7 @@ const Comments = (props: Props) => {
       title: 'Trạng thái hiển thị',
       dataIndex: 'is_visible',
       key: 'is_visible',
+      align: 'center',
       render: (isVisible) =>
         <Tag
           color={isVisible ? 'green' : 'red'}
@@ -293,6 +299,7 @@ const Comments = (props: Props) => {
     {
       title: 'Số sao',
       dataIndex: 'stars',
+      align: 'center',
       key: 'stars',
       render: (stars) => <Tag
         color="gold"
@@ -310,6 +317,8 @@ const Comments = (props: Props) => {
     {
       title: 'Hành động',
       key: 'actions',
+      align: 'center',
+      width: "50px",
       render: (_, record) => (
         <div className="flex gap-2">
           <Button
