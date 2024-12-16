@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\Admin\AddressController;
 use App\Http\Controllers\Api\Admin\Product\ProductController;
 use App\Http\Controllers\Api\Admin\UserController;
 use App\Http\Controllers\Api\Client\AuthController;
@@ -250,7 +251,7 @@ Route::prefix('admins')
             Route::prefix('product_cost')->as('product_cost.')->group(function () {
                 Route::post('/store', [ProductCostController::class, 'store'])->name('product_cost.store');
             });
-        Route::apiResource('shippingaddress', ShippingController::class)->names('shippingaddress');
+        Route::apiResource('shippingaddress', AddressController::class)->names('shippingaddress');
         });
 
         
