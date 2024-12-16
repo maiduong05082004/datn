@@ -1,6 +1,6 @@
 import { ShoppingCartOutlined, EyeOutlined, FilterOutlined, SearchOutlined } from '@ant-design/icons';
 import { useMutation, useQuery } from '@tanstack/react-query';
-import { Button, Spin, Table, DatePicker, Input, Select, Drawer, Tabs } from 'antd';
+import { Button, Spin, Table, DatePicker, Input, Select, Drawer, Tabs, Tag } from 'antd';
 import instance from '@/configs/axios';
 import React, { useEffect, useState } from 'react';
 import { toast, ToastContainer } from 'react-toastify';
@@ -277,28 +277,34 @@ const ListBill: React.FC = () => {
       key: 'status_bill',
       render: (text: string) => {
         let vietnameseStatus = '';
+        let color = '';
         let statusClass = 'text-gray-500';
 
         switch (text) {
           case 'pending':
             vietnameseStatus = 'Đang chờ xử lý';
+            color="gray"
             break;
           case 'processed':
             vietnameseStatus = 'Đã Xử Lý';
+            color="green"
             statusClass = 'text-green-500';
             break;
           case 'shipped':
             vietnameseStatus = 'Đang giao hàng';
             statusClass = 'text-yellow-500';
+            color="yellow"
             break;
           case 'delivered':
             vietnameseStatus = 'Đã giao hàng';
             statusClass = 'text-teal-500';
+            color="teal"
             break;
           case 'canceled':
             vietnameseStatus = 'Đã hủy';
             statusClass = 'text-red-500';
-            break;
+            color="red"
+            break
           case 'new':
             vietnameseStatus = 'Mới';
             statusClass = 'text-white';
@@ -309,8 +315,8 @@ const ListBill: React.FC = () => {
         }
 
         return (
-          <div className={`p-2 rounded-md font-semibold ${statusClass}`}>
-            {vietnameseStatus}
+          <div className={`p-2 rounded-md font-semibold`}>
+            <Tag color={color}>{vietnameseStatus}</Tag>
           </div>
         );
       },

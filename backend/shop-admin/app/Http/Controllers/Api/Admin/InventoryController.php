@@ -583,8 +583,8 @@ class InventoryController extends Controller
     {
         $slug = $request->input('slug');
         $supplier = $request->input('supplier');
-        $startDate = $request->input('start_date'); // Ngày bắt đầu
-        $endDate = $request->input('end_date'); // Ngày kết thúc
+        $startDate = $request->input('start_date');
+        $endDate = $request->input('end_date');
     
         $query = Product::with(['cost', 'billDetails.bill'])
             ->orderBy('id', 'desc');
@@ -639,22 +639,34 @@ class InventoryController extends Controller
                 return $isDelivered && $isInDateRange;
             });
     
-            $totalExportedQuantity = $exportQuery->sum('quantity'); // Tổng số lượng xuất
+            $totalExportedQuantity = $exportQuery->sum('quantity');
             $totalExportedAmount = $exportQuery->sum(function ($detail) {
-                return $detail->quantity * $detail->don_gia; // Tổng thành tiền xuất
+                return $detail->quantity * $detail->don_gia;
             });
     
             $exportPrice = $product->price;
     
             // Tính toán tồn kho
             $remainingQuantity = $totalImportedQuantity - $totalExportedQuantity;
-            $remainingAmount = $remainingQuantity * $importPrice; // Thành tiền tồn kho
+            $remainingAmount = $remainingQuantity * $importPrice;
+    
+            // Xử lý import_date hiển thị
+            $importDate = 'tất cả';
+            if ($startDate && $endDate) {
+                $importDate = "$startDate -> $endDate";
+            } elseif ($startDate) {
+                $importDate = "từ $startDate";
+            } elseif ($endDate) {
+                $importDate = "đến $endDate";
+            }
     
             return [
                 'id' => $product->id,
                 'product_name' => $product->name,
                 'slug' => $product->slug,
                 'import_price' => round($importPrice, 2),
+                'supplier' => $supplier,
+                'import_date' => $importDate,
                 'total_imported_quantity' => $totalImportedQuantity,
                 'total_imported_amount' => round($totalImportedAmount, 2),
                 'export_price' => round($exportPrice, 2),
@@ -663,13 +675,14 @@ class InventoryController extends Controller
                 'remaining_price' => round($importPrice, 2),
                 'remaining_quantity' => $remainingQuantity,
                 'remaining_amount' => round($remainingAmount, 2),
-                'supplier' => $supplier,
             ];
         });
     
         // Trả về kết quả JSON
         return response()->json($result);
     }
+
+
     
 
 
