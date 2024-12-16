@@ -250,6 +250,7 @@ Route::prefix('admins')
             Route::prefix('product_cost')->as('product_cost.')->group(function () {
                 Route::post('/store', [ProductCostController::class, 'store'])->name('product_cost.store');
             });
+        Route::apiResource('shippingaddress', ShippingController::class)->names('shippingaddress');
         });
 
         
@@ -260,6 +261,4 @@ Route::prefix('admins')
             Route::get('/{id}', [MessageController::class, 'getUserMessages']);
             Route::delete('/{userId}', [MessageController::class, 'deleteUserAndMessages']);
         });
-
-
     });

@@ -216,10 +216,9 @@ const App: React.FC = () => {
           
 
           <div className="flex justify-end items-center space-x-6">
-            <Badge
+            <Link to={`/admin/dashboard/chat`}
               className="relative"
               style={{
-                backgroundColor: '#f5222d',
                 color: 'white',
                 fontSize: '12px',
               }}
@@ -233,7 +232,7 @@ const App: React.FC = () => {
                   style={{ fontSize: "24px" }} // Adjust the size as needed
                 />
               </button>
-            </Badge>
+            </Link>
 
 
             {/* User Profile */}
