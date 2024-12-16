@@ -63,7 +63,7 @@ class PromotionController extends Controller
         $promotions = Promotion::where('is_active', true)
             ->where('start_date', '<=', now())
             ->where('end_date', '>=', now())
-            ->where('promotion_type', '!=', 'voucher_discount')
+            ->where('promotion_subtype', '!=', 'voucher_discount')
             ->whereDoesntHave('userPromotions', function ($query) use ($user) {
                 $query->where('user_id', $user->id);
             })

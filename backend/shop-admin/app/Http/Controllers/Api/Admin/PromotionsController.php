@@ -117,12 +117,14 @@ class PromotionsController extends Controller
             'product_ids' => 'array|nullable',
             'product_ids.*' => 'exists:products,id',
             'usage_limit' => 'nullable|integer|min:1',
-            'status' => 'required',
+            'status' => 'required|in:active,expired,upcoming,disabled',
+            'is_active' => 'boolean',
         ]);
     
         $promotion = new Promotion($request->all());
         $promotion->category_ids = $request->category_ids;
         $promotion->product_ids = $request->product_ids;
+        $promotion->is_active = $request->is_active ?? false;
         $promotion->save();
     
         return response()->json($promotion, 201);
