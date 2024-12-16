@@ -38,12 +38,29 @@ const ListAllChart = () => {
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="blue" className="size-6 mr-[10px]">
             <path strokeLinecap="round" strokeLinejoin="round" d="M12 3c2.755 0 5.455.232 8.083.678.533.09.917.556.917 1.096v1.044a2.25 2.25 0 0 1-.659 1.591l-5.432 5.432a2.25 2.25 0 0 0-.659 1.591v2.927a2.25 2.25 0 0 1-1.244 2.013L9.75 21v-6.568a2.25 2.25 0 0 0-.659-1.591L3.659 7.409A2.25 2.25 0 0 1 3 5.818V4.774c0-.54.384-1.006.917-1.096A48.32 48.32 0 0 1 12 3Z" />
           </svg>
-          <select onChange={handleChange} value={year} className='rounded-[50px] p-[10px] border-blue-500 border-[2px] font-[600] w-[200px] cursor-pointer'>
+          <select className='rounded-[50px] p-[10px] border-blue-500 border-[2px] font-[600] w-[170px] cursor-pointer mr-[10px]'>
+            <option disabled>Chọn tháng</option>
+            <option value="0">Không chọn tháng</option>
+            <option value="1">Tháng 1</option>
+            <option value="2">Tháng 2</option>
+            <option value="3">Tháng 3</option>
+            <option value="4">Tháng 4</option>
+            <option value="5">Tháng 5</option>
+            <option value="6">Tháng 6</option>
+            <option value="7">Tháng 7</option>
+            <option value="8">Tháng 8</option>
+            <option value="9">Tháng 9</option>
+            <option value="10">Tháng 10</option>
+            <option value="11">Tháng 11</option>
+            <option value="12">Tháng 11</option>
+          </select>
+          <select onChange={handleChange} value={year} className='rounded-[50px] p-[10px] border-blue-500 border-[2px] font-[600] w-[170px] cursor-pointer'>
             <option disabled>Chọn năm</option>
             {years?.data.map((item: any, index: any) => (
               <option key={index + 1} value={item.period}>{item.period}</option>
             ))}
           </select>
+
         </div>
       </div>
       <div className="grid grid-cols-12 gap-4">
