@@ -41,7 +41,9 @@ const ListPromotions: React.FC = () => {
             sortDirections: ['ascend', 'descend'],
         },
         { title: 'Mã khuyến mãi', dataIndex: 'code', key: 'code' ,align: 'center'},
-        { title: 'Mô tả', dataIndex: 'description', key: 'description',align: 'center' },
+        { title: 'Mô tả', dataIndex: 'description', key: 'description',
+            render: (text: string) => <div>{text.split('\n').map((line, index) => <div key={index}>{line}</div>)}</div>
+        },
         {
             title: 'Giảm giá',
             dataIndex: 'discount_amount',
@@ -49,7 +51,7 @@ const ListPromotions: React.FC = () => {
             align: 'center',
             render: (_: any, record: Promotion) =>
                 record.discount_type === 'percent'
-                    ? `${record.discount_amount} %` + (record.max_discount_amount ? ` (tối đa ${record.max_discount_amount}) ₫` : '')
+                    ? `${record.discount_amount} %` + (record.max_discount_amount ? ` (tối đa ${record.max_discount_amount}₫)` : '')
                     : `${record.discount_amount} ₫`,
         },
         {
@@ -57,7 +59,11 @@ const ListPromotions: React.FC = () => {
             dataIndex: 'min_order_value',
             align: 'center',
             key: 'min_order_value',
-            render: (value) => (value ? `${value} ₫` : 'Không áp dụng'),
+            render: (value) => {
+                if (!value) return 'Không áp dụng';
+                const formattedValue = Math.round(parseFloat(value));
+                return `${new Intl.NumberFormat('vi-VN').format(formattedValue)}đ`;
+            },
         },
         {
             title: 'Số lần sử dụng',
@@ -90,7 +96,45 @@ const ListPromotions: React.FC = () => {
         //             ''
         //         ),
         // },
-        { title: 'Trạng thái', dataIndex: 'status', key: 'status' },
+        {
+            title: 'Kích Hoạt',
+            dataIndex: 'is_active',
+            key: 'is_active',
+            align: 'center',
+            render: (is_active: boolean) => (
+                <Tag color={is_active ? 'green' : 'red'}>
+                    {is_active ? 'Đã kích hoạt' : 'Chưa kích hoạt'}
+                </Tag>
+            ),
+        },
+        {
+            title: 'Trạng Thái',
+            dataIndex: 'status',
+            key: 'status',
+            align: 'center',
+            render: (status: string) => {
+                let color = '';
+                let text = '';
+                switch (status) {
+                    case 'active':
+                        color = 'blue';
+                        text = 'Đang diễn ra';
+                        break;
+                    case 'upcoming':
+                        color = 'orange';
+                        text = 'Sắp diễn ra';
+                        break;
+                    case 'disabled':
+                        color = 'gray';
+                        text = 'Không hoạt động';
+                        break;
+                    default:
+                        color = 'default';
+                        text = status;
+                }
+                return <Tag color={color}>{text}</Tag>;
+            },
+        },
         {
             title: 'Hành động',
             key: 'action',
