@@ -26,7 +26,7 @@ class StatisticsController extends Controller
     {
         $currentDate = Carbon::now();
 
-        $startDate = $currentDate->copy()->subMonth(1)->startOfMonth();
+        $startDate = $currentDate->copy()->subMonth(3)->startOfMonth();
         $endDate = $currentDate->copy()->endOfMonth();
         // $date = $request->get('date', [
         //     'start' => $startOfOeriod->toDateString(),
@@ -382,12 +382,10 @@ class StatisticsController extends Controller
             ->get();
         $sumYearly = null;
         if ($year && !$month) {
-            $sumYearly = $query->groupBy('year')->map(function ($yearGroup) {
-                return [
-                    'delivered' => $yearGroup->sum('total_delivered'),
-                    'canceled' => $yearGroup->sum('total_canceled'),
-                ];
-            });
+            $sumYearly = [
+                'delivered' => $query->sum('total_delivered'),
+                'canceled' => $query->sum('total_canceled'),
+            ];
         }
         return response()->json([
             'data' => $query,
