@@ -16,7 +16,7 @@ const UpdatePromotion: React.FC = () => {
     const [discountType, setDiscountType] = useState<'amount' | 'percent'>('percent');
     // const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
     // const [products, setProducts] = useState<Product[]>([]);
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('token_admin');
 
     // const { data: categories = [], isLoading: isLoadingCategories } = useQuery<Category[]>({
     //     queryKey: ['categories'],
@@ -269,9 +269,8 @@ const UpdatePromotion: React.FC = () => {
                 <Form.Item label="Trạng Thái" name="status">
                     <Select className='h-10'>
                         <Option value="active">Đang diễn ra</Option>
-                        <Option value="expired">Đã hết hạn</Option>
                         <Option value="upcoming">Sắp diễn ra</Option>
-                        <Option value="disabled">Vô hiệu hóa</Option>
+                        <Option value="disabled">Không hoạt động</Option>
                     </Select>
                 </Form.Item>
 

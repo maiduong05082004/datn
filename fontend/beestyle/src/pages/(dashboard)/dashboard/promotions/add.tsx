@@ -52,13 +52,7 @@ const AddPromotion: React.FC = () => {
     // }, [selectedCategory, promotionScope]);
 
     const onFinish = (values: any) => {
-        let promotionType = '';
-        if (values.promotion_subtype === 'shipping') {
-            promotionType = 'shipping';
-        } else {
-            promotionType = 'product';
-        }
-
+        let promotionType = values.promotion_subtype === 'shipping' ? 'shipping' : 'product';
         addPromotion({
             ...values,
             promotion_type: promotionType,
@@ -262,9 +256,8 @@ const AddPromotion: React.FC = () => {
                 >
                     <Select placeholder="Chọn trạng thái" className='h-10'>
                         <Option value="active">Đang diễn ra</Option>
-                        <Option value="expired">Đã hết hạn</Option>
                         <Option value="upcoming">Sắp diễn ra</Option>
-                        <Option value="disabled">Vô hiệu hóa</Option>
+                        <Option value="disabled">Không hoạt động</Option>
                     </Select>
                 </Form.Item>
 
