@@ -97,24 +97,33 @@ const ItemProducts = ({ promotionAdd, promotionShip, promotionProduct, checkouts
     const { mutate } = useMutation({
         mutationFn: async (data: any) => {
             try {
-                await instance.post(`api/client/promotions/check`, {
+                const response = await instance.post(`api/client/promotions/check`, {
                     codes: data
-                })
+                });
+                return response.data;
             } catch (error) {
-                throw new Error(`Mã giảm giá không tồn tại.`)
+                if (axios.isAxiosError(error) && error.response) {
+                    throw new Error(error.response.data.errors || 'Mã giảm giá không tồn tại.');
+                }
+                throw new Error('Đã xảy ra lỗi không xác định.');
             }
         },
-        onSuccess: () => {
+        onSuccess: (data) => {
+            const { discount_amount, applied_promotions } = data;
+            setPromotionShip(discount_amount);
+            setPromotionProduct(discount_amount);
+            setPromotionAdd(applied_promotions);
+
             messageApi.open({
                 type: "success",
                 content: "Thành công",
-            })
+            });
         },
         onError: (error) => {
             messageApi.error({
                 type: "error",
                 content: error.message,
-            })
+            });
         }
     })
 
@@ -174,7 +183,7 @@ const ItemProducts = ({ promotionAdd, promotionShip, promotionProduct, checkouts
                                 <div className="w-[100%]">
                                     <span className='mb-[8px] text-[12px] font-[600] text-[#808080] tracking-widest'>MÃ GIẢM GIÁ</span>
                                     <form onSubmit={handleSubmit(onSubmit)} className="mt-[8px] flex justify-between w-[100%] border-[1px] border-[#808080] leading-3 rounded-[3.5px]">
-                                        <input {...register("codes")} className='outline-none rounded-[3.5px] text-[12px] w-[calc(100%-100px)] p-[13px]' type="text" placeholder='Nhap Ma Giam Gia' />
+                                        <input {...register("codes")} className='outline-none rounded-[3.5px] text-[12px] w-[calc(100%-100px)] p-[13px]' type="text" placeholder='Nhập mã giảm giá' />
                                         <button type='submit' className='rounded-r-[3.5px] text-[12px] font-[700] justify-center tracking-widest bg-black text-white items-center px-[20px] w-[124.47px] flex'>THÊM MÃ</button>
                                     </form>
                                 </div>

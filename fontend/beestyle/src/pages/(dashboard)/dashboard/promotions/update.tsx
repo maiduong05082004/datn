@@ -17,6 +17,7 @@ const UpdatePromotion: React.FC = () => {
     // const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
     // const [products, setProducts] = useState<Product[]>([]);
     const token = localStorage.getItem('token_admin');
+    const [isActive, setIsActive] = useState<boolean>(false);
 
     // const { data: categories = [], isLoading: isLoadingCategories } = useQuery<Category[]>({
     //     queryKey: ['categories'],
@@ -69,7 +70,8 @@ const UpdatePromotion: React.FC = () => {
 
                 const data = await response.json();
                 setDiscountType(data.discount_type);
-
+                setIsActive(data.is_active);
+                
                 form.setFieldsValue({
                     code: data.code,
                     description: data.description,
@@ -84,7 +86,7 @@ const UpdatePromotion: React.FC = () => {
                     promotion_subtype: data.promotion_subtype,
                     promotion_scope: data.products.length > 0 ? 'product' : 'category',
                     is_active: data.is_active,
-                    status: data.status,
+                    status: data.is_active ? data.status : 'disabled',
                     category_ids: data.categories.map((cat: Category) => cat.id),
                     product_ids: data.products.map((prod: Product) => prod.id),
                 });
@@ -262,14 +264,26 @@ const UpdatePromotion: React.FC = () => {
                 )} */}
 
                 <Form.Item label="Kích Hoạt" name="is_active" valuePropName="checked" className='mb-[10px]'>
-                    <Switch />
+                    <Switch onChange={(checked) => {
+                        setIsActive(checked);
+                        if (!checked) {
+                            form.setFieldsValue({ status: 'disabled' });
+                        } else {
+                            form.setFieldsValue({ status: 'active' });
+                        }
+                    }} />
                 </Form.Item>
 
                 <Form.Item label="Trạng Thái" name="status">
-                    <Select className='h-10'>
-                        <Option value="active">Đang diễn ra</Option>
-                        <Option value="upcoming">Sắp diễn ra</Option>
-                        <Option value="disabled">Không hoạt động</Option>
+                    <Select className='h-10' disabled={!isActive}>
+                        {isActive ? (
+                            <>
+                                <Option value="active">Đang diễn ra</Option>
+                                <Option value="upcoming">Sắp diễn ra</Option>
+                            </>
+                        ) : (
+                            <Option value="disabled">Không hoạt động</Option>
+                        )}
                     </Select>
                 </Form.Item>
 

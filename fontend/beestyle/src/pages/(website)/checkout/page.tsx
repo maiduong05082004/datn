@@ -160,7 +160,7 @@ const CheckOutPage = () => {
         const { note, paymentMethod, address } = data
         const discounted_shipping_fee = Math.round(Number(promotionShip));
         const discounted_amount = Math.round(Number(promotionProduct));
-        const promotion_ids = promotionAdd.map((item: any) => item.id)
+        const promotion_ids = promotionAdd.map((item: any) => item.id);
         if (paymentMethod === "cod") {
             if (checkouts) {
                 const order = { cart_id, promotion_ids, note, payment_type: paymentMethod, shipping_address_id: address, shipping_fee: priceShip, discounted_amount, discounted_shipping_fee, total: checkouts.totalPrice }

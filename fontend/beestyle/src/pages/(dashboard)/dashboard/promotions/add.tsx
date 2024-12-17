@@ -14,6 +14,7 @@ const AddPromotion: React.FC = () => {
     const [discountType, setDiscountType] = useState<'amount' | 'percent'>('percent');
     // const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
     // const [products, setProducts] = useState<Product[]>([]);
+    const [isActive, setIsActive] = useState<boolean>(false);
 
     // const { data: categories = [], isLoading: isLoadingCategories } = useQuery<Category[]>({
     //     queryKey: ['categories'],
@@ -244,18 +245,26 @@ const AddPromotion: React.FC = () => {
                 )} */}
 
                 <Form.Item label="Kích Hoạt" name="is_active" valuePropName="checked" className='mb-[10px]'>
-                    <Switch />
+                    <Switch onChange={(checked) => {
+                        setIsActive(checked);
+                        if (!checked) {
+                            form.setFieldsValue({ status: 'disabled' });
+                        }else{
+                            form.setFieldsValue({ status: 'active' });
+                        }
+                    }} />
                 </Form.Item>
 
-                <Form.Item
-                    label="Trạng Thái"
-                    name="status"
-                    rules={[{ required: true, message: 'Vui lòng chọn trạng thái!' }]}
-                >
-                    <Select placeholder="Chọn trạng thái" className='h-10'>
-                        <Option value="active">Đang diễn ra</Option>
-                        <Option value="upcoming">Sắp diễn ra</Option>
-                        <Option value="disabled">Không hoạt động</Option>
+                <Form.Item label="Trạng Thái" name="status" initialValue="disabled">
+                    <Select className='h-10' disabled={!isActive}>
+                        {isActive ? (
+                            <>
+                                <Option value="active">Đang diễn ra</Option>
+                                <Option value="upcoming">Sắp diễn ra</Option>
+                            </>
+                        ) : (
+                            <Option value="disabled">Không hoạt động</Option>
+                        )}
                     </Select>
                 </Form.Item>
 
