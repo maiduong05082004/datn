@@ -109,7 +109,7 @@ const Promotions = ({ isPromotion, setPromotion, setPromotionAdd }: Props) => {
                                                         `${new Intl.NumberFormat('vi-VN').format(item?.discount_amount)}% ` :
                                                         `${new Intl.NumberFormat('vi-VN').format(Math.round(item?.discount_amount))}đ `
                                                     }cho {item.promotion_type === "product" ? "sản phẩm" : "phí giao hàng"}</li>
-                                                    <li>{item.description}</li>
+                                                    <li style={{ whiteSpace: 'pre-line' }}>{item.description}</li>
                                                     <li>Nhóm {item.promotion_type === "product" ? "sản phẩm" : "phí giao hàng"}</li>
                                                     {item.min_order_value !== null ? (<li>Đơn hàng tối thiểu: {new Intl.NumberFormat('vi-VN').format(Math.round(item.min_order_value))}đ</li>) : ""}
                                                 </ul>
