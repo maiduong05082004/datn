@@ -1,21 +1,41 @@
 import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { Table, Button, Spin ,DatePicker } from 'antd';
+import { Table, Button, Spin, DatePicker } from 'antd';
 import instance from '@/configs/axios';
 import * as XLSX from 'xlsx';
 
 const { RangePicker } = DatePicker;
 const DetailReport: React.FC = () => {
     const { id } = useParams();
+    const [dateRange, setDateRange] = useState<[string, string] | null>(null);
+    const [tempDateRange, setTempDateRange] = useState<[string, string] | null>(null);
 
-    const { data: reportData, isLoading } = useQuery({
-        queryKey: ['reportInventory', id],
-        queryFn: async () => {
-            const response = await instance.get(`/api/admins/inventory/getprodetails/${id}`);
-            return response.data;
-        },
+    const fetchReport = async () => {
+        const params: any = {};
+        if (dateRange) {
+            params.start_date = dateRange[0];
+            params.end_date = dateRange[1];
+        }
+        const response = await instance.post(`/api/admins/inventory/getprodetails/${id}`, null, {
+            params,
+        });
+        return response.data;
+    };
+
+    const { data: reportData, isLoading, refetch } = useQuery({
+        queryKey: ['reportInventory', id, dateRange],
+        queryFn: fetchReport,
     });
+
+    const handleDateChange = (dates: any, dateStrings: [string, string]) => {
+        setTempDateRange(dateStrings);
+    };
+    const applyFilter = () => {
+        setDateRange(tempDateRange);
+        refetch();
+    };
+
     const exportToExcel = () => {
         const workbook = XLSX.utils.book_new();
 
@@ -119,6 +139,8 @@ const DetailReport: React.FC = () => {
 
     return (
         <div className="bg-white shadow-md rounded-lg p-6">
+            <div className="mb-4 flex justify-between items-center">
+            </div>
             <div className="mb-6">
                 <h1 className="text-3xl font-bold text-gray-900 mb-4">
                     {reportData?.product_name}
@@ -135,14 +157,20 @@ const DetailReport: React.FC = () => {
                         </span>
                     </div>
                 </div>
-                <div className="flex justify-end mb-4">
+                <div className="flex justify-between mb-4">
                     <Button
-                        type="primary"
+                        type="default"
                         onClick={exportToExcel}
                         className="flex items-center"
                     >
                         Export to Excel
                     </Button>
+                    <div className="mb-4 flex justify-between items-center">
+                <RangePicker onChange={handleDateChange} />
+                <Button type="default" onClick={applyFilter} className="ml-2">
+                    Áp dụng
+                </Button>
+            </div>
                 </div>
             </div>
             <Table
@@ -153,6 +181,7 @@ const DetailReport: React.FC = () => {
                     showTotal: (total) => `Tổng ${total} sản phẩm`,
                 }}
                 bordered
+                rowKey={(record) => `${record.import_date}-${record.import_time}`}
             />
         </div>
     );

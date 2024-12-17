@@ -1,6 +1,6 @@
 import { ShoppingCartOutlined, EyeOutlined, FilterOutlined, SearchOutlined } from '@ant-design/icons';
 import { useMutation, useQuery } from '@tanstack/react-query';
-import { Button, Spin, Table, DatePicker, Input, Select, Drawer, Tabs, Tag } from 'antd';
+import { Button, Spin, Table, DatePicker, Input, Select, Drawer, Tabs, Tag, Modal } from 'antd';
 import instance from '@/configs/axios';
 import React, { useEffect, useState } from 'react';
 import { toast, ToastContainer } from 'react-toastify';
@@ -39,6 +39,8 @@ const ListBill: React.FC = () => {
   const [billData, setBillData] = useState<BillRecord[]>([]);
   const [isFilterVisible, setIsFilterVisible] = useState<boolean>(false);
   const navigate = useNavigate();
+  const [selectedBillId, setSelectedBillId] = useState<number | null>(null);
+  const [isCancelModalVisible, setIsCancelModalVisible] = useState<boolean>(false);
 
 
 
@@ -91,6 +93,23 @@ const ListBill: React.FC = () => {
     } catch (error: any) {
       toast.error('Không thể hủy đơn hàng.');
     }
+  };
+  const showCancelModal = (billId: number) => {
+    setSelectedBillId(billId);
+    setIsCancelModalVisible(true);
+  };
+
+  const handleCancelModalOk = async () => {
+    if (selectedBillId) {
+      await handleDeleteShipping(selectedBillId);
+    }
+    setIsCancelModalVisible(false);
+    setSelectedBillId(null);
+  };
+
+  const handleCancelModalCancel = () => {
+    setIsCancelModalVisible(false);
+    setSelectedBillId(null);
   };
 
   const handleAssignShipping = async (billId: number) => {
@@ -265,10 +284,10 @@ const ListBill: React.FC = () => {
     },
     {
       title: 'Hình Thức Thanh Toán',
-      dataIndex: 'payment_type_description',
+      dataIndex: 'payment_type',
       align: 'center',
-      key: 'payment_type_description',
-      render: (text: string) => <span className="text-gray-600">{text}</span>,
+      key: 'payment_type',
+      render: (text: string) => <span className="text-gray-600 uppercase">{text}</span>,
     },
     {
       title: 'Trạng Thái',
@@ -283,27 +302,27 @@ const ListBill: React.FC = () => {
         switch (text) {
           case 'pending':
             vietnameseStatus = 'Đang chờ xử lý';
-            color="gray"
+            color = "gray"
             break;
           case 'processed':
             vietnameseStatus = 'Đã Xử Lý';
-            color="green"
+            color = "green"
             statusClass = 'text-green-500';
             break;
           case 'shipped':
             vietnameseStatus = 'Đang giao hàng';
             statusClass = 'text-yellow-500';
-            color="yellow"
+            color = "yellow"
             break;
           case 'delivered':
             vietnameseStatus = 'Đã giao hàng';
             statusClass = 'text-teal-500';
-            color="teal"
+            color = "teal"
             break;
           case 'canceled':
             vietnameseStatus = 'Đã hủy';
             statusClass = 'text-red-500';
-            color="red"
+            color = "red"
             break
           case 'new':
             vietnameseStatus = 'Mới';
@@ -336,7 +355,7 @@ const ListBill: React.FC = () => {
                 if (newStatus === 'shipping') {
                   await handleAssignShipping(record.id);
                 } else if (newStatus === 'canceled') {
-                  await handleDeleteShipping(record.id);
+                  showCancelModal(record.id);
                 } else {
                   await instance.post(`api/admins/orders/update_order/${record.id}`, { status: newStatus });
                   toast.success('Trạng thái đơn hàng đã được cập nhật thành công.');
@@ -501,14 +520,14 @@ const ListBill: React.FC = () => {
                 className="w-full rounded-lg border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
                 onChange={(dates) => {
                   if (dates) {
-                    setStartDate(dates[0]?.format('YYYY-MM-DD') || null); 
-                    setEndDate(dates[1]?.format('YYYY-MM-DD') || null);   
+                    setStartDate(dates[0]?.format('YYYY-MM-DD') || null);
+                    setEndDate(dates[1]?.format('YYYY-MM-DD') || null);
                   } else {
                     setStartDate(null);
                     setEndDate(null);
                   }
                 }}
-                format="YYYY-MM-DD" 
+                format="YYYY-MM-DD"
               />
               <Input
                 className="w-full rounded-lg border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
@@ -533,7 +552,16 @@ const ListBill: React.FC = () => {
               </Button>
             </div>
           </Drawer>
-
+          <Modal
+            title="Xác nhận hủy đơn hàng"
+            visible={isCancelModalVisible}
+            onOk={handleCancelModalOk}
+            onCancel={handleCancelModalCancel}
+            okText="Xác nhận"
+            cancelText="Hủy"
+          >
+            <p>Bạn có chắc chắn muốn hủy đơn hàng này không?</p>
+          </Modal>
 
           <div className="overflow-x-auto pt-5">
             <div className=''>

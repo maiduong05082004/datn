@@ -29,7 +29,7 @@ class CommentController extends Controller
             'user'
         ])
             ->where('product_id', $productId)
-            ->where('is_visible', 1)
+            // ->where('is_visible', 1)
             ->paginate(10);
 
         $commentList = [];
@@ -219,6 +219,45 @@ class CommentController extends Controller
         return response()->json([
             'message' => 'Comment hide successfully',
         ]);
+    }
+
+    public function unhideComment(Request $request)
+    {
+        // Lấy id của comment từ request
+        $id = $request->input('id');
+        $comment = Comment::find($id);
+
+        if (!$comment) {
+            return response()->json([
+                'message' => 'Bình luận không tìm thấy',
+            ], 404);
+        }
+
+        // Kiểm tra quyền admin
+        if (Auth::user()->role !== 'admin') {
+            return response()->json([
+                'message' => 'Chỉ admin mới được ẩn bình luận',
+            ], 403);
+        }
+
+        // Kiểm tra comment đã ẩn chưa
+        if ($comment->is_visible == 1) {
+            return response()->json([
+                'message' => 'Bình luận đã được công khai',
+            ], 400);
+        }
+
+        // Chuyển trạng thái comment thành hiện
+        $comment->is_visible = 1;
+        $comment->save();
+
+        return response()->json([
+            'message' => 'Bình luận công khai thành công',
+            'data' => [
+                'id' => $comment->id,
+                'is_visible' => $comment->is_visible,
+            ]
+        ], 200);
     }
 
     public function manageUser(Request $request)
