@@ -100,6 +100,7 @@ const AddBanners: React.FC = () => {
             status: 0,
           }}
         >
+          {/* Loại Banner */}
           <Form.Item name="type" label="Loại Banner" className='mb-[10px]'>
             <Select placeholder="Chọn loại banner" onChange={handleTypeChange} allowClear className='h-10'>
               <Option value="main">Banner Chính</Option>
@@ -107,28 +108,41 @@ const AddBanners: React.FC = () => {
               <Option value="collection">Bộ Sưu Tập</Option>
             </Select>
           </Form.Item>
+
           {bannerType && (
             <>
-              <Form.Item name="title" label="Tiêu đề Banner" className='mb-[10px]'>
+              {/* Tiêu đề Banner */}
+              <Form.Item
+                name="title"
+                label="Tiêu đề Banner"
+                className='mb-[10px]'
+                rules={[
+                  { required: true, message: "Tiêu đề banner là bắt buộc" },
+                  { min: 5, message: "Tiêu đề banner phải có ít nhất 5 ký tự" },
+                  { max: 100, message: "Tiêu đề banner không được vượt quá 100 ký tự" },
+                ]}
+              >
                 <Input placeholder="Nhập tiêu đề banner" className='h-10' />
               </Form.Item>
 
+              {/* Banner Danh Mục */}
               {bannerType === 'category' && (
                 <Form.Item
-                label="Danh mục"
-                name="category_id"
-                rules={[{ required: true, message: "Danh mục sản phẩm bắt buộc phải chọn" }]}
-              >
-                <Select placeholder="Chọn danh mục">
-                  {parentCategories.map((category: any) => (
-                    <Option key={category.id} value={category.id}>
-                      {category.name}
-                    </Option>
-                  ))}
-                </Select>
-              </Form.Item>
+                  label="Danh mục"
+                  name="category_id"
+                  rules={[{ required: true, message: "Danh mục sản phẩm bắt buộc phải chọn" }]}
+                >
+                  <Select placeholder="Chọn danh mục">
+                    {parentCategories.map((category: any) => (
+                      <Option key={category.id} value={category.id}>
+                        {category.name}
+                      </Option>
+                    ))}
+                  </Select>
+                </Form.Item>
               )}
 
+              {/* Trạng thái */}
               <Form.Item name="status" label="Trạng thái" className='mb-[10px]'>
                 <Radio.Group>
                   <Radio value={0}>Không hoạt động</Radio>
@@ -136,14 +150,39 @@ const AddBanners: React.FC = () => {
                 </Radio.Group>
               </Form.Item>
 
-              <Form.Item name="image" label="Ảnh Banner">
-                <Upload listType="picture" onChange={handleFileChange} beforeUpload={() => false} maxCount={1}>
+              {/* Ảnh Banner */}
+              <Form.Item
+                name="image"
+                label="Ảnh Banner"
+                rules={[
+                  { required: true, message: "Ảnh banner là bắt buộc" },
+                ]}
+              >
+                <Upload
+                  listType="picture"
+                  onChange={handleFileChange}
+                  beforeUpload={(file) => {
+                    const isValidType = ["image/jpeg", "image/png"].includes(file.type);
+                    const isValidSize = file.size / 1024 / 1024 < 2;
+                    if (!isValidType) {
+                      message.error("Chỉ chấp nhận file định dạng JPG hoặc PNG.");
+                      return false;
+                    }
+                    if (!isValidSize) {
+                      message.error("Kích thước ảnh phải nhỏ hơn 2MB.");
+                      return false;
+                    }
+                    return true;
+                  }}
+                  maxCount={1}
+                >
                   <Button icon={<UploadOutlined />}>Tải lên ảnh</Button>
                 </Upload>
               </Form.Item>
             </>
           )}
 
+          {/* Nút Hành Động */}
           <Form.Item>
             <div className="flex justify-end space-x-4">
               <Button type="primary" htmlType="submit" loading={loading}>
@@ -153,6 +192,7 @@ const AddBanners: React.FC = () => {
             </div>
           </Form.Item>
         </Form>
+
       </div>
     </>
   );

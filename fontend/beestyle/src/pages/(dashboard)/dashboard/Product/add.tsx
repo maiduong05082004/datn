@@ -1,606 +1,496 @@
-import { useMutation, useQuery } from '@tanstack/react-query';
-import React, { useState } from 'react';
 import instance from '@/configs/axios';
-import { Spin, Button, message, Input, Table, Tag, Modal, Tabs } from 'antd';
-import type { ColumnsType } from 'antd/es/table';
-import { useParams } from 'react-router-dom';
-import { EyeInvisibleOutlined, HddOutlined } from '@ant-design/icons';
+import { PlusOutlined, UploadOutlined } from '@ant-design/icons';
+import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
+import { CKEditor } from '@ckeditor/ckeditor5-react';
+import { useMutation, useQuery } from '@tanstack/react-query';
+import { Button, Cascader, Checkbox, DatePicker, Form, Input, InputNumber, Select, Spin, Table, Upload } from 'antd';
+import moment from 'moment';
+import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { toast, ToastContainer } from 'react-toastify';
-import TabPane from 'antd/es/tabs/TabPane';
+import 'react-toastify/dist/ReactToastify.css';
+const { Option } = Select;
 
-type Props = {};
-
-interface ReplyComment {
-  comment_id: number;
-  content: string;
-  commentDate: string;
-  user_name: string;
-}
-type Report = {
-  user_name: string;
-  reason: string;
-  reported_at: string;
-};
-
-interface Comment {
-  comment_id: number;
-  user_id: number;
-  content: string;
-  commentDate: string;
-  user_name: string;
-  product_id?: number;
-  size?: string;
-  color?: string;
-  reported_count?: number;
-  is_reported?: boolean;
-  is_visible?: boolean;
-  moderation_status?: string;
-  bill_detail_id?: number;
-  stars?: number;
-  reply_comment: ReplyComment[];
+interface VariantProductGroup {
+  id: number;
+  name: string;
 }
 
-const Comments = (props: Props) => {
-  const { id } = useParams();
-  const [replyContent, setReplyContent] = useState<{ [key: number]: string }>({}); // Quản lý nội dung trả lời
-  const [currentCommentId, setCurrentCommentId] = useState<number | null>(null);
-  const [isReplyModalVisible, setIsReplyModalVisible] = useState(false);
-  const [isReportModalVisible, setIsReportModalVisible] = useState(false);
-  const [reportData, setReportData] = useState<Report[]>([]);
+interface Attribute {
+  id: number;
+  name: string;
+  attribute_type: number;
+  attribute_values: AttributeValue[];
+  selectedValues: number[];
+}
 
-  // Fetch danh sách bình luận
-  const { data: CommentsData, isLoading, refetch } = useQuery({
-    queryKey: ['comments', id],
+interface AttributeValue {
+  id: number;
+  value: string;
+  image_path?: string | null;
+}
+interface Variant {
+  attributeName: string;
+  attributeValue: string;
+  attributeValueId: number;
+  combinations: Combination[];
+  colorImage: any[];
+  albumImages: any[];
+  attributes?: {
+    stock: number;
+    discount: number;
+    attributeId: number;
+  }[];
+}
+
+
+interface Combination {
+  sizeId: number;
+  size: string;
+  stock: number;
+  discount: number;
+}
+
+const AddProduct: React.FC = () => {
+  const [form] = Form.useForm();
+  const [content, setContent] = useState<string>('');
+  const [selectedVariantGroup, setSelectedVariantGroup] = useState<VariantProductGroup | null>(null);
+  const [attributes, setAttributes] = useState<Attribute[]>([]);
+  const [variants, setVariants] = useState<Variant[]>([]);
+  const [albumList, setAlbumList] = useState<any[]>([]);
+  const navigate = useNavigate();
+  const [showVariantForm, setShowVariantForm] = useState<boolean>(true);
+  const [loading, setLoading] = useState<boolean>(false);
+
+  const { data: variantgroup, isLoading: isLoadingVariantGroup } = useQuery({
+    queryKey: ['variantgroup'],
     queryFn: async () => {
-      const response = await instance.post('api/admins/comment/list', {
-        product_id: id,
-      });
-      return response.data.comment_list;
+      const response = await instance.get(`api/admins/attribute_groups`);
+      return response?.data?.variation;
     },
   });
 
-  const { data: ProductData } = useQuery({
-    queryKey: ['detailProduct', id],
+  const { data: categories, isLoading: isLoadingCategories } = useQuery({
+    queryKey: ['categories'],
     queryFn: async () => {
-      const response = await instance.get(`api/admins/products/${id}`);
-      return response?.data?.data || {};
+      const response = await instance.get(`api/admins/categories`);
+      return response?.data;
     },
   });
 
-  const { mutate: toggleCommentVisibility } = useMutation({
-    mutationFn: async ({ id, is_visible }: { id: number; is_visible: number }) => {
-      const endpoint = is_visible === 1
-        ? 'api/admins/comment/unhide' 
-        : 'api/admins/comment/hide';  
+  const categoryOptions = categories?.map((category: any) => ({
+    value: category.id,
+    label: category.name,
+    children: category.children_recursive && category.children_recursive.length > 0
+      ? category.children_recursive.map((child: any) => ({
+        value: child.id,
+        label: child.name,
+        children: child.children_recursive && child.children_recursive.length > 0
+          ? child.children_recursive.map((subChild: any) => ({
+            value: subChild.id,
+            label: subChild.name,
+          }))
+          : [],
+      }))
+      : [],
+  }));
 
-      const response = await instance.post(endpoint, { id });
-      return response.data;
-    },
-    onSuccess: () => {
-      toast.success('Cập nhật bình luận thành công');
-      refetch(); 
-    },
-    onError: (error) => {
-      console.error("Error:", error);
-      toast.error('Cập nhật trạng thái thất bại!');
-    },
-  });
-
-
-
-
-  const { mutate: fetchReports } = useMutation({
-    mutationFn: async (comment_id: number) => {
-      const response = await instance.post('api/admins/comment/list-report', {
-        comment_id,
-      });
-      return response.data.reports;
-    },
-    onSuccess: (data) => {
-      setReportData(data);
-      setIsReportModalVisible(true);
-    },
-    onError: () => {
-      toast.error('Không thể lấy dữ liệu báo cáo.');
-    },
-  });
-  const showReportModal = (commentId: number) => {
-    setCurrentCommentId(commentId);
-    fetchReports(commentId);
-  };
-
-
-  // const { mutate: reportComment } = useMutation({
-  //   mutationFn: async ({ id, reason }: { id: number; reason: string }) => {
-  //     const response = await instance.post('api/admins/comment/report', {
-  //       id,
-  //       reason,
-  //     });
-  //     return response.data;
-  //   },
-  //   onSuccess: () => {
-  //     messageAPI.success('Báo cáo bình luận thành công');
-  //     refetch();
-  //     setIsReportModalVisible(false);
-  //     if (currentCommentId !== null) {
-  //       setReportReasons((prev: any) => ({ ...prev, [currentCommentId]: '' })); 
-  //     }
-  //   },
-  //   onError: () => {
-  //     messageAPI.error('Lỗi khi b��o cáo bình luận');
-  //   },
-  // });
-  // const showReportModal = (commentId: number) => {
-  //   setCurrentCommentId(commentId);
-  //   setIsReportModalVisible(true);
-  // };
-
-  // const handleReport = () => {
-  //   if (!currentCommentId || !reportReasons[currentCommentId]?.trim()) {
-  //     messageAPI.error('Vui lòng nhập lý do báo cáo.');
-  //     return;
-  //   }
-
-  //   reportComment({
-  //     id: currentCommentId,
-  //     reason: reportReasons[currentCommentId],
-  //   });
-  // };
 
   const { mutate } = useMutation({
-    mutationFn: async ({ parentId, content }: { parentId: number; content: string }) => {
-      const response = await instance.post('api/admins/comment/reply', {
-        parent_id: parentId,
-        content: content,
-      });
+    mutationFn: async (data: FormData) => {
+      const response = await instance.post(`api/admins/products`, data);
       return response.data;
     },
     onSuccess: () => {
-      toast.success('Trả lời bình luận thành công');
-      refetch();
-      setIsReplyModalVisible(false);
+      toast.success('Thêm sản phẩm thành công!');
+      form.resetFields();
+      setContent('');
+      setSelectedVariantGroup(null);
+      setAttributes([]);
+      setVariants([]);
+      setAlbumList([]);
+      setLoading(false);
+
+
     },
     onError: () => {
-      toast.error('Admin đã trả lời rồi');
+      toast.error('Thêm sản phẩm thất bại!');
+      setLoading(false);
+
     },
   });
 
-  const showReplyModal = (commentId: number) => {
-    setCurrentCommentId(commentId);
-    setIsReplyModalVisible(true);
+  useEffect(() => {
+    if (selectedVariantGroup && variantgroup) {
+      const selectedGroup = variantgroup.find((group: any) => group.group_id === selectedVariantGroup);
+      if (selectedGroup) {
+        const sortedAttributes = selectedGroup.attributes.sort((a: any, b: any) => {
+          return a.attribute_type === 0 ? -1 : b.attribute_type === 0 ? 1 : 0;
+        });
+        setAttributes(sortedAttributes.map((attribute: any) => ({ ...attribute, selectedValues: [] })));
+      }
+    }
+  }, [selectedVariantGroup, variantgroup]);
+
+  const handleAttributeValueChange = (index: number, selectedIds: number[]) => {
+    const updatedAttributes = [...attributes];
+    updatedAttributes[index].selectedValues = selectedIds;
+    setAttributes(updatedAttributes);
+  };
+  const handleResetImage = (index: number, field: string) => {
+    if (field === 'colorImage') {
+      const updatedVariants = [...variants];
+      updatedVariants[index].colorImage = [];
+      setVariants(updatedVariants);
+    } else if (field === 'albumImages') {
+      // Reset album ảnh về rỗng
+      const updatedVariants = [...variants];
+      updatedVariants[index].albumImages = [];
+      setVariants(updatedVariants);
+    }
+  };
+
+  const generateVariants = () => {
+    const primaryAttribute = attributes.find((attr) => attr.attribute_type === 0);
+    const otherAttributes = attributes.filter((attr) => attr.attribute_type !== 0);
+
+    if (!primaryAttribute || otherAttributes.length === 0) {
+      toast.error('Thiếu thuộc tính chính hoặc các thuộc tính khác để tạo biến thể');
+      return;
+    }
+
+    const newVariants: Variant[] = primaryAttribute.selectedValues.flatMap((primaryValueId) => {
+      const primaryValue = primaryAttribute.attribute_values.find((val) => val.id === primaryValueId);
+      if (!primaryValue) return [];
+
+      const combinations: Combination[] = otherAttributes.flatMap((attribute) => {
+        return attribute.selectedValues.map((valueId) => {
+          const value = attribute.attribute_values.find((val) => val.id === valueId);
+          return {
+            sizeId: value?.id || 0,
+            size: value?.value || '',
+            stock: 0,
+            discount: 0,
+          };
+        });
+      });
+
+      return {
+        attributeName: primaryAttribute.name,
+        attributeValue: primaryValue.value,
+        attributeValueId: primaryValue.id,
+        combinations,
+        colorImage: [],
+        albumImages: [],
+      };
+    });
+
+    setVariants(newVariants);
   };
 
 
-
-  const handleReply = () => {
-    if (currentCommentId !== null && replyContent[currentCommentId]?.trim()) {
-      mutate({ parentId: currentCommentId, content: replyContent[currentCommentId] });
-    } else {
-      toast.error('Vui lòng nhập nội dung trả lời trước khi gửi.');
-    }
+  const handleUploadChangeForVariant = (index: number, key: 'albumImages', { fileList }: any) => {
+    const updatedVariants = [...variants];
+    updatedVariants[index][key] = fileList;
+    setVariants(updatedVariants);
   };
+  const onFinish = async (values: any) => {
+    setLoading(true);
+    const formData = new FormData();
+    const formattedInputDay = moment(values.import_date).format("YYYY-MM-DD");
+    const selectedCategoryId = Array.isArray(values.category_id)
+      ? values.category_id[values.category_id.length - 1]
+      : values.category_id;
 
-  const filteredHiddenComments = CommentsData?.filter(
-    (comment: Comment) => Number(comment.is_visible) === 0 || comment.is_visible === false
-  );
+    formData.append('name', values.name);
+    formData.append('price', values.price.toString());
+    formData.append('description', values.description);
+    formData.append('content', content);
+    formData.append('import_date', formattedInputDay);
+    formData.append('category_id', selectedCategoryId.toString());
+    formData.append('stock', values.stock ? values.stock.toString() : '0');
+    formData.append('group_id', values.variant_group ? values.variant_group.toString() : '');
+    formData.append('cost_price', values.product_cost);
+    formData.append('supplier', values.supplier);
+    formData.append('is_collection', values.is_collection ? '1' : '0');
 
-  const filteredVisibleComments = CommentsData?.filter(
-    (comment: Comment) => Number(comment.is_visible) === 1 || comment.is_visible === true
-  );
+    albumList.forEach((file: any) => {
+      formData.append('album_images[]', file.originFileObj);
+    });
 
+    const variantData = variants.map((variant) => {
+      const attributeValueId = variant.attributeValueId;
+      const albumImages = variant.albumImages.map((file: any) => file.originFileObj);
 
-  const columns: ColumnsType<Comment> = [
-    {
-      title: 'STT',
-      dataIndex: 'stt',
-      key: 'stt',
-      width: "50px",
-      align: 'center',
-      render: (_: any, __: any, index: number) => index + 1,
-    },
-    {
-      title: 'Người bình luận',
-      dataIndex: 'user_name',
-      key: 'user_name',
-      align: 'center',
-      render: (text) => <strong>{text}</strong>,
-    },
-    {
-      title: 'Thông tin sản phẩm',
-      key: 'product_info',
+      const sizes = variant.combinations.reduce((acc: { [key: number]: { stock: number; discount: number } }, combination) => {
+        acc[combination.sizeId] = {
+          stock: combination.stock,
+          discount: combination.discount,
+        };
+        return acc;
+      }, {});
+      console.log();
 
-      render: () => (
-        <div>
-          <p><strong>Tên sản phẩm:</strong> {ProductData?.name || 'N/A'}</p>
-          <p><strong>Giá:</strong> {ProductData?.price ? `${ProductData.price} VNĐ` : 'N/A'}</p>
-          <p><strong>Danh mục:</strong> {ProductData?.category_name || 'N/A'}</p>
-        </div>
-      ),
-    },
-    {
-      title: 'Nội dung bình luận và trả lời',
-      key: 'content_with_replies',
-      width: '20%',
-      render: (_, record) => (
-        <div className="p-4 bg-white rounded-lg shadow-md">
-          <p className="text-gray-800 font-semibold">
-            <strong>Nội dung:</strong> {record.content}
-          </p>
-          {record.reply_comment.length > 0 && (
-            <div className="pl-4 border-l-2 border-gray-300 mt-4">
-              <strong className="block text-gray-600">Trả lời:</strong>
-              {record.reply_comment.map(reply => (
-                <div
-                  key={reply.comment_id}
-                  className="mt-2 bg-gray-100 p-2 rounded-md shadow-inner"
-                >
-                  <p className="text-sm text-gray-800">
-                    <strong>{reply.user_name}:</strong> {reply.content}
-                  </p>
-                  <p className="text-xs text-gray-500 italic">{reply.commentDate}</p>
-                </div>
-              ))}
-            </div>
-          )}
-    
-          {!record.reply_comment.some(reply => reply.user_name === 'admin') && (
-            <Button
-              type="default"
-              className="mt-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg px-4 py-2"
-              onClick={() => showReplyModal(record.comment_id)}
-            >
-              Trả lời
-            </Button>
-          )}
-        </div>
-      ),
-    },
+      albumImages.forEach((file: any) => {
+        formData.append(`album_images_${attributeValueId}[]`, file);
+      });
 
-    {
-      title: 'Số lần báo cáo',
-      dataIndex: 'reported_count',
-      align: 'center',
-      key: 'reported_count',
-      render: (count, record) => (
-        <div className="flex items-center justify-center gap-2">
-          <Tag
-            color={count > 0 ? 'red' : 'green'}
-            style={{
-              fontSize: '16px',
-              padding: '6px 12px',
-              borderRadius: '8px',
-              textAlign: 'center',
-            }}
-          >
-            {count || 0}
-          </Tag>
-          {count > 0 && (
-            <Button
-              type="default"
-              danger
-              onClick={() => showReportModal(record.comment_id)}
-            >
-              Xem Chi Tiết
-            </Button>
-          )}
-        </div>
-      ),
-    },
-    {
-      title: 'Trạng thái hiển thị',
-      dataIndex: 'is_visible',
-      key: 'is_visible',
-      align: 'center',
-      render: (isVisible) =>
-        <Tag
-          color={isVisible ? 'green' : 'red'}
-          style={{
-            fontSize: '16px',
-            padding: '6px 12px',
-            borderRadius: '8px',
-            display: 'inline-block',
-            textAlign: 'center',
-          }}
-        >
-          {isVisible ? 'Hiển thị' : 'Ẩn'}
-        </Tag>
-    },
-    {
-      title: 'Số sao',
-      dataIndex: 'stars',
-      align: 'center',
-      key: 'stars',
-      render: (stars) => <Tag
-        color="gold"
-        style={{
-          fontSize: '16px',
-          padding: '6px 12px',
-          borderRadius: '8px',
-          display: 'inline-flex',
-          alignItems: 'center',
-        }}
-      >
-        {stars || 0} ⭐
-      </Tag>,
-    },
-    {
-      title: 'Hành động',
-      key: 'actions',
-      align: 'center',
-      width: "50px",
-      render: (_, record) => (
-        <div className="flex gap-2">
-          <Button
-            type="default"
-            onClick={() => toggleCommentVisibility({ id: record.comment_id, is_visible: 1 })}>
-            Hiện
-          </Button>
+      return {
+        attribute_value_id: attributeValueId,
+        albumImages: albumImages.map((file: any) => file.name),
+        sizes: sizes,
+      };
+    });
 
-        </div>
-      ),
-    }
+    formData.append('variations', JSON.stringify(variantData));
+    mutate(formData);
+    console.log(formData);
 
-  ];
-
-  const columns2: ColumnsType<Comment> = [
-    {
-      title: 'STT',
-      dataIndex: 'stt',
-      key: 'stt',
-      width: "50px",
-      align: 'center',
-      render: (_: any, __: any, index: number) => index + 1,
-    },
-    {
-      title: 'Người bình luận',
-      dataIndex: 'user_name',
-      key: 'user_name',
-      align: 'center',
-      render: (text) => <strong>{text}</strong>,
-    },
-    {
-      title: 'Thông tin sản phẩm',
-      key: 'product_info',
-
-      render: () => (
-        <div>
-          <p><strong>Tên sản phẩm:</strong> {ProductData?.name || 'N/A'}</p>
-          <p><strong>Giá:</strong> {ProductData?.price ? `${ProductData.price} VNĐ` : 'N/A'}</p>
-          <p><strong>Danh mục:</strong> {ProductData?.category_name || 'N/A'}</p>
-        </div>
-      ),
-    },
-    {
-      title: 'Nội dung bình luận và trả lời',
-      key: 'content_with_replies',
-      width: '20%',
-      render: (_, record) => (
-        <div className="p-4 bg-white rounded-lg shadow-md">
-          <p className="text-gray-800 font-semibold">
-            <strong>Nội dung:</strong> {record.content}
-          </p>
-          {record.reply_comment.length > 0 && (
-            <div className="pl-4 border-l-2 border-gray-300 mt-4">
-              <strong className="block text-gray-600">Trả lời:</strong>
-              {record.reply_comment.map(reply => (
-                <div
-                  key={reply.comment_id}
-                  className="mt-2 bg-gray-100 p-2 rounded-md shadow-inner"
-                >
-                  <p className="text-sm text-gray-800">
-                    <strong>{reply.user_name}:</strong> {reply.content}
-                  </p>
-                  <p className="text-xs text-gray-500 italic">{reply.commentDate}</p>
-                </div>
-              ))}
-            </div>
-          )}
-
-          {!record.reply_comment.some(reply => reply.user_name === 'admin') && (
-            <Button
-              type="default"
-              className="mt-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg px-4 py-2"
-              onClick={() => showReplyModal(record.comment_id)}
-            >
-              Trả lời
-            </Button>
-          )}
-        </div>
-      ),
-    },
-
-    {
-      title: 'Số lần báo cáo',
-      dataIndex: 'reported_count',
-      align: 'center',
-      key: 'reported_count',
-      render: (count, record) => (
-        <div className="flex items-center justify-center gap-2">
-          <Tag
-            color={count > 0 ? 'red' : 'green'}
-            style={{
-              fontSize: '16px',
-              padding: '6px 12px',
-              borderRadius: '8px',
-              textAlign: 'center',
-            }}
-          >
-            {count || 0}
-          </Tag>
-          {count > 0 && (
-            <Button
-              type="default"
-              danger
-              onClick={() => showReportModal(record.comment_id)}
-            >
-              Xem Chi Tiết
-            </Button>
-          )}
-        </div>
-      ),
-    },
-    {
-      title: 'Trạng thái hiển thị',
-      dataIndex: 'is_visible',
-      key: 'is_visible',
-      align: 'center',
-      render: (isVisible) =>
-        <Tag
-          color={isVisible ? 'green' : 'red'}
-          style={{
-            fontSize: '16px',
-            padding: '6px 12px',
-            borderRadius: '8px',
-            display: 'inline-block',
-            textAlign: 'center',
-          }}
-        >
-          {isVisible ? 'Hiển thị' : 'Ẩn'}
-        </Tag>
-    },
-    {
-      title: 'Số sao',
-      dataIndex: 'stars',
-      align: 'center',
-      key: 'stars',
-      render: (stars) => <Tag
-        color="gold"
-        style={{
-          fontSize: '16px',
-          padding: '6px 12px',
-          borderRadius: '8px',
-          display: 'inline-flex',
-          alignItems: 'center',
-        }}
-      >
-        {stars || 0} ⭐
-      </Tag>,
-    },
-    {
-      title: 'Hành động',
-      key: 'actions',
-      align: 'center',
-      width: "50px",
-      render: (_, record) => (
-        <div className="flex gap-2">
-          <Button
-            type="default"
-            danger
-            onClick={() => toggleCommentVisibility({ id: record.comment_id, is_visible: 0 })}>
-            Ẩn
-          </Button>
-        </div>
-      ),
-    }
-
-  ];
-
-  if (isLoading) return <Spin tip="Loading..." className="flex justify-center items-center h-screen" />;
+  };
+  if (isLoadingVariantGroup || isLoadingCategories) {
+    return <Spin tip="Loading..." className="flex justify-center items-center h-screen" />;
+  }
 
   return (
     <>
-      <ToastContainer />
-      <div className="w-full mx-auto px-6 py-8">
+      <div className="w-full px-6 py-8">
         <ToastContainer />
-        <Tabs defaultActiveKey="1">
-          <TabPane tab="Bình Luận Công Khai" key="2">
-            <Table
-              columns={columns2}
-              dataSource={filteredVisibleComments}
-              rowKey="comment_id"
-              pagination={{ pageSize: 10 }}
-            />
-          </TabPane>
-          <TabPane tab="Bình Luận Ẩn" key="1">
-            <Table
-              columns={columns}
-              dataSource={filteredHiddenComments}
-              rowKey="comment_id"
-              pagination={{ pageSize: 10 }}
-            />
-          </TabPane>
+        <Form form={form} layout="vertical" onFinish={onFinish}>
+          <div className='grid grid-cols-2 gap-4'>
+            <div>
+              <Form.Item
+                className='mb-[10px]'
+                label="Tên sản phẩm"
+                name="name"
+                rules={[{ required: true, message: 'Tên sản phẩm bắt buộc' }]}
+              >
+                <Input className='h-10' />
+              </Form.Item>
+              <Form.Item
+                className='mb-[10px]'
 
-        </Tabs>
-        {/* <Modal
-          title="Báo cáo bình luận"
-          visible={isReportModalVisible}
-          onOk={handleReport}
-          onCancel={() => setIsReportModalVisible(false)}
-        >
-          <Input.TextArea
-            rows={4}
-            placeholder="Nhập lý do báo cáo..."
-            value={currentCommentId !== null ? reportReasons[currentCommentId] || '' : ''}
-            onChange={(e) => {
-              const value = e.target.value;
-              if (currentCommentId !== null) {
-                setReportReasons((prev) => ({
-                  ...prev,
-                  [currentCommentId]: value,
-                }));
-              }
-            }}
-          />
-        </Modal> */}
+                label="Giá Nhập"
+                name="product_cost"
+                rules={[{ required: true, message: 'Giá Nhập sản phẩm bắt buộc' }]}
+              >
+                <Input className='h-10' />
+              </Form.Item>
 
-        <Modal
-          title="Trả lời bình luận"
-          visible={isReplyModalVisible}
-          onOk={handleReply}
-          onCancel={() => setIsReplyModalVisible(false)}
-        >
-          <Input.TextArea
-            rows={4}
-            placeholder="Nhập nội dung trả lời..."
-            value={currentCommentId !== null ? replyContent[currentCommentId] || '' : ''}
-            onChange={(e) => {
-              const value = e.target.value;
-              if (currentCommentId !== null) {
-                setReplyContent((prev) => ({
-                  ...prev,
-                  [currentCommentId]: value,
-                }));
-              }
-            }}
-          />
-        </Modal>
+              <Form.Item
+                className='mb-[10px]'
 
-        <Modal
-          title="Chi Tiết Báo Cáo"
-          visible={isReportModalVisible}
-          onCancel={() => setIsReportModalVisible(false)}
-          footer={null}
-        >
-          <Table
-            dataSource={reportData}
-            columns={[
-              {
-                title: 'Người báo cáo',
-                dataIndex: 'user_name',
-                key: 'user_name',
-              },
-              {
-                title: 'Lý do',
-                dataIndex: 'reason',
-                key: 'reason',
-              },
-              {
-                title: 'Thời gian báo cáo',
-                dataIndex: 'reported_at',
-                key: 'reported_at',
-                render: (text) => new Date(text).toLocaleString(),
-              },
-            ]}
-            rowKey={(record, index) => index !== undefined ? index.toString() : record.user_name}
-            pagination={false}
-            bordered
-          />
-        </Modal>
+                label="Nhà Cung Cấp"
+                name="supplier"
+                rules={[{ required: true, message: 'Nhà Cung Cấp bắt buộc' }]}
+              >
+                <Input className='h-10' />
+              </Form.Item>
 
+              <Form.Item
+                className='mb-[10px]'
+                label="Ngày nhập"
+                name="import_date"
+                rules={[{ required: true, message: "Ngày nhập sản phẩm bắt buộc phải điền" }]}
+              >
+                <DatePicker format="YYYY-MM-DD" style={{ width: '100%' }} className='h-10' />
+              </Form.Item>
+
+              <Form.Item
+                className='mb-[10px]'
+                label="Giá Bán Sản Phẩm"
+                name="price"
+                rules={[{ required: true, message: "Giá sản phẩm bắt buộc phải điền" }]}
+              >
+                <InputNumber min={0} style={{ width: '100%' }} className='p-[5px]' />
+              </Form.Item>
+            </div>
+            <div>
+              <Form.Item
+                className='mb-[10px]'
+                label="Mô tả sản phẩm"
+                name="description"
+                rules={[{ required: true, message: "Mô tả sản phẩm bắt buộc phải điền" }]}
+              >
+                <Input.TextArea rows={4} placeholder="Nhập mô tả sản phẩm ngắn gọn" />
+              </Form.Item>
+
+              <Form.Item
+                className='mb-[10px]'
+                label="Nội dung chi tiết"
+                name="content"
+                rules={[{ required: true, message: "Nội dung chi tiết sản phẩm bắt buộc phải điền" }]}
+              >
+                <CKEditor
+                  editor={ClassicEditor}
+                  data={content}
+                  onChange={(event, editor: any) => {
+                    const data = editor.getData();
+                    setContent(data);
+                  }}
+                />
+              </Form.Item>
+            </div>
+          </div>
+          <Form.Item
+            label="Danh mục"
+            name="category_id"
+            className='mb-[10px]'
+            rules={[{ required: true, message: "Danh mục sản phẩm bắt buộc!" }]}
+          >
+            <Cascader options={categoryOptions} className='h-10' />
+          </Form.Item>
+          <div className='flex gap-5 pt-5'>
+            <Form.Item name="is_collection" valuePropName="checked" initialValue={false}>
+              <Checkbox>Bộ sưu tập</Checkbox>
+            </Form.Item>
+          </div>
+
+          {showVariantForm && (
+            <>
+              <Form.Item
+                label="Chọn nhóm biến thể"
+                className='mb-[10px] '
+                name="variant_group"
+                rules={[{ required: true, message: 'Vui lòng chọn nhóm biến thể' }]}              >
+                <Select className='h-[40px]' placeholder="Chọn nhóm biến thể" onChange={setSelectedVariantGroup}>
+                  {variantgroup?.map((group: { group_id: number; group_name: string }) => (
+                    <Option key={group.group_id} value={group.group_id}>
+                      {group.group_name}
+                    </Option>
+                  ))}
+                </Select>
+              </Form.Item>
+
+              {attributes.map((attribute, index) => (
+                <Form.Item key={attribute.id} label={`Thuộc Tính (${attribute.name})`} className="mb-[15px]">
+                  <Select
+                    className="h-[40px]"
+                    mode="tags"
+                    style={{ width: '100%' }}
+                    placeholder={`Nhập giá trị cho ${attribute.name}`}
+                    onChange={(values: { key: string; label: string }[]) =>
+                      handleAttributeValueChange(index, values.map((value) => Number(value.key)))
+                    }
+                    labelInValue
+                  >
+                    {attribute.attribute_values.map((val) => (
+                      <Option key={val.id} value={val.id}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                          {val.image_path ? (
+                            <img
+                              src={val.image_path}
+                              alt={val.value}
+                              style={{ width: 20, height: 20, borderRadius: '50%' }}
+                            />
+                          ) : null}
+                          <span>{val.value}</span>
+                        </div>
+                      </Option>
+                    ))}
+                  </Select>
+                </Form.Item>
+              ))}
+
+
+              <Button type="default" className='mb-4' onClick={generateVariants} icon={<PlusOutlined />}>
+                Tạo Biến Thể
+              </Button>
+
+              <Table
+                dataSource={variants}
+                columns={[
+                  {
+                    title: attributes.length > 0 ? attributes[0].name : 'Thuộc Tính',
+                    dataIndex: 'attributeValue',
+                    key: 'attributeValue',
+                  },
+                  {
+                    title: 'Thông tin',
+                    dataIndex: 'combinations',
+                    key: 'combinations',
+                    render: (combinations: Combination[], record, index) => (
+                      combinations.map((combination, combinationIndex) => (
+                        <div key={combinationIndex} className="flex items-center gap-3 mb-3">
+                          <span className="font-semibold w-20">{combination.size}</span>
+                          <InputNumber
+                            min={0}
+                            onChange={(value) => {
+                              const updatedVariants = [...variants];
+                              updatedVariants[index].combinations[combinationIndex].stock = value || 0;
+                              setVariants(updatedVariants);
+                            }}
+                            className="w-full border border-gray-300 rounded-md py-1"
+                            placeholder="Số Lượng"
+                          />
+                          <InputNumber
+                            max={100}
+                            onChange={(value) => {
+                              const updatedVariants = [...variants];
+                              updatedVariants[index].combinations[combinationIndex].discount = value || 0;
+                              setVariants(updatedVariants);
+                            }}
+                            className="w-full border border-gray-300 rounded-md py-1"
+                            placeholder="Giảm Giá (%)"
+                          />
+                        </div>
+                      ))
+                    ),
+                  },
+                  {
+                    title: 'Album Ảnh',
+                    dataIndex: 'albumImages',
+                    key: 'albumImages',
+                    render: (_: any, record: any, index: any) => (
+                      <div className="flex flex-col items-center justify-center p-4">
+                        <Upload
+                          listType="picture-card"
+                          multiple
+                          fileList={record.albumImages || []}
+                          onChange={(info) => handleUploadChangeForVariant(index, 'albumImages', info)}
+                          beforeUpload={() => false}
+                          showUploadList={{ showPreviewIcon: true, showRemoveIcon: true, showDownloadIcon: false }}
+                          className="upload-inline"
+                        >
+                          {record.albumImages?.length < 3 && (
+                            <div className="w-20 h-20 border border-dashed border-gray-300 rounded-md flex items-center justify-center cursor-pointer">
+                              <UploadOutlined className="text-green-500 text-xl" />
+                            </div>
+                          )}
+                        </Upload>
+                        <Button
+                          className='mt-2'
+                          type="primary"
+                          danger
+                          onClick={() => handleResetImage(index, 'albumImages')}
+                        >
+                          Reset
+                        </Button>
+                      </div>
+                    ),
+                  },
+                ]}
+                rowKey={(_, index = 0) => index.toString()}
+                pagination={false}
+                className="w-full border-collapse border border-gray-300"
+              />
+            </>
+          )}
+          <Form.Item>
+            <div className='flex justify-end space-x-4 pt-5'>
+              <Button type="primary" htmlType="submit" loading={loading}>
+                Submit
+              </Button>
+              <Button
+                onClick={() => navigate('/admin/dashboard/products/list')}
+              >
+                Back
+              </Button>
+            </div>
+          </Form.Item>
+        </Form>
       </div>
-
     </>
   );
 };
 
-export default Comments;
+export default AddProduct;
