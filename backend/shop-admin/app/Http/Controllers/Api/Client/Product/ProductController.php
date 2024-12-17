@@ -127,7 +127,11 @@ class ProductController extends Controller
                     ]);
                 }
             }
-
+            // Giảm số lượng voucher còn lại trong bảng Promotions
+            $promotion = Promotion::find($promotionId);
+            if ($promotion && $promotion->usage_limit > 0) {
+                $promotion->decrement('usage_limit');
+            }
             return response()->json(['message' => 'Đặt hàng thành công và email xác nhận sẽ được gửi!', 'bill' => $bill], 201);
         } catch (ModelNotFoundException $e) {
             DB::rollBack();
@@ -762,9 +766,9 @@ class ProductController extends Controller
             ->take(12)
             ->get();
         return response()->json(
-          [
-            'data' =>  ProductResource::collection($product)
-          ]
+            [
+                'data' =>  ProductResource::collection($product)
+            ]
         );
     }
 }
