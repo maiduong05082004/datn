@@ -508,10 +508,14 @@ class InventoryController extends Controller
     // tồn
 
 
+
+
     // public function listInventoryDetails(Request $request)
     // {
     //     $slug = $request->input('slug');
     //     $supplier = $request->input('supplier');
+    //     $startDate = $request->input('start_date'); // Ngày bắt đầu
+    //     $endDate = $request->input('end_date'); // Ngày kết thúc
     
     //     $query = Product::with(['cost', 'billDetails.bill'])
     //         ->orderBy('id', 'desc');
@@ -528,26 +532,46 @@ class InventoryController extends Controller
     
     //     $products = $query->get();
     
-    //     $result = $products->map(function ($product) {
+    //     $result = $products->map(function ($product) use ($startDate, $endDate) {
     //         $cost = $product->cost;
     //         $importPrice = $cost->cost_price ?? 0;
     //         $supplier = $cost->supplier ?? 'unknown';
     
-    //         // Lấy tổng số lượng nhập 
-    //         $totalImportedQuantity = ProductVariationQuantity::whereIn(
+    //         // Lọc nhập kho theo ngày tháng
+    //         $importQuery = ProductVariationQuantity::whereIn(
     //             'product_variation_value_id',
     //             $product->variations->pluck('variationValues.*.id')->flatten()
-    //         )->sum('quantity');
+    //         );
     
+    //         if ($startDate) {
+    //             $importQuery->whereDate('created_at', '>=', $startDate);
+    //         }
+    
+    //         if ($endDate) {
+    //             $importQuery->whereDate('created_at', '<=', $endDate);
+    //         }
+    
+    //         $totalImportedQuantity = $importQuery->sum('quantity');
     //         $totalImportedAmount = $totalImportedQuantity * $importPrice;
     
-    //         // Lọc trạng thái đã giao hàng
-    //         $successfulBillDetails = $product->billDetails->filter(function ($detail) {
-    //             return optional($detail->bill)->status_bill === Bill::STATUS_DELIVERED;
+    //         // Lọc xuất kho theo ngày tháng
+    //         $exportQuery = $product->billDetails->filter(function ($detail) use ($startDate, $endDate) {
+    //             $isDelivered = optional($detail->bill)->status_bill === Bill::STATUS_DELIVERED;
+    //             $isInDateRange = true;
+    
+    //             if ($startDate) {
+    //                 $isInDateRange = $isInDateRange && $detail->created_at->gte($startDate);
+    //             }
+    
+    //             if ($endDate) {
+    //                 $isInDateRange = $isInDateRange && $detail->created_at->lte($endDate);
+    //             }
+    
+    //             return $isDelivered && $isInDateRange;
     //         });
     
-    //         $totalExportedQuantity = $successfulBillDetails->sum('quantity'); // Tổng số lượng xuất
-    //         $totalExportedAmount = $successfulBillDetails->sum(function ($detail) {
+    //         $totalExportedQuantity = $exportQuery->sum('quantity'); // Tổng số lượng xuất
+    //         $totalExportedAmount = $exportQuery->sum(function ($detail) {
     //             return $detail->quantity * $detail->don_gia; // Tổng thành tiền xuất
     //         });
     
@@ -578,7 +602,6 @@ class InventoryController extends Controller
     //     return response()->json($result);
     // }
     
-
     public function listInventoryDetails(Request $request)
     {
         $slug = $request->input('slug');
@@ -684,7 +707,6 @@ class InventoryController extends Controller
 
 
     
-
 
 
     // chi tiết kho
