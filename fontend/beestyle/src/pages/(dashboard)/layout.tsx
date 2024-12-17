@@ -26,7 +26,7 @@ import {
 import { Link, Outlet, useNavigate } from 'react-router-dom';
 import { NavLink } from 'react-router-dom'; // Import NavLink for navigation
 import axios from 'axios';
-import { toast } from 'react-toastify';
+import { toast, ToastContainer } from 'react-toastify';
 import instance from '@/configs/axios';
 
 const { Header, Content, Sider } = Layout;
@@ -191,6 +191,7 @@ const App: React.FC = () => {
 
   return (
     <Layout style={{ minHeight: '100vh' }}>
+      <ToastContainer />
       <Sider
         collapsible
         collapsed={collapsed}
