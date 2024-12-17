@@ -202,8 +202,11 @@ Route::prefix('admins')
                 Route::post('approve', [CommentController::class, 'approve'])->name('comment.approve'); // Duyệt bình luận
                 Route::post('/reply', [CommentController::class, 'reply'])->name('comment.reply'); // Admin trả lời bình luận của user
                 Route::post('/hide', [CommentController::class, 'hideComment'])->name('comment.hide'); // Ẩn bình luận nếu vi phạm 
+                Route::post('/unhide', [CommentController::class, 'unhideComment'])->name('comment.unhide'); // Bỏ ẩn bình luận
                 Route::post('/manageUser', [CommentController::class, 'manageUser'])->name('comment.manageUser'); // quản lý user (khóa nếu comment bị báo cáo nhiều)
                 Route::post('/list-report', [CommentController::class, 'listReportComment'])->name('comment.list-report');
+                
+                
             });
 
             Route::prefix('inventory')->as('inventory.')->group(function () {
@@ -220,7 +223,7 @@ Route::prefix('admins')
                 Route::post('listProductDate', [InventoryController::class, 'listProductsByDateAndSupplier'])->name('listProductsByDateAndSupplier');
                 Route::get('list/', [InventoryController::class, 'index'])->name('index');
                 Route::get('listinventory/', [InventoryController::class, 'listInventoryDetails'])->name('listInventoryDetails');
-                Route::get('getprodetails/{id}', [InventoryController::class, 'getProductInventoryDetails'])->name('getProductInventoryDetails');
+                Route::post('getprodetails/{id}', [InventoryController::class, 'getProductInventoryDetails'])->name('getProductInventoryDetails');
 
             });
 

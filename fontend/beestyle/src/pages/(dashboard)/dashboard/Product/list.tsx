@@ -128,25 +128,6 @@ const ListProducts = () => {
       render: (product_cost: { cost_price: string }) => (
         <span>{product_cost?.cost_price ? parseFloat(product_cost.cost_price).toLocaleString() : 'Không có'} VND</span>
       ),
-    },
-    {
-      title: 'Nhà cung cấp',
-      dataIndex: 'product_cost',
-      key: 'supplier',
-      align: 'center',
-      render: (product_cost: { supplier: string }) => (
-        <span>{product_cost?.supplier || 'Không có'}</span>
-      ),
-    },
-
-    {
-      title: 'Ngày nhập',
-      dataIndex: 'product_cost',
-      align: 'center',
-      key: 'import_date',
-      render: (product_cost: { import_date: string }) => (
-        <span>{product_cost ? format(new Date(product_cost.import_date), 'dd/MM/yyyy') : 'Không có'}</span>
-      ),
     }
     ,
     {

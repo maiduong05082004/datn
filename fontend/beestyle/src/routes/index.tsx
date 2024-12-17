@@ -118,7 +118,6 @@ const Router = () => {
                 {/* Admin Routes */}
                 <Route path="admin" element={<Signin />} />
                 <Route path="admin/dashboard" element={<PrivateRouter><LayoutAdmin /></PrivateRouter>}>
-                    {/* <Route path="admin/dashboard" element={<LayoutAdmin />}> */}
                     <Route index element={<DashboardPage />} />
 
                     <Route path="profile" element={<MyProfile />} />
@@ -133,8 +132,6 @@ const Router = () => {
                     {/* <Route path="bill/shiping/:id" element={<Shiping />} /> */}
                     <Route path="bill/shiping/:id" element={<ShipNoGHN />} />
                     {/* <Route path="bill/address" element={<AddAddresses />} /> */}
-                    {/* comments */}
-                    {/* <Route path="comment/list" element={<ListComments />} /> */}
                     {/* banners */}
                     <Route path="banner/add" element={<AddBanners />} />
                     <Route path="banner/list/main" element={<ListBannersMain />} />

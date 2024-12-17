@@ -23,8 +23,11 @@ import {
   MenuProps,
   Button,
 } from 'antd';
-import { Link, Outlet } from 'react-router-dom';
+import { Link, Outlet, useNavigate } from 'react-router-dom';
 import { NavLink } from 'react-router-dom'; // Import NavLink for navigation
+import axios from 'axios';
+import { toast } from 'react-toastify';
+import instance from '@/configs/axios';
 
 const { Header, Content, Sider } = Layout;
 
@@ -40,7 +43,7 @@ const items1: MenuProps['items'] = [
   },
   {
     key: '2',
-    icon: <InfoCircleOutlined  />,
+    icon: <InfoCircleOutlined />,
     label: "Banners",
     children: [
 
@@ -131,7 +134,7 @@ const items1: MenuProps['items'] = [
       },
     ],
   }
-  
+
   ,
   {
     key: 'sub12',
@@ -151,16 +154,37 @@ const App: React.FC = () => {
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [openKeys, setOpenKeys] = useState<string[]>([]);
+  const navigate = useNavigate();
   const toggleDropdown = () => {
     setIsOpen(!isOpen);
   };
 
   const onOpenChange = (keys: string[]) => {
-    const latestOpenKey = keys.find((key) => openKeys.indexOf(key) === -1); 
-    if (items1.map((item :any) => item.key).includes(latestOpenKey!)) {
+    const latestOpenKey = keys.find((key) => openKeys.indexOf(key) === -1);
+    if (items1.map((item: any) => item.key).includes(latestOpenKey!)) {
       setOpenKeys(latestOpenKey ? [latestOpenKey] : []);
     } else {
-      setOpenKeys(keys); 
+      setOpenKeys(keys);
+    }
+  };
+  const handleLogout = async () => {
+    try {
+      await instance.post(
+        'http://localhost:8000/api/client/auth/logout',
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`,
+          },
+        }
+      );
+      localStorage.removeItem('token_admin');
+      toast.success('Đăng xuất thành công!');
+
+      navigate('/admin');
+    } catch (error) {
+      console.error('Lỗi khi logout:', error);
+      toast.error('Có lỗi xảy ra khi đăng xuất.');
     }
   };
 
@@ -171,7 +195,7 @@ const App: React.FC = () => {
         collapsible
         collapsed={collapsed}
         onCollapse={setCollapsed}
-        theme="dark" 
+        theme="dark"
         style={{
           background: '#001529',
         }}
@@ -184,7 +208,7 @@ const App: React.FC = () => {
           onOpenChange={onOpenChange}
           defaultSelectedKeys={["dashboard"]}
           items={items1}
-          className='font-bold text-[14px]'
+          className='font-bold text-[12px]'
           style={{ marginTop: "16px" }}
         />
       </Sider>
@@ -213,7 +237,7 @@ const App: React.FC = () => {
               }`}
           >
           </div>
-          
+
 
           <div className="flex justify-end items-center space-x-6">
             <Link to={`/admin/dashboard/chat`}
@@ -291,8 +315,8 @@ const App: React.FC = () => {
                     <div className="border-t border-gray-600 my-1"></div>
 
                     <a
-                      href="#logout"
-                      className="flex items-center px-4 py-2 text-sm text-white hover:bg-gray-700 hover:translate-x-1 transform transition-transform duration-300 ease-in-out"
+                      onClick={handleLogout} // Thêm sự kiện onClick
+                      className="flex items-center px-4 py-2 text-sm text-white hover:bg-gray-700 hover:translate-x-1 transform transition-transform duration-300 ease-in-out cursor-pointer"
                       role="menuitem"
                     >
                       <svg
@@ -311,6 +335,7 @@ const App: React.FC = () => {
                       </svg>
                       Log Out
                     </a>
+
                   </div>
                 </div>
               )}

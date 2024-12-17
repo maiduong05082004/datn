@@ -150,7 +150,7 @@ const InventoryManagement = (props: Props) => {
         setSelectedSupplier(null);
         setSelectedCategoryId(null);
     };
-
+// tất cả 
     const { data: productDataNew } = useQuery({
         queryKey: ['products'],
         queryFn: async () => {
@@ -158,7 +158,7 @@ const InventoryManagement = (props: Props) => {
             return response.data.data;
         },
     })
-
+// Đang Bán
     const { data: activeData, isLoading: loadingActive} = useQuery({
         queryKey: ['activeProducts'],
         queryFn: async () => {
@@ -166,7 +166,7 @@ const InventoryManagement = (props: Props) => {
             return response.data.data;
         },
     });
-
+// Ngừng Bán
     const { data: inactiveData, isLoading: loadingInactive } = useQuery({
         queryKey: ['inactiveProducts'],
         queryFn: async () => {
@@ -174,7 +174,7 @@ const InventoryManagement = (props: Props) => {
             return response.data.data;
         },
     });
-
+// Đang bán sắp hết hàng
     const { data: outOfStockData, isLoading: loadingOutOfStock } = useQuery({
         queryKey: ['outOfStockProducts'],
         queryFn: async () => {
@@ -182,7 +182,7 @@ const InventoryManagement = (props: Props) => {
             return response.data.data;
         },
     });
-
+// Ngừng bán
     const { data: lowStockData, isLoading: loadingLowStock } = useQuery({
         queryKey: ['lowStockProducts'],
         queryFn: async () => {
@@ -206,11 +206,11 @@ const InventoryManagement = (props: Props) => {
         },
         onSuccess: () => {
             toast.success('Trạng thái sản phẩm đã được chuyển sang Ngừng bán.');
-            queryCient.invalidateQueries({ queryKey: ['products'] });
-            queryCient.invalidateQueries({ queryKey: ['activeProducts'] });
-            queryCient.invalidateQueries({ queryKey: ['inactiveProducts'] });
-            queryCient.invalidateQueries({ queryKey: ['outOfStockProducts'] });
-            queryCient.refetchQueries({ queryKey: ['products'] });
+            queryCient.invalidateQueries({ queryKey: ['products'] })
+            // queryCient.invalidateQueries({ queryKey: ['activeProducts'] }),
+            // queryCient.invalidateQueries({ queryKey: ['inactiveProducts'] }),
+            // queryCient.invalidateQueries({ queryKey: ['outOfStockProducts'] }),
+            // queryCient.refetchQueries({ queryKey: ['products'] })
         },
         onError: (error) => {
             console.error('Lỗi:', error);
@@ -234,8 +234,11 @@ const InventoryManagement = (props: Props) => {
                 `Trạng thái sản phẩm đã được chuyển sang ${action === 'activate' ? 'Đang bán' : 'Ngừng bán'
                 }.`
             );
+            queryCient.invalidateQueries({ queryKey: ['products'] });
             queryCient.invalidateQueries({ queryKey: ['activeProducts'] });
             queryCient.invalidateQueries({ queryKey: ['inactiveProducts'] });
+            queryCient.invalidateQueries({ queryKey: ['outOfStockProducts'] });
+            queryCient.refetchQueries({ queryKey: ['products'] });
         },
         onError: (error) => {
             console.error('Lỗi:', error);
