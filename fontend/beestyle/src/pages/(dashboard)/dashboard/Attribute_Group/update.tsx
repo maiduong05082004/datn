@@ -67,18 +67,31 @@ const UpdateAttributeGroup = () => {
       <div className="min-h-screen p-5">
         <div className="w-full max-w-8x">
           <Form form={form} layout="vertical" onFinish={handleFinish}>
+            {/* Tên Nhóm Biến Thể */}
             <Form.Item
               label="Tên Nhóm Biến Thể"
               name="group_name"
-              className='mb-[10px] '
-              rules={[{ required: true, message: 'Vui lòng nhập tên nhóm biến thể' }]}
+              className="mb-[10px]"
+              rules={[
+                { required: true, message: 'Vui lòng nhập tên nhóm biến thể' },
+                { min: 3, message: 'Tên nhóm biến thể phải có ít nhất 3 ký tự' },
+                { max: 50, message: 'Tên nhóm biến thể không được vượt quá 50 ký tự' },
+                { pattern: /^[a-zA-Z0-9\s]+$/, message: 'Tên nhóm chỉ được chứa chữ cái, số và khoảng trắng' },
+              ]}
             >
-              <Input placeholder="Nhập tên nhóm biến thể" className='h-10' />
+              <Input placeholder="Nhập tên nhóm biến thể" className="h-10" />
             </Form.Item>
 
-            <Form.Item label="Thuộc Tính">
+            {/* Thuộc Tính */}
+            <Form.Item
+              label="Thuộc Tính"
+              name="attributes"
+              rules={[
+                { required: true, message: 'Vui lòng chọn ít nhất một thuộc tính' },
+              ]}
+            >
               <Select
-              className='h-10'
+                className="h-10"
                 mode="multiple"
                 placeholder="Chọn thuộc tính"
                 value={selectedAttributes}
@@ -93,7 +106,8 @@ const UpdateAttributeGroup = () => {
               </Select>
             </Form.Item>
 
-            <div className='flex justify-end space-x-4'>
+            {/* Nút hành động */}
+            <div className="flex justify-end space-x-4">
               <Button type="primary" htmlType="submit">
                 Submit
               </Button>
@@ -104,6 +118,7 @@ const UpdateAttributeGroup = () => {
               </Button>
             </div>
           </Form>
+
         </div>
       </div>
     </>

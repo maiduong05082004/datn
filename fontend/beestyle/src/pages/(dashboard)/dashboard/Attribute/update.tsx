@@ -57,37 +57,53 @@ const UpdateAttribute: React.FC = () => {
             onFinish={onFinish}
             initialValues={{ ...attribute?.data }}
           >
+            {/* Tên thuộc tính */}
             <Form.Item
               label="Tên thuộc tính"
               name="name"
-              className='mb-[10px] '
-              rules={[{ required: true, message: 'Vui lòng nhập tên thuộc tính' }]}
+              className="mb-[10px]"
+              rules={[
+                { required: true, message: 'Vui lòng nhập tên thuộc tính' },
+                { min: 3, message: 'Tên thuộc tính phải có ít nhất 3 ký tự' },
+                { max: 50, message: 'Tên thuộc tính không được vượt quá 50 ký tự' },
+                { pattern: /^[a-zA-Z0-9\s]+$/, message: 'Tên thuộc tính chỉ được chứa chữ cái, số và khoảng trắng' },
+              ]}
             >
-              <Input placeholder="Nhập tên thuộc tính" className='h-10' />
+              <Input placeholder="Nhập tên thuộc tính" className="h-10" />
             </Form.Item>
+
+            {/* Phân cấp thuộc tính */}
             <Form.Item
               label="Phân cấp thuộc tính"
               name="attribute_type"
-              rules={[{ required: true, message: 'Vui lòng chọn loại thuộc tính' }]}
+              rules={[
+                { required: true, message: 'Vui lòng chọn loại thuộc tính' },
+                {
+                  type: 'enum',
+                  enum: [0, 1],
+                  message: 'Giá trị không hợp lệ, vui lòng chọn Cấp bậc cha hoặc Cấp bậc con',
+                },
+              ]}
             >
-              <Select placeholder="Chọn loại thuộc tính" className='h-10'>
+              <Select placeholder="Chọn loại thuộc tính" className="h-10">
                 <Option value={0}>Cấp bậc cha</Option>
                 <Option value={1}>Cấp bậc con</Option>
               </Select>
             </Form.Item>
+
+            {/* Nút hành động */}
             <Form.Item>
-              <div className='flex justify-end space-x-4'>
+              <div className="flex justify-end space-x-4">
                 <Button type="primary" htmlType="submit">
                   Submit
                 </Button>
-                <Button
-                  onClick={() => navigate('/admin/dashboard/attribute/list')}
-                >
+                <Button onClick={() => navigate('/admin/dashboard/attribute/list')}>
                   Back
                 </Button>
               </div>
             </Form.Item>
           </Form>
+
         </div>
       </div>
     </>

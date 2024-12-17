@@ -66,65 +66,63 @@ const AddPromotion: React.FC = () => {
         <div className="min-h-screen p-5">
             <Form form={form} layout="vertical" onFinish={onFinish}>
                 <Form.Item
-                    label="Mã Khuyến Mãi"
-                    name="code"
+                    label="Mã khuyến mãi"
+                    name="promo_code"
                     rules={[{ required: true, message: 'Vui lòng nhập mã khuyến mãi!' }]}
-                    className='mb-[10px]'
                 >
                     <Input className='h-10' />
                 </Form.Item>
+
 
                 <Form.Item
                     label="Mô tả"
                     name="description"
                     rules={[{ required: true, message: 'Vui lòng nhập mô tả!' }]}
-                    className='mb-[10px]'
                 >
-                    <Input.TextArea rows={5} />
+                    <Input.TextArea rows={4} className="h-10" />
                 </Form.Item>
 
+
                 <Form.Item
-                    label="Ngày Bắt Đầu"
+                    label="Ngày bắt đầu"
                     name="start_date"
-                    className='mb-[10px]'
                     rules={[{ required: true, message: 'Vui lòng chọn ngày bắt đầu!' }]}
                 >
-                    <DatePicker format="YYYY-MM-DD" style={{ width: '100%' }} className='h-10' />
+                    <DatePicker className="h-10" style={{ width: '100%' }} />
                 </Form.Item>
 
+
                 <Form.Item
-                    label="Ngày Kết Thúc"
+                    label="Ngày kết thúc"
                     name="end_date"
-                    className='mb-[10px]'
                     rules={[{ required: true, message: 'Vui lòng chọn ngày kết thúc!' }]}
                 >
-                    <DatePicker format="YYYY-MM-DD" style={{ width: '100%' }} className='h-10' />
+                    <DatePicker className="h-10" style={{ width: '100%' }} />
                 </Form.Item>
 
+
                 <Form.Item
-                    label="Loại Giảm Giá"
+                    label="Loại giảm giá"
                     name="discount_type"
                     rules={[{ required: true, message: 'Vui lòng chọn loại giảm giá!' }]}
                 >
-                    <Radio.Group
-                        onChange={(e) => setDiscountType(e.target.value)}
-                        value={discountType}
-                    >
-                        <Radio value="percent">Giảm theo phần trăm</Radio>
-                        <Radio value="amount">Giảm theo số tiền</Radio>
-                    </Radio.Group>
+                    <Select className="h-10" placeholder="Chọn loại giảm giá">
+                        <Option value="percentage">Giảm theo phần trăm</Option>
+                        <Option value="fixed">Giảm theo giá cố định</Option>
+                    </Select>
                 </Form.Item>
+
 
                 {discountType === 'percent' && (
                     <>
                         <Form.Item
-                            label="Số Phần Trăm Giảm"
+                            label="Số tiền giảm"
                             name="discount_amount"
-                            className='mb-[10px]'
                             rules={[{ required: true, message: 'Vui lòng nhập số tiền giảm!' }]}
                         >
-                            <InputNumber min={0} max={100} style={{ width: '100%' }} className='h-10' />
+                            <InputNumber min={0} style={{ width: '100%' }} className="p-[5px]" />
                         </Form.Item>
+
                         <Form.Item
                             label="Triết Khấu Tối Đa"
                             name="max_discount_amount"
@@ -153,7 +151,7 @@ const AddPromotion: React.FC = () => {
 
                 <Form.Item label="Giá Trị Đơn Hàng Tối Thiểu" name="min_order_value" className='mb-[10px]'
                 >
-                    <InputNumber min={0} style={{ width: '100%' }} className='p-1'/>
+                    <InputNumber min={0} style={{ width: '100%' }} className='p-1' />
                 </Form.Item>
 
                 <Form.Item

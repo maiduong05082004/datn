@@ -134,6 +134,7 @@ const UpdateBanners: React.FC = () => {
           layout="vertical"
           onFinish={onFinish}
         >
+          {/* Loại Banner */}
           <Form.Item
             name="type"
             label="Loại Banner"
@@ -149,15 +150,21 @@ const UpdateBanners: React.FC = () => {
 
           {bannerType && (
             <>
+              {/* Tiêu đề Banner */}
               <Form.Item
                 name="title"
                 label="Tiêu đề Banner"
                 className='mb-[10px]'
-                rules={[{ required: true, message: 'Vui lòng nhập tiêu đề banner' }]}
+                rules={[
+                  { required: true, message: 'Vui lòng nhập tiêu đề banner' },
+                  { min: 5, message: 'Tiêu đề phải có ít nhất 5 ký tự' },
+                  { max: 100, message: 'Tiêu đề không được vượt quá 100 ký tự' },
+                ]}
               >
                 <Input placeholder="Nhập tiêu đề banner" className='h-10' />
               </Form.Item>
 
+              {/* Danh mục Banner */}
               {bannerType === 'category' && (
                 <Form.Item
                   label="Danh mục"
@@ -175,6 +182,7 @@ const UpdateBanners: React.FC = () => {
                 </Form.Item>
               )}
 
+              {/* Trạng thái */}
               <Form.Item
                 name="status"
                 label="Trạng thái"
@@ -187,15 +195,31 @@ const UpdateBanners: React.FC = () => {
                 </Radio.Group>
               </Form.Item>
 
+              {/* Ảnh Banner */}
               <Form.Item
                 label="Ảnh Banner"
                 name="image"
+                rules={[
+                  { required: true, message: 'Vui lòng tải lên ảnh banner' },
+                ]}
               >
                 <Upload
                   listType="picture"
                   fileList={fileList}
                   onChange={handleFileChange}
-                  beforeUpload={() => false}
+                  beforeUpload={(file) => {
+                    const isValidType = ["image/jpeg", "image/png"].includes(file.type);
+                    const isValidSize = file.size / 1024 / 1024 < 2;
+                    if (!isValidType) {
+                      message.error("Chỉ chấp nhận file định dạng JPG hoặc PNG.");
+                      return false;
+                    }
+                    if (!isValidSize) {
+                      message.error("Kích thước ảnh phải nhỏ hơn 2MB.");
+                      return false;
+                    }
+                    return true;
+                  }}
                   maxCount={1}
                 >
                   <Button icon={<UploadOutlined />}>Tải lên ảnh</Button>
@@ -214,6 +238,7 @@ const UpdateBanners: React.FC = () => {
             </>
           )}
 
+          {/* Hành động */}
           <Form.Item>
             <div className="flex justify-end space-x-4">
               <Button type="primary" htmlType="submit" loading={loading}>
@@ -223,6 +248,7 @@ const UpdateBanners: React.FC = () => {
             </div>
           </Form.Item>
         </Form>
+
       </div>
     </>
   );

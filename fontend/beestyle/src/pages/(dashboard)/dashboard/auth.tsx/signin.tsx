@@ -54,28 +54,30 @@ const Signin = () => {
                     onFinish={onFinish}
                     layout="vertical"
                 >
+                    {/* Email */}
                     <Form.Item
                         label="Email"
                         name="email"
                         rules={[
-                            {
-                                required: true,
-                                type: "email",
-                                message: "Vui lòng nhập email hợp lệ!",
-                            },
+                            { required: true, message: "Vui lòng nhập email!" },
+                            { type: "email", message: "Vui lòng nhập email hợp lệ!" },
+                            { max: 50, message: "Email không được vượt quá 50 ký tự!" },
                         ]}
                     >
                         <Input
                             placeholder="Nhập email của bạn"
-                            className="rounded-[5px] p-[10px]  border-gray-300 focus:border-orange-500 focus:ring focus:ring-orange-200"
+                            className="rounded-[5px] p-[10px] border-gray-300 focus:border-orange-500 focus:ring focus:ring-orange-200"
                         />
                     </Form.Item>
 
+                    {/* Mật khẩu */}
                     <Form.Item
                         label="Mật khẩu"
                         name="password"
                         rules={[
                             { required: true, message: "Vui lòng nhập mật khẩu!" },
+                            { min: 6, message: "Mật khẩu phải có ít nhất 6 ký tự!" },
+                            { whitespace: false, message: "Mật khẩu không được chứa khoảng trắng!" },
                         ]}
                     >
                         <Input.Password
@@ -84,6 +86,7 @@ const Signin = () => {
                         />
                     </Form.Item>
 
+                    {/* Nút Đăng Nhập */}
                     <Form.Item>
                         <Button
                             htmlType="submit"
@@ -93,6 +96,7 @@ const Signin = () => {
                         </Button>
                     </Form.Item>
                 </Form>
+
             </div>
         </div>
     );

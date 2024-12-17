@@ -69,7 +69,7 @@ const UpdatePromotion: React.FC = () => {
 
                 const data = await response.json();
                 setDiscountType(data.discount_type);
-                
+
                 form.setFieldsValue({
                     code: data.code,
                     description: data.description,
@@ -119,33 +119,32 @@ const UpdatePromotion: React.FC = () => {
     return (
         <div className="min-h-screen p-5">
             <Form form={form} layout="vertical" onFinish={onFinish}>
-            
+
                 <Form.Item
-                    label="Mã Khuyến Mãi"
-                    name="code"
-                    className='mb-[10px]'
-                    rules={[{ required: true, message: 'Vui lòng nhập mã khuyến mãi!' }]}
-                    initialValue={{...promotionData}}
+                    label="Mã khuyến mãi"
+                    name="promo_code"
+                    rules={[
+                        { required: true, message: 'Vui lòng nhập mã khuyến mãi!' },
+                        { max: 20, message: 'Mã khuyến mãi không được dài quá 20 ký tự!' },
+                    ]}
                 >
-                    <Input className='h-10'/>
+                    <Input className='h-10' />
                 </Form.Item>
 
                 <Form.Item
                     label="Mô tả"
                     name="description"
-                    className='mb-[10px]'
                     rules={[{ required: true, message: 'Vui lòng nhập mô tả!' }]}
                 >
-                    <Input.TextArea rows={5} />
+                    <Input.TextArea rows={4} className="h-10" />
                 </Form.Item>
 
                 <Form.Item
-                    label="Ngày Bắt Đầu"
+                    label="Ngày bắt đầu"
                     name="start_date"
-                    className='mb-[10px]'
                     rules={[{ required: true, message: 'Vui lòng chọn ngày bắt đầu!' }]}
                 >
-                    <DatePicker format="YYYY-MM-DD" style={{ width: '100%' }} className='h-10'/>
+                    <DatePicker className="h-10" style={{ width: '100%' }} />
                 </Form.Item>
 
                 <Form.Item
@@ -158,15 +157,14 @@ const UpdatePromotion: React.FC = () => {
                 </Form.Item>
 
                 <Form.Item
-                    label="Loại Giảm Giá"
+                    label="Loại giảm giá"
                     name="discount_type"
-                    className='mb-[10px]'
                     rules={[{ required: true, message: 'Vui lòng chọn loại giảm giá!' }]}
                 >
-                    <Radio.Group onChange={(e) => setDiscountType(e.target.value)} value={discountType}>
-                        <Radio value="percent">Giảm theo phần trăm</Radio>
-                        <Radio value="amount">Giảm theo số tiền</Radio>
-                    </Radio.Group>
+                    <Select className="h-10" placeholder="Chọn loại giảm giá">
+                        <Option value="percentage">Giảm theo phần trăm</Option>
+                        <Option value="fixed">Giảm theo giá cố định</Option>
+                    </Select>
                 </Form.Item>
 
                 {discountType === 'percent' ? (
@@ -188,32 +186,33 @@ const UpdatePromotion: React.FC = () => {
                     </>
                 ) : (
                     <Form.Item
-                        label="Số Tiền Giảm"
+                        label="Số tiền giảm"
                         name="discount_amount"
-                        rules={[{ required: true, message: 'Vui lòng nhập số tiền giảm!' }]}
+                        rules={[
+                            { required: true, message: 'Vui lòng nhập số tiền giảm!' },
+                            { type: 'number', min: 0, message: 'Số tiền giảm phải là số dương!' },
+                        ]}
                     >
-                        <InputNumber min={0} style={{ width: '100%' }} className='py-1' />
+                        <InputNumber min={0} style={{ width: '100%' }} />
                     </Form.Item>
                 )}
 
                 <Form.Item label="Số Lần Sử Dụng" name="usage_limit" className='mb-[10px]'>
-                    <InputNumber min={1} style={{ width: '100%' }} className='py-1'/>
+                    <InputNumber min={1} style={{ width: '100%' }} className='py-1' />
                 </Form.Item>
                 <Form.Item label="Giá Trị Đơn Hàng Tối Thiểu" name="min_order_value" className='mb-[10px]'>
-                    <InputNumber min={0} style={{ width: '100%' }} className='py-1'/>
+                    <InputNumber min={0} style={{ width: '100%' }} className='py-1' />
                 </Form.Item>
 
                 <Form.Item
-                    label="Loại Khuyến Mãi"
-                    className='mb-[10px]'
-                    name="promotion_subtype"
+                    label="Loại khuyến mãi"
+                    name="promotion_type"
                     rules={[{ required: true, message: 'Vui lòng chọn loại khuyến mãi!' }]}
                 >
-                    <Select placeholder="Chọn loại khuyến mãi" className='h-10'>
-                        <Option value="shipping">Miễn phí vận chuyển</Option>
-                        <Option value="product_discount">Giảm giá sản phẩm</Option>
-                        <Option value="voucher_discount">Giảm giá bằng voucher</Option>
-                        <Option value="first_order">Giảm giá đơn hàng đầu tiên</Option>
+                    <Select placeholder="Chọn loại khuyến mãi">
+                        <Option value="discount">Giảm giá</Option>
+                        <Option value="gift">Quà tặng</Option>
+                        <Option value="free_shipping">Miễn phí vận chuyển</Option>
                     </Select>
                 </Form.Item>
                 {/* <Form.Item label="Phạm Vi Khuyến Mãi" name="promotion_scope">
@@ -275,17 +274,17 @@ const UpdatePromotion: React.FC = () => {
                 </Form.Item>
 
                 <Form.Item>
-              <div className='flex justify-end space-x-4'>
-                <Button type="primary" htmlType="submit">
-                  Submit
-                </Button>
-                <Button
-                  onClick={() => navigate('/admin/dashboard/promotions/list')}
-                >
-                  Back
-                </Button>
-              </div>
-            </Form.Item>
+                    <div className='flex justify-end space-x-4'>
+                        <Button type="primary" htmlType="submit">
+                            Submit
+                        </Button>
+                        <Button
+                            onClick={() => navigate('/admin/dashboard/promotions/list')}
+                        >
+                            Back
+                        </Button>
+                    </div>
+                </Form.Item>
             </Form>
         </div>
     );

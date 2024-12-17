@@ -27,7 +27,7 @@ interface Attribute {
 interface AttributeValue {
   id: number;
   value: string;
-  image_path?: string | null; 
+  image_path?: string | null;
 }
 interface Variant {
   attributeName: string;
@@ -259,13 +259,14 @@ const AddProduct: React.FC = () => {
           <div className='grid grid-cols-2 gap-4'>
             <div>
               <Form.Item
-                className='mb-[10px]'
+                className="mb-[10px]"
                 label="Tên sản phẩm"
                 name="name"
                 rules={[{ required: true, message: 'Tên sản phẩm bắt buộc' }]}
               >
-                <Input className='h-10' />
+                <Input className="h-10" />
               </Form.Item>
+
               <Form.Item
                 className='mb-[10px]'
 
@@ -277,32 +278,42 @@ const AddProduct: React.FC = () => {
               </Form.Item>
 
               <Form.Item
-                className='mb-[10px]'
-
+                className="mb-[10px]"
                 label="Nhà Cung Cấp"
                 name="supplier"
                 rules={[{ required: true, message: 'Nhà Cung Cấp bắt buộc' }]}
               >
-                <Input className='h-10' />
+                <Input className="h-10" />
               </Form.Item>
 
               <Form.Item
-                className='mb-[10px]'
                 label="Ngày nhập"
                 name="import_date"
-                rules={[{ required: true, message: "Ngày nhập sản phẩm bắt buộc phải điền" }]}
+                rules={[
+                  { required: true, message: "Ngày nhập sản phẩm bắt buộc phải điền" },
+                  {
+                    validator: (_, value) => {
+                      if (value && value.isBefore(new Date(), 'day')) {
+                        return Promise.reject('Ngày nhập không được là ngày trong quá khứ');
+                      }
+                      return Promise.resolve();
+                    }
+                  }
+                ]}
               >
-                <DatePicker format="YYYY-MM-DD" style={{ width: '100%' }} className='h-10' />
+                <DatePicker format="YYYY-MM-DD" style={{ width: '100%' }} className="h-10" />
+              </Form.Item>
+              <Form.Item
+                label="Giá Sản Phẩm"
+                name="price"
+                rules={[
+                  { required: true, message: "Giá sản phẩm bắt buộc phải điền" },
+                  { type: 'number', min: 1, message: "Giá sản phẩm phải lớn hơn 0" },
+                ]}
+              >
+                <InputNumber min={1} style={{ width: '100%' }} className="p-[5px]" />
               </Form.Item>
 
-              <Form.Item
-                className='mb-[10px]'
-                label="Giá Bán Sản Phẩm"
-                name="price"
-                rules={[{ required: true, message: "Giá sản phẩm bắt buộc phải điền" }]}
-              >
-                <InputNumber min={0} style={{ width: '100%' }} className='p-[5px]' />
-              </Form.Item>
             </div>
             <div>
               <Form.Item
@@ -315,7 +326,6 @@ const AddProduct: React.FC = () => {
               </Form.Item>
 
               <Form.Item
-                className='mb-[10px]'
                 label="Nội dung chi tiết"
                 name="content"
                 rules={[{ required: true, message: "Nội dung chi tiết sản phẩm bắt buộc phải điền" }]}
@@ -323,21 +333,22 @@ const AddProduct: React.FC = () => {
                 <CKEditor
                   editor={ClassicEditor}
                   data={content}
-                  onChange={(event, editor: any) => {
+                  onChange={(event, editor) => {
                     const data = editor.getData();
                     setContent(data);
                   }}
                 />
               </Form.Item>
+
             </div>
           </div>
           <Form.Item
             label="Danh mục"
             name="category_id"
-            className='mb-[10px]'
+            className="mb-[10px]"
             rules={[{ required: true, message: "Danh mục sản phẩm bắt buộc!" }]}
           >
-            <Cascader options={categoryOptions} className='h-10' />
+            <Cascader options={categoryOptions} className="h-10" />
           </Form.Item>
           <div className='flex gap-5 pt-5'>
             <Form.Item name="is_collection" valuePropName="checked" initialValue={false}>

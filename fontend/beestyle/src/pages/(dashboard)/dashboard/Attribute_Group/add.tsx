@@ -48,18 +48,30 @@ const AddAttributeGroup = (props: Props) => {
       <div className="min-h-screen">
         <div className="w-full max-w-8xl p-5 rounded-xl">
           <Form form={form} layout="vertical" onFinish={handleFinish}>
+            {/* Tên Nhóm Biến Thể */}
             <Form.Item
-              className='mb-[10px] '
+              className="mb-[10px]"
               label="Tên Nhóm Biến Thể"
               name="group_name"
-              rules={[{ required: true, message: 'Vui lòng nhập tên nhóm biến thể' }]}
+              rules={[
+                { required: true, message: 'Vui lòng nhập tên nhóm biến thể' },
+                { min: 3, message: 'Tên nhóm biến thể phải có ít nhất 3 ký tự' },
+                { max: 50, message: 'Tên nhóm biến thể không được vượt quá 50 ký tự' },
+                { pattern: /^[a-zA-Z0-9\s]+$/, message: 'Tên nhóm chỉ được chứa chữ cái, số và khoảng trắng' },
+              ]}
             >
-              <Input placeholder="Nhập tên nhóm biến thể" className='h-10' />
+              <Input placeholder="Nhập tên nhóm biến thể" className="h-10" />
             </Form.Item>
 
-            <Form.Item label="Thuộc Tính">
+            {/* Thuộc Tính */}
+            <Form.Item
+              label="Thuộc Tính"
+              rules={[
+                { required: true, message: 'Vui lòng chọn ít nhất một thuộc tính' },
+              ]}
+            >
               <Select
-              className='h-10'
+                className="h-10"
                 mode="multiple"
                 placeholder="Chọn thuộc tính"
                 value={selectedAttributes}
@@ -73,19 +85,20 @@ const AddAttributeGroup = (props: Props) => {
                 ))}
               </Select>
             </Form.Item>
+
+            {/* Nút hành động */}
             <Form.Item>
-              <div className='flex justify-end space-x-4'>
+              <div className="flex justify-end space-x-4">
                 <Button type="primary" htmlType="submit">
                   Submit
                 </Button>
-                <Button
-                  onClick={() => navigate('/admin/dashboard/attribute_group/list')}
-                >
+                <Button onClick={() => navigate('/admin/dashboard/attribute_group/list')}>
                   Back
                 </Button>
               </div>
             </Form.Item>
           </Form>
+
         </div>
       </div>
     </>
