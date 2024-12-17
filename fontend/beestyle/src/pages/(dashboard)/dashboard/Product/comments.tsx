@@ -41,7 +41,8 @@ interface Comment {
 }
 
 const Comments = (props: Props) => {
-  const { id } = useParams();
+  const { id } = useParams(); // Lấy ID sản phẩm từ URL
+  const [messageAPI, contextHolder] = message.useMessage();
   const [replyContent, setReplyContent] = useState<{ [key: number]: string }>({}); // Quản lý nội dung trả lời
   const [currentCommentId, setCurrentCommentId] = useState<number | null>(null);
   const [isReplyModalVisible, setIsReplyModalVisible] = useState(false);
@@ -70,23 +71,22 @@ const Comments = (props: Props) => {
   const { mutate: toggleCommentVisibility } = useMutation({
     mutationFn: async ({ id, is_visible }: { id: number; is_visible: number }) => {
       const endpoint = is_visible === 1
-        ? 'api/admins/comment/unhide' 
-        : 'api/admins/comment/hide';  
+        ? 'api/admins/comment/unhide'  // API hiện bình luận
+        : 'api/admins/comment/hide';   // API ẩn bình luận
 
       const response = await instance.post(endpoint, { id });
       return response.data;
     },
-    onSuccess: () => {
-      toast.success('Cập nhật bình luận thành công');
-      refetch(); 
+    onSuccess: (_, variables) => {
+      const action = variables.is_visible === 1 ? 'hiện' : 'ẩn';
+      toast.success(`Bình luận đã được ${action} thành công.`);
+      refetch();
     },
-    onError: (error) => {
-      console.error("Error:", error);
-      toast.error('Cập nhật trạng thái thất bại!');
+    onError: (_, variables) => {
+      const action = variables.is_visible === 1 ? 'hiện' : 'ẩn';
+      toast.error(`Cập nhật trạng thái thất bại! Không thể ${action} bình luận.`);
     },
   });
-
-
 
 
   const { mutate: fetchReports } = useMutation({
@@ -101,12 +101,12 @@ const Comments = (props: Props) => {
       setIsReportModalVisible(true);
     },
     onError: () => {
-      toast.error('Không thể lấy dữ liệu báo cáo.');
+      messageAPI.error('Không thể lấy dữ liệu báo cáo.');
     },
   });
   const showReportModal = (commentId: number) => {
     setCurrentCommentId(commentId);
-    fetchReports(commentId);
+    fetchReports(commentId); // Gọi hàm fetch báo cáo
   };
 
 
@@ -127,7 +127,7 @@ const Comments = (props: Props) => {
   //     }
   //   },
   //   onError: () => {
-  //     messageAPI.error('Lỗi khi b��o cáo bình luận');
+  //     messageAPI.error('Lỗi khi báo cáo bình luận');
   //   },
   // });
   // const showReportModal = (commentId: number) => {
@@ -156,12 +156,12 @@ const Comments = (props: Props) => {
       return response.data;
     },
     onSuccess: () => {
-      toast.success('Trả lời bình luận thành công');
+      messageAPI.success('Trả lời bình luận thành công');
       refetch();
       setIsReplyModalVisible(false);
     },
     onError: () => {
-      toast.error('Admin đã trả lời rồi');
+      messageAPI.error('Admin đã trả lời rồi');
     },
   });
 
@@ -169,17 +169,7 @@ const Comments = (props: Props) => {
     setCurrentCommentId(commentId);
     setIsReplyModalVisible(true);
   };
-
-
-
-  const handleReply = () => {
-    if (currentCommentId !== null && replyContent[currentCommentId]?.trim()) {
-      mutate({ parentId: currentCommentId, content: replyContent[currentCommentId] });
-    } else {
-      toast.error('Vui lòng nhập nội dung trả lời trước khi gửi.');
-    }
-  };
-
+  // Lọc bình luận ẩn
   const filteredHiddenComments = CommentsData?.filter(
     (comment: Comment) => Number(comment.is_visible) === 0 || comment.is_visible === false
   );
@@ -189,26 +179,37 @@ const Comments = (props: Props) => {
   );
 
 
+  const handleReply = () => {
+    if (currentCommentId !== null && replyContent[currentCommentId]?.trim()) {
+      mutate({ parentId: currentCommentId, content: replyContent[currentCommentId] });
+    } else {
+      messageAPI.error('Vui lòng nhập nội dung trả lời trước khi gửi.');
+    }
+  };
+
+  const filteredRootComments = CommentsData?.filter(
+    (comment: Comment) => !CommentsData.some((parent: Comment) =>
+      parent.reply_comment?.some((reply) => reply.comment_id === comment.comment_id)
+    )
+  );
+
+
   const columns: ColumnsType<Comment> = [
     {
       title: 'STT',
       dataIndex: 'stt',
       key: 'stt',
-      width: "50px",
-      align: 'center',
       render: (_: any, __: any, index: number) => index + 1,
     },
     {
       title: 'Người bình luận',
       dataIndex: 'user_name',
       key: 'user_name',
-      align: 'center',
       render: (text) => <strong>{text}</strong>,
     },
     {
       title: 'Thông tin sản phẩm',
       key: 'product_info',
-
       render: () => (
         <div>
           <p><strong>Tên sản phẩm:</strong> {ProductData?.name || 'N/A'}</p>
@@ -230,10 +231,7 @@ const Comments = (props: Props) => {
             <div className="pl-4 border-l-2 border-gray-300 mt-4">
               <strong className="block text-gray-600">Trả lời:</strong>
               {record.reply_comment.map(reply => (
-                <div
-                  key={reply.comment_id}
-                  className="mt-2 bg-gray-100 p-2 rounded-md shadow-inner"
-                >
+                <div key={reply.comment_id} className="mt-2 bg-gray-100 p-2 rounded-md shadow-inner">
                   <p className="text-sm text-gray-800">
                     <strong>{reply.user_name}:</strong> {reply.content}
                   </p>
@@ -242,7 +240,8 @@ const Comments = (props: Props) => {
               ))}
             </div>
           )}
-    
+
+
           {!record.reply_comment.some(reply => reply.user_name === 'admin') && (
             <Button
               type="default"
@@ -259,10 +258,9 @@ const Comments = (props: Props) => {
     {
       title: 'Số lần báo cáo',
       dataIndex: 'reported_count',
-      align: 'center',
       key: 'reported_count',
       render: (count, record) => (
-        <div className="flex items-center justify-center gap-2">
+        <div className="flex items-center gap-2">
           <Tag
             color={count > 0 ? 'red' : 'green'}
             style={{
@@ -290,16 +288,15 @@ const Comments = (props: Props) => {
       title: 'Trạng thái hiển thị',
       dataIndex: 'is_visible',
       key: 'is_visible',
-      align: 'center',
       render: (isVisible) =>
         <Tag
           color={isVisible ? 'green' : 'red'}
           style={{
-            fontSize: '16px',
-            padding: '6px 12px',
-            borderRadius: '8px',
-            display: 'inline-block',
-            textAlign: 'center',
+            fontSize: '16px', // Tăng kích thước chữ
+            padding: '6px 12px', // Tăng khoảng cách bên trong
+            borderRadius: '8px', // Bo góc
+            display: 'inline-block', // Giữ thẻ hiển thị gọn gàng
+            textAlign: 'center', // Căn giữa nội dung
           }}
         >
           {isVisible ? 'Hiển thị' : 'Ẩn'}
@@ -308,7 +305,6 @@ const Comments = (props: Props) => {
     {
       title: 'Số sao',
       dataIndex: 'stars',
-      align: 'center',
       key: 'stars',
       render: (stars) => <Tag
         color="gold"
@@ -327,41 +323,34 @@ const Comments = (props: Props) => {
       title: 'Hành động',
       key: 'actions',
       align: 'center',
-      width: "50px",
       render: (_, record) => (
-        <div className="flex gap-2">
-          <Button
-            type="default"
-            onClick={() => toggleCommentVisibility({ id: record.comment_id, is_visible: 1 })}>
-            Hiện
-          </Button>
-
-        </div>
+        <Button
+          type="default"
+          onClick={() => toggleCommentVisibility({ id: record.comment_id, is_visible: 1 })}
+        >
+          Hiện
+        </Button>
       ),
-    }
+    },
+
 
   ];
-
   const columns2: ColumnsType<Comment> = [
     {
       title: 'STT',
       dataIndex: 'stt',
       key: 'stt',
-      width: "50px",
-      align: 'center',
       render: (_: any, __: any, index: number) => index + 1,
     },
     {
       title: 'Người bình luận',
       dataIndex: 'user_name',
       key: 'user_name',
-      align: 'center',
       render: (text) => <strong>{text}</strong>,
     },
     {
       title: 'Thông tin sản phẩm',
       key: 'product_info',
-
       render: () => (
         <div>
           <p><strong>Tên sản phẩm:</strong> {ProductData?.name || 'N/A'}</p>
@@ -395,7 +384,7 @@ const Comments = (props: Props) => {
               ))}
             </div>
           )}
-    
+
           {!record.reply_comment.some(reply => reply.user_name === 'admin') && (
             <Button
               type="default"
@@ -412,10 +401,9 @@ const Comments = (props: Props) => {
     {
       title: 'Số lần báo cáo',
       dataIndex: 'reported_count',
-      align: 'center',
       key: 'reported_count',
       render: (count, record) => (
-        <div className="flex items-center justify-center gap-2">
+        <div className="flex items-center gap-2">
           <Tag
             color={count > 0 ? 'red' : 'green'}
             style={{
@@ -443,16 +431,15 @@ const Comments = (props: Props) => {
       title: 'Trạng thái hiển thị',
       dataIndex: 'is_visible',
       key: 'is_visible',
-      align: 'center',
       render: (isVisible) =>
         <Tag
           color={isVisible ? 'green' : 'red'}
           style={{
-            fontSize: '16px',
-            padding: '6px 12px',
-            borderRadius: '8px',
-            display: 'inline-block',
-            textAlign: 'center',
+            fontSize: '16px', // Tăng kích thước chữ
+            padding: '6px 12px', // Tăng khoảng cách bên trong
+            borderRadius: '8px', // Bo góc
+            display: 'inline-block', // Giữ thẻ hiển thị gọn gàng
+            textAlign: 'center', // Căn giữa nội dung
           }}
         >
           {isVisible ? 'Hiển thị' : 'Ẩn'}
@@ -461,7 +448,6 @@ const Comments = (props: Props) => {
     {
       title: 'Số sao',
       dataIndex: 'stars',
-      align: 'center',
       key: 'stars',
       render: (stars) => <Tag
         color="gold"
@@ -480,18 +466,18 @@ const Comments = (props: Props) => {
       title: 'Hành động',
       key: 'actions',
       align: 'center',
-      width: "50px",
       render: (_, record) => (
-        <div className="flex gap-2">
-          <Button
-            type="default"
-            danger
-            onClick={() => toggleCommentVisibility({ id: record.comment_id, is_visible: 0 })}>
-            Ẩn
-          </Button>
-        </div>
+        <Button
+          type="default"
+          danger
+          onClick={() => toggleCommentVisibility({ id: record.comment_id, is_visible: 0 })}
+        >
+          Ẩn
+        </Button>
       ),
-    }
+    },
+
+
 
   ];
 
@@ -501,26 +487,28 @@ const Comments = (props: Props) => {
     <>
       <ToastContainer />
       <div className="w-full mx-auto px-6 py-8">
-        <ToastContainer />
         <Tabs defaultActiveKey="1">
-          <TabPane tab="Bình Luận Công Khai" key="2">
+          {/* Tab Bình luận công khai */}
+          <TabPane tab="Bình Luận Công Khai" key="1">
             <Table
               columns={columns2}
-              dataSource={filteredVisibleComments}
-              rowKey="comment_id"
-              pagination={{ pageSize: 10 }}
-            />
-          </TabPane>
-          <TabPane tab="Bình Luận Ẩn" key="1">
-            <Table
-              columns={columns}
-              dataSource={filteredHiddenComments}
+              dataSource={filteredRootComments?.filter((comment: any) => comment.is_visible === 1)}
               rowKey="comment_id"
               pagination={{ pageSize: 10 }}
             />
           </TabPane>
 
+          {/* Tab Bình luận ẩn */}
+          <TabPane tab="Bình Luận Ẩn" key="2">
+            <Table
+              columns={columns}
+              dataSource={filteredRootComments?.filter((comment: any) => comment.is_visible === 0)}
+              rowKey="comment_id"
+              pagination={{ pageSize: 10 }}
+            />
+          </TabPane>
         </Tabs>
+
         {/* <Modal
           title="Báo cáo bình luận"
           visible={isReportModalVisible}
