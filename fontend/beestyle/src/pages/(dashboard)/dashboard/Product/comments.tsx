@@ -169,15 +169,6 @@ const Comments = (props: Props) => {
     setCurrentCommentId(commentId);
     setIsReplyModalVisible(true);
   };
-  // Lọc bình luận ẩn
-  const filteredHiddenComments = CommentsData?.filter(
-    (comment: Comment) => Number(comment.is_visible) === 0 || comment.is_visible === false
-  );
-
-  const filteredVisibleComments = CommentsData?.filter(
-    (comment: Comment) => Number(comment.is_visible) === 1 || comment.is_visible === true
-  );
-
 
   const handleReply = () => {
     if (currentCommentId !== null && replyContent[currentCommentId]?.trim()) {
