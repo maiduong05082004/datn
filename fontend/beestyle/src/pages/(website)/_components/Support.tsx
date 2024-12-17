@@ -1,15 +1,11 @@
-import { useEffect, useRef, useState } from 'react'
-import Loader from '../loading/loadSupport'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import axios from 'axios'
-import Pusher from 'pusher-js'
-import { joinChannel } from '@/echo'
+import { useEffect, useRef, useState } from 'react'
 
 const Support = () => {
     const [isSupport, setSupport] = useState<boolean>(false)
     const queryClient = useQueryClient()
     const messagesEndRef = useRef<HTMLDivElement | null>(null);
-
 
     const { data: support } = useQuery({
         queryKey: ['support'],
@@ -21,7 +17,7 @@ const Support = () => {
             })
         },
     })
-
+    
     useEffect(() => {
         if (support) {
           queryClient.invalidateQueries({
@@ -94,10 +90,10 @@ const Support = () => {
 
                     <div className="overflow-y-auto whitespace-nowrapw h-[296px]">
                         {support?.data.support.slice().reverse().map((item: any, index: any) => (
-                            <div className={`${item.sender_id === support?.data.user_id ? "justify-end" : "justify-start"} flex p-[10px]`}>
+                            <div key={index + 1} className={`${item.sender_id === support?.data.user_id ? "justify-end" : "justify-start"} flex p-[10px]`}>
                                 <div className={`${item.sender_id === support?.data.user_id ? "bg-blue-500 text-white" : "bg-slate-200"}  rounded-[5px] p-[5px_10px] max-w-[250px]`}>
                                     {item.content}
-                                </div>
+                                </div> 
                             </div>
                         ))}
                         <div ref={messagesEndRef}></div>

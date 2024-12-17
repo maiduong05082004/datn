@@ -1,10 +1,15 @@
-import React from 'react';
+import { useEffect } from "react";
+import { Link } from "react-router-dom";
 
 const ContactPage = () => {
+  // Load dau trang
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
   return (
     <div className="bg-gray-50">
       <div className="text-center mb-12">
-        
+
         <div className="relative w-full h-[300px] mb-12">
           <img
             src="https://bizweb.dktcdn.net/thumb/large/100/446/974/products/giay-mlb-chinh-hang-bigball-chunky-logo-ny-mau-kem-3ashbcv4n-50crs-2.jpg?v=1723951477623"
@@ -13,10 +18,10 @@ const ContactPage = () => {
           />
           <div className="absolute inset-0 flex flex-col items-center justify-center bg-black bg-opacity-40 text-center">
             <h1 className="text-white text-3xl font-bold mb-4">Thông tin liên hệ</h1>
-            
-            <a href="/" className="text-white text-xl mb-0">
+
+            <Link to={`/`} className="text-white text-xl mb-0">
               Quay về
-            </a>
+            </Link>
           </div>
         </div>
 
