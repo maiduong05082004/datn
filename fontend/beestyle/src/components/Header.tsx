@@ -24,7 +24,7 @@ const Header = ({ isSearch, setIsSearch }: Props) => {
 
     const token = localStorage.getItem("token")
 
-    const { data: user, isLoading: isLoadingUser} = useQuery({
+    const { data: user, isLoading: isLoadingUser } = useQuery({
         queryKey: ['user', token],
         queryFn: () => {
             return axios.get(`http://127.0.0.1:8000/api/client/auth/profile`, {
@@ -50,7 +50,7 @@ const Header = ({ isSearch, setIsSearch }: Props) => {
     return (
         <>
             <div className="bg-black h-[42px] text-center flex">
-                <span className='text-white justify-center flex m-auto text-[11px] font-[600] lg:text-[14px]'>Ưu đãi 5% cho dơn hàng đầu tiên* | Nhập mã: BEESTYLEWELCOM</span>
+                <span className='text-white justify-center flex m-auto text-[11px] font-[600] lg:text-[14px]'>Ưu đãi 5% cho đơn hàng đầu tiên* | Nhập mã: BEESTYLEWELCOM</span>
             </div>
             <header className='py-[8px] h-[57px] sticky top-0 bg-white lg:h-[64px] mt-[0.1px] border-b-[1px] border-b-[##e8e8e8] lg:border-none z-20'>
                 <div className="flex text-center justify-center h-[100%] px-[15px] pc:px-[48px]">
@@ -230,32 +230,32 @@ const Header = ({ isSearch, setIsSearch }: Props) => {
                     </div>
 
                     {!isLoadingCarts &&
-                    <div className="ml-auto grid grid-cols-3 grid-rows-1 lg:grid-cols-4">
-                        <div onClick={() => setIsSearch(!isSearch)} className="flex items-center">
-                            <div className='w-[40px] h-[40px] flex justify-center items-center text-center'>
-                                <img className=" ls-is-cached lazyloaded" src="https://file.hstatic.net/200000642007/file/icon-search_f3577f42c6314038a0636c20100bd8d9.svg" data-src="https://file.hstatic.net/200000642007/file/icon-search_f3577f42c6314038a0636c20100bd8d9.svg" alt="Icon search" width={24} height={24} />
+                        <div className="ml-auto grid grid-cols-3 grid-rows-1 lg:grid-cols-4">
+                            <div onClick={() => setIsSearch(!isSearch)} className="flex items-center">
+                                <div className='w-[40px] h-[40px] flex justify-center items-center text-center'>
+                                    <img className=" ls-is-cached lazyloaded" src="https://file.hstatic.net/200000642007/file/icon-search_f3577f42c6314038a0636c20100bd8d9.svg" data-src="https://file.hstatic.net/200000642007/file/icon-search_f3577f42c6314038a0636c20100bd8d9.svg" alt="Icon search" width={24} height={24} />
+                                </div>
                             </div>
-                        </div>
-                        <Link to={`${user ? "/carts" : "/signin"}`} className="relative flex items-center col-start-3 lg:col-start-2">
-                            <div
-                                className='w-[40px] h-[40px] flex justify-center items-center text-center'>
-                                <img className=" ls-is-cached lazyloaded" src="https://file.hstatic.net/200000642007/file/icon-cart_d075fce117f74a07ae7f149d8943fc33.svg" data-src="https://file.hstatic.net/200000642007/file/icon-cart_d075fce117f74a07ae7f149d8943fc33.svg" alt="Icon cart" width={24} height={24} />
-                            </div>
-                            {carts ? (
-                                <div className={`absolute w-[13px] h-[13px] text-[9px] rounded-[100%] top-[10px] right-[5px] bg-black text-white flex items-center justify-center`}>{carts?.data.total_quantity || 0}</div>
-                            ) : ""}
-                        </Link>
-                        <Link to={`${user ? "/account/wishlist" : "/signin"}`} className="items-center hidden lg:flex col-start-2 row-start-1 lg:col-start-3">
-                            <div className='w-[40px] h-[40px] flex justify-center items-center text-center'>
-                                <img className=" ls-is-cached lazyloaded" src="	https://file.hstatic.net/200000642007/file/icon-wishlist_86d7262a56ae455fa531e6867655996d.svg" data-src="	https://file.hstatic.net/200000642007/file/icon-wishlist_86d7262a56ae455fa531e6867655996d.svg" alt="Icon cart" width={24} height={24} />
-                            </div>
-                        </Link>
-                        <Link to={`${user ? "/account" : "/signin"}`} className="flex items-center col-start-2 row-start-1 lg:col-start-4">
-                            <div className='w-[40px] h-[40px] flex justify-center items-center text-center'>
-                                <img className=" ls-is-cached lazyloaded" src="https://file.hstatic.net/200000642007/file/icon-account_5d386c88832c4872b857c0da62a81bbc.svg" data-src="https://file.hstatic.net/200000642007/file/icon-account_5d386c88832c4872b857c0da62a81bbc.svg" alt="Icon account" width={24} height={24} />
-                            </div>
-                        </Link>
-                    </div>}
+                            <Link to={`${user ? "/carts" : "/signin"}`} className="relative flex items-center col-start-3 lg:col-start-2">
+                                <div
+                                    className='w-[40px] h-[40px] flex justify-center items-center text-center'>
+                                    <img className=" ls-is-cached lazyloaded" src="https://file.hstatic.net/200000642007/file/icon-cart_d075fce117f74a07ae7f149d8943fc33.svg" data-src="https://file.hstatic.net/200000642007/file/icon-cart_d075fce117f74a07ae7f149d8943fc33.svg" alt="Icon cart" width={24} height={24} />
+                                </div>
+                                {carts ? (
+                                    <div className={`absolute w-[13px] h-[13px] text-[9px] rounded-[100%] top-[10px] right-[5px] bg-black text-white flex items-center justify-center`}>{carts?.data.total_quantity || 0}</div>
+                                ) : ""}
+                            </Link>
+                            <Link to={`${user ? "/account/wishlist" : "/signin"}`} className="items-center hidden lg:flex col-start-2 row-start-1 lg:col-start-3">
+                                <div className='w-[40px] h-[40px] flex justify-center items-center text-center'>
+                                    <img className=" ls-is-cached lazyloaded" src="	https://file.hstatic.net/200000642007/file/icon-wishlist_86d7262a56ae455fa531e6867655996d.svg" data-src="	https://file.hstatic.net/200000642007/file/icon-wishlist_86d7262a56ae455fa531e6867655996d.svg" alt="Icon cart" width={24} height={24} />
+                                </div>
+                            </Link>
+                            <Link to={`${user ? "/account" : "/signin"}`} className="flex items-center col-start-2 row-start-1 lg:col-start-4">
+                                <div className='w-[40px] h-[40px] flex justify-center items-center text-center'>
+                                    <img className=" ls-is-cached lazyloaded" src="https://file.hstatic.net/200000642007/file/icon-account_5d386c88832c4872b857c0da62a81bbc.svg" data-src="https://file.hstatic.net/200000642007/file/icon-account_5d386c88832c4872b857c0da62a81bbc.svg" alt="Icon account" width={24} height={24} />
+                                </div>
+                            </Link>
+                        </div>}
                 </div>
                 {user ? (<Support />) : ""}
                 <EventsAudio />

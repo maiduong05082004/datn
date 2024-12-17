@@ -38,7 +38,7 @@ const ListAllChart = () => {
 
   return (
     <div className="grid gap-4 p-[16px] bg-slate-100 h-auto">
-      <div className="w-full flex justify-between items-center">
+      <div className="w-full sticky top-0 flex z-10 p-[20px] bg-white justify-between items-center">
         <h1 className="font-[700] text-[18px]">BIỂU ĐỒ THỐNG KÊ</h1>
         <div className="flex items-center">
           <svg

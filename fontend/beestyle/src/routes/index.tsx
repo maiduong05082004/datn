@@ -65,12 +65,12 @@ import PrivateRouter from "./PrivateRoute";
 import ListBannerCollection from "@/pages/(dashboard)/dashboard/Banner/list_collection";
 import ListAllChart from "@/pages/(dashboard)/dashboard/Statistics/page";
 import { ToastContainer } from "react-toastify";
-import PaymentPolicyPage from "@/pages/(website)/checkout/PaymentPolicy";
-import ReturnPolicyPage from "@/pages/(website)/checkout/ReturnPolicy";
-import ShippingPolicyPage from "@/pages/(website)/checkout/ShippingPolicy";
-import PrivacyPolicyPage from "@/pages/(website)/checkout/PrivacyPolicy";
-import ContactPage from "@/pages/(website)/checkout/Contact";
-import TermsOfUse from "@/pages/(website)/checkout/TermsOfUse";
+import PaymentPolicyPage from "@/pages/(website)/_components/PaymentPolicy";
+import ReturnPolicyPage from "@/pages/(website)/_components/ReturnPolicy";
+import ShippingPolicyPage from "@/pages/(website)/_components/ShippingPolicy";
+import PrivacyPolicyPage from "@/pages/(website)/_components/PrivacyPolicy";
+import ContactPage from "@/pages/(website)/_components/Contact";
+import TermsOfUse from "@/pages/(website)/_components/TermsOfUse";
 
 
 const Router = () => {

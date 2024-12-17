@@ -3,6 +3,7 @@ import { message } from 'antd';
 import axios from 'axios';
 import { useEffect } from 'react';
 import LoadingPage from '../../loading/loadPage';
+import { Link } from 'react-router-dom';
 
 const WishlistPage = () => {
 
@@ -26,9 +27,6 @@ const WishlistPage = () => {
             })
         }
     })
-
-    console.log(favorite);
-
 
     const { mutate } = useMutation({
         mutationFn: async (productId: any) => {
@@ -85,7 +83,7 @@ const WishlistPage = () => {
                         <div className="-mx-[15px] p-[24px_20px] lg:mx-0">
                             {favorite?.data?.data.map((item: any, index: any) => (
                                 <div className={`${index === 0 ? "mt-0" : "mt-[20px]"} flex justify-between items-center`}>
-                                    <div className='w-[80%] flex'>
+                                    <Link to={`/products/${item.product.id}`} className='w-[80%] flex'>
                                         <div className='w-[120px]'>
                                             <div
                                                 className="pt-[123%] bg-cover bg-center bg-no-repeat"
@@ -100,7 +98,7 @@ const WishlistPage = () => {
                                             </h3>
                                             <span className='mt-[14px] font-[700]'>{new Intl.NumberFormat('vi-VN').format(item.product.price) || 0} VND</span>
                                         </div>
-                                    </div>
+                                    </Link>
                                     <div onClick={() => handleRemoveFromWishlist(item.product.id)} className="hidden w-[20%] cursor-pointer text-center border border-[#E8E8E8] rounded-[3px] text-[14px] py-[6px] px-[8px] lg:block">Xóa khỏi mục yêu thích</div>
                                     <div onClick={() => handleRemoveFromWishlist(item.product.id)} className="lg:hidden">
                                         <button className='cursor-pointer'>

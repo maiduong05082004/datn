@@ -1,6 +1,11 @@
-import React from "react";
+import { useEffect } from "react";
+import { Link } from "react-router-dom";
 
 function TermsOfUse() {
+    // Load dau trang
+    useEffect(() => {
+        window.scrollTo(0, 0);
+    }, []);
     return (
         <div className="bg-gray-50">
             {/* Banner */}
@@ -13,9 +18,9 @@ function TermsOfUse() {
                 <div className="absolute inset-0 flex flex-col items-center justify-center bg-black bg-opacity-40 text-center">
                     <h1 className="text-white text-3xl font-bold mb-4">Điều khoản sử dụng</h1>
 
-                    <a href="/" className="text-white text-xl mb-0">
+                    <Link to={`/`} className="text-white text-xl mb-0">
                         Quay về
-                    </a>
+                    </Link>
                 </div>
             </div>
 

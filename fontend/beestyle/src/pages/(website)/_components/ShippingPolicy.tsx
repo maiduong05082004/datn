@@ -1,6 +1,11 @@
-import React from "react";
+import { useEffect } from "react";
+import { Link } from "react-router-dom";
 
 const ShippingPolicyPage = () => {
+    // Load dau trang
+    useEffect(() => {
+        window.scrollTo(0, 0);
+    }, []);
     return (
         <div className="bg-gray-50">
 
@@ -14,12 +19,11 @@ const ShippingPolicyPage = () => {
                 <div className="absolute inset-0 flex flex-col items-center justify-center bg-black bg-opacity-40 text-center">
                     <h1 className="text-white text-3xl font-bold mb-4">Chính sách vận chuyển và giao hàng</h1>
 
-                    <a
-                        href="/"
+                    <Link to={`/`}
                         className="text-white text-xl mb-0"
                     >
                         Quay về
-                    </a>
+                    </Link>
                 </div>
             </div>
 

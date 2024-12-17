@@ -1,7 +1,6 @@
-import { useEffect, useState } from 'react'
-import { Select, Space } from 'antd'
 import { useQuery } from '@tanstack/react-query'
 import axios from 'axios'
+import { useEffect, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import ProductsList from '../list/_components/product'
 
@@ -11,10 +10,10 @@ type Props = {
 
 const SearchPage = ({ isKeySearch }: Props) => {
     const [filter, setFilter] = useState<boolean>(false)
-    const [isColorMenuOpen, setIsColorMenuOpen] = useState(false);
-    const [isSizeMenuOpen, setIsSizeMenuOpen] = useState(false);
-    const [isDesignMenuOpen, setIsDesignMenuOpen] = useState(false);
-    const [isPriceMenuOpen, setIsPriceMenuOpen] = useState(false);
+    // const [isColorMenuOpen, setIsColorMenuOpen] = useState(false);
+    // const [isSizeMenuOpen, setIsSizeMenuOpen] = useState(false);
+    // const [isDesignMenuOpen, setIsDesignMenuOpen] = useState(false);
+    // const [isPriceMenuOpen, setIsPriceMenuOpen] = useState(false);
     const [inputValue, setInputValue] = useState("");
 
     console.log(inputValue);
@@ -29,9 +28,9 @@ const SearchPage = ({ isKeySearch }: Props) => {
         setInputValue(e.target.value)
     }
 
-    const handlerInputSearch = (e: any) => {
-        setInputValue(e.target.value)
-    }
+    // const handlerInputSearch = (e: any) => {
+    //     setInputValue(e.target.value)
+    // }
 
     const location = useLocation();
     const queryParams = new URLSearchParams(location.search);
@@ -82,7 +81,7 @@ const SearchPage = ({ isKeySearch }: Props) => {
                                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="12" viewBox="0 0 16 12" fill="none"><path d="M1.33325 2.66699H8.83325" stroke="black" strokeLinecap="square"></path><path d="M12.1665 2.66699L14.6665 2.66699" stroke="black" strokeLinecap="square"></path><path d="M7.1665 9.33301L14.6665 9.33301" stroke="black" strokeLinecap="square"></path><path d="M1.33325 9.33301H3.83325" stroke="black" strokeLinecap="square"></path><ellipse cx="5.49992" cy="9.33366" rx="1.66667" ry="1.66667" stroke="black"></ellipse><ellipse cx="10.4999" cy="2.66667" rx="1.66667" ry="1.66667" stroke="black"></ellipse></svg>
                                 </div>
 
-                                <div className="my-[3px] text-[14px] font-[500] lg:ml-[12px]">
+                                {/* <div className="my-[3px] text-[14px] font-[500] lg:ml-[12px]">
                                     <Space wrap>
                                         <Select
                                             defaultValue="Sắp xếp"
@@ -95,14 +94,14 @@ const SearchPage = ({ isKeySearch }: Props) => {
                                             ]}
                                         />
                                     </Space>
-                                </div>
+                                </div> */}
                             </div>
                         </div>
                     </div>
 
                     <ProductsList products={products} />
 
-                    <div className={`${filter ? "flex" : "hidden"} fixed max-w-[440px] w-[100%] top-0 right-0 z-20 bg-white flex-col justify-between h-full`}>
+                    {/* <div className={`${filter ? "flex" : "hidden"} fixed max-w-[440px] w-[100%] top-0 right-0 z-20 bg-white flex-col justify-between h-full`}>
                         <div className=" bg-white z-20 h-full">
                             <div className="flex justify-between items-center p-[8px_20px] shadow-sm">
                                 <h2 className="text-lg font-semibold">Bộ lọc</h2>
@@ -219,7 +218,7 @@ const SearchPage = ({ isKeySearch }: Props) => {
                             </div>
                         </div>
                         <div className="block bg-black opacity-[0.24] fixed w-[100%] h-[100%] top-0 left-0 z-10"></div>
-                    </div>
+                    </div> */}
                 </>
 
             ) : (

@@ -76,7 +76,7 @@ const AddAddresses = ({ isCheckAddresses, isAddAddresses, setCheckAddresses, set
             district: "",
             ward: "",
             phone_number: "",
-            is_default: false,
+            is_default: true,
         },
     });
 
@@ -249,10 +249,12 @@ const AddAddresses = ({ isCheckAddresses, isAddAddresses, setCheckAddresses, set
                                     )}
                                 </div>
 
+                                {addresses?.data?.data.length !== 0 &&
                                 <div className="flex items-center mt-[20px]">
                                     <input {...register("is_default")} type="checkbox" />
                                     <label className='ml-[5px]'>Đặt làm mặc định</label>
                                 </div>
+                                }
                             </div>
                             <div className="flex mt-[20px] justify-end">
                                 {addresses?.data?.data.length === 0 ? "" : (

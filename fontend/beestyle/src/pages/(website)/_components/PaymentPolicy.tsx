@@ -1,28 +1,32 @@
-import React from "react";
+import { useEffect } from "react";
+import { Link } from "react-router-dom";
 
 const PaymentPolicyPage = () => {
+    // Load dau trang
+    useEffect(() => {
+        window.scrollTo(0, 0);
+    }, []);
     return (
         <div className="bg-gray-50">
-           
+
             <div className="relative w-full h-[300px] mb-12">
-        <img
-            src="https://bizweb.dktcdn.net/thumb/large/100/446/974/products/giay-mlb-chinh-hang-bigball-chunky-logo-ny-mau-kem-3ashbcv4n-50crs-2.jpg?v=1723951477623"
-            alt="Banner"
-            className="w-full h-full object-cover rounded-lg"
-        />
-       
-        <div className="absolute inset-0 flex flex-col items-center justify-center bg-black bg-opacity-40 text-center">
-            <h1 className="text-white text-3xl font-bold mb-4">Chính sách thanh toán</h1>
-           
-            <a
-                href="/" 
-                className="text-white text-xl mb-0"
-            >
-                Quay về  
-            </a>
-           
-        </div>
-    </div>
+                <img
+                    src="https://bizweb.dktcdn.net/thumb/large/100/446/974/products/giay-mlb-chinh-hang-bigball-chunky-logo-ny-mau-kem-3ashbcv4n-50crs-2.jpg?v=1723951477623"
+                    alt="Banner"
+                    className="w-full h-full object-cover rounded-lg"
+                />
+
+                <div className="absolute inset-0 flex flex-col items-center justify-center bg-black bg-opacity-40 text-center">
+                    <h1 className="text-white text-3xl font-bold mb-4">Chính sách thanh toán</h1>
+
+                    <Link to={`/`}
+                        className="text-white text-xl mb-0"
+                    >
+                        Quay về
+                    </Link>
+
+                </div>
+            </div>
 
 
 
@@ -30,7 +34,7 @@ const PaymentPolicyPage = () => {
             <div className="container mx-auto px-6 py-12 max-w-7xl">
                 <div>
                     <h2 className="text-2xl font-semibold text-gray-800">I. THANH TOÁN ONLINE QUA ỨNG DỤNG QR CODE</h2>
-                    
+
                     <p className="text-lg text-gray-600 mb-4">
                         Ứng dụng thanh toán di động giúp đáp ứng nhu cầu thanh toán của quý khách hàng mà không cần tiền mặt hay qua ngân hàng.
                     </p>

@@ -1,5 +1,5 @@
 import { useOrderViewMutations } from '@/components/hooks/useOrderViewMutations';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
@@ -20,7 +20,6 @@ const ViewAccount = () => {
     const [isStep, setStep] = useState<number>(1)
     const [bill_id, setBillId] = useState<any>(null)
     const [isReason, setReason] = useState<boolean>(false)
-    const queryClient = useQueryClient();
     const { evaluateOrder, handleContext, successOrder } = useOrderViewMutations()
     const { register, handleSubmit, setValue, reset } = useForm<TDanh>()
     const status = [{ id: 1, name: "Tất cả" }, { id: 2, name: "Đang chờ xử lý" }, { id: 3, name: "Đã xử lý" }, { id: 4, name: "Đang giao hàng" }, { id: 5, name: "Đã giao hàng" }, { id: 6, name: "Đã hủy" }]
