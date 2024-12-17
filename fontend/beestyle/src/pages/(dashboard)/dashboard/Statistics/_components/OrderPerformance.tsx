@@ -10,36 +10,62 @@ import {
     Title,
     Tooltip,
 } from 'chart.js';
+import { useMemo } from 'react';
 import { Doughnut } from 'react-chartjs-2';
+
 ChartJS.register(ArcElement, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
-const OrderPerformance = ({year}: any) => {
-
-    const { data: order_performance } = useQuery({
-        queryKey: ['order_performance', year],
+const OrderPerformance = ({ year, month }: any) => {
+    const { data: orderPerformance } = useQuery({
+        queryKey: ['order_performance', year, month],
         queryFn: async () => {
             return instance.post(`api/admins/statistics/order_statistics`, {
-                year: year
-            })
+                year,
+                ...(month && { month: parseInt(month) }),
+            });
         },
-        enabled:!!year
-    })
+        enabled: !!year,
+    });
 
-    const sum_yearly = () => {
-        const delivered = order_performance?.data.sum_yearly[year].delivered
-        const canceled = order_performance?.data.sum_yearly[year].canceled
-        return [canceled, delivered]
-    }
+    const totalDelivered = useMemo(() => {
+        return orderPerformance?.data?.data.reduce((sum: number, item: any) => sum + item.total_delivered, 0) || 0;
+    }, [orderPerformance]);
 
-    const doughnutData = {
-        labels: [`Đơn bị hủy ${sum_yearly()[0] || 0}`, `Đơn thành công ${sum_yearly()[1] || 0}`],
-        datasets: [
-            {
-                data: sum_yearly(),
-                backgroundColor: ['#ff6384', '#4bc0c0'],
-            },
-        ],
-    };
+    const totalCanceled = useMemo(() => {
+        return orderPerformance?.data?.data.reduce((sum: number, item: any) => sum + item.total_canceled, 0) || 0;
+    }, [orderPerformance]);
+
+    const totalOrders = parseInt(totalDelivered) + parseInt(totalCanceled);
+
+    const doughnutData = useMemo(() => {
+        if (totalOrders) {
+            const canceledPercentage = ((parseInt(totalCanceled) / totalOrders) * 100).toFixed(1);
+            const deliveredPercentage = ((parseInt(totalDelivered) / totalOrders) * 100).toFixed(1);
+
+            return {
+                labels: [
+                    `Đơn bị hủy: ${canceledPercentage}% (${parseInt(totalCanceled)})`,
+                    `Đơn thành công: ${deliveredPercentage}% (${parseInt(totalDelivered)})`,
+                ],
+                datasets: [
+                    {
+                        data: [parseInt(totalCanceled), parseInt(totalDelivered)],
+                        backgroundColor: ['#ff6384', '#4bc0c0'],
+                    },
+                ],
+            };
+        } else {
+            return {
+                labels: ['Không có dữ liệu'],
+                datasets: [
+                    {
+                        data: [1],
+                        backgroundColor: ['#cccccc'],
+                    },
+                ],
+            };
+        }
+    }, [totalCanceled, totalDelivered]);
 
     const options = {
         responsive: true,
@@ -58,7 +84,7 @@ const OrderPerformance = ({year}: any) => {
             },
             title: {
                 display: true,
-                text: `Đơn hàng (năm ${year || 0})`,
+                text: `Đơn hàng (${month ? "Tháng " + month + " - " + year : year === 0 ? '' : "Năm " + year})`,
                 color: 'white',
                 font: {
                     family: 'Arial',
@@ -68,12 +94,8 @@ const OrderPerformance = ({year}: any) => {
             },
         },
         scales: {
-            x: {
-                display: false,
-            },
-            y: {
-                display: false,
-            },
+            x: { display: false },
+            y: { display: false },
         },
     };
 
