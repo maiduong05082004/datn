@@ -55,27 +55,53 @@ class PromotionController extends Controller
     public function getAvailablePromotions(Request $request)
     {
         $user = $request->user();
-
+    
         if (!$user) {
             return response()->json(['message' => 'Không thể xác thực người dùng'], 401);
         }
-
+    
+        $currentDate = now();
+    
         $promotions = Promotion::where('is_active', true)
-            ->where('start_date', '<=', now())
-            ->where('end_date', '>=', now())
-            ->where('promotion_subtype', '!=', 'voucher_discount')
-            ->whereDoesntHave('userPromotions', function ($query) use ($user) {
-                $query->where('user_id', $user->id);
+            ->where(function ($query) {
+                $query->where('promotion_subtype', '!=', 'voucher_discount')
+                      ->orWhere('status', 'upcoming');
             })
             ->where(function ($query) {
                 $query->whereNull('usage_limit')
-                    ->orWhereRaw('(SELECT COUNT(*) FROM user_promotions WHERE promotion_id = promotions.id) < promotions.usage_limit');
+                      ->orWhereRaw('(SELECT COUNT(*) FROM user_promotions WHERE promotion_id = promotions.id) < promotions.usage_limit');
             })
-            ->get();
-
+            ->where(function ($query) use ($currentDate) {
+                $query->where('status', 'upcoming')
+                      ->orWhere(function ($subQuery) use ($currentDate) {
+                          $subQuery->where('start_date', '<=', $currentDate)
+                                   ->where('end_date', '>=', $currentDate);
+                      });
+            })
+            ->get()
+            ->map->only([
+                'id',
+                'code','description',
+                'start_date',
+                'end_date',
+                'discount_amount',
+                'discount_type',
+                'max_discount_amount',
+                'usage_limit',
+                'min_order_value',
+                'promotion_type',
+                'promotion_subtype',
+                'category_id',
+                'product_id',
+                'is_active',
+                'status',
+                'created_at',
+                'updated_at'
+            ]);
+    
         return response()->json($promotions, 200);
     }
-
+    
 
 
     public function calculateCartTotal($userId)
@@ -152,6 +178,15 @@ class PromotionController extends Controller
 
             if (!$promotion) {
                 $errors[] = "Mã $code không hợp lệ hoặc đã hết hạn.";
+                continue;
+            }
+
+            $usedPromotion = UserPromotion::where('promotion_id', $promotion->id)
+                ->where('user_id', $user->id)
+                ->first();
+
+            if ($usedPromotion) {
+                $errors[] = "Mã $code đã được sử dụng.";
                 continue;
             }
 

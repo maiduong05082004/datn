@@ -11,6 +11,7 @@ use App\Models\Product;
 use App\Models\ProductVariationValue;
 use Illuminate\Http\Request;
 use App\Mail\OrderConfirmationMail;
+use App\Models\Promotion;
 use App\Models\UserPromotion;
 use Auth;
 use DB;
@@ -96,7 +97,11 @@ class PaymentController extends Controller
                     ]);
                 }
             }
-
+            // Giảm số lượng voucher còn lại trong bảng Promotions
+            $promotion = Promotion::find($promotionId);
+            if ($promotion && $promotion->usage_limit > 0) {
+                $promotion->decrement('usage_limit');
+            }
             // Lấy danh sách cart_items dựa vào cart_id và thêm vào bill_details
             $cartItems = CartItem::whereIn('id', $request->input('cart_id'))->get();
             $subtotal = 0;

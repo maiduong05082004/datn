@@ -11,6 +11,7 @@ use App\Models\Payment;
 use App\Models\Product;
 use App\Models\ShippingAddress;
 use App\Models\ProductVariationValue;
+use App\Models\Promotion;
 use App\Models\UserPromotion;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -152,6 +153,11 @@ class CheckoutController extends Controller
                 ]);
             }
         }
+        // Giảm số lượng voucher còn lại trong bảng Promotions
+        $promotion = Promotion::find($promotionId);
+        if ($promotion && $promotion->usage_limit > 0) {
+            $promotion->decrement('usage_limit');
+        }
         // Xử lý thanh toán
         if ($request->payment_method === 'paypal') {
             // Tạo order trên PayPal
@@ -284,7 +290,6 @@ class CheckoutController extends Controller
 
             // return response()->json(['message' => 'Thanh toán thành công và trạng thái đã được cập nhật.', 'bill_id' => $bill->id]);
             return redirect('http://localhost:5173/account?status=success');
-
         } else {
             $errorDetails = isset($response['details']) ? json_encode($response['details']) : 'Unknown error';
             Log::error('PayPal payment capture failed', ['response' => $response, 'errorDetails' => $errorDetails]);
@@ -301,7 +306,7 @@ class CheckoutController extends Controller
 
     private function prepareOrderData($request, $bill, $orderItems)
     {
-      
+
         $payment = Payment::where('bill_id', $bill->id)->first();
 
         return [
